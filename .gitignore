@@ -5,3 +5,8 @@ storybook-static
 .DS_Store
 coverage
 *.tsbuildinfo
+
+.claude/skills
+.agents/skills
+.kiro/skills
+.junie/skills
