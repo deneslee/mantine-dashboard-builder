@@ -1,32 +1,54 @@
-import { describe, expect, it } from 'vitest';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { createQueryClient } from '@/app/queryClient';
+import { notify } from '@/features/notifications';
 import { createShellStore, ShellProvider } from '@/features/shell';
-import { fireEvent, render, screen } from '@/test/render';
+import { fireEvent, render, screen, waitFor } from '@/test/render';
 import { AppearanceSettings } from './AppearanceSettings';
 
 function setup() {
   const store = createShellStore({ narrow: false }, false);
   render(
-    <ShellProvider store={store}>
-      <AppearanceSettings />
-    </ShellProvider>,
+    <QueryClientProvider client={createQueryClient()}>
+      <ShellProvider store={store}>
+        <AppearanceSettings />
+      </ShellProvider>
+    </QueryClientProvider>,
   );
   const burger = () => store.getState().sidebar.burger;
   return { burger };
 }
 
+afterEach(() => vi.restoreAllMocks());
+
 describe('AppearanceSettings', () => {
   it('keeps a changed option as a draft until "Save changes"', () => {
     const { burger } = setup();
-    const save = screen.getByRole('button', { name: 'Save changes' });
-    expect(save).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Save changes' })).toBeDisabled();
 
     fireEvent.click(screen.getByRole('radio', { name: /Hide completely/ }));
     expect(burger()).toBe('compact');
     expect(screen.getByText('You have unsaved changes.')).toBeInTheDocument();
+  });
 
+  it('shows a loading state while saving, then stores the setting and notifies', async () => {
+    const success = vi.spyOn(notify, 'success');
+    const { burger } = setup();
+
+    fireEvent.click(screen.getByRole('radio', { name: /Hide completely/ }));
+    const save = screen.getByRole('button', { name: 'Save changes' });
     fireEvent.click(save);
-    expect(burger()).toBe('hide');
-    expect(screen.getByRole('button', { name: 'Save changes' })).toBeDisabled();
+
+    await waitFor(() => expect(save).toHaveAttribute('data-loading'));
+    expect(screen.getByRole('button', { name: 'Discard' })).toBeDisabled();
+    expect(burger()).toBe('compact');
+
+    await waitFor(() => expect(burger()).toBe('hide'));
+    await waitFor(() =>
+      expect(success).toHaveBeenCalledWith(expect.objectContaining({ title: 'Settings saved' })),
+    );
+    expect(save).not.toHaveAttribute('data-loading');
+    expect(save).toBeDisabled();
   });
 
   it('discards the draft without touching the stored setting', () => {

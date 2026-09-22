@@ -31,79 +31,83 @@ const themeOptions = [
 
 /** Appearance tab. Changes are a draft until "Save changes". */
 export function AppearanceSettings() {
-  const { values, dirty, setField, save, reset } = useAppearanceForm();
+  const { values, dirty, saving, setField, save, reset } = useAppearanceForm();
 
   return (
     <form
       className={classes.form}
+      aria-busy={saving}
       onSubmit={(event) => {
         event.preventDefault();
         save();
       }}
     >
-      <SettingsSection title="Sidebar" description="How the navigation sidebar behaves on wide screens.">
-        <SettingsRow
-          label="Menu button"
-          labelId="settings-burger"
-          description="What the menu button in the top bar does to the docked sidebar. On small screens it always opens the sidebar as a drawer."
-        >
-          <Radio.Group
-            aria-labelledby="settings-burger"
-            value={values.burger}
-            onChange={(value) => {
-              const option = burgerOptions.find((o) => o.value === value);
-              if (option) setField('burger', option.value);
-            }}
+      {/* Locked while saving so an edit can't land between submit and the draft being cleared. */}
+      <fieldset disabled={saving} className={classes.fields}>
+        <SettingsSection title="Sidebar" description="How the navigation sidebar behaves on wide screens.">
+          <SettingsRow
+            label="Menu button"
+            labelId="settings-burger"
+            description="What the menu button in the top bar does to the docked sidebar. On small screens it always opens the sidebar as a drawer."
           >
-            <Stack gap="xs">
-              {burgerOptions.map((o) => (
-                <Radio.Card key={o.value} value={o.value} radius="md" className={classes.option}>
-                  <Group wrap="nowrap" align="flex-start" gap="sm">
-                    <Radio.Indicator mt={2} />
-                    <div>
-                      <Text className={classes.optionLabel}>{o.label}</Text>
-                      <Text className={classes.optionHelp}>{o.description}</Text>
-                    </div>
-                  </Group>
-                </Radio.Card>
-              ))}
-            </Stack>
-          </Radio.Group>
-        </SettingsRow>
-      </SettingsSection>
+            <Radio.Group
+              aria-labelledby="settings-burger"
+              value={values.burger}
+              onChange={(value) => {
+                const option = burgerOptions.find((o) => o.value === value);
+                if (option) setField('burger', option.value);
+              }}
+            >
+              <Stack gap="xs">
+                {burgerOptions.map((o) => (
+                  <Radio.Card key={o.value} value={o.value} radius="md" className={classes.option}>
+                    <Group wrap="nowrap" align="flex-start" gap="sm">
+                      <Radio.Indicator mt={2} />
+                      <div>
+                        <Text className={classes.optionLabel}>{o.label}</Text>
+                        <Text className={classes.optionHelp}>{o.description}</Text>
+                      </div>
+                    </Group>
+                  </Radio.Card>
+                ))}
+              </Stack>
+            </Radio.Group>
+          </SettingsRow>
+        </SettingsSection>
 
-      <SettingsSection title="Theme" description="Colors used across the app.">
-        <SettingsRow
-          label="Color scheme"
-          labelId="settings-theme"
-          description="System follows your operating system setting."
-        >
-          <SegmentedControl
-            aria-labelledby="settings-theme"
-            value={values.colorScheme}
-            onChange={(value) => {
-              const option = themeOptions.find((o) => o.value === value);
-              if (option) setField('colorScheme', option.value);
-            }}
-            data={themeOptions.map((o) => ({
-              value: o.value,
-              label: (
-                <Group gap={6} wrap="nowrap" justify="center">
-                  <o.icon size={16} stroke={1.75} />
-                  <span>{o.label}</span>
-                </Group>
-              ),
-            }))}
-          />
-        </SettingsRow>
-      </SettingsSection>
+        <SettingsSection title="Theme" description="Colors used across the app.">
+          <SettingsRow
+            label="Color scheme"
+            labelId="settings-theme"
+            description="System follows your operating system setting."
+          >
+            <SegmentedControl
+              aria-labelledby="settings-theme"
+              value={values.colorScheme}
+              onChange={(value) => {
+                const option = themeOptions.find((o) => o.value === value);
+                if (option) setField('colorScheme', option.value);
+              }}
+              data={themeOptions.map((o) => ({
+                value: o.value,
+                label: (
+                  <Group gap={6} wrap="nowrap" justify="center">
+                    <o.icon size={16} stroke={1.75} />
+                    <span>{o.label}</span>
+                  </Group>
+                ),
+              }))}
+            />
+          </SettingsRow>
+        </SettingsSection>
+      </fieldset>
 
       <div className={classes.actions}>
-        {dirty ? <Text className={classes.status}>You have unsaved changes.</Text> : null}
-        <Button variant="default" disabled={!dirty} onClick={reset}>
+        {dirty && !saving ? <Text className={classes.status}>You have unsaved changes.</Text> : null}
+        <Button variant="default" disabled={!dirty || saving} onClick={reset}>
           Discard
         </Button>
-        <Button type="submit" disabled={!dirty}>
+        <Button type="submit" disabled={!dirty} loading={saving}>
           Save changes
         </Button>
       </div>
