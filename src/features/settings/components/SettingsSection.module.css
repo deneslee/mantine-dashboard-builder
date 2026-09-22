@@ -1,0 +1,39 @@
+.section {
+  overflow: hidden;
+}
+
+.header {
+  padding: var(--mantine-spacing-md) var(--mantine-spacing-lg);
+  border-bottom: 1px solid var(--app-border);
+}
+
+/* Label and help text on the left, the control on the right; stacked on small screens. */
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+  gap: var(--mantine-spacing-lg);
+  padding: var(--mantine-spacing-lg);
+
+  & + & {
+    border-top: 1px solid var(--app-border);
+  }
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--mantine-spacing-sm);
+  }
+}
+
+.label {
+  display: block;
+  font-size: var(--mantine-font-size-sm);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.help {
+  margin-top: rem(2px);
+  color: var(--app-text-muted);
+  font-size: var(--mantine-font-size-xs);
+  line-height: 1.45;
+}

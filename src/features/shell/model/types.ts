@@ -1,8 +1,13 @@
 export type SidebarMode = 'expanded' | 'compact' | 'closed';
 
+/** What the burger does to a docked, expanded sidebar: collapse to icons, hide it, or cycle through both. */
+export type BurgerBehavior = 'compact' | 'hide' | 'cycle';
+
 export interface SidebarState {
   /** Docked layout: full, icon rail, or hidden. */
   mode: SidebarMode;
+  /** User preference, set on the settings page. */
+  burger: BurgerBehavior;
   /** User preference. Below `md` the sidebar is an overlay regardless. */
   docked: boolean;
   /** Width in px when docked and expanded. */
@@ -29,11 +34,12 @@ export interface ShellState {
 }
 
 export interface ShellActions {
-  /** Burger. Docked: expanded → compact → closed → expanded. Overlay: open/close the drawer. */
+  /** Burger. Docked: follows `burger` (see `nextSidebarMode`). Overlay: open/close the drawer. */
   toggleSidebar: () => void;
   /** Closes whichever form is showing (column or drawer). */
   closeSidebar: () => void;
   setSidebarMode: (mode: SidebarMode) => void;
+  setBurgerBehavior: (burger: BurgerBehavior) => void;
   setSidebarWidth: (width: number) => void;
   setSidebarDocked: (docked: boolean) => void;
 

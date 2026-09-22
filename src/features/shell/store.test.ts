@@ -4,16 +4,54 @@ import { createShellStore, type ShellInit } from './store';
 
 const make = (init?: ShellInit) => createShellStore({ narrow: false, ...init }, false);
 
+function burgerModes(init?: ShellInit) {
+  const store = make(init);
+  const { toggleSidebar } = store.getState().actions;
+  const modes = [store.getState().sidebar.mode];
+  for (let i = 0; i < 3; i++) {
+    toggleSidebar();
+    modes.push(store.getState().sidebar.mode);
+  }
+  return modes;
+}
+
 describe('shell store: sidebar', () => {
-  it('burger cycles expanded → compact → closed → expanded when docked', () => {
+  it('burger toggles expanded ↔ compact by default', () => {
+    expect(burgerModes()).toEqual(['expanded', 'compact', 'expanded', 'compact']);
+  });
+
+  it('burger toggles expanded ↔ closed with the hide behavior', () => {
+    expect(burgerModes({ sidebar: { burger: 'hide' } })).toEqual([
+      'expanded',
+      'closed',
+      'expanded',
+      'closed',
+    ]);
+  });
+
+  it('burger cycles expanded → compact → closed → expanded with the cycle behavior', () => {
+    expect(burgerModes({ sidebar: { burger: 'cycle' } })).toEqual([
+      'expanded',
+      'compact',
+      'closed',
+      'expanded',
+    ]);
+  });
+
+  it('burger expands a hidden sidebar whatever the behavior', () => {
+    expect(burgerModes({ sidebar: { mode: 'closed' } })).toEqual([
+      'closed',
+      'expanded',
+      'compact',
+      'expanded',
+    ]);
+  });
+
+  it('changing the behavior applies to the next burger press', () => {
     const store = make();
-    const { toggleSidebar } = store.getState().actions;
-    const modes = [store.getState().sidebar.mode];
-    for (let i = 0; i < 3; i++) {
-      toggleSidebar();
-      modes.push(store.getState().sidebar.mode);
-    }
-    expect(modes).toEqual(['expanded', 'compact', 'closed', 'expanded']);
+    store.getState().actions.setBurgerBehavior('hide');
+    store.getState().actions.toggleSidebar();
+    expect(store.getState().sidebar.mode).toBe('closed');
   });
 
   it('burger opens and closes the drawer when undocked, without touching the docked mode', () => {
@@ -82,6 +120,7 @@ describe('shell store: persistence', () => {
     expect(saved.version).toBe(1);
     expect(saved.state.sidebar).toEqual({
       mode: 'compact',
+      burger: 'compact',
       docked: true,
       width: tokens.shell.sidebar.expanded,
     });

@@ -22,6 +22,7 @@ export function useSidebar() {
       const docked = sidebarDocked(s);
       return {
         mode: s.sidebar.mode,
+        burger: s.sidebar.burger,
         width: s.sidebar.width,
         docked,
         prefersDocked: s.sidebar.docked,

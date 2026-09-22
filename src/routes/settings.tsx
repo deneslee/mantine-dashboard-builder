@@ -1,6 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { Placeholder } from './-placeholder';
+import { parseSettingsTab, SettingsPage, type SettingsTab } from '@/features/settings';
 
 export const Route = createFileRoute('/settings')({
-  component: () => <Placeholder title="Settings" description="Workspace, members and appearance." />,
+  validateSearch: (search: Record<string, unknown>): { tab?: SettingsTab } => ({
+    tab: parseSettingsTab(search.tab),
+  }),
+  component: SettingsRoute,
 });
+
+function SettingsRoute() {
+  const { tab = 'general' } = Route.useSearch();
+  return <SettingsPage tab={tab} />;
+}

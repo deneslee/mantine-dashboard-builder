@@ -1,0 +1,43 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-lg);
+  max-width: rem(760px);
+}
+
+.option {
+  padding: var(--mantine-spacing-sm) var(--mantine-spacing-md);
+  transition:
+    border-color var(--app-motion-fast) var(--app-motion-ease),
+    background-color var(--app-motion-fast) var(--app-motion-ease);
+
+  &[data-checked] {
+    border-color: var(--mantine-primary-color-filled);
+    background-color: alpha(var(--mantine-primary-color-filled), 0.08);
+  }
+}
+
+.optionLabel {
+  font-size: var(--mantine-font-size-sm);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.optionHelp {
+  color: var(--app-text-muted);
+  font-size: var(--mantine-font-size-xs);
+  line-height: 1.45;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--mantine-spacing-xs);
+}
+
+.status {
+  margin-right: auto;
+  color: var(--app-text-muted);
+  font-size: var(--mantine-font-size-sm);
+}

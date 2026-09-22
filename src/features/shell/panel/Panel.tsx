@@ -1,10 +1,5 @@
 import { ActionIcon, Box, Group, ScrollArea, Tooltip, type BoxProps } from '@mantine/core';
-import {
-  IconLayoutSidebarLeftCollapse,
-  IconLayoutSidebarRightCollapse,
-  IconPinned,
-  IconPinnedOff,
-} from '@tabler/icons-react';
+import { IconPinned, IconPinnedOff } from '@tabler/icons-react';
 import type { ReactNode } from 'react';
 import classes from './Panel.module.css';
 
@@ -84,29 +79,10 @@ export function PanelDockToggle({ docked, onChange, variant = 'subtle' }: DockTo
   );
 }
 
-interface CollapseToggleProps {
-  side: 'left' | 'right';
-  label: string;
-  onClick: () => void;
-  variant?: 'chrome' | 'subtle';
-}
-
-export function PanelCollapseToggle({ side, label, onClick, variant = 'subtle' }: CollapseToggleProps) {
-  const Icon = side === 'left' ? IconLayoutSidebarLeftCollapse : IconLayoutSidebarRightCollapse;
-  return (
-    <Tooltip label={label}>
-      <ActionIcon variant={variant} aria-label={label} onClick={onClick}>
-        <Icon size={18} stroke={1.75} />
-      </ActionIcon>
-    </Tooltip>
-  );
-}
-
 export const Panel = {
   Root: PanelRoot,
   Header: PanelHeader,
   Body: PanelBody,
   Footer: PanelFooter,
   DockToggle: PanelDockToggle,
-  CollapseToggle: PanelCollapseToggle,
 };

@@ -5,27 +5,39 @@ import { useContextBar, useShellActions, useSidebar } from '../hooks/useShell';
 import { useTotalBadgeCount } from '../hooks/useBadgeCount';
 import { useContextTabs } from '../hooks/useContextTabs';
 import { areas } from '../model/nav';
+import type { SidebarMode } from '../model/types';
+import { nextSidebarMode } from '../store';
 import { ColorSchemeToggle } from './ColorSchemeToggle';
 import { Search } from './Search';
 import { UserMenu } from './UserMenu';
 import classes from './TopNavbar.module.css';
 
 /** Global bar: burger · search · area select · context · theme · user. */
+const burgerLabels: Record<SidebarMode, string> = {
+  expanded: 'Expand sidebar',
+  compact: 'Collapse sidebar to icons',
+  closed: 'Hide sidebar',
+};
+
 export function TopNavbar() {
-  const { isOverlay: drawerOpen, docked: sidebarDocked } = useSidebar();
+  const { isOverlay: drawerOpen, docked: sidebarDocked, mode, burger } = useSidebar();
   const { open: contextOpen } = useContextBar();
   const { toggleSidebar, toggleContextBar } = useShellActions();
 
+  const burgerLabel = sidebarDocked
+    ? burgerLabels[nextSidebarMode(mode, burger)]
+    : drawerOpen
+      ? 'Close menu'
+      : 'Open menu';
+
   return (
     <Group className={classes.root} h="100%" px="sm" gap="md" wrap="nowrap">
-      <Tooltip
-        label={sidebarDocked ? 'Sidebar: full, icons, hidden' : drawerOpen ? 'Close menu' : 'Open menu'}
-      >
+      <Tooltip label={burgerLabel}>
         <Burger
           size="sm"
           opened={drawerOpen}
           onClick={toggleSidebar}
-          aria-label={sidebarDocked ? 'Change sidebar layout' : drawerOpen ? 'Close menu' : 'Open menu'}
+          aria-label={burgerLabel}
           aria-expanded={sidebarDocked ? undefined : drawerOpen}
           color="var(--app-navbar-text)"
           className={classes.burger}
