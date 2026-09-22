@@ -1,0 +1,30 @@
+{
+  "extends": ["stylelint-config-standard"],
+  "rules": {
+    "selector-class-pattern": null,
+    "custom-property-pattern": null,
+    "color-no-hex": [
+      true,
+      {
+        "message": "Use a Mantine CSS variable or a token, not a raw hex color."
+      }
+    ],
+    "function-no-unknown": [
+      true,
+      {
+        "ignoreFunctions": ["light-dark", "rem", "em", "alpha", "lighten", "darken"]
+      }
+    ],
+    "at-rule-no-unknown": [
+      true,
+      {
+        "ignoreAtRules": ["mixin", "define-mixin"]
+      }
+    ],
+    "declaration-property-value-no-unknown": null,
+    "media-query-no-invalid": null,
+    "property-no-vendor-prefix": null,
+    "import-notation": "string"
+  },
+  "ignoreFiles": ["src/design-system/tokens/**/*.css"]
+}

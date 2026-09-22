@@ -1,0 +1,31 @@
+.root {
+  --panel-border: var(--app-sidebar-border);
+
+  background: var(--app-sidebar-bg);
+  color: var(--app-sidebar-text);
+}
+
+.header {
+  padding-inline: var(--mantine-spacing-md);
+
+  [data-compact] & {
+    justify-content: center;
+    padding-inline: 0;
+  }
+}
+
+.groupLabel {
+  color: var(--app-sidebar-muted);
+  padding-inline: var(--mantine-spacing-sm);
+  padding-bottom: rem(4px);
+}
+
+.footer {
+  justify-content: flex-end;
+
+  [data-compact] & {
+    flex-direction: column;
+    align-items: center;
+    padding-inline: 0;
+  }
+}

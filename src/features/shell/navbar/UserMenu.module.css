@@ -1,0 +1,10 @@
+.avatar {
+  cursor: pointer;
+  border: 0;
+  padding: 0;
+
+  &:focus-visible {
+    outline: 2px solid var(--mantine-primary-color-filled);
+    outline-offset: 2px;
+  }
+}

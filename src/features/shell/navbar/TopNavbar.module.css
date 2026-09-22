@@ -1,0 +1,35 @@
+.root {
+  background: var(--app-navbar-bg);
+  backdrop-filter: saturate(140%) blur(8px);
+  color: var(--app-navbar-text);
+  border-bottom: 1px solid var(--app-navbar-border);
+}
+
+.burger {
+  flex: none;
+}
+
+/* The search takes the leftover space and shrinks first; burger and actions keep their size. */
+.center {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.right {
+  flex: none;
+}
+
+.selectInput {
+  --input-bg: transparent;
+  --input-bd: rgb(255 255 255 / 12%);
+  --input-color: var(--app-navbar-text);
+  --input-placeholder-color: var(--app-navbar-muted);
+
+  &:hover {
+    --input-bg: rgb(255 255 255 / 8%);
+  }
+}
+
+.selectSection {
+  color: var(--app-navbar-muted);
+}

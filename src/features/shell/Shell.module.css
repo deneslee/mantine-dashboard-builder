@@ -1,0 +1,127 @@
+.root {
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--app-surface);
+}
+
+.skip {
+  position: absolute;
+  top: var(--mantine-spacing-xs);
+  left: var(--mantine-spacing-xs);
+  z-index: calc(var(--app-z-navbar) + 1);
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+  border-radius: var(--mantine-radius-sm);
+  background: var(--mantine-primary-color-filled);
+  color: var(--mantine-color-white);
+  font-size: var(--mantine-font-size-sm);
+  transform: translateY(-200%);
+
+  &:focus-visible {
+    transform: none;
+  }
+}
+
+.splitter {
+  height: 100%;
+}
+
+.pane {
+  overflow: hidden;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+
+  /* Animate open/close/compact; not while the user is dragging. */
+  .root:not([data-resizing]) & {
+    transition: flex-basis var(--app-motion-base) var(--app-motion-ease);
+  }
+}
+
+.sidebarPane {
+  background: var(--app-sidebar-bg);
+  z-index: var(--app-z-sidebar);
+}
+
+.contextPane {
+  background: var(--app-surface-raised);
+  z-index: var(--app-z-context);
+}
+
+.mainPane {
+  position: relative;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: var(--app-z-navbar);
+  flex: 0 0 var(--app-navbar-height);
+  height: var(--app-navbar-height);
+}
+
+.main {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  outline: none;
+}
+
+/*
+ * The handle is the 1px border between panes, with a wider invisible hit area.
+ * Hidden next to a collapsed (0px) or fixed-size pane.
+ */
+.handle {
+  --splitter-handle-color: var(--app-border);
+
+  z-index: calc(var(--app-z-navbar) + 1);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline: rem(-3px);
+  }
+
+  &:hover,
+  &:focus-visible,
+  &[data-active] {
+    --splitter-handle-color: var(--mantine-primary-color-filled);
+  }
+
+  .sidebarPane + & {
+    --splitter-handle-color: var(--app-sidebar-border);
+  }
+
+  .sidebarPane + &:hover,
+  .sidebarPane + &:focus-visible,
+  .sidebarPane + &[data-active] {
+    --splitter-handle-color: var(--mantine-primary-color-filled);
+  }
+
+  .pane[data-fixed] + &,
+  &:has(+ .pane[data-fixed]) {
+    pointer-events: none;
+    visibility: hidden;
+    flex-basis: 0;
+  }
+
+  .sidebarPane[data-fixed]:not([data-collapsed]) + & {
+    visibility: visible;
+    flex-basis: 1px;
+  }
+}
+
+.drawerContent {
+  display: flex;
+  flex-direction: column;
+}
+
+.drawerBody {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}

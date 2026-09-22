@@ -1,0 +1,24 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.header {
+  flex: 0 0 auto;
+  min-height: var(--app-navbar-height);
+  padding-inline: var(--mantine-spacing-sm);
+  border-bottom: 1px solid var(--panel-border, var(--app-border));
+}
+
+.body {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.footer {
+  flex: 0 0 auto;
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+  border-top: 1px solid var(--panel-border, var(--app-border));
+}

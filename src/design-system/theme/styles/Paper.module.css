@@ -1,0 +1,15 @@
+.root {
+  &[data-variant='panel'] {
+    background-color: var(--app-surface-raised);
+    border: 1px solid var(--app-border);
+  }
+
+  &[data-variant='widget'] {
+    background-color: var(--app-surface-raised);
+    border: 1px solid var(--app-border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    height: 100%;
+  }
+}

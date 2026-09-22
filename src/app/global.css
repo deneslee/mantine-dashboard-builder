@@ -1,0 +1,46 @@
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/jetbrains-mono';
+@import '@mantine/core/styles.layer.css';
+@import '@mantine/notifications/styles.layer.css';
+@import '@mantine/spotlight/styles.layer.css';
+@import '@mantine/nprogress/styles.layer.css';
+@import '@mantine/dates/styles.layer.css';
+@import '@mantine/charts/styles.layer.css';
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    background: var(--app-surface);
+    color: var(--mantine-color-text);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #splash {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: var(--mantine-color-body);
+    color: var(--mantine-color-dimmed);
+    font-family: var(--mantine-font-family);
+    font-size: var(--mantine-font-size-sm);
+  }
+
+  #root:not(:empty) + #splash {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
+}

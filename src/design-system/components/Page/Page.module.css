@@ -1,0 +1,19 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.header {
+  padding: var(--mantine-spacing-lg) var(--mantine-spacing-lg) var(--mantine-spacing-md);
+}
+
+.heading {
+  min-width: 0;
+}
+
+.body {
+  flex: 1 1 auto;
+  padding: 0 var(--mantine-spacing-lg) var(--mantine-spacing-lg);
+}

@@ -1,0 +1,36 @@
+{
+  "items": [
+    {
+      "id": "sales",
+      "title": "Sales overview",
+      "description": "Revenue, pipeline and win rate by region",
+      "updated_at": "2026-09-21T14:12:00Z",
+      "widget_count": 9,
+      "tags": ["sales", "weekly"]
+    },
+    {
+      "id": "ops",
+      "title": "Operations",
+      "description": "Building energy, HVAC alarms and occupancy",
+      "updated_at": "2026-09-19T08:40:00Z",
+      "widget_count": 12,
+      "tags": ["haystack", "live"]
+    },
+    {
+      "id": "infra",
+      "title": "Infrastructure health",
+      "description": "Datadog monitors, error budgets and latency",
+      "updated_at": "2026-09-15T17:05:00Z",
+      "widget_count": 7,
+      "tags": ["datadog"]
+    },
+    {
+      "id": "broken",
+      "title": "Broken example",
+      "description": "Fails to load on purpose, to show the route error screen",
+      "updated_at": "2026-09-10T09:00:00Z",
+      "widget_count": 0,
+      "tags": ["demo"]
+    }
+  ]
+}

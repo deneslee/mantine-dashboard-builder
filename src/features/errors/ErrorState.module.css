@@ -1,0 +1,40 @@
+.full {
+  flex: 1 1 auto;
+  min-height: calc(100dvh - var(--app-navbar-height) - var(--mantine-spacing-xl) * 2);
+  padding: var(--mantine-spacing-xl);
+}
+
+.code {
+  font-size: rem(96px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: rem(-4px);
+  font-variant-numeric: tabular-nums;
+  color: var(--app-border);
+  user-select: none;
+}
+
+.inline {
+  height: 100%;
+  min-height: rem(140px);
+  padding: var(--mantine-spacing-md);
+}
+
+.banner {
+  border-bottom: 1px solid var(--app-border);
+}
+
+.details {
+  max-height: rem(240px);
+  overflow: auto;
+  font-size: var(--mantine-font-size-xs);
+  text-align: left;
+}
+
+.chevron {
+  transition: transform var(--app-motion-fast) var(--app-motion-ease);
+
+  &[data-open] {
+    transform: rotate(180deg);
+  }
+}

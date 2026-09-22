@@ -1,0 +1,76 @@
+/*
+ * `sidebar` variant. Three states on top of the default:
+ *   - hover: subtle raised background
+ *   - [data-active]: the current route (tinted background, primary bar on the left, white text)
+ *   - [data-child-active]: a parent whose child is current (white text, heavier weight, no bar)
+ */
+.root {
+  &[data-variant='sidebar'] {
+    --nl-bg: transparent;
+    --nl-hover: var(--app-sidebar-hover);
+    --nl-color: var(--app-sidebar-text);
+
+    position: relative;
+    border-radius: var(--mantine-radius-sm);
+    padding-block: rem(7px);
+    padding-inline: var(--mantine-spacing-sm);
+    font-size: var(--mantine-font-size-sm);
+    transition:
+      background-color var(--app-motion-fast) var(--app-motion-ease),
+      color var(--app-motion-fast) var(--app-motion-ease);
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset-block: rem(6px);
+      inset-inline-start: 0;
+      width: rem(3px);
+      border-radius: 0 rem(3px) rem(3px) 0;
+      background: transparent;
+      transition: background-color var(--app-motion-fast) var(--app-motion-ease);
+    }
+
+    &[data-active] {
+      --nl-bg: var(--app-sidebar-active-bg);
+      --nl-hover: var(--app-sidebar-active-bg);
+      --nl-color: var(--app-sidebar-active-text);
+
+      font-weight: 600;
+
+      &::before {
+        background: var(--app-sidebar-active-bar);
+      }
+    }
+
+    &[data-child-active] {
+      --nl-color: var(--mantine-color-white);
+
+      font-weight: 600;
+    }
+
+    &[data-compact] {
+      justify-content: center;
+      padding-inline: 0;
+
+      & .body {
+        display: none;
+      }
+
+      & .chevron {
+        display: none;
+      }
+    }
+  }
+}
+
+.section {
+  color: inherit;
+}
+
+.children {
+  margin-top: rem(2px);
+}
+
+.label {
+  line-height: 1.3;
+}

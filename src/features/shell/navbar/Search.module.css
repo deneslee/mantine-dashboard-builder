@@ -1,0 +1,28 @@
+.wrapper {
+  width: 100%;
+  max-width: rem(520px);
+}
+
+.input {
+  --input-bg: rgb(255 255 255 / 8%);
+  --input-bd: rgb(255 255 255 / 10%);
+  --input-color: var(--app-navbar-text);
+  --input-placeholder-color: var(--app-navbar-muted);
+
+  text-align: left;
+  transition:
+    background-color var(--app-motion-fast) var(--app-motion-ease),
+    border-color var(--app-motion-fast) var(--app-motion-ease);
+
+  &:hover {
+    --input-bg: rgb(255 255 255 / 12%);
+  }
+
+  &:focus-visible {
+    --input-bd: var(--mantine-primary-color-filled);
+  }
+}
+
+.section {
+  color: var(--app-navbar-muted);
+}

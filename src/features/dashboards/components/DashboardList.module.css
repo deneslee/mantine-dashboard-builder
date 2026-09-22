@@ -1,0 +1,24 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  color: inherit;
+  text-decoration: none;
+  background: var(--app-surface-raised);
+  border-color: var(--app-border);
+  transition:
+    border-color var(--app-motion-fast) var(--app-motion-ease),
+    transform var(--app-motion-fast) var(--app-motion-ease);
+
+  &:hover {
+    border-color: var(--mantine-primary-color-filled);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--mantine-primary-color-filled);
+    outline-offset: 2px;
+  }
+}
+
+.nowrap {
+  white-space: nowrap;
+}
