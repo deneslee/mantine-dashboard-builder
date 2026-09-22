@@ -7,6 +7,7 @@ import type { QueryClient } from '@tanstack/react-query';
 export function createAppRouter(queryClient: QueryClient) {
   return createRouter({
     routeTree,
+    basepath: import.meta.env.BASE_URL,
     context: { queryClient },
     defaultPreload: 'intent',
     defaultPreloadStaleTime: 0,
