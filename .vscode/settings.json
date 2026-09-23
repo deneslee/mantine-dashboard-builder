@@ -1,0 +1,7 @@
+{
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.expand": false,
+  "explorer.fileNesting.patterns": {
+    "*.tsx": "${capture}.module.css, ${capture}.css, ${capture}.stories.tsx, ${capture}.stories.ts, ${capture}.test.tsx, ${capture}.spec.tsx, ${capture}.types.ts"
+  }
+}

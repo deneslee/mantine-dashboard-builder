@@ -24,6 +24,8 @@ export const theme = createTheme({
   spacing: { xs: rem(6), sm: rem(10), md: rem(16), lg: rem(24), xl: rem(36) },
   cursorType: 'pointer',
   focusRing: 'auto',
+  // Mantine transitions (Drawer, Menu, Collapse, Tooltip) go instant under the OS reduced-motion setting.
+  respectReducedMotion: true,
   other: tokens,
   components,
 });

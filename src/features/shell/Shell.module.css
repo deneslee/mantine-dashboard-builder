@@ -51,6 +51,11 @@
   position: relative;
   overflow: auto;
   overscroll-behavior: contain;
+
+  /* Pinned content is wider than the pane mid-animation: clip it instead of scrolling sideways. */
+  .root[data-moving] & {
+    overflow-x: hidden;
+  }
 }
 
 .header {
@@ -61,11 +66,18 @@
   height: var(--app-navbar-height);
 }
 
+/* `--shell-main-width` pins the content while panes move (useMainLock); otherwise it fills the pane. */
 .main {
   flex: 1 0 auto;
   display: flex;
   flex-direction: column;
+  width: var(--shell-main-width, auto);
   outline: none;
+
+  /* No hover or tooltip work while content slides under a still pointer. */
+  .root[data-moving] & {
+    pointer-events: none;
+  }
 }
 
 /*
