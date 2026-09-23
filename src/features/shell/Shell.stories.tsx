@@ -97,3 +97,14 @@ export const BothCompactAndContext: Story = {
 export const ChildRouteActive: Story = {
   args: { path: '/dashboards/ops', state: { sidebar: sidebar({}), contextBar: ctx({}) } },
 };
+/** On the rail a section whose child is current shows as selected. */
+export const CompactChildRouteActive: Story = {
+  args: { path: '/dashboards/ops', state: { sidebar: sidebar({ mode: 'compact' }), contextBar: ctx({}) } },
+};
+/** A section on the rail opens its children as a flyout menu. */
+export const CompactFlyout: Story = {
+  args: { path: '/dashboards/ops', state: { sidebar: sidebar({ mode: 'compact' }), contextBar: ctx({}) } },
+  play: async ({ canvas, userEvent }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Dashboards' }));
+  },
+};

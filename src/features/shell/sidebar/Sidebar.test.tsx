@@ -1,29 +1,28 @@
+import { IconSettings, IconTemplate } from '@tabler/icons-react';
 import { createMemoryHistory, createRootRoute, createRouter, RouterProvider } from '@tanstack/react-router';
+import type { ReactNode } from 'react';
 import { describe, expect, it } from 'vitest';
-import { fireEvent, render, screen } from '@/test/render';
+import { act, fireEvent, render, screen } from '@/test/render';
+import type { NavGroup } from '../model/nav';
 import { ShellProvider } from '../ShellProvider';
-import type { ShellInit } from '../store';
+import { createShellStore, type ShellInit } from '../store';
 import { Sidebar } from './Sidebar';
+import { SidebarNav } from './SidebarNav';
 
-function renderAt(path: string, compact = false, init: ShellInit = {}) {
+function renderAt(path: string, compact = false, init: ShellInit = {}, ui: ReactNode = <Sidebar />) {
+  const store = createShellStore(
+    { narrow: false, ...init, sidebar: { mode: compact ? 'compact' : 'expanded', ...init.sidebar } },
+    false,
+  );
   const rootRoute = createRootRoute({
-    component: () => (
-      <ShellProvider
-        initialState={{
-          narrow: false,
-          ...init,
-          sidebar: { mode: compact ? 'compact' : 'expanded', ...init.sidebar },
-        }}
-      >
-        <Sidebar />
-      </ShellProvider>
-    ),
+    component: () => <ShellProvider store={store}>{ui}</ShellProvider>,
   });
   const router = createRouter({
     routeTree: rootRoute,
     history: createMemoryHistory({ initialEntries: [path] }),
   });
-  return render(<RouterProvider router={router} />);
+  render(<RouterProvider router={router} />);
+  return { router, store };
 }
 
 describe('Sidebar active states', () => {
@@ -31,10 +30,14 @@ describe('Sidebar active states', () => {
     renderAt('/dashboards/sales');
     const child = await screen.findByRole('link', { name: 'Sales overview' });
     expect(child).toHaveAttribute('data-active');
+    expect(child).toHaveAttribute('aria-current', 'page');
+    // Exact matching: the section index is not "current" on a child page.
+    expect(screen.getByRole('link', { name: 'All dashboards' })).not.toHaveAttribute('aria-current');
 
     const parent = screen.getByRole('button', { name: /Dashboards/ });
     expect(parent).toHaveAttribute('data-child-active');
     expect(parent).not.toHaveAttribute('data-active');
+    expect(parent).toHaveAttribute('aria-expanded', 'true');
   });
 
   it('marks a leaf link active on its own route and nested paths', async () => {
@@ -43,11 +46,73 @@ describe('Sidebar active states', () => {
     expect(screen.getByRole('button', { name: /Dashboards/ })).not.toHaveAttribute('data-child-active');
   });
 
-  it('renders icon-only links with accessible names in compact mode', async () => {
+  it('opens a section when navigating into it', async () => {
+    const { router } = renderAt('/templates');
+    const parent = await screen.findByRole('button', { name: /Dashboards/ });
+    expect(parent).toHaveAttribute('aria-expanded', 'false');
+
+    await act(() => router.navigate({ to: '/dashboards/$id', params: { id: 'ops' } }));
+    expect(parent).toHaveAttribute('aria-expanded', 'true');
+    // A disclosure, not a menu button, while expanded.
+    expect(parent).not.toHaveAttribute('aria-haspopup');
+    expect(parent).not.toHaveAttribute('aria-controls');
+  });
+});
+
+describe('Sidebar compact rail', () => {
+  it('keeps accessible names on icon-only links', async () => {
+    renderAt('/datasources', true);
+    expect(await screen.findByRole('link', { name: 'Data sources' })).toHaveAttribute('data-active');
+    expect(screen.getByRole('link', { name: 'Settings' })).toBeInTheDocument();
+  });
+
+  it('opens a flyout with the children of a section', async () => {
     renderAt('/dashboards/ops', true);
-    const link = await screen.findByRole('link', { name: 'Dashboards' });
-    expect(link).toHaveAttribute('data-child-active');
-    expect(screen.queryByText('Sales overview')).not.toBeInTheDocument();
+    const parent = await screen.findByRole('button', { name: 'Dashboards' });
+    // Children are out of sight on the rail, so the section itself shows as selected.
+    expect(parent).toHaveAttribute('data-active');
+    expect(parent).toHaveAttribute('aria-haspopup', 'menu');
+    expect(parent).toHaveAttribute('aria-expanded', 'false');
+
+    fireEvent.click(parent);
+    expect(await screen.findByRole('menuitem', { name: 'Operations' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('menuitem', { name: 'All dashboards' })).not.toHaveAttribute('aria-current');
+    expect(parent).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('drops the flyout when the sidebar expands, so it does not reopen on collapse', async () => {
+    const { store } = renderAt('/dashboards/ops', true);
+    fireEvent.click(await screen.findByRole('button', { name: 'Dashboards' }));
+    expect(await screen.findByRole('menu')).toBeInTheDocument();
+
+    act(() => store.getState().actions.setSidebarMode('expanded'));
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Dashboards/ })).not.toHaveAttribute('aria-haspopup');
+
+    act(() => store.getState().actions.setSidebarMode('compact'));
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+  });
+});
+
+describe('Sidebar layout', () => {
+  it('pins bottom items outside the scrolling nav', async () => {
+    renderAt('/');
+    const settings = await screen.findByRole('link', { name: 'Settings' });
+    const templates = screen.getByRole('link', { name: 'Templates' });
+    expect(templates.closest('.mantine-ScrollArea-root')).not.toBeNull();
+    expect(settings.closest('.mantine-ScrollArea-root')).toBeNull();
+  });
+
+  it('names a group by its optional title', async () => {
+    const groups: NavGroup[] = [
+      { id: 'untitled', items: [{ id: 'templates', label: 'Templates', icon: IconTemplate, to: '/templates' }] },
+      { id: 'system', label: 'System', items: [{ id: 'settings', label: 'Settings', icon: IconSettings, to: '/settings' }] },
+    ];
+    renderAt('/', true, {}, <SidebarNav groups={groups} />);
+    const system = await screen.findByRole('group', { name: 'System' });
+    expect(system).toContainElement(screen.getByRole('link', { name: 'Settings' }));
+    // Untitled groups are plain containers, not unnamed groups.
+    expect(screen.getAllByRole('group')).toHaveLength(1);
   });
 });
 

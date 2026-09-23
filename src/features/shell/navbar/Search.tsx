@@ -4,7 +4,7 @@ import { Spotlight, spotlight, type SpotlightActionData } from '@mantine/spotlig
 import { IconSearch } from '@tabler/icons-react';
 import { useNavigate } from '@tanstack/react-router';
 import { useMemo } from 'react';
-import { navGroups } from '../model/nav';
+import { nav } from '../model/nav';
 import classes from './Search.module.css';
 
 /**
@@ -18,7 +18,9 @@ export function Search() {
 
   const actions = useMemo<SpotlightActionData[]>(
     () =>
-      navGroups.flatMap((g) =>
+      Object.values(nav)
+        .flat()
+        .flatMap((g) =>
         g.items.flatMap((item) => [
           {
             id: item.id,

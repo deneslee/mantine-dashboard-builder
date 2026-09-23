@@ -30,4 +30,9 @@
 .name {
   letter-spacing: rem(-0.2px);
   white-space: nowrap;
+  transition: opacity var(--app-motion-fast) var(--app-motion-ease);
+
+  [data-compact] & {
+    opacity: 0;
+  }
 }

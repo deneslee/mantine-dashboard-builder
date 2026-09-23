@@ -36,6 +36,7 @@ export const cssVariablesResolver: CSSVariablesResolver = (t) => {
       '--app-navbar-height': rem(shell.navbarHeight),
       '--app-sidebar-expanded': rem(shell.sidebar.expanded),
       '--app-sidebar-compact': rem(shell.sidebar.compact),
+      '--app-sidebar-icon': rem(shell.sidebar.iconSize),
       '--app-context-default': rem(shell.contextBar.default),
 
       '--app-z-sidebar': String(zIndex.sidebar),

@@ -5,8 +5,8 @@
  */
 
 export const shell = {
-  navbarHeight: 48,
-  sidebar: { expanded: 260, compact: 56, min: 200, max: 400 },
+  navbarHeight: 56,
+  sidebar: { expanded: 260, compact: 56, min: 200, max: 400, iconSize: 18 },
   contextBar: { default: 360, min: 280, max: 640 },
 } as const;
 

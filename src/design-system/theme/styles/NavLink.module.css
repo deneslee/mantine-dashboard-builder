@@ -3,6 +3,8 @@
  *   - hover: subtle raised background
  *   - [data-active]: the current route (tinted background, primary bar on the left, white text)
  *   - [data-child-active]: a parent whose child is current (white text, heavier weight, no bar)
+ * [data-compact] is the icon rail: label and chevron fade out but stay in the DOM (accessible name),
+ * and the icon keeps its position. The sidebar sets `--nl-inset` so that position is the rail's center.
  */
 .root {
   &[data-variant='sidebar'] {
@@ -11,9 +13,10 @@
     --nl-color: var(--app-sidebar-text);
 
     position: relative;
+    overflow: hidden;
     border-radius: var(--mantine-radius-sm);
     padding-block: rem(7px);
-    padding-inline: var(--mantine-spacing-sm);
+    padding-inline: var(--nl-inset, var(--mantine-spacing-sm)) var(--mantine-spacing-sm);
     font-size: var(--mantine-font-size-sm);
     transition:
       background-color var(--app-motion-fast) var(--app-motion-ease),
@@ -60,16 +63,15 @@
       font-weight: 600;
     }
 
+    & .body,
+    & .section[data-position='right'] {
+      transition: opacity var(--app-motion-fast) var(--app-motion-ease);
+    }
+
     &[data-compact] {
-      justify-content: center;
-      padding-inline: 0;
-
-      & .body {
-        display: none;
-      }
-
-      & .chevron {
-        display: none;
+      & .body,
+      & .section[data-position='right'] {
+        opacity: 0;
       }
     }
   }

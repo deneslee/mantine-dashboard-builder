@@ -1,5 +1,5 @@
 import { ActionIcon, Burger, Group, Indicator, Select, Tooltip } from '@mantine/core';
-import { IconHelpSquareRounded } from '@tabler/icons-react';
+import { IconHelp } from '@tabler/icons-react';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { useContextBar, useShellActions, useSidebar } from '../hooks/useShell';
 import { useTotalBadgeCount } from '../hooks/useBadgeCount';
@@ -95,7 +95,7 @@ function ContextButton({ open, onClick }: { open: boolean; onClick: () => void }
           data-active={open || undefined}
           onClick={onClick}
         >
-          <IconHelpSquareRounded size={20} stroke={1.75} />
+          <IconHelp size={20} stroke={1.75} />
         </ActionIcon>
       </Indicator>
     </Tooltip>

@@ -1,3 +1,8 @@
+/*
+ * Geometry: everything that stays visible on the compact rail (brand mark, nav icons, menu button)
+ * sits on the rail's center line in both modes. Collapsing then only covers the labels, and
+ * nothing moves sideways while the width animates.
+ */
 .root {
   --panel-border: var(--app-sidebar-border);
 
@@ -5,27 +10,71 @@
   color: var(--app-sidebar-text);
 }
 
+/* 11px = half the brand mark. */
 .header {
-  padding-inline: var(--mantine-spacing-md);
+  padding-inline: calc(var(--app-sidebar-compact) / 2 - rem(11px)) var(--mantine-spacing-md);
+}
+
+/* `--nl-inset` is the NavLink start padding that puts its icon on the rail's center line. */
+.nav {
+  --nl-inset: calc(var(--app-sidebar-compact) / 2 - var(--mantine-spacing-xs) - var(--app-sidebar-icon) / 2);
+
+  padding: var(--mantine-spacing-xs);
+}
+
+/* Pinned between the scrolling nav and the footer; never scrolls away. */
+.bottom {
+  flex: 0 0 auto;
+  border-top: 1px solid var(--panel-border);
+}
+
+/* The compact rail keeps the title's row as a short divider under the icons, so items below stay put. */
+.groupLabel {
+  position: relative;
+  padding-inline: var(--nl-inset) var(--mantine-spacing-sm);
+  padding-bottom: rem(4px);
+  color: var(--app-sidebar-muted);
+  white-space: nowrap;
+
+  & > span {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: opacity var(--app-motion-fast) var(--app-motion-ease);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset-inline-start: var(--nl-inset);
+    top: calc(50% - rem(2px));
+    width: var(--app-sidebar-icon);
+    height: 1px;
+    background: var(--panel-border);
+    opacity: 0;
+    transition: opacity var(--app-motion-fast) var(--app-motion-ease);
+  }
 
   [data-compact] & {
-    justify-content: center;
-    padding-inline: 0;
+    & > span {
+      opacity: 0;
+    }
+
+    &::after {
+      opacity: 1;
+    }
   }
 }
 
-.groupLabel {
-  color: var(--app-sidebar-muted);
-  padding-inline: var(--mantine-spacing-sm);
-  padding-bottom: rem(4px);
-}
-
+/* Trailing buttons; the end inset centers the menu button (17px = half of it) on the compact rail. */
 .footer {
   justify-content: flex-end;
+  padding-inline-end: calc(var(--app-sidebar-compact) / 2 - rem(17px));
+}
 
-  [data-compact] & {
-    flex-direction: column;
-    align-items: center;
-    padding-inline: 0;
-  }
+/* Compact flyout: the current page among the children. */
+.flyoutItem[aria-current='page'] {
+  font-weight: 600;
+  color: var(--mantine-primary-color-light-color);
+  background-color: var(--mantine-primary-color-light);
 }
