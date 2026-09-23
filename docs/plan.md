@@ -85,7 +85,7 @@ Rules:
 - Color scheme comes from `MantineProvider defaultColorScheme="auto"` plus `useMantineColorScheme`; the navbar switcher cycles light, dark, auto and stores in localStorage under the `mantine-color-scheme-value` key it already uses.
 - CSS modules per component, `postcss-preset-mantine` for `light-dark()` and `rem()`; media queries use `$mantine-breakpoint-*` mixins.
 - Storybook has a `Tokens` story (swatches, spacing scale, z-index ladder) and every chrome component gets a story per state. A Storybook decorator wraps `MantineProvider` with the app theme, so a component that looks wrong there is wrong.
-- ESLint rule `no-restricted-syntax` blocks `style={{` outside `design-system/` and `stylelint` blocks raw hex colors.
+- oxlint rule `app/no-inline-style` (local JS plugin in `lint/plugin.js`) blocks `style={{` outside `design-system/` and `stylelint` blocks raw hex colors.
 
 ## App chrome
 
@@ -330,7 +330,7 @@ Mantine-first rules (apply before writing any component):
 - Load the `frontend-design` skill before designing a new screen or reshaping one.
 - Naming: short and plain. `Shell`, `Sidebar`, `ContextBar`, `Splitter`, `notify`, `useShell`; no `AppShellSidebarPanelContainer`; a file is named after the one thing it exports.
 
-Conventions: TypeScript strict with `noUncheckedIndexedAccess`; ESLint (`typescript-eslint`, `react-hooks`, `react-compiler` plugin, import-order) plus Stylelint; Prettier; Conventional Commits; one story and one test per component; `AGENTS.md` at repo root lists these rules and the folder contract.
+Conventions: TypeScript 7 strict with `noUncheckedIndexedAccess`; oxlint (type-aware, native React hooks + React Compiler rules) plus Stylelint; Prettier; Conventional Commits; one story and one test per component; `AGENTS.md` at repo root lists these rules and the folder contract.
 
 ## Roadmap
 

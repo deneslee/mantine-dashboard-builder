@@ -4,7 +4,7 @@ Rules for humans and coding agents working in this repo. Read before writing cod
 
 ## Stack
 
-Vite 8 · React 19 · TypeScript strict · Mantine 9.6.2 · TanStack Router (file routes) + Query · Zustand · zod · Storybook 10 · Vitest.
+Vite 8 · React 19 · TypeScript 7 strict · Mantine 9.6.2 · TanStack Router (file routes) + Query · Zustand · zod · Storybook 10 · Vitest · oxlint + Stylelint.
 
 ## Mantine first
 
@@ -15,7 +15,7 @@ Vite 8 · React 19 · TypeScript strict · Mantine 9.6.2 · TanStack Router (fil
    - Wrong: a hand-built resize handle. Right: `Splitter` / `useSplitter`.
 3. **Dropdowns, selects and searchable lists** use `Combobox` (or `Select` / `Autocomplete` / `MultiSelect`, which wrap it).
 4. **Router links inside Mantine components** use `renderRoot={(props) => <Link to="…" {...props} />}` so they stay real anchors with preloading.
-5. **Styling:** theme defaults and variants in `src/design-system/theme/components.ts`; CSS modules for anything else. No inline style objects (ESLint blocks them outside `design-system/`), no raw hex colors (Stylelint blocks them). Colors, sizes and z-index come from `src/design-system/tokens/tokens.ts` via `var(--app-*)` or Mantine variables.
+5. **Styling:** theme defaults and variants in `src/design-system/theme/components.ts`; CSS modules for anything else. No inline style objects (oxlint rule `app/no-inline-style` blocks them outside `design-system/`), no raw hex colors (Stylelint blocks them). Colors, sizes and z-index come from `src/design-system/tokens/tokens.ts` via `var(--app-*)` or Mantine variables.
 
 ## Structure (light feature-based)
 
@@ -34,7 +34,7 @@ src/
   routes/         thin TanStack file routes; `-name.tsx` files are ignored by the router
 ```
 
-- Import another feature only through its `index.ts` (ESLint enforces). Inside a feature, import from the file.
+- Import another feature only through its `index.ts` (oxlint enforces). Inside a feature, import from the file.
 - UI never sees DTOs. Switching from local JSON to an HTTP API changes `client.ts`, `dto.ts`, `mapper.ts` only.
 
 ## Naming
@@ -68,7 +68,7 @@ Short and plain. `Shell`, `Sidebar`, `ContextBar`, `notify`, `useSidebar`. No `A
 ```bash
 pnpm dev              # http://localhost:5173
 pnpm build            # typecheck + production build
-pnpm lint             # ESLint + Stylelint
+pnpm lint             # oxlint (type-aware) + Stylelint
 pnpm test             # Vitest
 pnpm storybook        # http://localhost:6006
 ```

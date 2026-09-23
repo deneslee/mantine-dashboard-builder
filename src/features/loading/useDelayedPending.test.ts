@@ -10,9 +10,13 @@ describe('useDelayedPending', () => {
     const { result, rerender } = renderHook(({ p }) => useDelayedPending(p, 300, 400), {
       initialProps: { p: true },
     });
-    act(() => vi.advanceTimersByTime(200));
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
     rerender({ p: false });
-    act(() => vi.advanceTimersByTime(500));
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
     expect(result.current).toBe(false);
   });
 
@@ -20,12 +24,18 @@ describe('useDelayedPending', () => {
     const { result, rerender } = renderHook(({ p }) => useDelayedPending(p, 300, 400), {
       initialProps: { p: true },
     });
-    act(() => vi.advanceTimersByTime(300));
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
     expect(result.current).toBe(true);
     rerender({ p: false });
-    act(() => vi.advanceTimersByTime(100));
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
     expect(result.current).toBe(true);
-    act(() => vi.advanceTimersByTime(300));
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
     expect(result.current).toBe(false);
   });
 });

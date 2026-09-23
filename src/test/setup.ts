@@ -8,7 +8,7 @@ afterEach(() => {
 });
 
 // jsdom lacks these; Mantine components and hooks use them.
-const { getComputedStyle } = window;
+const getComputedStyle = window.getComputedStyle.bind(window);
 window.getComputedStyle = (elt) => getComputedStyle(elt);
 window.HTMLElement.prototype.scrollIntoView = () => {};
 window.scrollTo = () => {};
