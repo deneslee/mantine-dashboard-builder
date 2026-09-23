@@ -1,7 +1,17 @@
+# Quarantine newly published versions by 24 hours to prevent supply-chain compromise
+minimumReleaseAge: 1440
+
+# Packages exempt from the 24-hour quarantine window
+minimumReleaseAgeExclude:
+
+
+# Explicitly allowed lifecycle scripts (replaces onlyBuiltDependencies)
 allowBuilds:
   esbuild: true
   msw: true
-minimumReleaseAgeExclude:
-  - '@tabler/icons-react@3.48.0'
-  - '@tabler/icons@3.48.0'
-  - jsdom@30.1.1
+
+# Hardening & stability defaults
+engineStrict: true
+saveExact: true
+strictPeerDependencies: true
+preferFrozenLockfile: true
