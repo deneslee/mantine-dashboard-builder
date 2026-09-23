@@ -7,8 +7,9 @@ export const theme = createTheme({
   primaryShade: { light: 6, dark: 5 },
   defaultRadius: 'sm',
   fontFamily:
-    '"Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif',
-  fontFamilyMonospace: '"JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
+    '"DM Sans Variable", "Source Sans 3 Variable", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif',
+  fontFamilyMonospace:
+    '"Source Code Pro Variable", "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
   headings: {
     fontFamily: 'inherit',
     fontWeight: '600',

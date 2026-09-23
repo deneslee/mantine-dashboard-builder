@@ -1,4 +1,6 @@
-@import '@fontsource-variable/inter';
+@import '@fontsource-variable/dm-sans';
+@import '@fontsource-variable/source-sans-3';
+@import '@fontsource-variable/source-code-pro';
 @import '@fontsource-variable/jetbrains-mono';
 @import '@mantine/core/styles.layer.css';
 @import '@mantine/notifications/styles.layer.css';

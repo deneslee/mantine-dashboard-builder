@@ -19,6 +19,18 @@
       background-color var(--app-motion-fast) var(--app-motion-ease),
       color var(--app-motion-fast) var(--app-motion-ease);
 
+    /*
+     * Sidebar chrome is scheme-invariant (always dark), but Mantine's own NavLink
+     * hover rule is scoped to [data-mantine-color-scheme] and hardcodes gray-0 in
+     * light scheme instead of using --nl-hover. Override it explicitly so hover
+     * matches the sidebar palette in both schemes.
+     */
+    @media (hover: hover) {
+      &:hover {
+        background-color: var(--nl-hover);
+      }
+    }
+
     &::before {
       content: '';
       position: absolute;
