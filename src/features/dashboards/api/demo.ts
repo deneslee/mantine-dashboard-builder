@@ -1,4 +1,5 @@
 import { AppError } from '@/shared/errors';
+import type { ChartForm, DashboardWidget } from '../model/types';
 
 /**
  * Stand-in widget data until datasources exist (phase 2). Deterministic per dashboard so
@@ -53,6 +54,60 @@ export async function fetchRegions(dashboardId: string, signal?: AbortSignal): P
   const values = regions.map(() => Math.round(5_000 + rand() * 40_000));
   const total = values.reduce((a, b) => a + b, 0);
   return regions.map((region, i) => ({ region, value: values[i] ?? 0, share: (values[i] ?? 0) / total }));
+}
+
+export interface SeriesPoint {
+  time: string;
+  value: number;
+}
+
+/** A day of half-hourly values: a seeded random walk, so each widget keeps its own shape. */
+export async function fetchSeries(seed: string, signal?: AbortSignal): Promise<SeriesPoint[]> {
+  const rand = seeded(seed);
+  await sleep(300 + Math.random() * 700, signal);
+  let value = 40 + rand() * 40;
+  return Array.from({ length: 48 }, (_, i) => {
+    value = Math.max(0, value + (rand() - 0.48) * 12);
+    const hh = String(Math.floor(i / 2)).padStart(2, '0');
+    return { time: `${hh}:${i % 2 ? '30' : '00'}`, value: Math.round(value) };
+  });
+}
+
+const forms: ChartForm[] = ['area', 'line', 'bar'];
+
+/** The "Grid performance" dashboard: 20 charts, three per row on a wide canvas. */
+function perfWidgets(): DashboardWidget[] {
+  return Array.from({ length: 20 }, (_, i) => ({
+    id: `chart-${i + 1}`,
+    kind: 'trend',
+    title: `Series ${i + 1}`,
+    chart: forms[i % forms.length],
+    placement: { x: (i % 3) * 4, y: Math.floor(i / 3) * 6, w: 4, h: 6 },
+  }));
+}
+
+/** Tiles each dashboard shows until dashboards carry their own widgets (phase 2). */
+export function demoWidgets(dashboardId: string): DashboardWidget[] {
+  if (dashboardId === 'perf') return perfWidgets();
+  return [
+    { id: 'kpis', kind: 'kpis', title: 'Key figures', placement: { x: 0, y: 0, w: 12, h: 3 } },
+    {
+      id: 'revenue',
+      kind: 'trend',
+      chart: 'area',
+      title: 'Revenue, last 24 hours',
+      placement: { x: 0, y: 3, w: 8, h: 6 },
+    },
+    { id: 'regions', kind: 'regions', title: 'Revenue by region', placement: { x: 8, y: 3, w: 4, h: 6 } },
+    { id: 'alarms', kind: 'broken', title: 'HVAC alarms', placement: { x: 0, y: 9, w: 6, h: 6 } },
+    {
+      id: 'occupancy',
+      kind: 'trend',
+      chart: 'line',
+      title: 'Occupancy',
+      placement: { x: 6, y: 9, w: 6, h: 6 },
+    },
+  ];
 }
 
 /** Always fails, to demonstrate the per-widget error boundary. */

@@ -25,6 +25,14 @@
       "tags": ["datadog"]
     },
     {
+      "id": "perf",
+      "title": "Grid performance",
+      "description": "20 charts, for checking that the grid and shell stay fast",
+      "updated_at": "2026-09-23T12:00:00Z",
+      "widget_count": 20,
+      "tags": ["demo"]
+    },
+    {
       "id": "broken",
       "title": "Broken example",
       "description": "Fails to load on purpose, to show the route error screen",

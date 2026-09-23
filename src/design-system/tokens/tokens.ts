@@ -62,5 +62,16 @@ export const motion = {
   ease: 'cubic-bezier(0.2, 0, 0, 1)',
 } as const;
 
-export const tokens = { shell, zIndex, chrome, surface, motion } as const;
+/**
+ * Dashboard canvas (react-grid-layout). Breakpoints are canvas widths, not viewport widths, so
+ * opening the context bar can move a dashboard to fewer columns.
+ */
+export const grid = {
+  breakpoints: { lg: 1100, md: 640, sm: 0 },
+  cols: { lg: 12, md: 8, sm: 4 },
+  rowHeight: 40,
+  gap: 16,
+} as const;
+
+export const tokens = { shell, zIndex, chrome, surface, motion, grid } as const;
 export type Tokens = typeof tokens;

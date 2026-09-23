@@ -10,6 +10,16 @@ function box(width: number, transition = '0.18s') {
   return el;
 }
 
+/** A pane transition whose end the test controls. */
+function transitionOn(el: HTMLElement) {
+  let finish = () => {};
+  const finished = new Promise<Animation>((resolve) => {
+    finish = () => resolve({} as Animation);
+  });
+  el.getAnimations = () => [{ finished } as Animation];
+  return { finish: () => finish() };
+}
+
 function setup({ main = 700, sidebar = 260, context = 0, transition = '0.18s' } = {}) {
   const parts = {
     root: { current: document.createElement('div') },
@@ -21,31 +31,53 @@ function setup({ main = 700, sidebar = 260, context = 0, transition = '0.18s' } 
   const { result } = renderHook(() => useMainLock(parts));
   const pinned = () => parts.main.current.style.getPropertyValue('--shell-main-width') || null;
   const moving = () => parts.root.current.hasAttribute('data-moving');
-  return { lock: result.current, pinned, moving };
+  return { lock: result.current, parts, pinned, moving };
 }
 
 describe('useMainLock', () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
 
-  it('pins main to the width it will have once the panes arrive, then releases', () => {
+  it('keeps main at its current width while the panes move', () => {
     const { lock, pinned, moving } = setup({ main: 700, sidebar: 260 });
-    lock.holdFor(56, 0); // sidebar collapses to the rail: main gains 204px
-    expect(pinned()).toBe('904px');
+    lock.holdFor(56, 0); // sidebar collapses to the rail
+    expect(pinned()).toBe('700px');
     expect(moving()).toBe(true);
+  });
 
-    vi.advanceTimersByTime(180 + 100);
+  it('releases when the pane transition finishes', async () => {
+    const { lock, parts, pinned, moving } = setup();
+    const transition = transitionOn(parts.sidebarPane.current);
+    lock.holdFor(56, 0);
+    await vi.advanceTimersByTimeAsync(0); // the microtask that finds the transition
+    expect(pinned()).toBe('700px');
+
+    transition.finish();
+    await vi.advanceTimersByTimeAsync(0);
     expect(pinned()).toBeNull();
     expect(moving()).toBe(false);
   });
 
-  it('accounts for both panes', () => {
-    const { lock, pinned } = setup({ main: 700, sidebar: 260, context: 0 });
-    lock.holdFor(260, 360); // context bar opens
-    expect(pinned()).toBe('340px');
+  it('falls back to a timer when no transition end is reported', () => {
+    const { lock, pinned } = setup();
+    lock.holdFor(56, 0);
+    vi.advanceTimersByTime(180 + 100);
+    expect(pinned()).toBeNull();
   });
 
-  it('does nothing when main keeps its width', () => {
+  it('ignores the end of an earlier transition once a newer pin exists', async () => {
+    const { lock, parts, pinned } = setup();
+    const first = transitionOn(parts.sidebarPane.current);
+    lock.holdFor(56, 0);
+    await vi.advanceTimersByTimeAsync(0);
+
+    lock.hold(); // a drag starts before the first transition ends
+    first.finish();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(pinned()).toBe('700px');
+  });
+
+  it('does nothing when the panes keep their widths', () => {
     const { lock, pinned, moving } = setup();
     lock.holdFor(260, 0);
     expect(pinned()).toBeNull();

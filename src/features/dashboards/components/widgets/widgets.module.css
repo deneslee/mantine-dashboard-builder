@@ -1,0 +1,11 @@
+.kpi {
+  font-size: rem(26px);
+  font-weight: 600;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: rem(-0.5px);
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}

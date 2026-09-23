@@ -21,6 +21,12 @@
         "ignoreAtRules": ["mixin", "define-mixin"]
       }
     ],
+    "selector-pseudo-class-no-unknown": [
+      true,
+      {
+        "ignorePseudoClasses": ["global"]
+      }
+    ],
     "declaration-property-value-no-unknown": null,
     "media-query-no-invalid": null,
     "property-no-vendor-prefix": null,

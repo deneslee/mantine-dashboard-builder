@@ -1,0 +1,21 @@
+/* react-grid-layout overrides. The numbered rules are in docs/grid-and-charts.md. */
+.root {
+  /*
+   * Rule 2: tiles move by transform only. RGL's default also animates width and height, which
+   * would resize every chart on every frame after each layout change.
+   */
+  & :global(.react-grid-item.cssTransforms) {
+    transition-property: transform;
+  }
+
+  /* Nor does the canvas animate its height when the layout gets taller or shorter. */
+  & :global(.react-grid-layout) {
+    transition: none;
+  }
+
+  /* Rule 3: tiles have explicit sizes, so each is isolated and skipped while off-screen. */
+  & :global(.react-grid-item) {
+    contain: layout style;
+    content-visibility: auto;
+  }
+}

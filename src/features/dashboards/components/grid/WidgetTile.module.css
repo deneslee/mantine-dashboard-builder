@@ -1,0 +1,18 @@
+.header {
+  flex: 0 0 auto;
+  min-height: rem(40px);
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
+  border-bottom: 1px solid var(--app-border);
+}
+
+/*
+ * Fills the rest of the tile; charts size to it with `h="100%"`. Clips instead of scrolling: for one
+ * frame after a tile shrinks, a chart is still at its old width, and a scrollbar appearing then
+ * would resize the chart a second time.
+ */
+.body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: var(--mantine-spacing-md);
+  overflow: hidden;
+}

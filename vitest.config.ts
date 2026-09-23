@@ -1,8 +1,10 @@
-import react from '@vitejs/plugin-react';
+import babel from '@rolldown/plugin-babel';
+import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
-  plugins: [react()],
+  // Same React Compiler as the app, so tests run the code that ships.
+  plugins: [react(), babel({ presets: [reactCompilerPreset()] })],
   resolve: { tsconfigPaths: true },
   test: {
     globals: true,

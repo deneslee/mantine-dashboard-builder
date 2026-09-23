@@ -64,7 +64,7 @@ stateDiagram-v2
 
 ## Pane sizes and the main lock
 
-Sizes flow one way at a time: store to splitter for toggles, splitter to store for user resizes. While panes move, `<main>` is pinned so its content (grid, charts) lays out once per change instead of on every animation frame.
+Sizes flow one way at a time: store to splitter for toggles, splitter to store for user resizes. While panes move, `<main>` keeps its current width, and its content (grid, charts) lays out once, when they stop, instead of on every animation frame. Once rather than during: re-rendering a dozen charts takes about 150–250ms in a production build and would freeze the animation.
 
 ```mermaid
 sequenceDiagram
@@ -76,19 +76,19 @@ sequenceDiagram
   Store->>Shell: new sidebar or context size
   Shell->>Splitter: setSizes (layout effect)
   Splitter->>Lock: onSizeChange → holdFor(sidebar, context)
-  Lock->>Main: pin to final width, one layout
+  Lock->>Main: pin to current width
   Note over Splitter: flex-basis transition, 180ms
-  Lock->>Main: release after the transition
+  Lock->>Main: release when it finishes, one layout
 ```
 
-| Source                               | What happens                                                                                   |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------- |
-| Burger, dock, close, persisted width | Store → `setSizes` → `holdFor` pins main to its final width, releases after the transition     |
-| Drag                                 | `onResizeStart` holds main at its current width; `onResizeEnd` releases it and saves the width |
-| Keyboard on a handle                 | `onSizeChange` → `holdFor` + save the width                                                    |
-| Double-click on a handle             | Saves the token default; the store change then animates like a toggle                          |
+| Source                               | What happens                                                                                     |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| Burger, dock, close, persisted width | Store → `setSizes` → `holdFor` pins main at its current width, releases when the transition ends |
+| Drag                                 | `onResizeStart` holds main at its current width; `onResizeEnd` releases it and saves the width   |
+| Keyboard on a handle                 | `onSizeChange` → `holdFor` + save the width                                                      |
+| Double-click on a handle             | Saves the token default; the store change then animates like a toggle                            |
 
-While pinned, the root has `data-moving`: the main pane clips sideways instead of scrolling, and the content ignores the pointer. When transitions are zero (reduced motion) nothing is pinned. Details: `hooks/useMainLock.ts`.
+While pinned, the root has `data-moving`: the main pane clips sideways instead of scrolling, and the content ignores the pointer. The release waits for the panes' transitions to finish (`getAnimations()`), with a timer as fallback. When transitions are zero (reduced motion) nothing is pinned. Details: `hooks/useMainLock.ts`.
 
 ## Sidebar
 
