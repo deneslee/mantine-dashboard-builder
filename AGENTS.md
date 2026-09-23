@@ -74,3 +74,31 @@ pnpm storybook        # http://localhost:6006
 ```
 
 Every chrome component gets a story per state and a test for its behaviour.
+
+<!-- Workflow instructions -->
+
+## Workflow
+
+All planning artifacts live inside `.agents/plan/`:
+
+1. **Plans**:
+   - Location: `.agents/plan/` (root)
+   - Naming: `plan-{number}.md`, e.g. `plan-01.md`
+   - Header format: First line after title always includes date, version, and references to task files (and research files if applicable).
+
+2. **Tasks**:
+   - Location: `.agents/plan/tasks/`
+   - Naming: `task-r{plan_num}-{version}.md`, e.g. `task-r01-01.md` (where `r01` references `plan-01`, and `01` is versioning).
+   - Item format: `- [ ] **Task title.** task description with ref if needed.`
+
+3. **Research**:
+   - Location: `.agents/plan/research/`
+   - Naming: `research-{topic}.md` or `research-r{plan_num}-{topic}.md`
+   - Reference: Always reference the relevant plan on the second line after title if created for a specific plan.
+
+4. **Archive**:
+   - Location: `.agents/plan/archive/`
+   - Completed/deprecated plan, task, and research files are moved to `archive/` when finished.
+   - This folder is gitignored.
+
+<!-- /Workflow instructions -->

@@ -10,3 +10,6 @@ coverage
 .agents/skills
 .kiro/skills
 .junie/skills
+
+# Agent plans archive
+.agents/plan/archive/
