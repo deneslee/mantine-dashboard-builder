@@ -14,7 +14,7 @@ A Sentry prototype was merged in PR #13. Its plan and task list are in `archive/
 
 **Already fixed after the merge (commit `1cc521f`), so the rest of the app isn't affected:**
 
-- **SDK loading:** the SDK is loaded as its own chunk, only when a DSN is configured (`src/integrations/sentry/runtime.ts`: `startSentry`, `connectRouter`, `reportError`). First-load JS went from 1085 back to 809 KiB.
+- **SDK loading:** the SDK is loaded as its own chunk, only when a DSN is configured (now `src/lib/sentry/runtime.ts`: `startSentry`, `connectRouter`, `reportError`). First-load JS went from 1085 back to 809 KiB.
 - **Replay privacy:** Replay masks all text and blocks media (Sentry's defaults); the prototype had turned both off.
 - **Console forwarding:** only `warn` and `error`, not every log.
 - **Source maps:** built only when uploading to Sentry, then deleted, so GitHub Pages no longer publishes them.

@@ -21,14 +21,14 @@ npx skills add vercel-labs/agent-skills
 
 ## What's here
 
-| Area                    | Where                                      | Notes                                                                                                                                 |
-| ----------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Tokens, theme, variants | `src/design-system`                        | `tokens.ts` → CSS variables via `cssVariablesResolver`; `ActionIcon` `chrome`, `Paper` `panel`/`widget`, `NavLink` `sidebar` variants |
-| App chrome              | `src/features/shell`                       | Mantine `Splitter` panes: sidebar · main (navbar + content) · context bar; `Drawer` for undocked panels                               |
-| Notifications           | `src/features/notifications`               | `notify.*` API, dedupe, priority, persisted inbox tab with unread badge                                                               |
-| Errors                  | `src/features/errors`, `src/shared/errors` | `AppError`, `ErrorState.Full/Inline/Banner`, 404, route error, app crash, offline banner, widget boundary                             |
-| Loading                 | `src/features/loading`                     | Shaped skeletons, route pending (300 ms delay, 500 ms minimum), top progress bar                                                      |
-| Sample data             | `public/data/dashboards/index.json`        | Read through `client → dto (zod) → mapper`, with simulated latency in dev                                                             |
+| Area                    | Where                                                              | Notes                                                                                                                                 |
+| ----------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Tokens, theme, variants | `src/design-system`                                                | `tokens.ts` → CSS variables via `cssVariablesResolver`; `ActionIcon` `chrome`, `Paper` `panel`/`widget`, `NavLink` `sidebar` variants |
+| App chrome              | `src/components/layouts/shell`                                     | Mantine `Splitter` panes: sidebar · main (navbar + content) · context bar; `Drawer` for undocked panels                               |
+| Notifications           | `src/lib/notify`, `src/stores/inbox`, `src/features/notifications` | `notify.*` API, dedupe, priority, persisted inbox tab with unread badge                                                               |
+| Errors                  | `src/components/errors`, `src/lib/errors`                          | `AppError`, `ErrorState.Full/Inline/Banner`, 404, route error, app crash, offline banner, widget boundary                             |
+| Loading                 | `src/components/feedback`                                          | Shaped skeletons, route pending (300 ms delay, 500 ms minimum), top progress bar                                                      |
+| Sample data             | `public/data/dashboards/index.json`                                | Read through `client → dto (zod) → mapper`, with simulated latency in dev                                                             |
 
 ## Try it
 

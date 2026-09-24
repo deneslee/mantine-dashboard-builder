@@ -17,25 +17,37 @@ Vite 8 · React 19 · TypeScript 7 strict · Mantine 9.6.2 · TanStack Router (f
 4. **Router links inside Mantine components** use `renderRoot={(props) => <Link to="…" {...props} />}` so they stay real anchors with preloading.
 5. **Styling:** theme defaults and variants in `src/design-system/theme/components.ts`; CSS modules for anything else. No inline style objects (oxlint rule `app/no-inline-style` blocks them outside `design-system/`), no raw hex colors (Stylelint blocks them). Colors, sizes and z-index come from `src/design-system/tokens/tokens.ts` via `var(--app-*)` or Mantine variables.
 
-## Structure (light feature-based)
+## Structure (bulletproof-react, lightly adapted)
 
 ```
 src/
-  app/            providers, router, query client
-  design-system/  tokens, theme, extended Mantine, Page layout
-  shared/         AppError, config, user context; no UI, no feature imports
-  features/<name>/
-    components/   UI
+  app/                  APP LAYER: the only place features meet
+    routes/             TanStack file routes, thin; `-name.tsx` files are ignored by the router
+    App.tsx  Providers.tsx  router.ts  queryClient.ts  routeTree.gen.ts (generated)
+  features/<name>/      FEATURE LAYER: never imports another feature or app/
+    components/         UI
     hooks/
-    model/        types, zod schemas
-    api/          client.ts (transport) · dto.ts (wire shape) · mapper.ts (dto → domain) · queries.ts
-    store.ts      only when the feature owns state
-    index.ts      public API: entry components, hooks, types
-  routes/         thin TanStack file routes; `-name.tsx` files are ignored by the router
+    model/              types, zod schemas
+    api/                client.ts (transport) · dto.ts (wire shape) · mapper.ts (dto → domain) · queries.ts
+    store.ts            only when the feature owns state
+  components/           SHARED UI: errors/, feedback/ (skeletons), layouts/shell/ (app frame, own store)
+  hooks/  lib/  stores/  config/  types/  utils/  testing/     SHARED (lib: notify, AppError, user, sentry)
+  design-system/        LOWEST LAYER: tokens, theme, Mantine extensions, Page
 ```
 
-- Import another feature only through its `index.ts` (oxlint enforces). Inside a feature, import from the file.
-- UI never sees DTOs. Switching from local JSON to an HTTP API changes `client.ts`, `dto.ts`, `mapper.ts` only.
+- **Imports go one way:** `design-system` ← shared (`components`, `hooks`, `lib`, `stores`, `config`, `types`, `utils`, `testing`) ← `features` ← `app`. oxlint enforces the direction and `import/no-cycle`.
+- **Features never import each other.** Combine them in `app/`:
+  - A route may import several features and wrap parts in its own Suspense or error boundary.
+  - A feature that needs something from another asks for it (props, context, a registry); `app/` passes it in, e.g. `ShellProvider globalTabs`.
+  - Code both need moves down to the shared layer.
+- **No barrel files (`index.ts`).** Import the file that defines the name: `@/components/errors/ErrorState`, `@/lib/notify/notify`. Barrels defeat tree-shaking.
+- **Aliases and relative imports:** inside a feature or shared module, use relative imports; across modules, use `@/…`.
+- **UI never sees DTOs.** Switching from local JSON to an HTTP API changes `client.ts`, `dto.ts`, `mapper.ts` only.
+- **Where does it go?**
+  - Look only → `design-system/`.
+  - Reusable UI with states → `components/`.
+  - Knows about data or the domain → `features/`.
+  - Places things on a page → `app/routes/`.
 
 ## Naming
 
@@ -58,9 +70,9 @@ Short and plain. `Shell`, `Sidebar`, `ContextBar`, `notify`, `useSidebar`. No `A
 
 ## Notifications, errors, loading
 
-- **Toasts:** `notify.success | info | warning | error | progress` from `@/features/notifications`. Never call `notifications.show` directly. Title = outcome first, under 60 characters. Warnings and errors also land in the inbox tab. Same `dedupeKey` within 10 s updates instead of stacking.
+- **Toasts:** `notify.success | info | warning | error | progress` from `@/lib/notify/notify`. Never call `notifications.show` directly. Title = outcome first, under 60 characters. Warnings and errors also land in the inbox tab. Same `dedupeKey` within 10 s updates instead of stacking.
 - **Mutations:** errors toast automatically (global `MutationCache`); set `meta.successMessage` to opt into a success toast.
-- **Errors:** throw or map to `AppError` (`@/shared/errors`). Routes use `RouteError` / `NotFound`; widgets wrap in `WidgetBoundary`. Initial-load errors render inline, never as a toast.
+- **Errors:** throw or map to `AppError` (`@/lib/errors/AppError`). Routes use `RouteError` / `NotFound`; widgets wrap in `WidgetBoundary`. Initial-load errors render inline, never as a toast.
 - **Loading:** skeleton shaped like the content (`TextSkeleton`, `ChartSkeleton`, `TableSkeleton`, `PanelSkeleton`, `DashboardSkeleton`, `ListSkeleton`). Routes show them after 300 ms and keep them at least 500 ms. Refetches keep old data (`keepPreviousData`); no skeleton on refetch.
 
 ## Commands

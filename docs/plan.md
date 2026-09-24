@@ -42,30 +42,29 @@ Verified 22 Sep 2026: react-grid-layout 2.2.3 is current ([releases](https://git
 
 Light feature-based layout: one folder per feature, four fixed sub-folders, no layers or slices beyond that.
 
+Current layout and rules: [AGENTS.md › Structure](../AGENTS.md#structure-bulletproof-react-lightly-adapted) (bulletproof-react, adopted Sep 24, 2026 in `.agents/plan/plan-02.md`). Planned features slot into it like this:
+
 ```markdown
 src/
-app/ providers.tsx, router.tsx, query-client.ts, App.tsx
-design-system/ tokens/, theme/, components/ (extended Mantine), index.ts
-shared/ DataFrame, hooks, utils, types — no UI, no feature imports
+app/ routes/, providers, router, query client; the only place features meet
 features/
-shell/ navbar/, sidebar/, context-bar/, panel/, model/, store.ts
-notifications/ notify.ts, components/, model/
-errors/ ErrorBoundary, NotFound, RouteError, WidgetError, Offline
-loading/ skeletons/, PendingRoute, useDelayedPending
-dashboard/ model/ (schema, migrations), store.ts, grid/, editor/
-widgets/ registry.ts, header/, chart/, table/, container/, markdown/, nodes/
-datasources/ registry.ts, local-json/, csv/, mock/, api/
+dashboards/ model/ (schema, migrations), api/, components/ (grid, editor)
+widgets/ one folder per widget type (chart, table, container, markdown, nodes)
+datasources/ one folder per adapter (local-json, csv, mock, api)
 templates/
 import-export/
-routes/ TanStack file routes; thin, compose features
+settings/, notifications/ (inbox UI), debug/, integrations/
+components/ errors/, feedback/ (skeletons), layouts/shell/
+hooks/ lib/ (notify, AppError, user, sentry) stores/ config/ types/ (DataFrame, widget contracts) utils/ testing/
+design-system/ tokens/, theme/, components/ (Page)
 data/ dashboards/_.json, templates/_.json (dev only)
 ```
 
 Feature folder contract:
 
 - `components/` UI, `hooks/`, `model/` (types + zod), `api/` (`client.ts`, `dto.ts`, `mapper.ts`); a feature that owns state adds `store.ts` and a `Provider`.
-- Cross-feature imports only through the feature's `index.ts`, which re-exports types and entry components only. Inside a feature import from the file, not a barrel.
-- `shared/` and `design-system/` never import from `features/`. This keeps them movable to `packages/` if a monorepo (pnpm + Turborepo) becomes needed: a second app, a backend in-repo, or publishable widget plugins.
+- Features never import each other; `app/` combines them (routes, registries, props). No barrel files: import the file that defines the name.
+- The shared layer and `design-system/` never import from `features/` or `app/` (oxlint enforces). This keeps them movable to `packages/` if a monorepo (pnpm + Turborepo) becomes needed: a second app, a backend in-repo, or publishable packages.
 - Route files contain no logic; they wire providers, loaders and `staticData` and render a feature entry component.
 
 ## Design system
@@ -184,7 +183,7 @@ The tabs sit in the header row next to dock and close, so there is no duplicate 
 
 ## Notifications
 
-Two surfaces, one API: transient toasts (`@mantine/notifications`) and a persistent inbox in the context bar's `notifications` tab. Features call `notify.*` from `features/notifications/notify.ts`; nothing calls `notifications.show` directly.
+Two surfaces, one API: transient toasts (`@mantine/notifications`) and a persistent inbox in the context bar's `notifications` tab. Features call `notify.*` from `lib/notify/notify.tsx`; nothing calls `notifications.show` directly.
 
 | Level      | Toast                    | Inbox | Auto-close | Example                                |
 | ---------- | ------------------------ | ----- | ---------- | -------------------------------------- |
@@ -247,7 +246,7 @@ Loading state matches the shape of what arrives, appears only when it would othe
 
 Rules:
 
-- Skeleton components live in `features/loading/skeletons/` as named variants (`ChartSkeleton`, `TableSkeleton`, `TextSkeleton`, `PanelSkeleton`, `DashboardGridSkeleton`) built from `Skeleton.extend` so animation and radius come from tokens; each widget type declares which skeleton it uses in the registry.
+- Skeleton components live in `components/feedback/skeletons/` as named variants (`ChartSkeleton`, `TableSkeleton`, `TextSkeleton`, `PanelSkeleton`, `DashboardGridSkeleton`) built from `Skeleton.extend` so animation and radius come from tokens; each widget type declares which skeleton it uses in the registry.
 - `useDelayedPending(isPending, 300)` gates every skeleton so sub-300ms loads render nothing; every skeleton is `aria-busy` on its container and `aria-hidden` itself, with one `visually-hidden` "Loading" per region.
 - Never a full-screen spinner after the initial app boot; the boot uses a static HTML splash in `index.html` replaced on first render.
 - Query defaults: `staleTime: 30s`, `gcTime: 5m`, `retry: 1` for datasources (retryable errors only), `refetchOnWindowFocus: false` for dashboards, `placeholderData: keepPreviousData` for time-range changes so charts do not skeleton on every range change.
@@ -304,7 +303,7 @@ React best practices ([source](https://github.com/vercel-labs/agent-skills/blob/
 
 | Rule                                                                 | In this project                                                                                                         |
 | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `bundle-barrel-imports`, `bundle-analyzable-paths`                   | Import icons and Mantine pieces from files; feature `index.ts` exports types and entry components only                  |
+| `bundle-barrel-imports`, `bundle-analyzable-paths`                   | Import icons and Mantine pieces from files; no barrel files anywhere (oxlint enforces)                                  |
 | `bundle-conditional`, `bundle-dynamic-imports`                       | Every widget type, datasource adapter, editor tab and heavy library (`@xyflow/react`, `react-markdown`) is a lazy chunk |
 | `bundle-preload`                                                     | Router `preload: 'intent'`; palette preloads a widget's chunk on hover                                                  |
 | `async-parallel`                                                     | `useQueries` for widgets, `Promise.all` in loaders                                                                      |
@@ -345,7 +344,7 @@ Status: phases 0 and 1 are built (22 Sep 2026). Typecheck, ESLint, Stylelint, 22
 - The color scheme is applied by an inline script in `index.html` before first paint.
 - A thin `dashboards` feature reads `public/data/dashboards/index.json` through `client → dto → mapper` to exercise loading and error paths.
 - `/debug` fires every toast level, mutation error, route error, throwing widget and all skeletons.
-- The app name is `appName` in `src/shared/config.ts` (placeholder: Dashboard Builder).
+- The app name is `appName` in `src/config/config.ts` (placeholder: Dashboard Builder).
 
 | Phase              | Scope                                                                                                                                                                                                     | Done when                                                                   |
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
@@ -389,7 +388,7 @@ Notifications
 
 Errors
 
-- [ ] `AppError` type and mapper helpers in `shared/`
+- [ ] `AppError` type and mapper helpers in `lib/errors/`
 - [ ] `ErrorState` compound with `Full`, `Inline`, `Banner`
 - [ ] `NotFound` (404), `RouteError`, `AppCrash`, `Offline` banner, `WidgetError` shell
 - [ ] Router `notFoundComponent`, `errorComponent`, `react-error-boundary` at root

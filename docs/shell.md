@@ -2,7 +2,7 @@
 
 How the chrome around every page works today: panes, state, sidebar, context bar. The original design and its reasoning are in [plan.md](plan.md#app-chrome); where the two differ, this file describes the code.
 
-Code: `src/features/shell`. Public API (`index.ts`): `Shell`, `ShellProvider`, `useSidebar`, `useContextBar`, `useShellActions`, `createShellStore`.
+Code: `src/components/layouts/shell`. Used from outside: `Shell`, `ShellProvider` (takes `globalTabs`), `useSidebar`, `useContextBar`, `useShellActions` (`hooks/useShell.ts`), `createShellStore`. No barrel; import the file.
 
 ## Layout
 
