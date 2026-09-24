@@ -17,6 +17,8 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as TemplatesRouteImport } from './routes/templates'
 import { Route as DashboardsIndexRouteImport } from './routes/dashboards/index'
 import { Route as DashboardsIdRouteImport } from './routes/dashboards/$id'
+import { Route as IntegrationsIndexRouteImport } from './routes/integrations/index'
+import { Route as IntegrationsSentryRouteImport } from './routes/integrations/sentry'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -58,6 +60,16 @@ const DashboardsIdRoute = DashboardsIdRouteImport.update({
   path: '/dashboards/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const IntegrationsIndexRoute = IntegrationsIndexRouteImport.update({
+  id: '/integrations/',
+  path: '/integrations/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IntegrationsSentryRoute = IntegrationsSentryRouteImport.update({
+  id: '/integrations/sentry',
+  path: '/integrations/sentry',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -67,7 +79,9 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/templates': typeof TemplatesRoute
   '/dashboards/$id': typeof DashboardsIdRoute
+  '/integrations/sentry': typeof IntegrationsSentryRoute
   '/dashboards/': typeof DashboardsIndexRoute
+  '/integrations/': typeof IntegrationsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -77,7 +91,9 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/templates': typeof TemplatesRoute
   '/dashboards/$id': typeof DashboardsIdRoute
+  '/integrations/sentry': typeof IntegrationsSentryRoute
   '/dashboards': typeof DashboardsIndexRoute
+  '/integrations': typeof IntegrationsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -88,7 +104,9 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/templates': typeof TemplatesRoute
   '/dashboards/$id': typeof DashboardsIdRoute
+  '/integrations/sentry': typeof IntegrationsSentryRoute
   '/dashboards/': typeof DashboardsIndexRoute
+  '/integrations/': typeof IntegrationsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -100,7 +118,9 @@ export interface FileRouteTypes {
     | '/settings'
     | '/templates'
     | '/dashboards/$id'
+    | '/integrations/sentry'
     | '/dashboards/'
+    | '/integrations/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -110,7 +130,9 @@ export interface FileRouteTypes {
     | '/settings'
     | '/templates'
     | '/dashboards/$id'
+    | '/integrations/sentry'
     | '/dashboards'
+    | '/integrations'
   id:
     | '__root__'
     | '/'
@@ -120,7 +142,9 @@ export interface FileRouteTypes {
     | '/settings'
     | '/templates'
     | '/dashboards/$id'
+    | '/integrations/sentry'
     | '/dashboards/'
+    | '/integrations/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -131,7 +155,9 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   TemplatesRoute: typeof TemplatesRoute
   DashboardsIdRoute: typeof DashboardsIdRoute
+  IntegrationsSentryRoute: typeof IntegrationsSentryRoute
   DashboardsIndexRoute: typeof DashboardsIndexRoute
+  IntegrationsIndexRoute: typeof IntegrationsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -192,6 +218,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/integrations/': {
+      id: '/integrations/'
+      path: '/integrations'
+      fullPath: '/integrations/'
+      preLoaderRoute: typeof IntegrationsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/integrations/sentry': {
+      id: '/integrations/sentry'
+      path: '/integrations/sentry'
+      fullPath: '/integrations/sentry'
+      preLoaderRoute: typeof IntegrationsSentryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -203,7 +243,9 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   TemplatesRoute: TemplatesRoute,
   DashboardsIdRoute: DashboardsIdRoute,
+  IntegrationsSentryRoute: IntegrationsSentryRoute,
   DashboardsIndexRoute: DashboardsIndexRoute,
+  IntegrationsIndexRoute: IntegrationsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

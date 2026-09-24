@@ -1,11 +1,12 @@
 import { createRouter } from '@tanstack/react-router';
 import { NotFound, RouteError } from '@/features/errors';
 import { ListSkeleton } from '@/features/loading';
+import { bindRouterToSentry } from '@/integrations/sentry';
 import { routeTree } from '@/routeTree.gen';
 import type { QueryClient } from '@tanstack/react-query';
 
 export function createAppRouter(queryClient: QueryClient) {
-  return createRouter({
+  const router = createRouter({
     routeTree,
     basepath: import.meta.env.BASE_URL,
     context: { queryClient },
@@ -19,6 +20,10 @@ export function createAppRouter(queryClient: QueryClient) {
     defaultNotFoundComponent: NotFound,
     scrollRestoration: true,
   });
+
+  bindRouterToSentry(router);
+
+  return router;
 }
 
 declare module '@tanstack/react-router' {
