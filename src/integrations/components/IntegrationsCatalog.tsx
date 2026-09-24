@@ -102,8 +102,8 @@ export function IntegrationsCatalog() {
                     <Stack justify="space-between" h="100%" gap="md">
                       <Stack gap="xs">
                         <Group justify="space-between" align="center">
-                          <ThemeIcon size="lg" radius="md" variant="light" color={isConnected ? 'teal' : 'gray'}>
-                            <Icon size={24} />
+                          <ThemeIcon size="lg" radius="md" variant="filled" color="#7553FF" c="white">
+                            <Icon size={22} />
                           </ThemeIcon>
                           <Badge color={isConnected ? 'teal' : 'yellow'} variant="light" size="sm">
                             {isConnected ? 'Connected' : 'Not configured'}
@@ -153,8 +153,8 @@ export function IntegrationsCatalog() {
                   >
                     <Group justify="space-between" w="100%" wrap="nowrap">
                       <Group gap="md" wrap="nowrap">
-                        <ThemeIcon size="lg" radius="md" variant="light" color={isConnected ? 'teal' : 'gray'}>
-                          <Icon size={24} />
+                        <ThemeIcon size="lg" radius="md" variant="filled" color="#7553FF" c="white">
+                          <Icon size={22} />
                         </ThemeIcon>
                         <div>
                           <Group gap="xs" align="center">

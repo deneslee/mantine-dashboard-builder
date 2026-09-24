@@ -32,9 +32,10 @@ export const theme = createTheme({
 
 /** Emits app tokens as CSS variables so CSS modules can read them. */
 export const cssVariablesResolver: CSSVariablesResolver = (t) => {
-  const { shell, zIndex, chrome, surface, motion } = t.other;
+  const { shell, zIndex, chrome, surface, motion, brand } = t.other;
   return {
     variables: {
+      '--app-brand-sentry': brand.sentry,
       '--app-navbar-height': rem(shell.navbarHeight),
       '--app-sidebar-expanded': rem(shell.sidebar.expanded),
       '--app-sidebar-compact': rem(shell.sidebar.compact),

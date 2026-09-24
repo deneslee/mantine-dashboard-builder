@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { getIntegrations } from '../registry';
-import { getSentryStatus } from './client';
+import { getSentryStatus, testSentryConnection } from './client';
+import { loadSentryConfig, saveSentryConfig } from './settings';
 import { logger, metrics } from './telemetry';
 
 describe('Sentry Integration', () => {
@@ -35,5 +36,23 @@ describe('Sentry Integration', () => {
     expect(sentry?.features).toContain('App Metrics');
     expect(sentry?.features).toContain('Session Replay');
     expect(sentry?.features).toContain('Tracing');
+  });
+
+  it('supports saving and loading settings from localStorage', () => {
+    const config = loadSentryConfig();
+    expect(config).toBeDefined();
+    saveSentryConfig({
+      ...config,
+      tracesSampleRate: 0.8,
+    });
+    const updated = loadSentryConfig();
+    expect(updated.tracesSampleRate).toBe(0.8);
+  });
+
+  it('handles connection test without throwing when DSN is empty or invalid', async () => {
+    const result = await testSentryConnection();
+    expect(result).toBeDefined();
+    expect(typeof result.ok).toBe('boolean');
+    expect(typeof result.message).toBe('string');
   });
 });
