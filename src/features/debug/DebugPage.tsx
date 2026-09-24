@@ -2,18 +2,19 @@ import { Anchor, Button, Group, Paper, SimpleGrid, Stack, Switch, Text, Title } 
 import { useMutation } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { useState, type ReactNode } from 'react';
-import { Page } from '@/design-system';
-import { ErrorState, WidgetBoundary } from '@/components/errors';
+import { Page } from '@/design-system/components/Page/Page';
+import { ErrorState } from '@/components/errors/ErrorState';
+import { WidgetBoundary } from '@/components/errors/WidgetBoundary';
 import {
   ChartSkeleton,
   DashboardSkeleton,
   PanelSkeleton,
   TableSkeleton,
   TextSkeleton,
-} from '@/components/feedback';
+} from '@/components/feedback/skeletons/Skeletons';
 import { notify } from '@/lib/notify/notify';
 import { useInbox } from '@/stores/inbox';
-import { AppError } from '@/lib/errors';
+import { AppError } from '@/lib/errors/AppError';
 import { wait } from '@/utils/wait';
 
 /** Visual QA for chrome states. Not linked from the sidebar; open /debug. */

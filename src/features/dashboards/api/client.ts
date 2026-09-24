@@ -1,4 +1,4 @@
-import { AppError } from '@/lib/errors';
+import { AppError } from '@/lib/errors/AppError';
 import { dashboardListDto } from './dto';
 import { toDashboardSummary } from './mapper';
 import type { DashboardSummary } from '../model/types';

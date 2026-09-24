@@ -1,9 +1,11 @@
 import type { QueryClient } from '@tanstack/react-query';
 import { Outlet, createRootRouteWithContext } from '@tanstack/react-router';
-import { NotFound, OfflineBanner } from '@/components/errors';
-import { RouteProgress } from '@/components/feedback';
-import { notificationsTab } from '@/features/notifications';
-import { Shell, ShellProvider } from '@/components/layouts/shell';
+import { NotFound } from '@/components/errors/NotFound';
+import { OfflineBanner } from '@/components/errors/OfflineBanner';
+import { RouteProgress } from '@/components/feedback/RouteProgress';
+import { notificationsTab } from '@/features/notifications/tab';
+import { Shell } from '@/components/layouts/shell/Shell';
+import { ShellProvider } from '@/components/layouts/shell/ShellProvider';
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   component: Root,

@@ -23,7 +23,7 @@ import {
 } from '@tabler/icons-react';
 import { Link } from '@tanstack/react-router';
 import { useState } from 'react';
-import { Page } from '@/design-system';
+import { Page } from '@/design-system/components/Page/Page';
 import { getSentryStatus } from '@/lib/sentry/client';
 import { SentryIcon } from './sentry/SentryIcon';
 import { SentrySettings } from './sentry/SentrySettings';

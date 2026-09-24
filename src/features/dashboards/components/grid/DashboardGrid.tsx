@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { ResponsiveGridLayout, useContainerWidth } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
-import { tokens } from '@/design-system';
+import { tokens } from '@/design-system/tokens/tokens';
 import { toLayouts } from '../../model/layouts';
 import type { DashboardWidget } from '../../model/types';
 import { WidgetTile } from './WidgetTile';

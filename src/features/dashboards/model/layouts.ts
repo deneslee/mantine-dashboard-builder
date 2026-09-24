@@ -1,4 +1,4 @@
-import { tokens } from '@/design-system';
+import { tokens } from '@/design-system/tokens/tokens';
 import type { DashboardWidget } from './types';
 
 const { cols } = tokens.grid;

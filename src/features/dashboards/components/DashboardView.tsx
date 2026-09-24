@@ -3,7 +3,7 @@ import { IconRefresh } from '@tabler/icons-react';
 import { useIsFetching, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { useMemo } from 'react';
-import { Page } from '@/design-system';
+import { Page } from '@/design-system/components/Page/Page';
 import { notify } from '@/lib/notify/notify';
 import { demoWidgets } from '../api/demo';
 import { dashboardQuery } from '../api/queries';

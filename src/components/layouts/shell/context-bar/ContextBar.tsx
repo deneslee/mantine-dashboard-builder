@@ -1,7 +1,7 @@
 import { ActionIcon, Badge, Group, Tabs, Tooltip } from '@mantine/core';
 import { IconX } from '@tabler/icons-react';
 import { Suspense, useEffect } from 'react';
-import { PanelSkeleton } from '@/components/feedback';
+import { PanelSkeleton } from '@/components/feedback/skeletons/Skeletons';
 import { useBadgeCount } from '../hooks/useBadgeCount';
 import { useContextTabs } from '../hooks/useContextTabs';
 import { useContextBar, useShellActions, useSidebar } from '../hooks/useShell';

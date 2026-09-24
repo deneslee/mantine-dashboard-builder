@@ -1,7 +1,7 @@
 import { Button, Paper, SimpleGrid } from '@mantine/core';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { IconRefresh } from '@tabler/icons-react';
-import { AppError } from '@/lib/errors';
+import { AppError } from '@/lib/errors/AppError';
 import { ErrorState } from './ErrorState';
 
 const meta = { title: 'Errors/ErrorState' } satisfies Meta;

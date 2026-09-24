@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { parseSettingsTab, SettingsPage, type SettingsTab } from '@/features/settings';
+import { parseSettingsTab, type SettingsTab } from '@/features/settings/model/tabs';
+import { SettingsPage } from '@/features/settings/components/SettingsPage';
 
 export const Route = createFileRoute('/settings')({
   validateSearch: (search: Record<string, unknown>): { tab?: SettingsTab } => ({

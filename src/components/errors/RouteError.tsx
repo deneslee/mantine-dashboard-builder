@@ -3,7 +3,7 @@ import { IconRefresh } from '@tabler/icons-react';
 import { useQueryErrorResetBoundary } from '@tanstack/react-query';
 import { useRouter, type ErrorComponentProps } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-import { errorTitles, toAppError } from '@/lib/errors';
+import { errorTitles, toAppError } from '@/lib/errors/AppError';
 import { ErrorState } from './ErrorState';
 
 /** Route `errorComponent`: loader or render failure inside the content area; chrome keeps working. */

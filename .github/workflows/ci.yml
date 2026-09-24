@@ -44,3 +44,6 @@ jobs:
 
       - name: Test
         run: pnpm test
+
+      - name: Storybook
+        run: pnpm build-storybook --quiet

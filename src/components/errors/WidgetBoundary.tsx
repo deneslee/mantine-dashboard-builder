@@ -3,7 +3,7 @@ import { IconRefresh } from '@tabler/icons-react';
 import { QueryErrorResetBoundary } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import { errorTitles, toAppError } from '@/lib/errors';
+import { errorTitles, toAppError } from '@/lib/errors/AppError';
 import { ErrorState } from './ErrorState';
 
 /**

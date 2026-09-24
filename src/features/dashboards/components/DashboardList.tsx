@@ -4,7 +4,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { Page } from '@/design-system';
+import { Page } from '@/design-system/components/Page/Page';
 import { dashboardsQuery } from '../api/queries';
 import classes from './DashboardList.module.css';
 

@@ -1,7 +1,7 @@
 import { RouterProvider } from '@tanstack/react-router';
 import { useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import { AppCrash } from '@/components/errors';
+import { AppCrash } from '@/components/errors/AppCrash';
 import { reportError } from '@/lib/sentry/runtime';
 import { Providers } from './Providers';
 import { createQueryClient } from './queryClient';

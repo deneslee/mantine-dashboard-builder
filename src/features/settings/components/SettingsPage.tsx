@@ -1,7 +1,7 @@
 import { EmptyState, Tabs } from '@mantine/core';
 import { IconAdjustments } from '@tabler/icons-react';
 import { Link } from '@tanstack/react-router';
-import { Page } from '@/design-system';
+import { Page } from '@/design-system/components/Page/Page';
 import { settingsTabs, type SettingsTab } from '../model/tabs';
 import { AppearanceSettings } from './AppearanceSettings';
 

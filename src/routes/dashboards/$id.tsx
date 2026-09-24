@@ -1,7 +1,9 @@
 import { createFileRoute, notFound } from '@tanstack/react-router';
-import { DashboardView, dashboardQuery, dashboardTabs } from '@/features/dashboards';
-import { DashboardSkeleton } from '@/components/feedback';
-import { isAppError } from '@/lib/errors';
+import { DashboardView } from '@/features/dashboards/components/DashboardView';
+import { dashboardQuery } from '@/features/dashboards/api/queries';
+import { dashboardTabs } from '@/features/dashboards/tabs';
+import { DashboardSkeleton } from '@/components/feedback/skeletons/Skeletons';
+import { isAppError } from '@/lib/errors/AppError';
 
 export const Route = createFileRoute('/dashboards/$id')({
   staticData: { contextTabs: dashboardTabs },

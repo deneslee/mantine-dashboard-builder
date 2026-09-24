@@ -21,7 +21,7 @@ import {
 } from '@tabler/icons-react';
 import { Link } from '@tanstack/react-router';
 import { useState } from 'react';
-import { Page } from '@/design-system';
+import { Page } from '@/design-system/components/Page/Page';
 import { getIntegrations } from '../registry';
 import classes from './IntegrationsCatalog.module.css';
 

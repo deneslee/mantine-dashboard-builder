@@ -1,7 +1,7 @@
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@/testing/render';
-import { AppError } from '@/lib/errors';
+import { AppError } from '@/lib/errors/AppError';
 import { WidgetBoundary } from './WidgetBoundary';
 
 let shouldThrow = true;

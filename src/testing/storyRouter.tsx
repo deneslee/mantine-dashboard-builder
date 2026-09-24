@@ -8,7 +8,7 @@ import {
   Outlet,
 } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
-import type { ContextTab } from '@/components/layouts/shell';
+import type { ContextTab } from '@/components/layouts/shell/model/contextTabs';
 
 /**
  * Minimal router for stories: a root that renders `wrap(<Outlet />)` and a catch-all page.

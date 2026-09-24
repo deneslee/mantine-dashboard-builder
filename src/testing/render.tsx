@@ -1,7 +1,7 @@
 import { MantineProvider } from '@mantine/core';
 import { render as rtlRender, type RenderOptions } from '@testing-library/react';
 import type { ReactElement, ReactNode } from 'react';
-import { cssVariablesResolver, theme } from '@/design-system';
+import { cssVariablesResolver, theme } from '@/design-system/theme/theme';
 
 /** Render inside the app theme. Router/query wrappers are added per test where needed. */
 export function render(ui: ReactElement, options?: RenderOptions) {

@@ -75,13 +75,15 @@ export default defineConfig({
     // Design system rule: no inline styles outside design-system/. Use CSS modules or Mantine style props.
     'app/no-inline-style': 'error',
 
+    // No barrel files (bulletproof-react: they defeat tree-shaking); import the file that defines a name.
     'no-restricted-imports': [
       'error',
       {
         patterns: [
           {
-            group: ['@/features/*/*', '!@/features/*/index'],
-            message: 'Import other features through their index.ts.',
+            group: ['@/features/*', '@/components/*', '@/design-system', '@/lib/errors'],
+            message:
+              'No barrel files: import the file that defines the name, e.g. @/components/errors/ErrorState.',
           },
         ],
       },

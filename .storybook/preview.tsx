@@ -3,7 +3,7 @@ import { MantineProvider, useMantineColorScheme } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import type { Preview } from '@storybook/react-vite';
 import { useEffect, type ReactNode } from 'react';
-import { cssVariablesResolver, theme } from '../src/design-system';
+import { cssVariablesResolver, theme } from '../src/design-system/theme/theme';
 
 function SchemeSync({ scheme, children }: { scheme: 'light' | 'dark'; children: ReactNode }) {
   const { setColorScheme } = useMantineColorScheme();

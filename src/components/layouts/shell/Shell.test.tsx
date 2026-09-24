@@ -1,7 +1,7 @@
 import { createMemoryHistory, createRootRoute, createRouter, RouterProvider } from '@tanstack/react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@/testing/render';
-import { tokens } from '@/design-system';
+import { tokens } from '@/design-system/tokens/tokens';
 import { Shell } from './Shell';
 import { ShellProvider } from './ShellProvider';
 import { createShellStore, type ShellInit } from './store';

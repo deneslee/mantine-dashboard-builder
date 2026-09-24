@@ -1,7 +1,7 @@
 import { Menu, NavLink, Stack, Text, Tooltip } from '@mantine/core';
 import { Link, useRouterState } from '@tanstack/react-router';
 import { useId, useState } from 'react';
-import { tokens } from '@/design-system';
+import { tokens } from '@/design-system/tokens/tokens';
 import { useShellActions, useSidebar } from '../hooks/useShell';
 import type { NavGroup, NavItem } from '../model/nav';
 import classes from './Sidebar.module.css';
