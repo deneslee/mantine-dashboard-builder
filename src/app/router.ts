@@ -3,7 +3,7 @@ import { NotFound } from '@/components/errors/NotFound';
 import { RouteError } from '@/components/errors/RouteError';
 import { ListSkeleton } from '@/components/feedback/skeletons/Skeletons';
 import { connectRouter } from '@/lib/sentry/runtime';
-import { routeTree } from '@/routeTree.gen';
+import { routeTree } from './routeTree.gen';
 import type { QueryClient } from '@tanstack/react-query';
 
 export function createAppRouter(queryClient: QueryClient) {

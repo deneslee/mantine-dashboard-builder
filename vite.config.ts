@@ -9,7 +9,12 @@ const uploadSourcemaps = Boolean(process.env.SENTRY_AUTH_TOKEN);
 export default defineConfig({
   base: '/mantine-dashboard-builder/',
   plugins: [
-    tanstackRouter({ target: 'react', autoCodeSplitting: true, routesDirectory: 'src/routes' }),
+    tanstackRouter({
+      target: 'react',
+      autoCodeSplitting: true,
+      routesDirectory: 'src/app/routes',
+      generatedRouteTree: 'src/app/routeTree.gen.ts',
+    }),
     react(),
     // React Compiler 1.0 (stable, through Babel): automatic memoization. See docs/grid-and-charts.md.
     babel({ presets: [reactCompilerPreset()] }),

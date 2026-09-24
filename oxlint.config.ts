@@ -29,7 +29,7 @@ export default defineConfig({
   jsPlugins: ['./lint/plugin.js'],
   categories: { correctness: 'error' },
   env: { browser: true },
-  ignorePatterns: ['dist', 'storybook-static', 'src/routeTree.gen.ts'],
+  ignorePatterns: ['dist', 'storybook-static', 'src/app/routeTree.gen.ts'],
   rules: {
     'import/no-cycle': 'warn',
     // typescript-eslint recommended
@@ -101,7 +101,7 @@ export default defineConfig({
       rules: { 'app/no-inline-style': 'off', 'react/only-export-components': 'off' },
     },
     {
-      files: ['src/routes/**/*.tsx'],
+      files: ['src/app/routes/**/*.tsx'],
       rules: { 'react/only-export-components': 'off' },
     },
     {
