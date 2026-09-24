@@ -4,7 +4,7 @@ Sep 24, 2026 · v1.2.0 · Tasks: [task-r05-03.md](./tasks/task-r05-03.md) · Res
 
 **v1.2 changes:** the table widget uses TanStack Table v9 (headless, only the features it uses) for table logic, rendered with Mantine `Table` and virtualized with `@tanstack/react-virtual`. The dashboard list paginates with Mantine `Pagination`.
 
-**Order:** 5 of 5 · **Depends on:** Plan 04 (`Page.ControlBar`), Plan 03 (surface and layer tokens for widgets), Plan 02 (layer rules: the app layer fills the registries) · **Blocks:** phase 3 (editing)
+**Order:** 5 of 6 · **Depends on:** Plan 04 (`Page.ControlBar`), Plan 03 (surface and layer tokens for widgets), Plan 02 (layer rules: the app layer fills the registries) · **Blocks:** phase 3 (editing)
 
 **v1.1 changes:**
 

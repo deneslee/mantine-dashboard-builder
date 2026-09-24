@@ -2,7 +2,7 @@
 
 Sep 24, 2026 · v1.1.0 · Tasks: [task-r01-02.md](./tasks/task-r01-02.md)
 
-**Order:** 1 of 5 (01 → 02 → 03 → 04 → 05) · **Depends on:** nothing · **Blocks:** nothing hard; Plan 02 removes the feature barrels and finishes the bundle fix for good.
+**Order:** 1 of 6 (01 → 02 → 03 → 04 → 05 → 06) · **Depends on:** nothing · **Blocks:** nothing hard; Plan 02 removes the feature barrels and finishes the bundle fix for good.
 
 **v1.1 changes:** the bundle fix now targets the actual cause (the barrel file plus a CSS side effect), not `React.lazy`. The bundle goal is restated so it can be measured. `<Activity>` is described as React actually documents it. Window-resize edge cases are covered. The reduced-motion hook is renamed so it doesn't clash with Mantine's. Items dropped from the archived task list are restored. Every task now has a done-condition.
 

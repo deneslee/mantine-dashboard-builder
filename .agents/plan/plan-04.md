@@ -2,7 +2,7 @@
 
 Sep 24, 2026 · v1.1.0 · Tasks: [task-r04-02.md](./tasks/task-r04-02.md) · Research: [research-page-header-composition.md](./research/research-page-header-composition.md)
 
-**Order:** 4 of 5 · **Depends on:** Plan 03 (spacing, surface and radius tokens), Plan 02 (final file locations, no barrels) · **Blocks:** Plan 05 (`TimeRangePicker` sits in `Page.ControlBar`)
+**Order:** 4 of 6 · **Depends on:** Plan 03 (spacing, surface and radius tokens), Plan 02 (final file locations, no barrels) · **Blocks:** Plan 05 (`TimeRangePicker` sits in `Page.ControlBar`)
 
 **v1.1 changes:**
 

@@ -1,6 +1,6 @@
 # Research: Sentry Integration (Errors, Logs, App Metrics, Session Replay, Tracing)
 
-Reference: [plan-04.md](../plan/plan-04.md)
+Reference: [plan-06.md](../plan-06.md) (written for the prototype, archived as `archive/plan-sentry-prototype.md`)
 Date: Sep 24, 2026
 
 ## Objective

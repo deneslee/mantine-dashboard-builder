@@ -1,18 +1,19 @@
 # Tasks: Design Tokens (one source of truth, Mantine-native)
 
-Sep 24, 2026 · v1.1.0 · Reference: [plan-03.md](../plan-03.md)
+Sep 24, 2026 · v1.2.0 · Reference: [plan-03.md](../plan-03.md)
 
 - [ ] **Spike: chrome theme zone.** Re-assign the semantic tokens under `[data-app-zone='chrome']`, and check every Mantine component in the navbar and sidebar in both schemes ([plan-03 §4](../plan-03.md#4-the-always-dark-chrome-a-theme-zone-spike-first)). Done when the result and the chosen approach are written down.
 - [ ] **Spike: tooling compatibility.** Check that `stylelint-declaration-strict-value` works with Stylelint 17, and whether Mantine 9.6 `fw` accepts `fontWeights` keys. Done when both are answered in the research file.
 - [ ] **Primitives.** Create `tokens/primitives.ts` with explicit palette tuples, alpha steps and every scale, keeping the current spacing scale plus `2xs=4`/`3xs=2` through `MantineThemeSizesOverride`; this is the only file with raw values. Done when `createTheme` reads colors, spacing, radius, fontSizes, fontWeights and shadows from it, and the UI looks the same.
 - [ ] **Semantic tokens and generated resolver.** Create `tokens/semantic.ts` (elevation, color text/border, shape, motion, z, layer, chart, `iconSize`/`iconStroke`) with light and dark values, plus `toCssVars()`, and replace the hand-written resolver list. Done when a unit test checks that every semantic key produces a `--app-*` variable.
+- [ ] **Move `brand.sentry` to the primitives.** It's a third-party logo color, not a role; only the Sentry icon uses it. Done when `tokens.brand` is gone and the icon looks the same.
 - [ ] **Semantic color aliases.** `virtualColor` aliases `brand`, `neutral`, `danger`, `warning`, `success` and `info`. Done when `color="danger"` renders the same as `red` in both schemes.
 - [ ] **Split the component tier.** Move `components.ts` into `theme/components/<Name>.ts`, with radius from `shape.*` for Button, ActionIcon, Input, Select, Paper, Card, Alert, Notification, Modal and Menu. Done when changing `shape.control` restyles every control in Storybook.
 - [ ] **Overlay surfaces.** Menu, Popover, Modal, Drawer, Tooltip and Spotlight use `elevation.surface.overlay` and `shadow.overlay` through `theme.components`. Done when stories in both schemes show them correctly.
 - [ ] **Layer CSS.** `theme/layers.css` with `data-layer` depth rules; Paper `panel` and `widget` set `data-layer` and use `--app-layer`. Done when a nested-layer story shows 3 distinct steps in both schemes.
 - [ ] **Replace custom code with Mantine ([plan-03 §8](../plan-03.md#8-custom-code-that-mantine-already-covers)).** `.srOnly` → `VisuallyHidden`; `SlowHint` and `Inbox` timers → `useTimeout`; `Panel` class joins → `clsx`; `Tooltip.Group` around the navbar actions and compact sidebar. Done when the tests pass and `grep -rn "setTimeout" src --include=*.tsx` shows only intended uses.
 - [ ] **Rebuild `ErrorState.Full` / `.Inline` on `EmptyState`.** Same public API, `color="danger"`, `role="alert"`, the 404 code display and the details panel kept; delete the layout CSS it no longer needs. Done when the ErrorState stories look the same (or intentionally better) and `WidgetBoundary.test.tsx` passes.
-- [ ] **Add the lint rules as warnings.** Stylelint rules for rgb/palette/strict values, oxlint `app/no-raw-style-props`, and the `primitives.ts` import boundary. Done when `pnpm lint` lists every violation as a warning.
+- [ ] **Add the lint rules as warnings.** Stylelint rules for rgb/palette/strict values, oxlint `app/no-raw-style-props`, and the `primitives.ts` import boundary, with `features/integrations/**` excluded until Plan 06. Done when `pnpm lint` lists every violation as a warning.
 - [ ] **Migrate the CSS modules.** Replace the 7 rgba literals and `chrome.*` uses with semantic tokens (or the zone). Done when Stylelint shows no token warnings.
 - [ ] **Migrate the TSX props.** About 30 files: icon sizes and strokes → `iconSize` / `iconStroke`; spacing → keys (`2xs`/`3xs` for 4/2); `fw` → keys; chart heights → token; palette colors → aliases. Done when oxlint shows no `no-raw-style-props` warnings and the visual check passes.
 - [ ] **Switch the rules to error and add fixtures.** Add one violating fixture per rule, which CI expects to fail. Done when the rules are on error in CI.

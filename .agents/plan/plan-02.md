@@ -1,10 +1,12 @@
 # Plan 02: Project Structure (bulletproof-react, lightly adapted)
 
-Sep 24, 2026 · v1.1.0 · Tasks: [task-r02-02.md](./tasks/task-r02-02.md) · Research: [research-r02-project-structure.md](./research/research-r02-project-structure.md)
+Sep 24, 2026 · v1.2.0 · Tasks: [task-r02-03.md](./tasks/task-r02-03.md) · Research: [research-r02-project-structure.md](./research/research-r02-project-structure.md)
+
+**v1.2 changes:** the merged Sentry prototype (`src/integrations/`) gets a place: its SDK code goes to `lib/sentry/`, its UI to `features/integrations/` (new migration step 5). `useMotion` (Plan 01) moves from `shared/hooks/` to `hooks/`.
 
 **v1.1 changes:** decisions settled: the shell goes to `components/shell/`, routes go to `app/routes/`, and there's no dependency-cruiser. Rules are enforced with oxlint only, adding `import/no-cycle` for cycles. The duplicated `wait()` helper moves to `utils/`.
 
-**Order:** 2 of 5 · **Depends on:** Plan 01's bundle task (or absorbs it) · **Blocks:** Plan 03, Plan 04, Plan 05 (new code should land in its final place)
+**Order:** 2 of 6 · **Depends on:** Plan 01's bundle task (or absorbs it) · **Blocks:** Plan 03, Plan 04, Plan 05 (new code should land in its final place)
 
 ## Objective
 
@@ -32,14 +34,18 @@ src/
     settings/    components/  hooks/  model/
     notifications/ components/Inbox.tsx  tab.ts           (inbox UI only)
     debug/
+    integrations/  components/ (catalog, Sentry page, settings, verification)  registry.ts
+                             Sentry prototype UI, for show only; rebuilt or dropped in Plan 06
     (later) widgets/  datasources/
 
   components/                SHARED LAYER: shared UI; imports only shared + design-system
     errors/                  ErrorState, WidgetBoundary, NotFound, RouteError, AppCrash, OfflineBanner (from features/errors)
     feedback/                Skeletons, SlowHint, RouteProgress (from features/loading)
     shell/                   Shell, navbar, sidebar, context-bar, panel + its store/hooks/model (from features/shell)
-  hooks/                     useDelayedPending, useMotion (Plan 01)
+  hooks/                     useDelayedPending, useMotion (Plan 01, now in shared/hooks)
   lib/                       notify.tsx (from notifications), errors/AppError (from shared/errors), user.tsx (from shared/user)
+    sentry/                  runtime.ts (startSentry, connectRouter, reportError) + client, router, telemetry, settings, types
+                             (from src/integrations/sentry; the app uses only runtime.ts, which loads the SDK lazily)
   stores/                    inbox.ts (from notifications/store: notify writes to it, so it's shared)
   config/                    config.ts (from shared/config.ts)
   types/                     ContextTab, DataFrame, WidgetDefinition, DatasourceDefinition, … (as needed)
@@ -90,15 +96,17 @@ src/
    - `shared/config.ts` → `config/`
    - `shared/errors` → `lib/errors`
    - `shared/user` → `lib/user.tsx`
+   - `shared/hooks/useMotion.ts` (+ test) → `hooks/`
    - `src/test` → `src/testing` (update `vitest.config.ts`)
    - `wait(ms)` (duplicated in `DebugPage.tsx` and `useAppearanceForm.ts`) → `utils/wait.ts`
-   - delete the empty `shared/hooks|types|utils` folders
+   - delete the then-empty `shared/` folders
 3. **Notifications split:** `notify` → `lib/notify.tsx`, store → `stores/inbox.ts`, UI stays in the feature.
 4. **Shell:** fix the cycle (inversion 1), then move `features/shell` → `components/shell`.
-5. **Remove barrels:** delete `features/*/index.ts` and `design-system/index.ts` and rewrite imports as direct paths (a codemod or `qartez_move`/`qartez_rename_file` keep references updated). Fixes the root cause behind Plan 01's bundle problem.
-6. **Routes:** `src/routes` → `src/app/routes`. Update `routesDirectory` and `generatedRouteTree` in `vite.config.ts` and the oxlint override globs, then regenerate `routeTree.gen.ts`.
-7. **Turn enforcement on:** switch the oxlint direction rules and `import/no-cycle` to **error**. The baseline must be empty.
-8. **Docs:** rewrite AGENTS.md › Structure (tree, import direction, changes from bulletproof, no barrels), and fix path references in `docs/*.md` and the other plans.
+5. **Sentry prototype:** `src/integrations/sentry/*` minus its UI → `lib/sentry/`; the catalog, Sentry page and `sentry/components/` → `features/integrations/components/`; `registry.ts` and `types.ts` → `features/integrations/`. Delete `src/integrations/index.ts` and `sentry/index.ts` (barrels). `App.tsx`, `router.ts` and `main.tsx` import `@/lib/sentry/runtime`; the routes import the page components directly. Behaviour and UI stay exactly as they are; Plan 06 decides what to keep.
+6. **Remove barrels:** delete `features/*/index.ts` and `design-system/index.ts` and rewrite imports as direct paths (a codemod or `qartez_move`/`qartez_rename_file` keep references updated). Fixes the root cause behind Plan 01's bundle problem.
+7. **Routes:** `src/routes` → `src/app/routes`. Update `routesDirectory` and `generatedRouteTree` in `vite.config.ts` and the oxlint override globs, then regenerate `routeTree.gen.ts`.
+8. **Turn enforcement on:** switch the oxlint direction rules and `import/no-cycle` to **error**. The baseline must be empty.
+9. **Docs:** rewrite AGENTS.md › Structure (tree, import direction, changes from bulletproof, no barrels), and fix path references in `docs/*.md` and the other plans.
 
 ## Decisions (settled Sep 24, 2026)
 
@@ -113,8 +121,8 @@ New features, renaming components, changing behaviour, and Feature-Sliced Design
 ## Risks
 
 - **Large diff across many files.** Mitigation: moves without edits in their own commits, qartez or codemod-driven reference updates, and a green build after every step.
-- **The TanStack route move breaks the generated route tree.** Mitigation: step 6 is on its own, with the dev server and a build checked right after.
-- **Plans 03–05 refer to old paths.** Mitigation: step 8 updates them. Plans 03, 04 and 05 run after this one.
+- **The TanStack route move breaks the generated route tree.** Mitigation: step 7 is on its own, with the dev server and a build checked right after.
+- **Plans 03–06 refer to old paths.** Mitigation: step 9 updates them. Plans 03–06 run after this one.
 
 ## Verification
 
@@ -122,4 +130,5 @@ New features, renaming components, changing behaviour, and Feature-Sliced Design
 - Final:
   - `pnpm lint` passes with the direction rules and `import/no-cycle` on error, and a fixture with a cross-feature import fails
   - `find src/features -name index.ts` returns nothing
+  - no `src/integrations/` remains, and the first load still contains no Sentry code (`startSentry` imports it lazily)
   - the entry chunk contains no `react-draggable`, confirming Plan 01's bundle fix still holds without `sideEffects` doing the work

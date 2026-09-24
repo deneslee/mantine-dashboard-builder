@@ -1,10 +1,12 @@
 # Plan 03: Design Tokens (one source of truth, Mantine-native)
 
-Sep 24, 2026 · v1.1.0 · Tasks: [task-r03-02.md](./tasks/task-r03-02.md) · Research: [research-r03-design-tokens.md](./research/research-r03-design-tokens.md)
+Sep 24, 2026 · v1.2.0 · Tasks: [task-r03-03.md](./tasks/task-r03-03.md) · Research: [research-r03-design-tokens.md](./research/research-r03-design-tokens.md)
 
 **v1.1 changes:** the open decisions are settled (see Decisions). New §8 lists custom code that Mantine 9.6.2 already covers, checked against the installed package's exports.
 
-**Order:** 3 of 5 · **Depends on:** Plan 02 (files already in their final places) · **Blocks:** Plan 04 (Page uses spacing and surface tokens), Plan 05 (widgets use the layer tokens)
+**v1.2 changes:** the Sentry prototype UI (`features/integrations/**` after Plan 02) is exempt from the new lint rules until Plan 06 rebuilds it. Third-party brand colors (`brand.sentry`, added by the prototype) belong in the primitives tier.
+
+**Order:** 3 of 6 · **Depends on:** Plan 02 (files already in their final places) · **Blocks:** Plan 04 (Page uses spacing and surface tokens), Plan 05 (widgets use the layer tokens)
 
 ## Objective
 
@@ -111,6 +113,7 @@ Button.extend({
   - palette names in `c` / `color` / `bg` (allowed: `dimmed`, `bright`, and the semantic aliases)
   - numeric `size` / `stroke` on `Icon*` elements
   - Exempt: `design-system/**`, stories and tests.
+  - Exempt **for now**: `features/integrations/**`, the Sentry prototype UI, which is for show and gets rebuilt or dropped in Plan 06. Spending migration time on it would be wasted. Plan 06 removes the exemption.
 - **Import boundary:** only `design-system/theme/**` may import `tokens/primitives.ts`.
 - **Rollout:** start the rules as **warn**, migrate, then switch them to **error** in the same PR that finishes the migration.
 
@@ -137,6 +140,8 @@ Button.extend({
 - **CSS:** 7 rgba literals in 3 modules.
 - **tokens.ts:** 12 `chrome.*` tokens.
 - **Resolver:** the hand-written list in `theme.ts`.
+- **Third-party brand colors:** `tokens.brand.sentry` (`--app-brand-sentry`) from the Sentry prototype. A raw brand value is a primitive; it moves to `primitives.ts` as `brand.sentry` and is only used for that logo. There is no semantic role for it.
+- **Not migrated:** `features/integrations/**` (exempt, see §5).
 
 ### 8. Custom code that Mantine already covers
 
