@@ -1,0 +1,174 @@
+{
+  "pbtResults": {
+    "2.2 **[Automated property test] Verify monotonic first-mount state**": {
+      "status": "passed",
+      "lastRunTimestamp": 1790248646235
+    },
+    "3.3 **[Automated property test] Verify the scripting-improvement calculation**": {
+      "status": "passed",
+      "lastRunTimestamp": 1790248651167
+    },
+    "3.4 **[Automated property test] Verify the exhaustive Activity decision rule**": {
+      "status": "passed",
+      "lastRunTimestamp": 1790248654056
+    },
+    "5.3 **[Automated property test] Verify that Drawer retention requires both directions**": {
+      "status": "passed",
+      "lastRunTimestamp": 1790248657101
+    },
+    "6.3 **[Automated property test] Verify resize-entry counting and non-gating behavior**": {
+      "status": "passed",
+      "lastRunTimestamp": 1790248662761
+    }
+  },
+  "executionHistory": {
+    "1.1 **[Manual/browser measurement] Capture the baseline width-change trace before editing Activity code**": [
+      {
+        "executionId": "da7a4eff-c02e-492e-bd9d-b7c59529c085",
+        "chatSessionId": "sess_cffb51c1-3869-4588-bbdc-e637fe93a283",
+        "timestamp": 1790243077289
+      },
+      {
+        "executionId": "da7a4eff-c02e-492e-bd9d-b7c59529c085",
+        "chatSessionId": "sess_cffb51c1-3869-4588-bbdc-e637fe93a283",
+        "timestamp": 1790243084163
+      },
+      {
+        "executionId": "da7a4eff-c02e-492e-bd9d-b7c59529c085",
+        "chatSessionId": "sess_cffb51c1-3869-4588-bbdc-e637fe93a283",
+        "timestamp": 1790243594758
+      },
+      {
+        "executionId": "57c83126-95dd-406b-9665-49b62f22f54b",
+        "chatSessionId": "sess_be976d7f-8d7a-4aae-aac3-53b54bafc1e4",
+        "timestamp": 1790248859845
+      }
+    ],
+    "2.1 **[Code] Add the isolated far-tile Activity prototype**": [
+      {
+        "executionId": "da7a4eff-c02e-492e-bd9d-b7c59529c085",
+        "chatSessionId": "sess_cffb51c1-3869-4588-bbdc-e637fe93a283",
+        "timestamp": 1790243077416
+      }
+    ],
+    "2.2 **[Automated property test] Verify monotonic first-mount state**": [
+      {
+        "executionId": "da7a4eff-c02e-492e-bd9d-b7c59529c085",
+        "chatSessionId": "sess_cffb51c1-3869-4588-bbdc-e637fe93a283",
+        "timestamp": 1790243077522
+      }
+    ],
+    "2.3 **[Automated component tests] Cover Activity observer and rendering behavior**": [
+      {
+        "executionId": "da7a4eff-c02e-492e-bd9d-b7c59529c085",
+        "chatSessionId": "sess_cffb51c1-3869-4588-bbdc-e637fe93a283",
+        "timestamp": 1790243077617
+      }
+    ],
+    "3.1 **[Code validation] Validate and build the prototype before browser capture**": [
+      {
+        "executionId": "da7a4eff-c02e-492e-bd9d-b7c59529c085",
+        "chatSessionId": "sess_cffb51c1-3869-4588-bbdc-e637fe93a283",
+        "timestamp": 1790243077696
+      }
+    ],
+    "3.2 **[Manual/browser measurement] Capture equivalent prototype width-change and scrolling traces**": [
+      {
+        "executionId": "da7a4eff-c02e-492e-bd9d-b7c59529c085",
+        "chatSessionId": "sess_cffb51c1-3869-4588-bbdc-e637fe93a283",
+        "timestamp": 1790243077777
+      }
+    ],
+    "3.3 **[Automated property test] Verify the scripting-improvement calculation**": [
+      {
+        "executionId": "da7a4eff-c02e-492e-bd9d-b7c59529c085",
+        "chatSessionId": "sess_cffb51c1-3869-4588-bbdc-e637fe93a283",
+        "timestamp": 1790243077868
+      }
+    ],
+    "3.4 **[Automated property test] Verify the exhaustive Activity decision rule**": [
+      {
+        "executionId": "da7a4eff-c02e-492e-bd9d-b7c59529c085",
+        "chatSessionId": "sess_cffb51c1-3869-4588-bbdc-e637fe93a283",
+        "timestamp": 1790243077957
+      }
+    ],
+    "4.1 **[Code + measurement decision] Calculate the result and establish the final Activity source state**": [
+      {
+        "executionId": "da7a4eff-c02e-492e-bd9d-b7c59529c085",
+        "chatSessionId": "sess_cffb51c1-3869-4588-bbdc-e637fe93a283",
+        "timestamp": 1790243078035
+      }
+    ],
+    "5.1 **[Manual/browser measurement] Capture unchanged Drawer open and close traces**": [
+      {
+        "executionId": "da7a4eff-c02e-492e-bd9d-b7c59529c085",
+        "chatSessionId": "sess_cffb51c1-3869-4588-bbdc-e637fe93a283",
+        "timestamp": 1790243078112
+      }
+    ],
+    "5.2 **[Conditional code + manual retest] Correct only failed Drawer directions**": [
+      {
+        "executionId": "da7a4eff-c02e-492e-bd9d-b7c59529c085",
+        "chatSessionId": "sess_cffb51c1-3869-4588-bbdc-e637fe93a283",
+        "timestamp": 1790243078202
+      }
+    ],
+    "5.3 **[Automated property test] Verify that Drawer retention requires both directions**": [
+      {
+        "executionId": "da7a4eff-c02e-492e-bd9d-b7c59529c085",
+        "chatSessionId": "sess_cffb51c1-3869-4588-bbdc-e637fe93a283",
+        "timestamp": 1790243078287
+      }
+    ],
+    "6.1 **[Manual/browser measurement] Capture the complete panel-slide animation trace**": [
+      {
+        "executionId": "da7a4eff-c02e-492e-bd9d-b7c59529c085",
+        "chatSessionId": "sess_cffb51c1-3869-4588-bbdc-e637fe93a283",
+        "timestamp": 1790243078369
+      }
+    ],
+    "6.2 **[Manual/browser measurement] Capture and count breakpoint-crossing chart resizes**": [
+      {
+        "executionId": "da7a4eff-c02e-492e-bd9d-b7c59529c085",
+        "chatSessionId": "sess_cffb51c1-3869-4588-bbdc-e637fe93a283",
+        "timestamp": 1790243078460
+      }
+    ],
+    "6.3 **[Automated property test] Verify resize-entry counting and non-gating behavior**": [
+      {
+        "executionId": "da7a4eff-c02e-492e-bd9d-b7c59529c085",
+        "chatSessionId": "sess_cffb51c1-3869-4588-bbdc-e637fe93a283",
+        "timestamp": 1790243078546
+      }
+    ],
+    "7.1 **[Documentation code change] Update the measured performance and motion records**": [
+      {
+        "executionId": "da7a4eff-c02e-492e-bd9d-b7c59529c085",
+        "chatSessionId": "sess_cffb51c1-3869-4588-bbdc-e637fe93a283",
+        "timestamp": 1790243078627
+      }
+    ],
+    "7.2 **[Planning-file code change] Mark only Plan 01 tasks whose done conditions are proven**": [
+      {
+        "executionId": "da7a4eff-c02e-492e-bd9d-b7c59529c085",
+        "chatSessionId": "sess_cffb51c1-3869-4588-bbdc-e637fe93a283",
+        "timestamp": 1790243078701
+      }
+    ],
+    "8.1 **[Automated validation] Run targeted and full checks against the retained or restored implementation**": [
+      {
+        "executionId": "da7a4eff-c02e-492e-bd9d-b7c59529c085",
+        "chatSessionId": "sess_cffb51c1-3869-4588-bbdc-e637fe93a283",
+        "timestamp": 1790243078779
+      }
+    ],
+    "9. Final checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "da7a4eff-c02e-492e-bd9d-b7c59529c085",
+        "chatSessionId": "sess_cffb51c1-3869-4588-bbdc-e637fe93a283",
+        "timestamp": 1790243078856
+      }
+    ]
+  }
+}

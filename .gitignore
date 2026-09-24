@@ -17,3 +17,5 @@ coverage
 .env
 .env.local
 .env.production
+.kiro/settings/permissions.yaml
+.kiro/specs/shell-performance-remaining-tasks/.config.kiro
