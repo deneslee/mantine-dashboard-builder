@@ -74,12 +74,7 @@ export function SentryVerificationCard({ onGoToSettings }: { onGoToSettings?: ()
     },
   ]);
 
-  const addLog = (
-    type: ActivityLogItem['type'],
-    badgeColor: string,
-    message: string,
-    details?: string
-  ) => {
+  const addLog = (type: ActivityLogItem['type'], badgeColor: string, message: string, details?: string) => {
     const item: ActivityLogItem = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       time: new Date().toLocaleTimeString(),
@@ -105,7 +100,7 @@ export function SentryVerificationCard({ onGoToSettings }: { onGoToSettings?: ()
           'flush',
           'teal',
           `Connection verified! Transport flush succeeded in ${result.durationMs}ms`,
-          result.eventId ? `Ping Event ID: ${result.eventId}` : undefined
+          result.eventId ? `Ping Event ID: ${result.eventId}` : undefined,
         );
         notify.success({
           title: 'Sentry Connected',
@@ -133,7 +128,12 @@ export function SentryVerificationCard({ onGoToSettings }: { onGoToSettings?: ()
       action: 'test_error_button_click',
       timestamp: new Date().toISOString(),
     });
-    addLog('log', 'blue', 'Sentry.logger.info: "User triggered test error"', 'action: test_error_button_click');
+    addLog(
+      'log',
+      'blue',
+      'Sentry.logger.info: "User triggered test error"',
+      'action: test_error_button_click',
+    );
 
     // 2. Send test metric
     Sentry.metrics.count('test_counter', 1, {
@@ -243,7 +243,12 @@ export function SentryVerificationCard({ onGoToSettings }: { onGoToSettings?: ()
       eventId = Sentry.captureException(e, {
         tags: { type: 'handled_test' },
       });
-      addLog('error', 'orange', 'Sentry.captureException: "Handled verification error test"', `Event ID: ${eventId}`);
+      addLog(
+        'error',
+        'orange',
+        'Sentry.captureException: "Handled verification error test"',
+        `Event ID: ${eventId}`,
+      );
     }
 
     await Sentry.flush(2000);
@@ -275,12 +280,7 @@ export function SentryVerificationCard({ onGoToSettings }: { onGoToSettings?: ()
         {/* Top Connection Status & Quick Diagnostic */}
         <Group justify="space-between" align="center" wrap="wrap">
           <Group gap="xs">
-            <ThemeIcon
-              color={status.isConfigured ? 'teal' : 'yellow'}
-              variant="light"
-              size="lg"
-              radius="md"
-            >
+            <ThemeIcon color={status.isConfigured ? 'teal' : 'yellow'} variant="light" size="lg" radius="md">
               {status.isConfigured ? <IconCheck size={20} /> : <IconAlertCircle size={20} />}
             </ThemeIcon>
             <div>
@@ -358,7 +358,8 @@ export function SentryVerificationCard({ onGoToSettings }: { onGoToSettings?: ()
             Test & Verification Triggers
           </Text>
           <Text size="xs" c="dimmed" mb="sm">
-            Trigger events below to view real-time delivery receipts and verify transmission directly on this page:
+            Trigger events below to view real-time delivery receipts and verify transmission directly on this
+            page:
           </Text>
 
           <Group gap="sm" wrap="wrap">
@@ -439,7 +440,12 @@ export function SentryVerificationCard({ onGoToSettings }: { onGoToSettings?: ()
                       <Code fw={600}>{receipt.eventId}</Code>
                       <CopyButton value={receipt.eventId}>
                         {({ copied, copy }) => (
-                          <ActionIcon size="xs" variant="subtle" color={copied ? 'teal' : 'gray'} onClick={copy}>
+                          <ActionIcon
+                            size="xs"
+                            variant="subtle"
+                            color={copied ? 'teal' : 'gray'}
+                            onClick={copy}
+                          >
                             <IconCopy size={12} />
                           </ActionIcon>
                         )}

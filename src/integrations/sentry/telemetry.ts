@@ -19,7 +19,11 @@ export const metrics = {
   count: (name: string, value: number = 1, options?: Parameters<typeof Sentry.metrics.count>[2]) => {
     Sentry.metrics.count(name, value, options);
   },
-  distribution: (name: string, value: number, options?: Parameters<typeof Sentry.metrics.distribution>[2]) => {
+  distribution: (
+    name: string,
+    value: number,
+    options?: Parameters<typeof Sentry.metrics.distribution>[2],
+  ) => {
     Sentry.metrics.distribution(name, value, options);
   },
   gauge: (name: string, value: number, options?: Parameters<typeof Sentry.metrics.gauge>[2]) => {

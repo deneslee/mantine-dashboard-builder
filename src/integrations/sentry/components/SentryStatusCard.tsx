@@ -14,11 +14,36 @@ export function SentryStatusCard() {
   const [status] = useState(getSentryStatus);
 
   const featureList = [
-    { label: 'Error Tracking', icon: IconAlertTriangle, active: status.features.errors, desc: 'Global unhandled crashes & route errors' },
-    { label: 'Structured Logs', icon: IconFileCode, active: status.features.logs, desc: 'Sentry.logger & console log ingestion' },
-    { label: 'App Metrics', icon: IconChartDots, active: status.features.metrics, desc: 'Counters, distributions & gauges' },
-    { label: 'Session Replay', icon: IconPlayerPlay, active: status.features.replay, desc: '100% on error & sampling in dev' },
-    { label: 'Router Tracing', icon: IconActivity, active: status.features.tracing, desc: 'TanStack Router navigation spans' },
+    {
+      label: 'Error Tracking',
+      icon: IconAlertTriangle,
+      active: status.features.errors,
+      desc: 'Global unhandled crashes & route errors',
+    },
+    {
+      label: 'Structured Logs',
+      icon: IconFileCode,
+      active: status.features.logs,
+      desc: 'Sentry.logger & console log ingestion',
+    },
+    {
+      label: 'App Metrics',
+      icon: IconChartDots,
+      active: status.features.metrics,
+      desc: 'Counters, distributions & gauges',
+    },
+    {
+      label: 'Session Replay',
+      icon: IconPlayerPlay,
+      active: status.features.replay,
+      desc: '100% on error & sampling in dev',
+    },
+    {
+      label: 'Router Tracing',
+      icon: IconActivity,
+      active: status.features.tracing,
+      desc: 'TanStack Router navigation spans',
+    },
   ];
 
   return (
