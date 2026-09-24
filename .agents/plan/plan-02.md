@@ -1,6 +1,8 @@
 # Plan 02: Project Structure (bulletproof-react, lightly adapted)
 
-Sep 24, 2026 · v1.2.0 · Tasks: [task-r02-03.md](./tasks/task-r02-03.md) · Research: [research-r02-project-structure.md](./research/research-r02-project-structure.md)
+Sep 24, 2026 · v1.3.0 · Tasks: [task-r02-03.md](./tasks/task-r02-03.md) · Research: [research-r02-project-structure.md](./research/research-r02-project-structure.md)
+
+**v1.3 changes:** checked against bulletproof-react's example app (`apps/react-vite/src`). The shell goes to `components/layouts/shell/`, as their app frame lives in `components/layouts/`. Routes may handle Suspense and error boundaries themselves when they only arrange shared UI, as their discussion route does.
 
 **v1.2 changes:** the merged Sentry prototype (`src/integrations/`) gets a place: its SDK code goes to `lib/sentry/`, its UI to `features/integrations/` (new migration step 5). `useMotion` (Plan 01) moves from `shared/hooks/` to `hooks/`.
 
@@ -41,7 +43,7 @@ src/
   components/                SHARED LAYER: shared UI; imports only shared + design-system
     errors/                  ErrorState, WidgetBoundary, NotFound, RouteError, AppCrash, OfflineBanner (from features/errors)
     feedback/                Skeletons, SlowHint, RouteProgress (from features/loading)
-    shell/                   Shell, navbar, sidebar, context-bar, panel + its store/hooks/model (from features/shell)
+    layouts/shell/           Shell, navbar, sidebar, context-bar, panel + its store/hooks/model (from features/shell)
   hooks/                     useDelayedPending, useMotion (Plan 01, now in shared/hooks)
   lib/                       notify.tsx (from notifications), errors/AppError (from shared/errors), user.tsx (from shared/user)
     sentry/                  runtime.ts (startSentry, connectRouter, reportError) + client, router, telemetry, settings, types
@@ -62,8 +64,8 @@ src/
 1. **`design-system/` is its own lowest layer**, below `components/`. It owns the tokens and theme (Plan 03), so it can't depend on anything else.
 2. **Features keep `api/{client,dto,mapper,queries}.ts` and `model/`** (types and zod), instead of bulletproof's `api/` + `types/`. That keeps the AGENTS.md rule that the UI never sees DTOs.
 3. **File names stay PascalCase, named after the export** (AGENTS.md), not kebab-case.
-4. **A shared module may keep its own store and hooks together.** `components/shell/` keeps its Zustand store, `ShellProvider` and hooks. Only `ShellProvider` knows it's Zustand (AGENTS.md composition rule).
-5. **Routes live in `app/routes/`** and stay thin. `-name.tsx` files are still ignored by the router.
+4. **A shared module may keep its own store and hooks together.** `components/layouts/shell/` keeps its Zustand store, `ShellProvider` and hooks. Only `ShellProvider` knows it's Zustand (AGENTS.md composition rule).
+5. **Routes live in `app/routes/`** and stay thin. `-name.tsx` files are still ignored by the router. A route may import several features and wrap parts in its own Suspense or error boundary; that's where features meet (bulletproof's discussion route does exactly this with `discussions` + `comments`). A page built only from shared UI needs no feature folder at all.
 6. **The app layer composes registries and cross-feature wiring.** Dashboards receive widgets and datasources through a provider, so they never import them (Plan 05).
 7. **Barrel files:** none in `features/` or the shared folders. `design-system/index.ts` also goes; import `design-system/theme/theme` and similar directly.
 
@@ -72,7 +74,7 @@ src/
 1. **Shell ↔ notifications cycle:**
    - The shell stops importing `notificationsTab`. `useContextTabs` merges the route's tabs with a `globalTabs` prop.
    - `app/shell.tsx` passes `[notificationsTab]`.
-   - `ContextTab` moves to `types/` (or stays in `components/shell/model` as a shared type).
+   - `ContextTab` moves to `types/` (or stays in `components/layouts/shell/model` as a shared type).
 2. **Moving `notify` breaks the inbox link:** `notify` moves to `lib/` and must still write warnings and errors to the inbox. The inbox store therefore moves to `stores/inbox.ts`, and the feature keeps only `Inbox.tsx` and the tab.
 3. **Settings reaches into the shell:** `useAppearanceForm` uses shell hooks. That's allowed once the shell is shared, so no change is needed. Record it as the intended pattern.
 
@@ -101,7 +103,7 @@ src/
    - `wait(ms)` (duplicated in `DebugPage.tsx` and `useAppearanceForm.ts`) → `utils/wait.ts`
    - delete the then-empty `shared/` folders
 3. **Notifications split:** `notify` → `lib/notify.tsx`, store → `stores/inbox.ts`, UI stays in the feature.
-4. **Shell:** fix the cycle (inversion 1), then move `features/shell` → `components/shell`.
+4. **Shell:** fix the cycle (inversion 1), then move `features/shell` → `components/layouts/shell`.
 5. **Sentry prototype:** `src/integrations/sentry/*` minus its UI → `lib/sentry/`; the catalog, Sentry page and `sentry/components/` → `features/integrations/components/`; `registry.ts` and `types.ts` → `features/integrations/`. Delete `src/integrations/index.ts` and `sentry/index.ts` (barrels). `App.tsx`, `router.ts` and `main.tsx` import `@/lib/sentry/runtime`; the routes import the page components directly. Behaviour and UI stay exactly as they are; Plan 06 decides what to keep.
 6. **Remove barrels:** delete `features/*/index.ts` and `design-system/index.ts` and rewrite imports as direct paths (a codemod or `qartez_move`/`qartez_rename_file` keep references updated). Fixes the root cause behind Plan 01's bundle problem.
 7. **Routes:** `src/routes` → `src/app/routes`. Update `routesDirectory` and `generatedRouteTree` in `vite.config.ts` and the oxlint override globs, then regenerate `routeTree.gen.ts`.
@@ -110,7 +112,7 @@ src/
 
 ## Decisions (settled Sep 24, 2026)
 
-1. **Shell location:** `components/shell/` (shared, with its own store and hooks).
+1. **Shell location:** `components/layouts/shell/` (shared, with its own store and hooks). Bulletproof's example app keeps its app frame in `components/layouts/`.
 2. **Routes:** move to `app/routes/`.
 3. **dependency-cruiser:** not added. oxlint direction rules plus `import/no-cycle` are enough for now.
 

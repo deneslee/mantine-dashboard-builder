@@ -1,6 +1,6 @@
 # Tasks: Project Structure (bulletproof-react, lightly adapted)
 
-Sep 24, 2026 · v1.2.0 · Reference: [plan-02.md](../plan-02.md)
+Sep 24, 2026 · v1.3.0 · Reference: [plan-02.md](../plan-02.md)
 
 - [ ] **Baseline with oxlint.** Add the per-layer `no-restricted-imports` overrides and `import/no-cycle` as warnings ([plan-02 enforcement](../plan-02.md#enforcement-oxlint-only-no-dependency-cruiser)). Done when the warning list is saved in the research file and shows the `shell ↔ notifications` cycle.
 - [ ] **Move errors and loading into the shared layer.** `features/errors` → `components/errors`, `features/loading` → `components/feedback` + `hooks/useDelayedPending`, with the move committed separately from the import edits. Done when build, test and lint pass.
@@ -8,7 +8,7 @@ Sep 24, 2026 · v1.2.0 · Reference: [plan-02.md](../plan-02.md)
 - [ ] **Move `src/test` to `src/testing`.** Update `setupFiles` in `vitest.config.ts` and the oxlint override glob. Done when `pnpm test` passes.
 - [ ] **Split notifications.** `notify` → `lib/notify.tsx`, store → `stores/inbox.ts`, and `Inbox.tsx` and the tab stay in `features/notifications`. Done when `notify.test.tsx` passes and the Inbox tab shows new warnings.
 - [ ] **Break the shell ↔ notifications cycle.** `useContextTabs` takes `globalTabs`, `app/shell.tsx` passes `notificationsTab`, and `ContextTab` goes to the shared layer. Done when `import/no-cycle` reports nothing.
-- [ ] **Move the shell to `components/shell`.** Done when build, test and lint pass and the Shell stories render.
+- [ ] **Move the shell to `components/layouts/shell`.** Done when build, test and lint pass and the Shell stories render.
 - [ ] **Move the Sentry prototype ([plan-02 step 5](../plan-02.md#migration-steps-each-is-its-own-commit-build-test-and-lint-must-pass-after-each)).** SDK code → `lib/sentry/`, UI → `features/integrations/`, delete both `index.ts` barrels, and point `App.tsx`, `router.ts` and `main.tsx` at `@/lib/sentry/runtime`. No behaviour or UI changes. Done when `src/integrations/` is gone, `runtime.test.ts` and `sentry.test.ts` pass, and the first load still has no Sentry code.
 - [ ] **Remove the barrels.** Delete `features/*/index.ts` and `design-system/index.ts`, rewrite imports as direct paths, and remove the old index-only import rule. Done when no `index.ts` remains under `features/` and the entry chunk has no `react-draggable`.
 - [ ] **Move routes to `app/routes`.** Update `routesDirectory` and `generatedRouteTree`, the oxlint globs, and regenerate the route tree. Done when `pnpm dev` and `pnpm build` work and every route loads.
