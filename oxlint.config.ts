@@ -1,26 +1,30 @@
 import { defineConfig } from 'oxlint';
 
 /** The shared layer: everything features may build on (see AGENTS.md › Structure). */
-const shared = [
-  'components',
-  'hooks',
-  'lib',
-  'stores',
-  'config',
-  'types',
-  'utils',
-  'testing',
-  'shared',
-  'test',
-];
+const shared = ['components', 'hooks', 'lib', 'stores', 'config', 'types', 'utils', 'testing'];
 
 /** Alias patterns for the given top-level folders. */
 const above = (...dirs: string[]) => dirs.flatMap((dir) => [`@/${dir}`, `@/${dir}/**`]);
 
-// Warn while the structure migration (plan-02) runs; switched to 'error' when it is done.
+/** Folder imports that would need a barrel (index.ts). There are none: import the defining file. */
+const barrels = {
+  group: [
+    '@/features/*',
+    '@/components/*',
+    '@/components/layouts/*',
+    '@/design-system',
+    '@/design-system/components/*',
+    '@/lib/errors',
+    '@/lib/notify',
+    '@/lib/sentry',
+  ],
+  message: 'No barrel files: import the file that defines the name, e.g. @/components/errors/ErrorState.',
+};
+
+/** Layer rule for one layer's files; it replaces the global rule there, so it repeats the barrel ban. */
 const layerRule = (group: string[], message: string) =>
-  ['warn', { patterns: [{ group, message }] }] as [
-    'warn',
+  ['error', { patterns: [{ group, message }, barrels] }] as [
+    'error',
     { patterns: { group: string[]; message: string }[] },
   ];
 
@@ -31,7 +35,7 @@ export default defineConfig({
   env: { browser: true },
   ignorePatterns: ['dist', 'storybook-static', 'src/app/routeTree.gen.ts'],
   rules: {
-    'import/no-cycle': 'warn',
+    'import/no-cycle': 'error',
     // typescript-eslint recommended
     'typescript/ban-ts-comment': 'error',
     'typescript/no-empty-object-type': 'error',
@@ -76,18 +80,7 @@ export default defineConfig({
     'app/no-inline-style': 'error',
 
     // No barrel files (bulletproof-react: they defeat tree-shaking); import the file that defines a name.
-    'no-restricted-imports': [
-      'error',
-      {
-        patterns: [
-          {
-            group: ['@/features/*', '@/components/*', '@/design-system', '@/lib/errors'],
-            message:
-              'No barrel files: import the file that defines the name, e.g. @/components/errors/ErrorState.',
-          },
-        ],
-      },
-    ],
+    'no-restricted-imports': ['error', { patterns: [barrels] }],
   },
   overrides: [
     {
@@ -115,7 +108,7 @@ export default defineConfig({
       files: ['src/design-system/**'],
       rules: {
         'no-restricted-imports': layerRule(
-          above('app', 'routes', 'features', 'integrations', ...shared),
+          above('app', 'features', ...shared),
           'design-system/ is the lowest layer: it imports nothing from the rest of the app.',
         ),
       },
@@ -124,7 +117,7 @@ export default defineConfig({
       files: shared.map((dir) => `src/${dir}/**`),
       rules: {
         'no-restricted-imports': layerRule(
-          above('app', 'routes', 'features', 'integrations'),
+          above('app', 'features'),
           'Shared code (components, hooks, lib, …) must not import features or the app layer.',
         ),
       },
@@ -133,7 +126,7 @@ export default defineConfig({
       files: ['src/features/**'],
       rules: {
         'no-restricted-imports': layerRule(
-          [...above('app', 'routes', 'features', 'integrations'), '**/features/**'],
+          [...above('app', 'features'), '**/features/**'],
           'Features never import other features or the app layer; combine them in app/. Inside a feature, use relative imports.',
         ),
       },
