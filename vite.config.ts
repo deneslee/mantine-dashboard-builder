@@ -6,9 +6,6 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   base: '/mantine-dashboard-builder/',
-  build: {
-    sourcemap: 'hidden',
-  },
   plugins: [
     tanstackRouter({ target: 'react', autoCodeSplitting: true, routesDirectory: 'src/routes' }),
     react(),
@@ -24,6 +21,7 @@ export default defineConfig({
   resolve: { tsconfigPaths: true },
   server: { port: 5173 },
   build: {
+    sourcemap: 'hidden',
     rolldownOptions: {
       output: {
         // Framework code every page loads, in its own long-cached chunks: an app-only deploy keeps
