@@ -80,3 +80,23 @@ Imports between features, measured with a grep of `@/features/*` inside `src/fea
 - `oxlint.config.ts`: override globs (`src/design-system/**`, `src/test/**`, `src/routes/**/*.tsx`) and `allowExportNames`
 - `.stylelintrc.json`: `ignoreFiles` for the tokens folder
 - `AGENTS.md` › Structure, and `docs/*.md` path references
+
+## 5. Baseline (Sep 24, 2026, plan-02 step 1)
+
+The layer rules in `oxlint.config.ts`, as warnings: **13 violations**, all features importing `errors`, `loading`, `notifications` or `shell`. Those four modules move to the shared layer in steps 2–4, which clears them. `import/no-cycle` reports nothing: the `shell ↔ notifications` cycle is type-only (`ContextTab`), which the rule ignores; step 4 removes it anyway.
+
+```
+src/features/dashboards/components/DashboardView.tsx  ->  @/features/notifications
+src/features/dashboards/components/grid/WidgetTile.tsx  ->  @/features/errors
+src/features/dashboards/components/widgets/widgetKinds.tsx  ->  @/features/loading
+src/features/dashboards/tabs.ts  ->  @/features/shell
+src/features/debug/DebugPage.tsx  ->  @/features/errors
+src/features/debug/DebugPage.tsx  ->  @/features/loading
+src/features/debug/DebugPage.tsx  ->  @/features/notifications
+src/features/notifications/tab.ts  ->  @/features/shell
+src/features/settings/components/AppearanceSettings.tsx  ->  @/features/shell
+src/features/settings/hooks/useAppearanceForm.ts  ->  @/features/shell
+src/features/shell/context-bar/ContextBar.tsx  ->  @/features/loading
+src/features/shell/hooks/useContextTabs.ts  ->  @/features/notifications
+src/test/storyRouter.tsx  ->  @/features/shell
+```

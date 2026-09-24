@@ -1,12 +1,37 @@
 import { defineConfig } from 'oxlint';
 
+/** The shared layer: everything features may build on (see AGENTS.md › Structure). */
+const shared = [
+  'components',
+  'hooks',
+  'lib',
+  'stores',
+  'config',
+  'types',
+  'utils',
+  'testing',
+  'shared',
+  'test',
+];
+
+/** Alias patterns for the given top-level folders. */
+const above = (...dirs: string[]) => dirs.flatMap((dir) => [`@/${dir}`, `@/${dir}/**`]);
+
+// Warn while the structure migration (plan-02) runs; switched to 'error' when it is done.
+const layerRule = (group: string[], message: string) =>
+  ['warn', { patterns: [{ group, message }] }] as [
+    'warn',
+    { patterns: { group: string[]; message: string }[] },
+  ];
+
 export default defineConfig({
-  plugins: ['typescript', 'react', 'unicorn', 'oxc'],
+  plugins: ['typescript', 'react', 'unicorn', 'oxc', 'import'],
   jsPlugins: ['./lint/plugin.js'],
   categories: { correctness: 'error' },
   env: { browser: true },
   ignorePatterns: ['dist', 'storybook-static', 'src/routeTree.gen.ts'],
   rules: {
+    'import/no-cycle': 'warn',
     // typescript-eslint recommended
     'typescript/ban-ts-comment': 'error',
     'typescript/no-empty-object-type': 'error',
@@ -80,6 +105,41 @@ export default defineConfig({
     {
       files: ['*.config.{ts,cjs}', 'lint/**'],
       env: { node: true, browser: false },
+    },
+
+    // Layers (AGENTS.md › Structure): design-system ← shared ← features ← app. A layer imports only
+    // from itself and the layers below; features never import each other (app/ combines them).
+    {
+      files: ['src/design-system/**'],
+      rules: {
+        'no-restricted-imports': layerRule(
+          above('app', 'routes', 'features', 'integrations', ...shared),
+          'design-system/ is the lowest layer: it imports nothing from the rest of the app.',
+        ),
+      },
+    },
+    {
+      files: shared.map((dir) => `src/${dir}/**`),
+      rules: {
+        'no-restricted-imports': layerRule(
+          above('app', 'routes', 'features', 'integrations'),
+          'Shared code (components, hooks, lib, …) must not import features or the app layer.',
+        ),
+      },
+    },
+    {
+      files: ['src/features/**'],
+      rules: {
+        'no-restricted-imports': layerRule(
+          [...above('app', 'routes', 'features', 'integrations'), '**/features/**'],
+          'Features never import other features or the app layer; combine them in app/. Inside a feature, use relative imports.',
+        ),
+      },
+    },
+    // Tests and stories assemble things, like app/: no layer rule.
+    {
+      files: ['**/*.test.{ts,tsx}', '**/*.stories.tsx'],
+      rules: { 'no-restricted-imports': 'off' },
     },
   ],
 });
