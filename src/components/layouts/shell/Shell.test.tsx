@@ -74,3 +74,22 @@ describe('Shell pane widths', () => {
     expect(store.getState().sidebar.width).toBe(320);
   });
 });
+
+describe('Context button', () => {
+  it('looks selected while the context bar is docked open', async () => {
+    renderShell({ contextBar: { open: true } });
+    // `pressed` tells the navbar toggle apart from the panel's own close button.
+    const button = await screen.findByRole('button', { name: 'Close context panel', pressed: true });
+    expect(button).toHaveAttribute('data-active');
+  });
+
+  it('does not look selected while the context bar is an open drawer', async () => {
+    renderShell({ contextBar: { docked: false, drawerOpen: true } });
+    const button = await screen.findByRole('button', {
+      name: 'Close context panel',
+      pressed: true,
+      hidden: true,
+    });
+    expect(button).not.toHaveAttribute('data-active');
+  });
+});

@@ -34,8 +34,15 @@ describe('Component tier defaults', () => {
     expect(NotificationTheme.defaultProps?.radius).toBe(shape.container);
     expect(ModalTheme.defaultProps?.radius).toBe(shape.container);
     expect(MenuTheme.defaultProps?.radius).toBe(shape.container);
-    expect(DrawerTheme.defaultProps?.radius).toBe(shape.container);
     expect(PopoverTheme.defaultProps?.radius).toBe(shape.container);
+  });
+
+  it('leaves Drawer square, since it docks to the viewport edge', () => {
+    expect(DrawerTheme.defaultProps?.radius).toBeUndefined();
+  });
+
+  it('uses shape.control as the fallback radius for every other component', () => {
+    expect(theme.defaultRadius).toBe(shape.control);
   });
 
   it('registers all split components on the Mantine theme', () => {

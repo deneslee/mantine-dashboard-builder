@@ -56,6 +56,35 @@
   .root[data-moving] & {
     overflow-x: hidden;
   }
+
+  /*
+   * Slim native scrollbar, about the width of Mantine's ScrollArea. Chromium ignores the
+   * ::-webkit-scrollbar rules once `scrollbar-width` is set, so the standard properties are only
+   * for browsers without them (Firefox).
+   */
+  &::-webkit-scrollbar {
+    width: rem(6px);
+    height: rem(6px);
+  }
+
+  &::-webkit-scrollbar-track,
+  &::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: rem(6px);
+    background: var(--app-color-border-strong);
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--app-color-text-subtle);
+  }
+
+  @supports not selector(::-webkit-scrollbar) {
+    scrollbar-width: thin;
+    scrollbar-color: var(--app-color-border-strong) transparent;
+  }
 }
 
 .header {

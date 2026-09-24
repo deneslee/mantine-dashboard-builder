@@ -128,39 +128,27 @@ export const color = {
 
 // 3. Contextual layer defaults (Carbon-aligned baseline before layers.css nesting)
 export const layer = {
-  surface: {
-    light: primitives.white,
-    dark: primitives.palette.dark[7],
-  },
-  surfaceHovered: {
-    light: primitives.palette.gray[0],
-    dark: primitives.palette.dark[6],
-  },
-  surfacePressed: {
-    light: primitives.palette.gray[1],
-    dark: primitives.palette.dark[5],
-  },
-  border: {
-    light: primitives.palette.gray[3],
-    dark: primitives.palette.dark[4],
-  },
+  surface: elevation.surface.raised,
+  surfaceHovered: elevation.surface.raisedHovered,
+  surfacePressed: elevation.surface.raisedPressed,
+  border: color.border.default,
   field: {
     light: primitives.white,
     dark: primitives.palette.dark[8],
   },
 } as const;
 
-// 4. Shape: semantic radius tokens
-export const radius = {
-  control: primitives.radius.sm,
-  container: primitives.radius.md,
-  pill: primitives.radius.xl,
-} as const;
-
+// 4. Shape: Mantine radius keys for `radius=` props; `radius` is the same scale as CSS values
 export const shape = {
   control: 'sm',
   container: 'md',
   pill: 'xl',
+} as const;
+
+export const radius = {
+  control: primitives.radius[shape.control],
+  container: primitives.radius[shape.container],
+  pill: primitives.radius[shape.pill],
 } as const;
 
 // 5. Motion: semantic durations and easings
@@ -192,14 +180,8 @@ export const chart = {
     md: '200px',
     default: '200px',
   },
-  grid: {
-    light: primitives.palette.gray[2],
-    dark: primitives.palette.dark[5],
-  },
-  text: {
-    light: primitives.palette.gray[6],
-    dark: primitives.palette.dark[2],
-  },
+  grid: color.border.subtle,
+  text: color.text.subtle,
 } as const;
 
 // 8. Icon tokens (TS constants for direct SVG prop consumption)
@@ -233,26 +215,14 @@ export const chrome = {
 
 // 11. Legacy compatibility aliases for existing CSS modules until Tasks 13 & 14
 export const legacy = {
-  surface: {
-    light: primitives.palette.gray[0],
-    dark: primitives.palette.dark[8],
-  },
-  surfaceRaised: {
-    light: primitives.white,
-    dark: primitives.palette.dark[7],
-  },
-  border: {
-    light: primitives.palette.gray[3],
-    dark: primitives.palette.dark[4],
-  },
-  textMuted: {
-    light: primitives.palette.gray[6],
-    dark: primitives.palette.dark[2],
-  },
-  motionFast: primitives.motion.duration.fast,
-  motionBase: primitives.motion.duration.base,
-  motionSlow: primitives.motion.duration.slow,
-  motionEase: primitives.motion.easing.ease,
+  surface: elevation.surface.canvas,
+  surfaceRaised: elevation.surface.raised,
+  border: color.border.default,
+  textMuted: color.text.subtle,
+  motionFast: motion.duration.fast,
+  motionBase: motion.duration.base,
+  motionSlow: motion.duration.slow,
+  motionEase: motion.easing.standard,
   brandSentry: primitives.brand.sentry,
 } as const;
 

@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { theme, cssVariablesResolver } from '../theme/theme';
+import { primitives } from './primitives';
 import {
   semantic,
+  shape,
+  isSchemeValue,
   toCssVars,
   elevation,
   color,
@@ -28,6 +31,29 @@ describe('semantic tokens and toCssVars generator', () => {
     for (const key of allKeys) {
       expect(key.startsWith('--app-')).toBe(true);
     }
+  });
+
+  it('produces exactly one variable per semantic leaf (no key dropped or merged)', () => {
+    let leaves = 0;
+    const walk = (node: unknown) => {
+      if (isSchemeValue(node) || typeof node === 'string' || typeof node === 'number') {
+        leaves += 1;
+        return;
+      }
+      Object.values(node as Record<string, unknown>).forEach(walk);
+    };
+    walk(semantic);
+
+    // A scheme leaf appears once in `light` and once in `dark`; count it once.
+    const emitted = Object.keys(cssVars.variables).length + Object.keys(cssVars.light).length;
+    expect(emitted).toBe(leaves);
+    expect(Object.keys(cssVars.light).some((key) => key in cssVars.variables)).toBe(false);
+  });
+
+  it('derives radius values from the shape keys', () => {
+    expect(radius.control).toBe(primitives.radius[shape.control]);
+    expect(radius.container).toBe(primitives.radius[shape.container]);
+    expect(radius.pill).toBe(primitives.radius[shape.pill]);
   });
 
   it('produces the exact surface elevation tokens in light and dark', () => {

@@ -1,9 +1,8 @@
 import { Drawer } from '@mantine/core';
-import { shape } from '../../tokens/semantic';
 
+// No radius: drawers dock to the viewport edge, so rounded corners would show against it.
 export const DrawerTheme = Drawer.extend({
   defaultProps: {
-    radius: shape.container,
     overlayProps: { backgroundOpacity: 0.35, blur: 2 },
     transitionProps: { duration: 180 },
   },

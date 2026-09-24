@@ -2,12 +2,13 @@ import { createTheme, mergeThemeOverrides, type CSSVariablesResolver } from '@ma
 import { components } from './components';
 import { tokens } from '../tokens/tokens';
 import { primitives } from '../tokens/primitives';
-import { semantic, toCssVars, virtualColors } from '../tokens/semantic';
+import { semantic, shape, toCssVars, virtualColors } from '../tokens/semantic';
 
 export const theme = createTheme({
   primaryColor: 'indigo',
   primaryShade: { light: 6, dark: 5 },
-  defaultRadius: 'sm',
+  // Controls without their own theme file (SegmentedControl, Checkbox, Badge, ...) use this.
+  defaultRadius: shape.control,
   fontFamily:
     '"DM Sans Variable", "Source Sans 3 Variable", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif',
   fontFamilyMonospace:

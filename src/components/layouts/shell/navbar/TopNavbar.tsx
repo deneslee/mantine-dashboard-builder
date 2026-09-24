@@ -21,7 +21,7 @@ const burgerLabels: Record<SidebarMode, string> = {
 
 export function TopNavbar() {
   const { isOverlay: drawerOpen, docked: sidebarDocked, mode, burger } = useSidebar();
-  const { open: contextOpen } = useContextBar();
+  const { open: contextOpen, isColumn: contextDocked } = useContextBar();
   const { toggleSidebar, toggleContextBar } = useShellActions();
 
   const burgerLabel = sidebarDocked
@@ -50,7 +50,7 @@ export function TopNavbar() {
 
       <Group gap={4} wrap="nowrap" className={classes.right} justify="flex-end">
         <AreaSelect />
-        <ContextButton open={contextOpen} onClick={toggleContextBar} />
+        <ContextButton open={contextOpen} active={contextDocked} onClick={toggleContextBar} />
         <ColorSchemeToggle />
         <UserMenu />
       </Group>
@@ -82,7 +82,16 @@ function AreaSelect() {
   );
 }
 
-function ContextButton({ open, onClick }: { open: boolean; onClick: () => void }) {
+/** `active` (selected look) only while the panel is docked open; an open drawer covers the navbar anyway. */
+function ContextButton({
+  open,
+  active,
+  onClick,
+}: {
+  open: boolean;
+  active: boolean;
+  onClick: () => void;
+}) {
   const count = useTotalBadgeCount(useContextTabs());
 
   return (
@@ -92,7 +101,7 @@ function ContextButton({ open, onClick }: { open: boolean; onClick: () => void }
           variant="chrome"
           aria-label={open ? 'Close context panel' : 'Open context panel'}
           aria-pressed={open}
-          data-active={open || undefined}
+          data-active={active || undefined}
           onClick={onClick}
         >
           <IconHelp size={20} stroke={1.75} />
