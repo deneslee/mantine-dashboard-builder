@@ -74,7 +74,8 @@ export function SentrySettings({ onConfigChanged }: { onConfigChanged?: () => vo
             withCloseButton
             onClose={() => setSaved(false)}
           >
-            Sentry is running with your updated settings. You can run verification tests in the Verification tab.
+            Sentry is running with your updated settings. You can run verification tests in the Verification
+            tab.
           </Alert>
         )}
 
@@ -141,7 +142,8 @@ export function SentrySettings({ onConfigChanged }: { onConfigChanged?: () => vo
                   />
                 </Group>
                 <Text size="xs" c="dimmed" mb="xs">
-                  Percentage of transactions captured for performance tracing and TanStack Router navigation spans.
+                  Percentage of transactions captured for performance tracing and TanStack Router navigation
+                  spans.
                 </Text>
                 <Slider
                   min={0}
@@ -220,31 +222,17 @@ export function SentrySettings({ onConfigChanged }: { onConfigChanged?: () => vo
             </Stack>
           </Paper>
 
-          <Alert
-            variant="light"
-            color="gray"
-            icon={<IconInfoCircle size={16} />}
-            title="Local Persistence"
-          >
-            Settings saved here are stored in your browser's <Code>localStorage</Code> and take precedence over defaults.
+          <Alert variant="light" color="gray" icon={<IconInfoCircle size={16} />} title="Local Persistence">
+            Settings saved here are stored in your browser's <Code>localStorage</Code> and take precedence
+            over defaults.
           </Alert>
 
           <Group justify="space-between">
-            <Button
-              variant="default"
-              size="sm"
-              leftSection={<IconRotate size={16} />}
-              onClick={handleReset}
-            >
+            <Button variant="default" size="sm" leftSection={<IconRotate size={16} />} onClick={handleReset}>
               Reset to Defaults
             </Button>
 
-            <Button
-              size="sm"
-              color="teal"
-              leftSection={<IconDeviceFloppy size={16} />}
-              onClick={handleSave}
-            >
+            <Button size="sm" color="teal" leftSection={<IconDeviceFloppy size={16} />} onClick={handleSave}>
               Save Settings & Apply
             </Button>
           </Group>

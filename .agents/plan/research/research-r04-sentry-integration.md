@@ -4,9 +4,11 @@ Reference: [plan-04.md](../plan/plan-04.md)
 Date: Sep 24, 2026
 
 ## Objective
+
 Analyze the requirements, architectural touchpoints, modular folder structure (`src/integrations/`), and UI navigation (Integrations view with Grid/Row view-changer and dedicated Sentry status/settings/verification hub) for Sentry integration in the Mantine dashboard builder.
 
 ## Architectural Requirements
+
 1. **Modular Integration Package (`src/integrations/sentry/`)**:
    - Isolate Sentry logic into a dedicated directory (`src/integrations/sentry/` and `src/integrations/registry.ts`).
    - Ensures future monorepo extraction into a separate package (e.g. `packages/integrations-sentry`) with zero frontend refactoring.

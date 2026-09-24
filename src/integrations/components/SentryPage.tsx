@@ -84,7 +84,11 @@ export function SentryPage() {
             >
               <Group justify="space-between" align="center" wrap="wrap">
                 <Text size="xs">
-                  Your project DSN is not configured. Go to the <Text span fw={600}>Settings</Text> tab to enter your DSN, or save it to <Code>.env.local</Code>.
+                  Your project DSN is not configured. Go to the{' '}
+                  <Text span fw={600}>
+                    Settings
+                  </Text>{' '}
+                  tab to enter your DSN, or save it to <Code>.env.local</Code>.
                 </Text>
                 <Button size="xs" variant="outline" color="yellow" onClick={() => setActiveTab('settings')}>
                   Configure DSN in Settings
@@ -142,7 +146,8 @@ export function SentryPage() {
                         <Text span fw={600}>
                           VITE_SENTRY_TRACES_SAMPLE_RATE
                         </Text>
-                        : Tracing rate for TanStack Router navigation spans (default: <Code>1.0</Code> in dev, <Code>0.1</Code> in prod).
+                        : Tracing rate for TanStack Router navigation spans (default: <Code>1.0</Code> in dev,{' '}
+                        <Code>0.1</Code> in prod).
                       </List.Item>
                       <List.Item>
                         <Text span fw={600}>
@@ -163,7 +168,8 @@ export function SentryPage() {
                         View real-time incoming events, stack traces, and session replays at{' '}
                         <Anchor href="https://sentry.io" target="_blank" rel="noreferrer" size="xs">
                           sentry.io <IconExternalLink size={12} />
-                        </Anchor>.
+                        </Anchor>
+                        .
                       </Text>
                     </Alert>
                   </Stack>

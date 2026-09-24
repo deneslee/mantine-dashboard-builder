@@ -30,10 +30,11 @@ export function IntegrationsCatalog() {
   const [query, setQuery] = useState('');
 
   const allIntegrations = getIntegrations();
-  const integrations = allIntegrations.filter((item) =>
-    item.name.toLowerCase().includes(query.toLowerCase()) ||
-    item.description.toLowerCase().includes(query.toLowerCase()) ||
-    item.category.toLowerCase().includes(query.toLowerCase())
+  const integrations = allIntegrations.filter(
+    (item) =>
+      item.name.toLowerCase().includes(query.toLowerCase()) ||
+      item.description.toLowerCase().includes(query.toLowerCase()) ||
+      item.category.toLowerCase().includes(query.toLowerCase()),
   );
 
   return (
