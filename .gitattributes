@@ -1,0 +1,2 @@
+# Store and check out text files with LF on every OS (Prettier expects LF; core.autocrlf would give CRLF on Windows).
+* text=auto eol=lf
