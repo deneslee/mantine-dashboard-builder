@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import { useEffect } from 'react';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { useShallow } from 'zustand/shallow';
-import { useInbox } from '../store';
+import { useInbox } from '@/stores/inbox';
 import classes from './Inbox.module.css';
 
 dayjs.extend(relativeTime);

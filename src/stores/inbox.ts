@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { InboxItem, NotifyLevel } from './model/types';
+import type { InboxItem, NotifyLevel } from '@/lib/notify/types';
 
 const MAX_ITEMS = 50;
 

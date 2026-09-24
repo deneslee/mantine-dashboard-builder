@@ -4,7 +4,7 @@ import { useIsFetching, useQueryClient, useSuspenseQuery } from '@tanstack/react
 import { useParams } from '@tanstack/react-router';
 import { useMemo } from 'react';
 import { Page } from '@/design-system';
-import { notify } from '@/features/notifications';
+import { notify } from '@/lib/notify/notify';
 import { demoWidgets } from '../api/demo';
 import { dashboardQuery } from '../api/queries';
 import { DashboardGrid } from './grid/DashboardGrid';

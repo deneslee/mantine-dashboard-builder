@@ -30,7 +30,7 @@ import {
 } from '@tabler/icons-react';
 import { useState } from 'react';
 import * as Sentry from '@sentry/react';
-import { notify } from '@/features/notifications';
+import { notify } from '@/lib/notify/notify';
 import {
   getReplaySessionId,
   getSentryStatus,

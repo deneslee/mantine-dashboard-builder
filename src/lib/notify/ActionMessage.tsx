@@ -1,6 +1,6 @@
 import { Button } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import type { NotifyAction } from '../model/types';
+import type { NotifyAction } from './types';
 
 /** Toast body with one action button; the action closes the toast. */
 export function ActionMessage({

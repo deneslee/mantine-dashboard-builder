@@ -1,8 +1,8 @@
 import { notifications } from '@mantine/notifications';
 import { IconAlertTriangle, IconCheck, IconInfoCircle, IconX } from '@tabler/icons-react';
-import type { NotifyInput, NotifyLevel } from './model/types';
-import { ActionMessage } from './components/ActionMessage';
-import { inboxLevels, useInbox } from './store';
+import type { NotifyInput, NotifyLevel } from './types';
+import { ActionMessage } from './ActionMessage';
+import { inboxLevels, useInbox } from '@/stores/inbox';
 
 const config: Record<
   NotifyLevel,

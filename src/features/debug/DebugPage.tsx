@@ -11,7 +11,8 @@ import {
   TableSkeleton,
   TextSkeleton,
 } from '@/components/feedback';
-import { notify, useInbox } from '@/features/notifications';
+import { notify } from '@/lib/notify/notify';
+import { useInbox } from '@/stores/inbox';
 import { AppError } from '@/lib/errors';
 import { wait } from '@/utils/wait';
 

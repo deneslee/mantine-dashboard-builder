@@ -1,7 +1,7 @@
 import { IconBell } from '@tabler/icons-react';
 import { lazy } from 'react';
 import type { ContextTab } from '@/features/shell';
-import { selectUnread, useInbox } from './store';
+import { selectUnread, useInbox } from '@/stores/inbox';
 
 /** Global context-bar tab, appended to every route's tabs. */
 export const notificationsTab: ContextTab = {

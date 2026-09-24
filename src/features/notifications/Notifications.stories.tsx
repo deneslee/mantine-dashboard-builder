@@ -2,8 +2,8 @@ import { Button, Group, Paper } from '@mantine/core';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useEffect } from 'react';
 import { Inbox } from './components/Inbox';
-import { notify } from './notify';
-import { useInbox } from './store';
+import { notify } from '@/lib/notify/notify';
+import { useInbox } from '@/stores/inbox';
 
 const meta = { title: 'Notifications/Toasts and inbox' } satisfies Meta;
 export default meta;

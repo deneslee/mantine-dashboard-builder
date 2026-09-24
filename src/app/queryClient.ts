@@ -1,5 +1,5 @@
 import { MutationCache, QueryCache, QueryClient, keepPreviousData } from '@tanstack/react-query';
-import { notify } from '@/features/notifications';
+import { notify } from '@/lib/notify/notify';
 import { errorTitles, toAppError } from '@/lib/errors';
 
 declare module '@tanstack/react-query' {

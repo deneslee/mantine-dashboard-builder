@@ -23,7 +23,7 @@ import {
   IconRotate,
 } from '@tabler/icons-react';
 import { useState } from 'react';
-import { notify } from '@/features/notifications';
+import { notify } from '@/lib/notify/notify';
 import { getActiveSentryConfig, reconfigureSentry } from '../client';
 import { resetSentryConfig, saveSentryConfig, type SentryConfig } from '../settings';
 
