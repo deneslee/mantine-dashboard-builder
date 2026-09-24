@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createQueryClient } from '@/app/queryClient';
 import { notify } from '@/features/notifications';
 import { createShellStore, ShellProvider } from '@/features/shell';
-import { fireEvent, render, screen, waitFor } from '@/test/render';
+import { fireEvent, render, screen, waitFor } from '@/testing/render';
 import { AppearanceSettings } from './AppearanceSettings';
 
 function setup() {

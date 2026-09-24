@@ -1,5 +1,5 @@
 import { lazy, type ComponentType, type ReactNode } from 'react';
-import { ChartSkeleton, TableSkeleton, TextSkeleton } from '@/features/loading';
+import { ChartSkeleton, TableSkeleton, TextSkeleton } from '@/components/feedback';
 import type { WidgetKind, WidgetProps } from '../../model/types';
 
 interface WidgetKindDef {

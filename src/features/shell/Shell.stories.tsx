@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { IconInfoCircle } from '@tabler/icons-react';
 import { useState } from 'react';
 import { Page } from '@/design-system';
-import { StoryRouter } from '@/test/storyRouter';
+import { StoryRouter } from '@/testing/storyRouter';
 import { Shell } from './Shell';
 import { ShellProvider } from './ShellProvider';
 import { createShellStore } from './store';

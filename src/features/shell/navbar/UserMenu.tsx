@@ -1,7 +1,7 @@
 import { Avatar, Menu, Text } from '@mantine/core';
 import { IconLogout, IconUserCircle } from '@tabler/icons-react';
 import { use } from 'react';
-import { CurrentUserContext } from '@/shared/user';
+import { CurrentUserContext } from '@/lib/user';
 import classes from './UserMenu.module.css';
 
 /** Placeholder until auth exists; reads the `CurrentUser` context so it swaps cleanly later. */

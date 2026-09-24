@@ -1,6 +1,6 @@
 import { MutationCache, QueryCache, QueryClient, keepPreviousData } from '@tanstack/react-query';
 import { notify } from '@/features/notifications';
-import { errorTitles, toAppError } from '@/shared/errors';
+import { errorTitles, toAppError } from '@/lib/errors';
 
 declare module '@tanstack/react-query' {
   interface Register {

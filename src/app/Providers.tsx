@@ -4,8 +4,8 @@ import { Notifications } from '@mantine/notifications';
 import { QueryClientProvider, type QueryClient } from '@tanstack/react-query';
 import { useEffect, type ReactNode } from 'react';
 import { cssVariablesResolver, reducedMotionTheme, theme, tokens } from '@/design-system';
-import { useMotion } from '@/shared/hooks/useMotion';
-import { CurrentUserContext, placeholderUser } from '@/shared/user';
+import { useMotion } from '@/hooks/useMotion';
+import { CurrentUserContext, placeholderUser } from '@/lib/user';
 
 const colorSchemeManager = localStorageColorSchemeManager({ key: 'color-scheme' });
 

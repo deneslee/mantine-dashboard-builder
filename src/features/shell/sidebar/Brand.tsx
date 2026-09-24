@@ -1,5 +1,5 @@
 import { Group, Text } from '@mantine/core';
-import { appName } from '@/shared/config';
+import { appName } from '@/config/config';
 import classes from './Brand.module.css';
 
 /**

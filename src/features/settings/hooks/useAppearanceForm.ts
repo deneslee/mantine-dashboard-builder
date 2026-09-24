@@ -2,7 +2,8 @@ import { useMantineColorScheme, type MantineColorScheme } from '@mantine/core';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useShellActions, useSidebar, type BurgerBehavior } from '@/features/shell';
-import { useMotionPreference, type MotionPreference } from '@/shared/hooks/useMotion';
+import { useMotionPreference, type MotionPreference } from '@/hooks/useMotion';
+import { wait } from '@/utils/wait';
 
 export interface AppearanceValues {
   burger: BurgerBehavior;
@@ -15,7 +16,6 @@ export interface AppearanceValues {
  * Holding it this long makes the save readable; a real API call replaces the wait, not the rule.
  */
 const MIN_SAVING_MS = 500;
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * Appearance settings as a draft that only takes effect on `save`.

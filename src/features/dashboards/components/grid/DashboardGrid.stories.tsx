@@ -1,6 +1,6 @@
 import { Box } from '@mantine/core';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { StoryRouter } from '@/test/storyRouter';
+import { StoryRouter } from '@/testing/storyRouter';
 import { demoWidgets } from '../../api/demo';
 import { DashboardGrid } from './DashboardGrid';
 

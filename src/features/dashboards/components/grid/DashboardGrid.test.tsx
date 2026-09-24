@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, render, screen, waitFor } from '@/test/render';
+import { act, render, screen, waitFor } from '@/testing/render';
 import type { DashboardWidget } from '../../model/types';
 import { DashboardGrid } from './DashboardGrid';
 

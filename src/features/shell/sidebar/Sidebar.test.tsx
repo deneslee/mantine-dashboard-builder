@@ -2,7 +2,7 @@ import { IconSettings, IconTemplate } from '@tabler/icons-react';
 import { createMemoryHistory, createRootRoute, createRouter, RouterProvider } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
 import { describe, expect, it } from 'vitest';
-import { act, fireEvent, render, screen } from '@/test/render';
+import { act, fireEvent, render, screen } from '@/testing/render';
 import type { NavGroup } from '../model/nav';
 import { ShellProvider } from '../ShellProvider';
 import { createShellStore, type ShellInit } from '../store';

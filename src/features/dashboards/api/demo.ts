@@ -1,4 +1,4 @@
-import { AppError } from '@/shared/errors';
+import { AppError } from '@/lib/errors';
 import type { ChartForm, DashboardWidget } from '../model/types';
 
 /**

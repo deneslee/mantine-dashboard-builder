@@ -1,7 +1,7 @@
 import { Notifications } from '@mantine/notifications';
 import { act } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { render, screen } from '@/test/render';
+import { render, screen } from '@/testing/render';
 import { notify } from './notify';
 import { useInbox } from './store';
 

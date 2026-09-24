@@ -1,7 +1,7 @@
 import { Box, Group, Paper, Text } from '@mantine/core';
 import { useIntersection } from '@mantine/hooks';
 import { Suspense, useId, useState } from 'react';
-import { WidgetBoundary } from '@/features/errors';
+import { WidgetBoundary } from '@/components/errors';
 import type { WidgetProps } from '../../model/types';
 import { widgetKinds } from '../widgets/widgetKinds';
 import classes from './WidgetTile.module.css';

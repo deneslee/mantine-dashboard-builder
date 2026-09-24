@@ -1,7 +1,7 @@
 import { useMantineTheme } from '@mantine/core';
 import { act, render, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { MOTION_STORAGE_KEY, useMotionPreference } from '@/shared/hooks/useMotion';
+import { MOTION_STORAGE_KEY, useMotionPreference } from '@/hooks/useMotion';
 import { createQueryClient } from './queryClient';
 import { Providers } from './Providers';
 

@@ -3,18 +3,17 @@ import { useMutation } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { useState, type ReactNode } from 'react';
 import { Page } from '@/design-system';
-import { ErrorState, WidgetBoundary } from '@/features/errors';
+import { ErrorState, WidgetBoundary } from '@/components/errors';
 import {
   ChartSkeleton,
   DashboardSkeleton,
   PanelSkeleton,
   TableSkeleton,
   TextSkeleton,
-} from '@/features/loading';
+} from '@/components/feedback';
 import { notify, useInbox } from '@/features/notifications';
-import { AppError } from '@/shared/errors';
-
-const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+import { AppError } from '@/lib/errors';
+import { wait } from '@/utils/wait';
 
 /** Visual QA for chrome states. Not linked from the sidebar; open /debug. */
 export function DebugPage() {

@@ -93,7 +93,7 @@ export default defineConfig({
         'src/design-system/**',
         '**/*.stories.tsx',
         '**/*.test.{ts,tsx}',
-        'src/test/**',
+        'src/testing/**',
         '.storybook/**',
       ],
       rules: { 'app/no-inline-style': 'off', 'react/only-export-components': 'off' },

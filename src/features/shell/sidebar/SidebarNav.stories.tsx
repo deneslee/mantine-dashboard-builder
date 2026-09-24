@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { IconChartDots3, IconDatabase, IconHelp, IconSettings, IconTemplate } from '@tabler/icons-react';
 import { useState } from 'react';
 import { tokens } from '@/design-system';
-import { StoryRouter } from '@/test/storyRouter';
+import { StoryRouter } from '@/testing/storyRouter';
 import type { NavGroup } from '../model/nav';
 import { ShellProvider } from '../ShellProvider';
 import { createShellStore } from '../store';
