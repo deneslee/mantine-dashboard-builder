@@ -13,4 +13,24 @@ export default defineConfig({
   ],
   resolve: { tsconfigPaths: true },
   server: { port: 5173 },
+  build: {
+    rolldownOptions: {
+      output: {
+        // Framework code every page loads, in its own long-cached chunks: an app-only deploy keeps
+        // them in the browser cache. Named libraries only; a catch-all node_modules group would
+        // pull lazy-only libraries (Recharts, react-grid-layout) into the first load. Mantine is
+        // left out on purpose: a group would also capture components only lazy routes use (+50 KiB).
+        codeSplitting: {
+          groups: [
+            { name: 'react', test: /node_modules[\\/](react|react-dom|scheduler)[\\/]/, priority: 30 },
+            {
+              name: 'tanstack',
+              test: /node_modules[\\/]@tanstack[\\/](react-router|router-core|react-query|query-core)[\\/]/,
+              priority: 20,
+            },
+          ],
+        },
+      },
+    },
+  },
 });

@@ -4,7 +4,6 @@ minimumReleaseAge: 1440
 # Packages exempt from the 24-hour quarantine window
 minimumReleaseAgeExclude:
 
-
 # Explicitly allowed lifecycle scripts (replaces onlyBuiltDependencies)
 allowBuilds:
   esbuild: true

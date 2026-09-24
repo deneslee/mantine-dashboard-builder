@@ -34,7 +34,10 @@ const handles = async () => {
 describe('Shell pane widths', () => {
   // The splitter measures its container for keyboard steps; jsdom has no layout.
   beforeEach(() => {
-    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: 1280, height: 800 } as DOMRect);
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+      width: 1280,
+      height: 800,
+    } as DOMRect);
   });
   afterEach(() => vi.restoreAllMocks());
 

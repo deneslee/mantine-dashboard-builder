@@ -51,6 +51,16 @@ describe('AppearanceSettings', () => {
     expect(save).toBeDisabled();
   });
 
+  it('saves the motion setting', async () => {
+    setup();
+    fireEvent.click(screen.getByRole('radio', { name: 'Reduce' }));
+    expect(localStorage.getItem('motion.v1')).not.toBe('reduce'); // still a draft
+
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+    await waitFor(() => expect(localStorage.getItem('motion.v1')).toBe('reduce'));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Save changes' })).toBeDisabled());
+  });
+
   it('discards the draft without touching the stored setting', () => {
     const { burger } = setup();
     fireEvent.click(screen.getByRole('radio', { name: /Cycle through both/ }));

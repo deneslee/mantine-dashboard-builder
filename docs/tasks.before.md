@@ -77,20 +77,20 @@ I have completed a comprehensive structural exploration of the codebase using th
 
 ### Knowledge Graph & Structural Analysis Summary
 
-* **Graph Topology**: 963 nodes, 1,671 edges across 122 TypeScript files, 23 CSS modules, and 4 documentation files.
-* **Core Pillars (Highest Fan-in)**:
-  * Error subsystem: [`AppError`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/shared/errors/AppError.ts) & [`toAppError`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/shared/errors/AppError.ts#L36) (fan-in: 11)
-  * Layout compounds: [`Page.Root`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/design-system/components/Page/Page.tsx#L18), [`Page.Header`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/design-system/components/Page/Page.tsx#L32), [`Page.Body`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/design-system/components/Page/Page.tsx#L58) (fan-in: 7–8)
-  * Shell state & hooks: [`useSidebar`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/shell/hooks/useShell.ts#L10), [`useShellActions`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/shell/hooks/useShell.ts#L46), [`createShellStore`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/shell/store.ts#L162) (fan-in: 7–9)
-  * Loading skeletons: [`Region`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/loading/skeletons/Skeletons.tsx#L15) (fan-in: 6)
-  * Notification dispatchers: [`notify.error`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/notifications/notify.tsx#L55), [`notify.success`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/notifications/notify.tsx#L68) (fan-in: 5)
-* **Code Complexity & Quality**:
-  * Cyclomatic / Cognitive complexity is remarkably low across the entire codebase (maximum cognitive complexity is 6 in [`loader`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/routes/dashboards/$id.tsx#L8), [`createShellStore`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/shell/store.ts#L162), and [`getJson`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/dashboards/api/client.ts#L22)).
-  * Linters (`oxlint --type-aware` and `stylelint`) reported **0 warnings and 0 errors** on 123 files.
-  * Test suite (`vitest run`): **11 test suites passed, 52/52 tests passing**.
-* **Current State & Progress**:
-  * **Phase 1 (App Chrome & Foundation)**: Fully built and verified (TopNavbar, Splitter resizable panes, Sidebar with compact rail flyouts, ContextBar with dynamic route tabs and notification inbox, error states, and delayed skeleton loaders).
-  * **Phase 2 & Performance Benchmarking (In Progress)**: Read-only [`DashboardGrid`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/dashboards/components/grid/DashboardGrid.tsx) with `react-grid-layout` v2, [`useMainLock`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/shell/hooks/useMainLock.ts) preventing layout thrashing during panel slide transitions, viewport intersection lazy loading (`WidgetTile`), and `/dashboards/perf` benchmark.
+- **Graph Topology**: 963 nodes, 1,671 edges across 122 TypeScript files, 23 CSS modules, and 4 documentation files.
+- **Core Pillars (Highest Fan-in)**:
+  - Error subsystem: [`AppError`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/shared/errors/AppError.ts) & [`toAppError`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/shared/errors/AppError.ts#L36) (fan-in: 11)
+  - Layout compounds: [`Page.Root`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/design-system/components/Page/Page.tsx#L18), [`Page.Header`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/design-system/components/Page/Page.tsx#L32), [`Page.Body`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/design-system/components/Page/Page.tsx#L58) (fan-in: 7–8)
+  - Shell state & hooks: [`useSidebar`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/shell/hooks/useShell.ts#L10), [`useShellActions`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/shell/hooks/useShell.ts#L46), [`createShellStore`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/shell/store.ts#L162) (fan-in: 7–9)
+  - Loading skeletons: [`Region`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/loading/skeletons/Skeletons.tsx#L15) (fan-in: 6)
+  - Notification dispatchers: [`notify.error`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/notifications/notify.tsx#L55), [`notify.success`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/notifications/notify.tsx#L68) (fan-in: 5)
+- **Code Complexity & Quality**:
+  - Cyclomatic / Cognitive complexity is remarkably low across the entire codebase (maximum cognitive complexity is 6 in [`loader`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/routes/dashboards/$id.tsx#L8), [`createShellStore`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/shell/store.ts#L162), and [`getJson`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/dashboards/api/client.ts#L22)).
+  - Linters (`oxlint --type-aware` and `stylelint`) reported **0 warnings and 0 errors** on 123 files.
+  - Test suite (`vitest run`): **11 test suites passed, 52/52 tests passing**.
+- **Current State & Progress**:
+  - **Phase 1 (App Chrome & Foundation)**: Fully built and verified (TopNavbar, Splitter resizable panes, Sidebar with compact rail flyouts, ContextBar with dynamic route tabs and notification inbox, error states, and delayed skeleton loaders).
+  - **Phase 2 & Performance Benchmarking (In Progress)**: Read-only [`DashboardGrid`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/dashboards/components/grid/DashboardGrid.tsx) with `react-grid-layout` v2, [`useMainLock`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/shell/hooks/useMainLock.ts) preventing layout thrashing during panel slide transitions, viewport intersection lazy loading (`WidgetTile`), and `/dashboards/perf` benchmark.
 
 ---
 
@@ -99,26 +99,26 @@ I have completed a comprehensive structural exploration of the codebase using th
 Before conducting the detailed code review and code quality audit, please clarify the following points:
 
 1. **Focus of the Upcoming Review & Quality Audit**:
-   * Would you like the audit to evaluate:
-     * **The Phase 1 Chrome & Shell implementation** (state management, accessibility, responsiveness, test coverage, and Vercel/Mantine convention compliance)?
-     * **The Phase 2 Dashboard Grid & Performance implementation** (react-grid-layout v2 usage, reflow containment, chart memoization, memory leaks)?
-     * **The full repository holistically**?
+   - Would you like the audit to evaluate:
+     - **The Phase 1 Chrome & Shell implementation** (state management, accessibility, responsiveness, test coverage, and Vercel/Mantine convention compliance)?
+     - **The Phase 2 Dashboard Grid & Performance implementation** (react-grid-layout v2 usage, reflow containment, chart memoization, memory leaks)?
+     - **The full repository holistically**?
 
 2. **Dashboard Bundle Code-Splitting vs. Route Preloading**:
-   * The production build generates a `dist/assets/index-*.js` chunk of **620 kB** (gz: 192 kB) because [`dashboards/index.ts`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/dashboards/index.ts) re-exports [`DashboardView`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/dashboards/components/DashboardView.tsx) alongside `dashboardQuery`, pulling `react-grid-layout` into the primary bundle.
-   * Task 1.4 in [`docs/tasks.md`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/docs/tasks.md#L10) suggests lazy-exporting `DashboardView`. Should the upcoming review propose/include the exact refactor for code-splitting [`DashboardView`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/dashboards/components/DashboardView.tsx) into the `/dashboards/$id` chunk?
+   - The production build generates a `dist/assets/index-*.js` chunk of **620 kB** (gz: 192 kB) because [`dashboards/index.ts`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/dashboards/index.ts) re-exports [`DashboardView`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/dashboards/components/DashboardView.tsx) alongside `dashboardQuery`, pulling `react-grid-layout` into the primary bundle.
+   - Task 1.4 in [`docs/tasks.md`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/docs/tasks.md#L10) suggests lazy-exporting `DashboardView`. Should the upcoming review propose/include the exact refactor for code-splitting [`DashboardView`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/dashboards/components/DashboardView.tsx) into the `/dashboards/$id` chunk?
 
 3. **Status of Phase 2 Contracts vs. Current Demo Data**:
-   * Currently, [`src/features/dashboards`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/dashboards) uses demo widgets ([`kpis`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/dashboards/components/widgets/Kpis.tsx), [`regions`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/dashboards/components/widgets/Regions.tsx), [`trend`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/dashboards/components/widgets/TrendChart.tsx), [`broken`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/dashboards/components/widgets/Broken.tsx)) and simple JSON mocks.
-   * The formal Phase 2 architecture calls for:
-     * Zod dashboard schema (versioned, migration pipeline)
-     * Standard `DataFrame` contract (`columns`, `rows`)
-     * Pluggable `WidgetRegistry` and `DatasourceRegistry`
-     * Global time-range picker
-   * Are you planning to review the existing demo implementation as a prototype, or are you looking for a gap analysis against the target Phase 2 specifications?
+   - Currently, [`src/features/dashboards`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/dashboards) uses demo widgets ([`kpis`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/dashboards/components/widgets/Kpis.tsx), [`regions`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/dashboards/components/widgets/Regions.tsx), [`trend`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/dashboards/components/widgets/TrendChart.tsx), [`broken`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/features/dashboards/components/widgets/Broken.tsx)) and simple JSON mocks.
+   - The formal Phase 2 architecture calls for:
+     - Zod dashboard schema (versioned, migration pipeline)
+     - Standard `DataFrame` contract (`columns`, `rows`)
+     - Pluggable `WidgetRegistry` and `DatasourceRegistry`
+     - Global time-range picker
+   - Are you planning to review the existing demo implementation as a prototype, or are you looking for a gap analysis against the target Phase 2 specifications?
 
 4. **Page Header Composition (Task 3 in `tasks.md`)**:
-   * [`tasks.md`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/docs/tasks.md#L20) lists an open item to design a composable page header / control bar (referencing Grafana, Perses, Superset). Is evaluating the current [`Page.Header`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/design-system/components/Page/Page.tsx#L32) and proposing an extensible compound control bar pattern part of what you want in the review?
+   - [`tasks.md`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/docs/tasks.md#L20) lists an open item to design a composable page header / control bar (referencing Grafana, Perses, Superset). Is evaluating the current [`Page.Header`](file:///c:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/src/design-system/components/Page/Page.tsx#L32) and proposing an extensible compound control bar pattern part of what you want in the review?
 
 5. **Code Style & Formatting Guidelines**:
-   * Are there specific strictness criteria you want emphasized in the code quality check (e.g., bundle size limits, strict zero-inline-style policy, React 19 forwardRef eradication, test coverage thresholds)?
+   - Are there specific strictness criteria you want emphasized in the code quality check (e.g., bundle size limits, strict zero-inline-style policy, React 19 forwardRef eradication, test coverage thresholds)?

@@ -1,3 +1,4 @@
+import { useDebouncedCallback, useWindowEvent } from '@mantine/hooks';
 import { useEffect, useRef, type RefObject } from 'react';
 
 type ElementRef = RefObject<HTMLElement | null>;
@@ -15,6 +16,9 @@ export interface MainLockParts {
 /** Fallback past the transition's length, for when its end is never reported (a background tab). */
 const RELEASE_FALLBACK_MS = 100;
 
+/** A window resize counts as finished once no width change has arrived for this long. */
+const WINDOW_SETTLE_MS = 150;
+
 const widthOf = (el: HTMLElement) => el.getBoundingClientRect().width;
 
 /** Width the main pane gives its content: the pane minus a classic (non-overlay) scrollbar. */
@@ -30,15 +34,19 @@ const transitionMs = (el: HTMLElement) =>
   );
 
 /**
- * Pins `<main>` to a fixed width while the side panes move, then lets it follow the pane again.
- * Whatever measures itself inside main (grid width, chart containers) then resizes once per shell
- * change instead of on every animation frame. The pane still animates; the pinned content stays
- * anchored to its edge and is clipped by it (`[data-moving]` in Shell.module.css).
+ * Pins `<main>` to a fixed width while the side panes move or the browser window is being resized,
+ * then lets it follow the pane again. Whatever measures itself inside main (grid width, chart
+ * containers) then resizes once per shell change instead of on every animation frame. The pane
+ * still moves; the pinned content stays anchored to its edge and is clipped by it (`[data-moving]`
+ * in Shell.module.css).
  */
 export function useMainLock({ root, main, mainPane, sidebarPane, contextPane }: MainLockParts) {
   const timer = useRef(0);
   /** Bumped on every pin and release, so a stale transition end cannot release a newer pin. */
   const generation = useRef(0);
+  /** The pin taken by the current window resize, if it is still the newest one. */
+  const resizePin = useRef(-1);
+  const windowWidth = useRef(typeof window === 'undefined' ? 0 : window.innerWidth);
 
   useEffect(() => () => window.clearTimeout(timer.current), []);
 
@@ -95,6 +103,28 @@ export function useMainLock({ root, main, mainPane, sidebarPane, contextPane }: 
       Promise.all(running.map((a) => a.finished)).then(releaseIfCurrent, () => {});
     });
   };
+
+  const releaseAfterResize = useDebouncedCallback(() => {
+    if (generation.current === resizePin.current) release();
+  }, WINDOW_SETTLE_MS);
+
+  /**
+   * Browser window drag: pin on the first width change and release once the width settles. Only
+   * the width counts; a mobile address bar showing or hiding changes just the height. The newest
+   * pin wins: a panel toggle during the drag takes the pin over (and releases it itself), and a
+   * width change after that takes it back.
+   */
+  useWindowEvent('resize', () => {
+    const width = window.innerWidth;
+    if (Math.abs(width - windowWidth.current) < 0.5) return;
+    windowWidth.current = width;
+
+    if (generation.current !== resizePin.current) {
+      hold();
+      resizePin.current = generation.current;
+    }
+    releaseAfterResize();
+  });
 
   return { hold, holdFor, release };
 }

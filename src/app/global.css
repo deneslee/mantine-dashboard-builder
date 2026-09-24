@@ -45,4 +45,12 @@
       animation-duration: 0.01ms !important;
     }
   }
+
+  /* The same for the "reduce motion" setting (Providers sets the attribute; see useMotion). */
+  [data-motion='reduce'] *,
+  [data-motion='reduce'] *::before,
+  [data-motion='reduce'] *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }

@@ -1,113 +1,99 @@
-# Plan 05: Project Structure (bulletproof-react, lightly adapted)
+# Plan 05: Phase 2 Dashboard Read Core
 
-Sep 24, 2026 · v1.1.0 · Tasks: [task-r05-02.md](./tasks/task-r05-02.md) · Research: [research-r05-project-structure.md](./research/research-r05-project-structure.md)
+Sep 24, 2026 · v1.2.0 · Tasks: [task-r05-03.md](./tasks/task-r05-03.md) · Research: [research-dashboard-architectures.md](./research/research-dashboard-architectures.md), [research-r05-table-library.md](./research/research-r05-table-library.md)
 
-**v1.1 changes:** decisions settled: the shell goes to `components/shell/`, routes go to `app/routes/`, and there's no dependency-cruiser. Rules are enforced with oxlint only, adding `import/no-cycle` for cycles. The duplicated `wait()` helper moves to `utils/`.
+**v1.2 changes:** the table widget uses TanStack Table v9 (headless, only the features it uses) for table logic, rendered with Mantine `Table` and virtualized with `@tanstack/react-virtual`. The dashboard list paginates with Mantine `Pagination`.
 
-**Order:** 2 of 5 · **Depends on:** Plan 01's bundle task (or absorbs it) · **Blocks:** Plan 04, Plan 02, Plan 03 (new code should land in its final place)
+**Order:** 5 of 5 · **Depends on:** Plan 04 (`Page.ControlBar`), Plan 03 (surface and layer tokens for widgets), Plan 02 (layer rules: the app layer fills the registries) · **Blocks:** phase 3 (editing)
+
+**v1.1 changes:**
+
+- **Time range:** kept in the URL and resolved at fetch time.
+- **Registries:** static maps filled in by the app layer (this removes the widgets ↔ dashboards cycle).
+- **DataFrame:** one columnar shape, plus `toRows()` for Mantine charts.
+- **Validation:** zod lives in `api/dto.ts`.
+- **Cut:** the migration engine and LTTB.
+- **`container`:** is now a layout section instead of a widget.
+- **Tasks added:** dependency install and dashboard-list virtualization.
 
 ## Objective
-Move from "light feature-based, with cross-feature imports through `index.ts`" to bulletproof-react's **layers where imports go one way**:
-- no imports across features,
-- no barrel files,
-- the app layer composes features.
 
-This is a mechanical move plus three small inversions. There is no behaviour change and no Feature-Sliced Design.
+Replace the hard-coded demo tiles with a versioned dashboard document, pluggable widgets and datasources, a time range kept in the URL, and a virtualized table widget.
 
-## Target structure
-```
-src/
-  app/                       APP LAYER: may import anything; the only place features meet
-    routes/                  TanStack file routes (moved from src/routes), thin
-    App.tsx  Providers.tsx  router.ts  queryClient.ts  global.css
-    shell.tsx                <Shell globalTabs={[notificationsTab]}> composition (inversion 1)
-    registry.ts              widget/datasource maps (Plan 03)
-    breadcrumbs.ts           useBreadcrumbs() (Plan 02)
+## Design
 
-  features/                  FEATURE LAYER: may import shared + design-system, never another feature or app
-    dashboards/  api/{client,dto,mapper,queries}.ts  components/  hooks/  model/  store.ts?
-    settings/    components/  hooks/  model/
-    notifications/ components/Inbox.tsx  tab.ts           (inbox UI only)
-    debug/
-    (later) widgets/  datasources/
+### 1. Dashboard document (the DTO) → domain
 
-  components/                SHARED LAYER: shared UI; imports only shared + design-system
-    errors/                  ErrorState, WidgetBoundary, NotFound, RouteError, AppCrash, OfflineBanner (from features/errors)
-    feedback/                Skeletons, SlowHint, RouteProgress (from features/loading)
-    shell/                   Shell, navbar, sidebar, context-bar, panel + its store/hooks/model (from features/shell)
-  hooks/                     useDelayedPending, useMotion (Plan 01)
-  lib/                       notify.tsx (from notifications), errors/AppError (from shared/errors), user.tsx (from shared/user)
-  stores/                    inbox.ts (from notifications/store: notify writes to it, so it's shared)
-  config/                    config.ts (from shared/config.ts)
-  types/                     ContextTab, DataFrame, WidgetDefinition, DatasourceDefinition, … (as needed)
-  utils/
-  testing/                   render, setup, storyRouter (from src/test)
+- **Wire shape:** `api/dto.ts` holds the zod schema for the stored document, `DashboardDocV1`, following Perses: panel specs separate from their positions.
+  - `version: 1`, `id`, `title`, `description`
+  - `timeRange: { from: string; to: string }`: raw strings, for example `now-24h`
+  - `refresh?: string`: `off`, `30s`, `1m`, and so on
+  - `variables: VariableDef[]`
+  - `widgets: Record<string, { type; title; options; queries }>`
+  - `layouts: Record<'lg' | 'md' | 'sm', { i; x; y; w; h }[]>`: the breakpoints match `tokens.grid.breakpoints`
+- **Mapping:** `api/mapper.ts` turns it into the domain types in `model/`, so the UI never sees the DTO (AGENTS.md).
+- **Versions:** `z.discriminatedUnion('version', [V1])`. No migration engine until there is a v2.
+- **Replaces:** the reading-order reflow in `model/layouts.ts`, which is removed once every demo dashboard has explicit per-breakpoint layouts.
+- **Row sections:** Perses's `PanelGroup` would be a layout concern, not a widget. RGL can't nest grids. Deferred.
 
-  design-system/             LOWEST LAYER: tokens, theme, Mantine extensions, Page, layers.css (Plan 04)
-```
-**Allowed imports:** `design-system` ← shared (`components`, `hooks`, `lib`, `stores`, `config`, `types`, `utils`, `testing`) ← `features` ← `app`.
+### 2. DataFrame
 
-## Changes from plain bulletproof-react (deliberate)
-1. **`design-system/` is its own lowest layer**, below `components/`. It owns the tokens and theme (Plan 04), so it can't depend on anything else.
-2. **Features keep `api/{client,dto,mapper,queries}.ts` and `model/`** (types and zod), instead of bulletproof's `api/` + `types/`. That keeps the AGENTS.md rule that the UI never sees DTOs.
-3. **File names stay PascalCase, named after the export** (AGENTS.md), not kebab-case.
-4. **A shared module may keep its own store and hooks together.** `components/shell/` keeps its Zustand store, `ShellProvider` and hooks. Only `ShellProvider` knows it's Zustand (AGENTS.md composition rule).
-5. **Routes live in `app/routes/`** and stay thin. `-name.tsx` files are still ignored by the router.
-6. **The app layer composes registries and cross-feature wiring.** Dashboards receive widgets and datasources through a provider, so they never import them (Plan 03).
-7. **Barrel files:** none in `features/` or the shared folders. `design-system/index.ts` also goes; import `design-system/theme/theme` and similar directly.
+- **Location:** `src/types/dataframe.ts` (the shared layer after Plan 02).
+- **Shape:** one columnar shape, following Grafana: `{ name?; length; fields: { name; type: 'time'|'number'|'string'|'boolean'; values: unknown[]; config? }[] }`.
+- **Charts:** Mantine charts take row objects. `toRows(frame)` converts; widgets call it through a memoized selector, once per frame change.
+- **Tables:** read the columns directly (the virtualizer reads index `i` of each field).
+- **Deferred:** LTTB downsampling, until a real datasource returns more than about 5k points.
 
-## Three inversions (the only non-mechanical changes)
-1. **Shell ↔ notifications cycle:**
-   - The shell stops importing `notificationsTab`. `useContextTabs` merges the route's tabs with a `globalTabs` prop.
-   - `app/shell.tsx` passes `[notificationsTab]`.
-   - `ContextTab` moves to `types/` (or stays in `components/shell/model` as a shared type).
-2. **Moving `notify` breaks the inbox link:** `notify` moves to `lib/` and must still write warnings and errors to the inbox. The inbox store therefore moves to `stores/inbox.ts`, and the feature keeps only `Inbox.tsx` and the tab.
-3. **Settings reaches into the shell:** `useAppearanceForm` uses shell hooks. That's allowed once the shell is shared, so no change is needed. Record it as the intended pattern.
+### 3. Registries (static maps filled in by the app layer)
 
-## Enforcement (oxlint only; no dependency-cruiser)
-* **Direction rules: `no-restricted-imports` overrides by folder:**
-  - `src/design-system/**`: no `@/app`, `@/features`, `@/components`, `@/lib`, `@/stores`, `@/hooks`
-  - shared folders: no `@/features/**` and no `@/app/**`
-  - `src/features/**`: no `@/app/**` and no `@/features/**`
-* **Relative imports:** inside a feature, imports are relative. An import from another feature through the alias is therefore always an error. Also ban the relative pattern `**/features/**` inside `src/features/**`, so `../../../features/x` is caught too.
-* **Cycles:** enable oxlint's `import` plugin with `import/no-cycle`. Check that it runs acceptably fast with `--type-aware`.
-* **Delete the barrel rule:** the old `@/features/*/*`-must-go-through-index rule is removed, since there are no barrels any more.
-* **Why no dependency-cruiser:** these rules cover this repo's size. Revisit it only if a violation gets past oxlint.
+- **Contracts** (types only, shared layer):
+  - `WidgetDefinition<TOptions>`: `{ type, name, icon, defaultSize, optionsSchema, component: LazyExoticComponent, skeleton }`
+  - `DatasourceDefinition`: `{ type, name, query(spec, ctx, signal): Promise<DataFrame>, test?(config) }`
+- **Definitions:** each widget or datasource lives in its own feature (`features/widgets/*`, `features/datasources/*`) and exports its definition.
+- **Registration:** `app/registry.ts` builds the maps: `const widgets = { chart, table, kpi, markdown } satisfies Record<string, WidgetDefinition>`. It hands them to the dashboard grid through `DashboardRegistryProvider` (a context).
+  - Dashboards never import the widgets feature, and widgets never import dashboards. The app layer composes them (bulletproof-react, Plan 02).
+  - There are no import-time `registerWidget()` side effects, so tree-shaking and the `sideEffects` fix from Plan 01 keep working.
+- **Current widgets:** the existing `widgetKinds.tsx` turns into the first definitions (`kpis → kpi`, `trend → chart`, `regions → chart`/`table`). `broken` stays as a story or test fixture.
+- **Adapters:** `local-json` (`/data/…`) and `mock` (time series generated on the fly, seeded by range).
 
-## Migration steps (each is its own commit; build, test and lint must pass after each)
-1. **Baseline:** add the oxlint direction rules and `import/no-cycle` as **warnings** and save the list of violations. It should show the `shell ↔ notifications` cycle.
-2. **Moves with no edits** (`git mv`, then update imports; keep moves and edits in separate commits so history follows the files):
-   - `features/errors` → `components/errors`
-   - `features/loading` → `components/feedback` + `hooks/useDelayedPending`
-   - `shared/config.ts` → `config/`
-   - `shared/errors` → `lib/errors`
-   - `shared/user` → `lib/user.tsx`
-   - `src/test` → `src/testing` (update `vitest.config.ts`)
-   - `wait(ms)` (duplicated in `DebugPage.tsx` and `useAppearanceForm.ts`) → `utils/wait.ts`
-   - delete the empty `shared/hooks|types|utils` folders
-3. **Notifications split:** `notify` → `lib/notify.tsx`, store → `stores/inbox.ts`, UI stays in the feature.
-4. **Shell:** fix the cycle (inversion 1), then move `features/shell` → `components/shell`.
-5. **Remove barrels:** delete `features/*/index.ts` and `design-system/index.ts` and rewrite imports as direct paths (a codemod or `qartez_move`/`qartez_rename_file` keep references updated). Fixes the root cause behind Plan 01's bundle problem.
-6. **Routes:** `src/routes` → `src/app/routes`. Update `routesDirectory` and `generatedRouteTree` in `vite.config.ts` and the oxlint override globs, then regenerate `routeTree.gen.ts`.
-7. **Turn enforcement on:** switch the oxlint direction rules and `import/no-cycle` to **error**. The baseline must be empty.
-8. **Docs:** rewrite AGENTS.md › Structure (tree, import direction, changes from bulletproof, no barrels), and fix path references in `docs/*.md` and the other plans.
+### 4. Time range (in the URL)
 
-## Decisions (settled Sep 24, 2026)
-1. **Shell location:** `components/shell/` (shared, with its own store and hooks).
-2. **Routes:** move to `app/routes/`.
-3. **dependency-cruiser:** not added. oxlint direction rules plus `import/no-cycle` are enough for now.
+- **Where it lives:** route search params, validated with zod in `validateSearch`: `?from=now-24h&to=now&refresh=1m`. That makes it shareable, lets back and forward work, and needs no context or store slice. The dashboard document gives the defaults.
+- **Query keys:** `['ds', datasourceId, queryHash, { from, to }]` with the **raw** strings, converted to absolute times inside `queryFn`. The key stays stable between renders; a refetch or the refresh interval re-resolves "now".
+- **Auto-refresh:** `refetchInterval` from `refresh`, paused while the tab is hidden (React Query's default).
+- **`keepPreviousData`:** on every datasource query, so changing the range never shows the skeleton again.
+- **Picker:** `TimeRangePicker` is built from Mantine `Combobox` (relative presets `15m`, `1h`, `24h`, `7d`) plus a `@mantine/dates` range `DatePicker` for absolute ranges. `RefreshPicker` is a `Select`. Both sit in `Page.ControlBar`.
+
+### 5. Table widget and virtualization
+
+- **Dependencies:** `@tanstack/react-table` **v9** and `@tanstack/react-virtual`, neither installed yet. See [research-r05-table-library.md](./research/research-r05-table-library.md) for why this pair, and not mantine-react-table or AG Grid.
+- **Division of work:**
+  - **TanStack Table** handles the table logic: column definitions, sorting, column visibility and sizing.
+  - **Mantine `Table`** renders it: `Table.Thead`, `Table.Tr`, `Table.Td`, `TableScrollContainer`, `stickyHeader`.
+  - **react-virtual** decides which rows are rendered, inside `ScrollArea` (`viewportRef` as the scroll element).
+  - No styles come from a third-party table.
+- **Bundle size:** v9 only bundles the features the table declares. Start with `tableFeatures({ rowSortingFeature, columnVisibilityFeature, columnSizingFeature })`; filtering and grouping are added only when a widget needs them.
+- **Columns:** built from `DataFrame.fields`, reading column values directly with no `toRows()` step. The widget options can override the label, format (`NumberFormatter`) and alignment per field.
+- **React Compiler:** v9 is built on TanStack Store and documented as working under the React Compiler, which this repo has on. That is the main reason for v9 over v8.
+- **Wrapper:** `createTableHook` (v9) gives a `useAppTable` with the feature set and Mantine cell renderers preset, so every table in the app behaves the same.
+- **Dashboard list:** past 50 items, paginate with Mantine `Pagination` / `usePagination`. No virtualization needed there.
 
 ## Out of scope
-New features, renaming components, changing behaviour, and Feature-Sliced Design layers (`entities/`, `widgets/`, `pages/`).
+
+Variables UI and interpolation (the schema only reserves the field), panel repeat, cross-filtering, LTTB, row sections, and editing.
 
 ## Risks
-* **Large diff across many files.** Mitigation: moves without edits in their own commits, qartez or codemod-driven reference updates, and a green build after every step.
-* **The TanStack route move breaks the generated route tree.** Mitigation: step 6 is on its own, with the dev server and a build checked right after.
-* **Plans 02–04 refer to old paths.** Mitigation: step 8 updates them. Plans 04, 02 and 03 run after this one.
+
+- Mantine charts might be slow re-rendering large row arrays. The fix is to downsample in the datasource, not the widget.
+- Relative ranges and cache: two tabs on `now-1h` share one cache entry. That is intended (with a short `staleTime`, it just works).
 
 ## Verification
-* After every step: `pnpm build`, `pnpm test` and `pnpm lint` pass, and Storybook builds.
-* Final:
-  - `pnpm lint` passes with the direction rules and `import/no-cycle` on error, and a fixture with a cross-feature import fails
-  - `find src/features -name index.ts` returns nothing
-  - the entry chunk contains no `react-draggable`, confirming Plan 01's bundle fix still holds without `sideEffects` doing the work
+
+- **Unit tests:**
+  - DTO schema: valid and invalid documents, unknown `version` rejected
+  - mapper
+  - `toRows`
+  - relative-range resolution
+- **Integration test:** changing the range in the URL refetches widget queries, keeps the grid mounted (same DOM node) and shows the previous data while fetching.
+- **Table:** 10k rows scroll with no long task over 50 ms (production build).
+- **Demo data:** every demo dashboard exists as `public/data/dashboards/<id>.json` and passes the schema, and `/dashboards/$id` renders it.
