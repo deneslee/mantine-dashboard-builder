@@ -4,9 +4,9 @@
  * read `var(--app-*)` and TS reads `theme.other`.
  */
 
-import { brand, grid, motion as primitiveMotion, shell, zIndex } from './primitives';
+import { grid, motion as primitiveMotion, shell, zIndex } from './primitives';
 
-export { brand, grid, shell, zIndex };
+export { grid, shell, zIndex };
 
 /**
  * Chrome colors are the same in light and dark schemes; only the content area follows
@@ -50,5 +50,5 @@ export const motion = {
   ease: primitiveMotion.easing.ease,
 } as const;
 
-export const tokens = { shell, zIndex, chrome, surface, motion, grid, brand } as const;
+export const tokens = { shell, zIndex, chrome, surface, motion, grid } as const;
 export type Tokens = typeof tokens;

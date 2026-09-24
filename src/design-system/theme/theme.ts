@@ -2,7 +2,7 @@ import { createTheme, mergeThemeOverrides, type CSSVariablesResolver } from '@ma
 import { components } from './components';
 import { tokens } from '../tokens/tokens';
 import { primitives } from '../tokens/primitives';
-import { semantic, toCssVars } from '../tokens/semantic';
+import { semantic, toCssVars, virtualColors } from '../tokens/semantic';
 
 export const theme = createTheme({
   primaryColor: 'indigo',
@@ -17,7 +17,10 @@ export const theme = createTheme({
     fontWeight: primitives.fontWeights.medium,
     sizes: primitives.headings,
   },
-  colors: primitives.palette,
+  colors: {
+    ...primitives.palette,
+    ...virtualColors,
+  },
   fontSizes: primitives.fontSizes,
   fontWeights: primitives.fontWeights,
   spacing: primitives.spacing,

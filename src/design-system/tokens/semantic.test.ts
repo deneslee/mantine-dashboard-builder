@@ -161,4 +161,13 @@ describe('semantic tokens and toCssVars generator', () => {
     const resolved = cssVariablesResolver(theme as any);
     expect(resolved).toEqual(cssVars);
   });
+
+  it('defines virtualColor aliases for semantic prop usage', () => {
+    const aliasNames = ['brand', 'neutral', 'danger', 'warning', 'success', 'info'] as const;
+    for (const name of aliasNames) {
+      expect(theme.colors?.[name]).toBeDefined();
+      expect(theme.colors?.[name]).toHaveLength(10);
+      expect(theme.colors?.[name]?.[0]).toContain(`--mantine-color-${name}-0`);
+    }
+  });
 });

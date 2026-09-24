@@ -1,8 +1,22 @@
+import type { DefaultMantineColor, MantineColorsTuple } from '@mantine/core';
 import type { Tokens } from '../tokens/tokens';
 
 declare module '@mantine/core' {
   export interface MantineThemeSizesOverride {
     spacing: Record<'3xs' | '2xs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl', string>;
+  }
+
+  export interface MantineThemeColorsOverride {
+    colors: Record<
+      | DefaultMantineColor
+      | 'brand'
+      | 'neutral'
+      | 'danger'
+      | 'warning'
+      | 'success'
+      | 'info',
+      MantineColorsTuple
+    >;
   }
 
   // Declaration merging: theme.other is typed as the token object.

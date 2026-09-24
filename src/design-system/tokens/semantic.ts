@@ -1,4 +1,4 @@
-import { rem } from '@mantine/core';
+import { rem, virtualColor } from '@mantine/core';
 import { primitives } from './primitives';
 
 /**
@@ -24,6 +24,19 @@ export function isSchemeValue(val: unknown): val is SchemeValue<string> {
     typeof (val as SchemeValue).dark === 'string'
   );
 }
+
+/**
+ * Status and role colors as Mantine virtualColor aliases.
+ * Enables props such as `color="danger"` or `color="brand"`.
+ */
+export const virtualColors = {
+  brand: virtualColor({ name: 'brand', light: 'indigo', dark: 'indigo' }),
+  neutral: virtualColor({ name: 'neutral', light: 'gray', dark: 'gray' }),
+  danger: virtualColor({ name: 'danger', light: 'red', dark: 'red' }),
+  warning: virtualColor({ name: 'warning', light: 'yellow', dark: 'yellow' }),
+  success: virtualColor({ name: 'success', light: 'green', dark: 'green' }),
+  info: virtualColor({ name: 'info', light: 'blue', dark: 'blue' }),
+} as const;
 
 // 1. Elevation & Surfaces: Atlassian vocabulary + exact surface model
 export const elevation = {

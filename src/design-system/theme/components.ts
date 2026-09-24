@@ -1,64 +1,42 @@
-import {
-  ActionIcon,
-  Alert,
-  Drawer,
-  Menu,
-  Modal,
-  NavLink,
-  Notification,
-  Paper,
-  Popover,
-  ScrollArea,
-  Select,
-  Skeleton,
-  Tabs,
-  Tooltip,
-  type MantineThemeComponents,
-} from '@mantine/core';
-import actionIcon from './styles/ActionIcon.module.css';
-import navLink from './styles/NavLink.module.css';
-import paper from './styles/Paper.module.css';
-import tabs from './styles/Tabs.module.css';
+import type { MantineThemeComponents } from '@mantine/core';
+import { ActionIconTheme } from './components/ActionIcon';
+import { AlertTheme } from './components/Alert';
+import { ButtonTheme } from './components/Button';
+import { CardTheme } from './components/Card';
+import { DrawerTheme } from './components/Drawer';
+import { InputTheme } from './components/Input';
+import { MenuTheme } from './components/Menu';
+import { ModalTheme } from './components/Modal';
+import { NavLinkTheme } from './components/NavLink';
+import { NotificationTheme } from './components/Notification';
+import { PaperTheme } from './components/Paper';
+import { PopoverTheme } from './components/Popover';
+import { ScrollAreaTheme } from './components/ScrollArea';
+import { SelectTheme } from './components/Select';
+import { SkeletonTheme } from './components/Skeleton';
+import { TabsTheme } from './components/Tabs';
+import { TooltipTheme } from './components/Tooltip';
 
 /**
  * Component-level defaults and custom variants.
- * Variants added here: ActionIcon `chrome`, Paper `panel` | `widget`, NavLink `sidebar`.
+ * Sourced from modular theme/components/<Name>.ts files.
  */
 export const components: MantineThemeComponents = {
-  ActionIcon: ActionIcon.extend({
-    defaultProps: { variant: 'subtle', color: 'gray', size: 'lg' },
-    classNames: actionIcon,
-  }),
-  Tooltip: Tooltip.extend({
-    defaultProps: { openDelay: 400, withArrow: false, position: 'bottom', fz: 'xs' },
-  }),
-  Paper: Paper.extend({
-    defaultProps: { radius: 'md' },
-    classNames: paper,
-  }),
-  NavLink: NavLink.extend({
-    defaultProps: { variant: 'sidebar', childrenOffset: 28, noWrap: true },
-    classNames: navLink,
-  }),
-  Tabs: Tabs.extend({
-    defaultProps: { variant: 'default' },
-    classNames: tabs,
-  }),
-  ScrollArea: ScrollArea.extend({
-    defaultProps: { type: 'hover', scrollbarSize: 8, offsetScrollbars: false },
-  }),
-  Drawer: Drawer.extend({
-    defaultProps: { overlayProps: { backgroundOpacity: 0.35, blur: 2 }, transitionProps: { duration: 180 } },
-  }),
-  Modal: Modal.extend({
-    defaultProps: { centered: true, overlayProps: { backgroundOpacity: 0.45, blur: 2 } },
-  }),
-  Menu: Menu.extend({
-    defaultProps: { shadow: 'md', width: 200, position: 'bottom-end', withinPortal: true },
-  }),
-  Popover: Popover.extend({ defaultProps: { shadow: 'md', withinPortal: true } }),
-  Select: Select.extend({ defaultProps: { checkIconPosition: 'right', allowDeselect: false } }),
-  Alert: Alert.extend({ defaultProps: { variant: 'light', radius: 'md' } }),
-  Notification: Notification.extend({ defaultProps: { radius: 'md', withBorder: true } }),
-  Skeleton: Skeleton.extend({ defaultProps: { radius: 'sm', animate: true } }),
+  ActionIcon: ActionIconTheme,
+  Alert: AlertTheme,
+  Button: ButtonTheme,
+  Card: CardTheme,
+  Drawer: DrawerTheme,
+  Input: InputTheme,
+  Menu: MenuTheme,
+  Modal: ModalTheme,
+  NavLink: NavLinkTheme,
+  Notification: NotificationTheme,
+  Paper: PaperTheme,
+  Popover: PopoverTheme,
+  ScrollArea: ScrollAreaTheme,
+  Select: SelectTheme,
+  Skeleton: SkeletonTheme,
+  Tabs: TabsTheme,
+  Tooltip: TooltipTheme,
 };
