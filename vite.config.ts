@@ -4,6 +4,8 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
+const uploadSourcemaps = Boolean(process.env.SENTRY_AUTH_TOKEN);
+
 export default defineConfig({
   base: '/mantine-dashboard-builder/',
   plugins: [
@@ -15,13 +17,16 @@ export default defineConfig({
       org: process.env.SENTRY_ORG,
       project: process.env.SENTRY_PROJECT,
       authToken: process.env.SENTRY_AUTH_TOKEN,
-      disable: !process.env.SENTRY_AUTH_TOKEN,
+      disable: !uploadSourcemaps,
+      // Uploaded to Sentry, then removed so the deployed site never serves them.
+      sourcemaps: { filesToDeleteAfterUpload: ['./dist/**/*.map'] },
     }),
   ],
   resolve: { tsconfigPaths: true },
   server: { port: 5173 },
   build: {
-    sourcemap: 'hidden',
+    // Source maps only when they go to Sentry; otherwise GitHub Pages would publish them.
+    sourcemap: uploadSourcemaps ? 'hidden' : false,
     rolldownOptions: {
       output: {
         // Framework code every page loads, in its own long-cached chunks: an app-only deploy keeps

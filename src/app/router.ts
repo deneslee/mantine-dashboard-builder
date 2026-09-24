@@ -1,7 +1,7 @@
 import { createRouter } from '@tanstack/react-router';
 import { NotFound, RouteError } from '@/features/errors';
 import { ListSkeleton } from '@/features/loading';
-import { bindRouterToSentry } from '@/integrations/sentry';
+import { connectRouter } from '@/integrations/sentry/runtime';
 import { routeTree } from '@/routeTree.gen';
 import type { QueryClient } from '@tanstack/react-query';
 
@@ -21,7 +21,7 @@ export function createAppRouter(queryClient: QueryClient) {
     scrollRestoration: true,
   });
 
-  bindRouterToSentry(router);
+  connectRouter(router);
 
   return router;
 }

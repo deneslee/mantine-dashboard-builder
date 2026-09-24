@@ -21,8 +21,10 @@ export function initSentry(overrideConfig?: SentryConfig): void {
     replaysSessionSampleRate: currentConfig.replaysSessionSampleRate,
     replaysOnErrorSampleRate: currentConfig.replaysOnErrorSampleRate,
     integrations: [
-      Sentry.replayIntegration({ maskAllText: false, blockAllMedia: false }),
-      Sentry.consoleLoggingIntegration({ levels: ['log', 'info', 'warn', 'error'] }),
+      // Sentry's privacy defaults: replays mask all text and block media, so user data never leaves the page.
+      Sentry.replayIntegration({ maskAllText: true, blockAllMedia: true }),
+      // Only problems, not every debug log.
+      Sentry.consoleLoggingIntegration({ levels: ['warn', 'error'] }),
     ],
   });
 }
