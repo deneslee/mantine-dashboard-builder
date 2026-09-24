@@ -24,8 +24,8 @@ import {
 } from '@tabler/icons-react';
 import { useState } from 'react';
 import { notify } from '@/lib/notify/notify';
-import { getActiveSentryConfig, reconfigureSentry } from '../client';
-import { resetSentryConfig, saveSentryConfig, type SentryConfig } from '../settings';
+import { getActiveSentryConfig, reconfigureSentry } from '@/lib/sentry/client';
+import { resetSentryConfig, saveSentryConfig, type SentryConfig } from '@/lib/sentry/settings';
 
 export function SentrySettings({ onConfigChanged }: { onConfigChanged?: () => void }) {
   const [config, setConfig] = useState<SentryConfig>(getActiveSentryConfig);

@@ -1,7 +1,7 @@
 import { createRouter } from '@tanstack/react-router';
 import { NotFound, RouteError } from '@/components/errors';
 import { ListSkeleton } from '@/components/feedback';
-import { connectRouter } from '@/integrations/sentry/runtime';
+import { connectRouter } from '@/lib/sentry/runtime';
 import { routeTree } from '@/routeTree.gen';
 import type { QueryClient } from '@tanstack/react-query';
 

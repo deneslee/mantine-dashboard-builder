@@ -8,7 +8,7 @@ import {
   IconPlayerPlay,
 } from '@tabler/icons-react';
 import { useState } from 'react';
-import { getSentryStatus } from '../client';
+import { getSentryStatus } from '@/lib/sentry/client';
 
 export function SentryStatusCard() {
   const [status] = useState(getSentryStatus);

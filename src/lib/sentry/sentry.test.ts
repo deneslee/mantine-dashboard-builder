@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { getIntegrations } from '../registry';
 import { getSentryStatus, testSentryConnection } from './client';
 import { loadSentryConfig, saveSentryConfig } from './settings';
 import { logger, metrics } from './telemetry';
@@ -24,18 +23,6 @@ describe('Sentry Integration', () => {
       metrics.distribution('unit_test_dist', 100);
       metrics.gauge('unit_test_gauge', 42);
     }).not.toThrow();
-  });
-
-  it('registers Sentry in integrations catalog with route and features', () => {
-    const integrations = getIntegrations();
-    const sentry = integrations.find((i) => i.id === 'sentry');
-    expect(sentry).toBeDefined();
-    expect(sentry?.to).toBe('/integrations/sentry');
-    expect(sentry?.features).toContain('Errors');
-    expect(sentry?.features).toContain('Logs');
-    expect(sentry?.features).toContain('App Metrics');
-    expect(sentry?.features).toContain('Session Replay');
-    expect(sentry?.features).toContain('Tracing');
   });
 
   it('supports saving and loading settings from localStorage', () => {

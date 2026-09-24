@@ -1,4 +1,5 @@
-import { SentryIcon, getSentryStatus } from './sentry';
+import { getSentryStatus } from '@/lib/sentry/client';
+import { SentryIcon } from './components/sentry/SentryIcon';
 import type { IntegrationDefinition } from './types';
 
 export function getIntegrations(): IntegrationDefinition[] {

@@ -24,11 +24,11 @@ import {
 import { Link } from '@tanstack/react-router';
 import { useState } from 'react';
 import { Page } from '@/design-system';
-import { getSentryStatus } from '../sentry/client';
-import { SentryIcon } from '../sentry/components/SentryIcon';
-import { SentrySettings } from '../sentry/components/SentrySettings';
-import { SentryStatusCard } from '../sentry/components/SentryStatusCard';
-import { SentryVerificationCard } from '../sentry/components/SentryVerificationCard';
+import { getSentryStatus } from '@/lib/sentry/client';
+import { SentryIcon } from './sentry/SentryIcon';
+import { SentrySettings } from './sentry/SentrySettings';
+import { SentryStatusCard } from './sentry/SentryStatusCard';
+import { SentryVerificationCard } from './sentry/SentryVerificationCard';
 
 export function SentryPage() {
   const [activeTab, setActiveTab] = useState<string | null>('verification');

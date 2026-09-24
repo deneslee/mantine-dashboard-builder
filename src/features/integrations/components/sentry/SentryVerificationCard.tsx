@@ -36,7 +36,7 @@ import {
   getSentryStatus,
   testSentryConnection,
   type ConnectionTestResult,
-} from '../client';
+} from '@/lib/sentry/client';
 import classes from './SentryVerificationCard.module.css';
 
 interface ActivityLogItem {
