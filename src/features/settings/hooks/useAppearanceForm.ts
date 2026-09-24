@@ -2,10 +2,12 @@ import { useMantineColorScheme, type MantineColorScheme } from '@mantine/core';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useShellActions, useSidebar, type BurgerBehavior } from '@/features/shell';
+import { useMotionPreference, type MotionPreference } from '@/shared/hooks/useMotion';
 
 export interface AppearanceValues {
   burger: BurgerBehavior;
   colorScheme: MantineColorScheme;
+  motion: MotionPreference;
 }
 
 /**
@@ -26,18 +28,20 @@ export function useAppearanceForm() {
   const { burger } = useSidebar();
   const { setBurgerBehavior } = useShellActions();
   const { colorScheme, setColorScheme } = useMantineColorScheme();
+  const [motion, setMotion] = useMotionPreference();
   const [draft, setDraft] = useState<Partial<AppearanceValues>>({});
 
-  const saved: AppearanceValues = { burger, colorScheme };
+  const saved: AppearanceValues = { burger, colorScheme, motion };
   const values: AppearanceValues = { ...saved, ...draft };
-  const dirty = values.burger !== saved.burger || values.colorScheme !== saved.colorScheme;
+  const dirty = (Object.keys(saved) as (keyof AppearanceValues)[]).some((key) => values[key] !== saved[key]);
 
   const mutation = useMutation({
     mutationFn: async (next: AppearanceValues) => {
       await wait(MIN_SAVING_MS);
-      // Both setters persist: the shell store to `shell.v1`, Mantine to its color-scheme key.
+      // Each setter persists: the shell store to `shell.v1`, Mantine to its color-scheme key, motion to `motion.v1`.
       setBurgerBehavior(next.burger);
       setColorScheme(next.colorScheme);
+      setMotion(next.motion);
     },
     onSuccess: () => setDraft({}),
     meta: { successMessage: 'Settings saved', source: 'Settings' },

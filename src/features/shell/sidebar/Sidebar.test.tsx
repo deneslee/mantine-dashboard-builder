@@ -75,7 +75,10 @@ describe('Sidebar compact rail', () => {
     expect(parent).toHaveAttribute('aria-expanded', 'false');
 
     fireEvent.click(parent);
-    expect(await screen.findByRole('menuitem', { name: 'Operations' })).toHaveAttribute('aria-current', 'page');
+    expect(await screen.findByRole('menuitem', { name: 'Operations' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
     expect(screen.getByRole('menuitem', { name: 'All dashboards' })).not.toHaveAttribute('aria-current');
     expect(parent).toHaveAttribute('aria-expanded', 'true');
   });
@@ -105,8 +108,15 @@ describe('Sidebar layout', () => {
 
   it('names a group by its optional title', async () => {
     const groups: NavGroup[] = [
-      { id: 'untitled', items: [{ id: 'templates', label: 'Templates', icon: IconTemplate, to: '/templates' }] },
-      { id: 'system', label: 'System', items: [{ id: 'settings', label: 'Settings', icon: IconSettings, to: '/settings' }] },
+      {
+        id: 'untitled',
+        items: [{ id: 'templates', label: 'Templates', icon: IconTemplate, to: '/templates' }],
+      },
+      {
+        id: 'system',
+        label: 'System',
+        items: [{ id: 'settings', label: 'Settings', icon: IconSettings, to: '/settings' }],
+      },
     ];
     renderAt('/', true, {}, <SidebarNav groups={groups} />);
     const system = await screen.findByRole('group', { name: 'System' });

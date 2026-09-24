@@ -26,7 +26,11 @@ export function SidebarNav({ groups, className }: { groups: NavGroup[]; classNam
 function SidebarGroup({ group }: { group: NavGroup }) {
   const labelId = useId();
   return (
-    <Stack gap={2} role={group.label ? 'group' : undefined} aria-labelledby={group.label ? labelId : undefined}>
+    <Stack
+      gap={2}
+      role={group.label ? 'group' : undefined}
+      aria-labelledby={group.label ? labelId : undefined}
+    >
       {group.label ? (
         <Text id={labelId} size="xs" fw={500} className={classes.groupLabel}>
           <span>{group.label}</span>

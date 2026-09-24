@@ -1,80 +1,125 @@
-# Plan 02: Composable Page Header & Control Bar
+# Plan 02: Project Structure (bulletproof-react, lightly adapted)
 
-Sep 24, 2026 · v1.1.0 · Tasks: [task-r02-02.md](./tasks/task-r02-02.md) · Research: [research-page-header-composition.md](./research/research-page-header-composition.md)
+Sep 24, 2026 · v1.1.0 · Tasks: [task-r02-02.md](./tasks/task-r02-02.md) · Research: [research-r02-project-structure.md](./research/research-r02-project-structure.md)
 
-**Order:** 4 of 5 · **Depends on:** Plan 04 (spacing, surface and radius tokens), Plan 05 (final file locations, no barrels) · **Blocks:** Plan 03 (`TimeRangePicker` sits in `Page.ControlBar`)
+**v1.1 changes:** decisions settled: the shell goes to `components/shell/`, routes go to `app/routes/`, and there's no dependency-cruiser. Rules are enforced with oxlint only, adding `import/no-cycle` for cycles. The duplicated `wait()` helper moves to `utils/`.
 
-**v1.1 changes:**
-- **Structure:** `Page.Heading` groups Title and Description, next to Actions.
-- **Overflow:** Mantine `OverflowList` handles actions that don't fit, instead of a custom menu.
-- **Responsiveness:** container queries replace viewport breakpoints.
-- **Breadcrumbs:** come from router matches and render as `<Link>`.
-- **Cut:** the editable title (it's phase 3).
-- **Sticky control bar:** decided (not in v1).
-- **Migration:** covers all 6 current callers.
+**Order:** 2 of 5 · **Depends on:** Plan 01's bundle task (or absorbs it) · **Blocks:** Plan 03, Plan 04, Plan 05 (new code should land in its final place)
 
 ## Objective
-Replace the fixed `title / description / actions` props of `Page.Header` with compound parts. That gives breadcrumbs, a title block, actions and a control bar their own slots, in the style of Grafana's `PageToolbar` and Metabase's parameter bar, without adding boolean props.
 
-## Design
+Move from "light feature-based, with cross-feature imports through `index.ts`" to bulletproof-react's **layers where imports go one way**:
 
-### 1. Parts
+- no imports across features,
+- no barrel files,
+- the app layer composes features.
+
+This is a mechanical move plus three small inversions. There is no behaviour change and no Feature-Sliced Design.
+
+## Target structure
+
 ```
-Page.Root            container-type: inline-size (responds to container width, not screen size)
-├── Page.Header
-│   ├── Page.Breadcrumbs   <nav aria-label="Breadcrumb">, Mantine Breadcrumbs, items rendered as <Link>
-│   ├── Page.TitleRow      flex row, wraps via @container
-│   │   ├── Page.Heading   stack: Title + Description
-│   │   │   ├── Page.Title         <h1> (Title order=1), truncates
-│   │   │   └── Page.Description   dimmed text
-│   │   └── Page.Actions   Mantine OverflowList → items that don't fit move to a Menu
-│   └── Page.ControlBar    wrapping ribbon; only accepts children (time range, refresh, filters)
-└── Page.Body
+src/
+  app/                       APP LAYER: may import anything; the only place features meet
+    routes/                  TanStack file routes (moved from src/routes), thin
+    App.tsx  Providers.tsx  router.ts  queryClient.ts  global.css
+    shell.tsx                <Shell globalTabs={[notificationsTab]}> composition (inversion 1)
+    registry.ts              widget/datasource maps (Plan 05)
+    breadcrumbs.ts           useBreadcrumbs() (Plan 04)
+
+  features/                  FEATURE LAYER: may import shared + design-system, never another feature or app
+    dashboards/  api/{client,dto,mapper,queries}.ts  components/  hooks/  model/  store.ts?
+    settings/    components/  hooks/  model/
+    notifications/ components/Inbox.tsx  tab.ts           (inbox UI only)
+    debug/
+    (later) widgets/  datasources/
+
+  components/                SHARED LAYER: shared UI; imports only shared + design-system
+    errors/                  ErrorState, WidgetBoundary, NotFound, RouteError, AppCrash, OfflineBanner (from features/errors)
+    feedback/                Skeletons, SlowHint, RouteProgress (from features/loading)
+    shell/                   Shell, navbar, sidebar, context-bar, panel + its store/hooks/model (from features/shell)
+  hooks/                     useDelayedPending, useMotion (Plan 01)
+  lib/                       notify.tsx (from notifications), errors/AppError (from shared/errors), user.tsx (from shared/user)
+  stores/                    inbox.ts (from notifications/store: notify writes to it, so it's shared)
+  config/                    config.ts (from shared/config.ts)
+  types/                     ContextTab, DataFrame, WidgetDefinition, DatasourceDefinition, … (as needed)
+  utils/
+  testing/                   render, setup, storyRouter (from src/test)
+
+  design-system/             LOWEST LAYER: tokens, theme, Mantine extensions, Page, layers.css (Plan 03)
 ```
-* **Named exports:** every part is exported by name (`PageRoot` … `PageBody`) and through the `Page` object, as AGENTS.md requires. `Page` is already allowed in the `only-export-components` rule.
-* **No feature imports:** the design system never imports feature code. `ControlBar` only lays out whatever children it gets.
-* **No editable title in v1.** Editing is phase 3. It will be a separate part (`Page.EditableTitle`), not a boolean prop.
-* **Control bar not sticky in v1.** If it's needed later, it becomes a separate part (`Page.StickyControlBar`), not a boolean prop.
 
-### 2. Breadcrumbs
-* **Source:** `useMatches()`, one crumb per match that has `staticData.crumb` (a string, or a function of loader data).
-* **Where it lives:** a small `useBreadcrumbs()` hook in the app layer (Plan 05). `Page.Breadcrumbs` only renders the items it's given.
-* **Links:** each item is Mantine `Anchor` with `renderRoot={(p) => <Link to=… {...p} />}` (AGENTS.md rule 4). The last item is plain text with `aria-current="page"`.
-* **Narrow containers:** on narrow containers, the middle crumbs collapse into a Menu ("…").
+**Allowed imports:** `design-system` ← shared (`components`, `hooks`, `lib`, `stores`, `config`, `types`, `utils`, `testing`) ← `features` ← `app`.
 
-### 3. Responsiveness (container queries)
-* **Why not screen breakpoints:** `<main>`'s width depends on whether the sidebar and context bar are open, so viewport breakpoints (`visibleFrom`, `mantine-hidden-from-*`) are the wrong signal inside the page.
-* **Mechanism:** `Page.Root` sets `container-type: inline-size`, and `Page.module.css` uses `@container` rules. postcss-preset-mantine supports `rem()` and `em()` inside them.
-* **Wide container:** Heading and Actions sit on one row, with the ControlBar below.
-* **Narrow container:** Actions wrap under the Heading, `OverflowList` moves secondary actions into a Menu, and titles wrap without being clipped.
+## Changes from plain bulletproof-react (deliberate)
 
-### 4. Migration
-* Update the six callers of `Page.Header` in one change:
-  - `DashboardList`
-  - `DashboardView`
-  - `DebugPage`
-  - `SettingsPage`
-  - `routes/-placeholder.tsx`
-  - `Shell.stories.tsx`
-* No compatibility wrapper, because there are few callers.
+1. **`design-system/` is its own lowest layer**, below `components/`. It owns the tokens and theme (Plan 03), so it can't depend on anything else.
+2. **Features keep `api/{client,dto,mapper,queries}.ts` and `model/`** (types and zod), instead of bulletproof's `api/` + `types/`. That keeps the AGENTS.md rule that the UI never sees DTOs.
+3. **File names stay PascalCase, named after the export** (AGENTS.md), not kebab-case.
+4. **A shared module may keep its own store and hooks together.** `components/shell/` keeps its Zustand store, `ShellProvider` and hooks. Only `ShellProvider` knows it's Zustand (AGENTS.md composition rule).
+5. **Routes live in `app/routes/`** and stay thin. `-name.tsx` files are still ignored by the router.
+6. **The app layer composes registries and cross-feature wiring.** Dashboards receive widgets and datasources through a provider, so they never import them (Plan 05).
+7. **Barrel files:** none in `features/` or the shared folders. `design-system/index.ts` also goes; import `design-system/theme/theme` and similar directly.
+
+## Three inversions (the only non-mechanical changes)
+
+1. **Shell ↔ notifications cycle:**
+   - The shell stops importing `notificationsTab`. `useContextTabs` merges the route's tabs with a `globalTabs` prop.
+   - `app/shell.tsx` passes `[notificationsTab]`.
+   - `ContextTab` moves to `types/` (or stays in `components/shell/model` as a shared type).
+2. **Moving `notify` breaks the inbox link:** `notify` moves to `lib/` and must still write warnings and errors to the inbox. The inbox store therefore moves to `stores/inbox.ts`, and the feature keeps only `Inbox.tsx` and the tab.
+3. **Settings reaches into the shell:** `useAppearanceForm` uses shell hooks. That's allowed once the shell is shared, so no change is needed. Record it as the intended pattern.
+
+## Enforcement (oxlint only; no dependency-cruiser)
+
+- **Direction rules: `no-restricted-imports` overrides by folder:**
+  - `src/design-system/**`: no `@/app`, `@/features`, `@/components`, `@/lib`, `@/stores`, `@/hooks`
+  - shared folders: no `@/features/**` and no `@/app/**`
+  - `src/features/**`: no `@/app/**` and no `@/features/**`
+- **Relative imports:** inside a feature, imports are relative. An import from another feature through the alias is therefore always an error. Also ban the relative pattern `**/features/**` inside `src/features/**`, so `../../../features/x` is caught too.
+- **Cycles:** enable oxlint's `import` plugin with `import/no-cycle`. Check that it runs acceptably fast with `--type-aware`.
+- **Delete the barrel rule:** the old `@/features/*/*`-must-go-through-index rule is removed, since there are no barrels any more.
+- **Why no dependency-cruiser:** these rules cover this repo's size. Revisit it only if a violation gets past oxlint.
+
+## Migration steps (each is its own commit; build, test and lint must pass after each)
+
+1. **Baseline:** add the oxlint direction rules and `import/no-cycle` as **warnings** and save the list of violations. It should show the `shell ↔ notifications` cycle.
+2. **Moves with no edits** (`git mv`, then update imports; keep moves and edits in separate commits so history follows the files):
+   - `features/errors` → `components/errors`
+   - `features/loading` → `components/feedback` + `hooks/useDelayedPending`
+   - `shared/config.ts` → `config/`
+   - `shared/errors` → `lib/errors`
+   - `shared/user` → `lib/user.tsx`
+   - `src/test` → `src/testing` (update `vitest.config.ts`)
+   - `wait(ms)` (duplicated in `DebugPage.tsx` and `useAppearanceForm.ts`) → `utils/wait.ts`
+   - delete the empty `shared/hooks|types|utils` folders
+3. **Notifications split:** `notify` → `lib/notify.tsx`, store → `stores/inbox.ts`, UI stays in the feature.
+4. **Shell:** fix the cycle (inversion 1), then move `features/shell` → `components/shell`.
+5. **Remove barrels:** delete `features/*/index.ts` and `design-system/index.ts` and rewrite imports as direct paths (a codemod or `qartez_move`/`qartez_rename_file` keep references updated). Fixes the root cause behind Plan 01's bundle problem.
+6. **Routes:** `src/routes` → `src/app/routes`. Update `routesDirectory` and `generatedRouteTree` in `vite.config.ts` and the oxlint override globs, then regenerate `routeTree.gen.ts`.
+7. **Turn enforcement on:** switch the oxlint direction rules and `import/no-cycle` to **error**. The baseline must be empty.
+8. **Docs:** rewrite AGENTS.md › Structure (tree, import direction, changes from bulletproof, no barrels), and fix path references in `docs/*.md` and the other plans.
+
+## Decisions (settled Sep 24, 2026)
+
+1. **Shell location:** `components/shell/` (shared, with its own store and hooks).
+2. **Routes:** move to `app/routes/`.
+3. **dependency-cruiser:** not added. oxlint direction rules plus `import/no-cycle` are enough for now.
 
 ## Out of scope
-Editable title, a sticky control bar, and the actual `TimeRangePicker`, refresh picker and filter controls (Plan 03).
+
+New features, renaming components, changing behaviour, and Feature-Sliced Design layers (`entities/`, `widgets/`, `pages/`).
 
 ## Risks
-* **`OverflowList` API:** its behaviour in Mantine 9.6.2 has to be checked in the docs before building. If it can't host a Menu fallback, use a `Menu` shown below a container-query breakpoint.
-* **Container queries and portals:** container queries don't reach content in portals (Menus). That is expected.
+
+- **Large diff across many files.** Mitigation: moves without edits in their own commits, qartez or codemod-driven reference updates, and a green build after every step.
+- **The TanStack route move breaks the generated route tree.** Mitigation: step 6 is on its own, with the dev server and a build checked right after.
+- **Plans 03–05 refer to old paths.** Mitigation: step 8 updates them. Plans 03, 04 and 05 run after this one.
 
 ## Verification
-* **Stories** in `Page.stories.tsx`:
-  - minimal (title only)
-  - standard (breadcrumbs, title, description, actions)
-  - full (control bar with placeholder controls)
-  - narrow container (the story wraps `Page.Root` in 375 / 768 / 1280 px boxes, not the viewport)
-* **Tests** in `Page.test.tsx`:
-  - exactly one `<h1>`
-  - `nav[aria-label="Breadcrumb"]`
-  - the last crumb has `aria-current="page"`
-  - crumbs are real `<a href>`
-  - the overflow Menu opens with the keyboard and its items can be reached
-* **Regression checks:** the six migrated screens render the same (Storybook a11y addon, no new violations).
+
+- After every step: `pnpm build`, `pnpm test` and `pnpm lint` pass, and Storybook builds.
+- Final:
+  - `pnpm lint` passes with the direction rules and `import/no-cycle` on error, and a fixture with a cross-feature import fails
+  - `find src/features -name index.ts` returns nothing
+  - the entry chunk contains no `react-draggable`, confirming Plan 01's bundle fix still holds without `sideEffects` doing the work

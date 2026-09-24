@@ -29,6 +29,11 @@ const themeOptions = [
   { value: 'auto', label: 'System', icon: IconDeviceDesktop },
 ] as const;
 
+const motionOptions = [
+  { value: 'system', label: 'Follow system' },
+  { value: 'reduce', label: 'Reduce' },
+] as const;
+
 /** Appearance tab. Changes are a draft until "Save changes". */
 export function AppearanceSettings() {
   const { values, dirty, saving, setField, save, reset } = useAppearanceForm();
@@ -97,6 +102,24 @@ export function AppearanceSettings() {
                   </Group>
                 ),
               }))}
+            />
+          </SettingsRow>
+        </SettingsSection>
+
+        <SettingsSection title="Motion" description="Animations across the app.">
+          <SettingsRow
+            label="Animations"
+            labelId="settings-motion"
+            description="Reduce makes panels, menus and drawers appear instantly. Follow system uses your operating system's reduced-motion setting."
+          >
+            <SegmentedControl
+              aria-labelledby="settings-motion"
+              value={values.motion}
+              onChange={(value) => {
+                const option = motionOptions.find((o) => o.value === value);
+                if (option) setField('motion', option.value);
+              }}
+              data={motionOptions.map((o) => ({ value: o.value, label: o.label }))}
             />
           </SettingsRow>
         </SettingsSection>

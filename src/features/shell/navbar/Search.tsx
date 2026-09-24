@@ -21,22 +21,22 @@ export function Search() {
       Object.values(nav)
         .flat()
         .flatMap((g) =>
-        g.items.flatMap((item) => [
-          {
-            id: item.id,
-            label: item.label,
-            description: item.to,
-            leftSection: <item.icon size={18} stroke={1.75} />,
-            onClick: () => void navigate({ to: item.to }),
-          },
-          ...(item.children ?? []).map((c) => ({
-            id: `${item.id}.${c.id}`,
-            label: c.label,
-            description: c.to,
-            onClick: () => void navigate({ to: c.to }),
-          })),
-        ]),
-      ),
+          g.items.flatMap((item) => [
+            {
+              id: item.id,
+              label: item.label,
+              description: item.to,
+              leftSection: <item.icon size={18} stroke={1.75} />,
+              onClick: () => void navigate({ to: item.to }),
+            },
+            ...(item.children ?? []).map((c) => ({
+              id: `${item.id}.${c.id}`,
+              label: c.label,
+              description: c.to,
+              onClick: () => void navigate({ to: c.to }),
+            })),
+          ]),
+        ),
     [navigate],
   );
 

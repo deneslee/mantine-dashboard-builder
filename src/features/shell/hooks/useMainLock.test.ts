@@ -90,6 +90,60 @@ describe('useMainLock', () => {
     expect(pinned()).toBeNull();
   });
 
+  describe('browser window resize', () => {
+    const initialWidth = window.innerWidth;
+    const resizeWindow = (width: number) => {
+      Object.defineProperty(window, 'innerWidth', { configurable: true, value: width });
+      window.dispatchEvent(new Event('resize'));
+    };
+    afterEach(() => Object.defineProperty(window, 'innerWidth', { configurable: true, value: initialWidth }));
+
+    it('pins while the width changes and releases 150ms after the last change', () => {
+      const { pinned, moving } = setup({ main: 700 });
+      resizeWindow(initialWidth - 10);
+      expect(pinned()).toBe('700px');
+      expect(moving()).toBe(true);
+
+      vi.advanceTimersByTime(100);
+      resizeWindow(initialWidth - 20); // still dragging: the release waits again
+      vi.advanceTimersByTime(100);
+      expect(pinned()).toBe('700px');
+
+      vi.advanceTimersByTime(50);
+      expect(pinned()).toBeNull();
+      expect(moving()).toBe(false);
+    });
+
+    it('ignores a height-only resize (mobile address bar)', () => {
+      const { pinned } = setup();
+      resizeWindow(initialWidth);
+      expect(pinned()).toBeNull();
+    });
+
+    it('leaves a panel pin taken during the resize to its own release', () => {
+      const { lock, pinned } = setup({ main: 700 });
+      resizeWindow(initialWidth - 10);
+      lock.holdFor(56, 0); // sidebar toggled mid-drag: the newer pin
+
+      vi.advanceTimersByTime(150); // the resize settles, but its pin is no longer the newest
+      expect(pinned()).toBe('700px');
+
+      vi.advanceTimersByTime(180 + 100 - 150); // the panel pin's own fallback release
+      expect(pinned()).toBeNull();
+    });
+
+    it('takes the pin back when the width changes after a panel pin', () => {
+      const { lock, pinned } = setup({ main: 700 });
+      lock.holdFor(56, 0);
+      resizeWindow(initialWidth - 10);
+
+      vi.advanceTimersByTime(149);
+      expect(pinned()).toBe('700px');
+      vi.advanceTimersByTime(1); // 150ms after the last width change, before the panel's 280ms fallback
+      expect(pinned()).toBeNull();
+    });
+  });
+
   it('holds the current width for a drag until released', () => {
     const { lock, pinned, moving } = setup({ main: 700 });
     lock.hold();
