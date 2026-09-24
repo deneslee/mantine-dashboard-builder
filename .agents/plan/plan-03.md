@@ -25,14 +25,15 @@ Every visual decision is stored once and then referenced by name everywhere else
 The resource-backed model is:
 `constant / primitive` ↓ (aliases) `semantic role` ↓ (inherited by placement) `contextual layer role` ↓ (bound by design system) `Mantine component styling`
 
-| Implementation Layer | File / Mechanism | Token Category (GitLab/Carbon) | Contains | Who may read it |
-| -------------------- | ---------------- | ------------------------------ | -------- | --------------- |
-| **1. Primitives (Constants)** | `tokens/primitives.ts` | Constant | The **only** place with raw values: palette tuples (10 shades each for gray, dark, indigo, red, green, yellow, blue), white/black alpha steps, spacing / radius / font-size / weight / line-height scales, shadows, durations, easings, z-index numbers, icon sizes and strokes, shell sizes, brand colors | `design-system/theme/**` only (lint-enforced); application UI never consumes these directly |
-| **2. Semantic** | `tokens/semantic.ts` | Semantic | Global visual meaning aliasing primitives, per scheme where needed: surfaces (`canvas`, `sunken`, `raised`, `overlay`), text (`primary`, `subtle`, `inverse`, `disabled`), border (`default`, `subtle`, `strong`, `focused`), shadows, shape, motion | Emitted as `--app-*` CSS variables and exported as TS constants |
-| **3. Contextual Layers** | `theme/layers.css` | Contextual | Nested depth tokens resolving dynamically by DOM placement: `--app-layer-surface`, `--app-layer-surface-hovered`, `--app-layer-surface-pressed`, `--app-layer-border`, `--app-layer-field` | Inherited CSS custom properties via `[data-layer]` hierarchy |
-| **4. Component Bindings** | `theme/components/<Name>.ts` + CSS modules | Component Styling | Mantine `Component.extend({ defaultProps, vars, classNames })` binding Mantine components to contextual or semantic tokens | Mantine components apply automatically; not a consumable token tier |
+| Implementation Layer          | File / Mechanism                           | Token Category (GitLab/Carbon) | Contains                                                                                                                                                                                                                                                                                                   | Who may read it                                                                             |
+| ----------------------------- | ------------------------------------------ | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| **1. Primitives (Constants)** | `tokens/primitives.ts`                     | Constant                       | The **only** place with raw values: palette tuples (10 shades each for gray, dark, indigo, red, green, yellow, blue), white/black alpha steps, spacing / radius / font-size / weight / line-height scales, shadows, durations, easings, z-index numbers, icon sizes and strokes, shell sizes, brand colors | `design-system/theme/**` only (lint-enforced); application UI never consumes these directly |
+| **2. Semantic**               | `tokens/semantic.ts`                       | Semantic                       | Global visual meaning aliasing primitives, per scheme where needed: surfaces (`canvas`, `sunken`, `raised`, `overlay`), text (`primary`, `subtle`, `inverse`, `disabled`), border (`default`, `subtle`, `strong`, `focused`), shadows, shape, motion                                                       | Emitted as `--app-*` CSS variables and exported as TS constants                             |
+| **3. Contextual Layers**      | `theme/layers.css`                         | Contextual                     | Nested depth tokens resolving dynamically by DOM placement: `--app-layer-surface`, `--app-layer-surface-hovered`, `--app-layer-surface-pressed`, `--app-layer-border`, `--app-layer-field`                                                                                                                 | Inherited CSS custom properties via `[data-layer]` hierarchy                                |
+| **4. Component Bindings**     | `theme/components/<Name>.ts` + CSS modules | Component Styling              | Mantine `Component.extend({ defaultProps, vars, classNames })` binding Mantine components to contextual or semantic tokens                                                                                                                                                                                 | Mantine components apply automatically; not a consumable token tier                         |
 
 **Exact surface and color vocabulary:**
+
 ```
 elevation.surface.canvas            dashboard/page canvas
 elevation.surface.sunken            recessed region, such as grid background
@@ -45,6 +46,7 @@ color.border.default | subtle | strong | focused
 ```
 
 **Contextual tokens (`theme/layers.css`):**
+
 ```
 --app-layer-surface
 --app-layer-surface-hovered
@@ -54,13 +56,14 @@ color.border.default | subtle | strong | focused
 ```
 
 **Component resolution mapping:**
-| Situation | Component consumes | Resolved meaning |
-| --------- | ------------------ | ---------------- |
-| Page or dashboard canvas | `elevation.surface.sunken` | Fixed semantic surface |
-| Widget on the canvas | `layer.surface` | First contextual layer → raised |
-| Nested panel in a widget | `layer.surface` | Next contextual layer |
-| Input inside a panel | `layer.field` | Visually distinct editable surface |
-| Menu / Drawer / Modal | `elevation.surface.overlay` | Fixed overlay semantic surface |
+
+| Situation                | Component consumes          | Resolved meaning                   |
+| ------------------------ | --------------------------- | ---------------------------------- |
+| Page or dashboard canvas | `elevation.surface.sunken`  | Fixed semantic surface             |
+| Widget on the canvas     | `layer.surface`             | First contextual layer → raised    |
+| Nested panel in a widget | `layer.surface`             | Next contextual layer              |
+| Input inside a panel     | `layer.field`               | Visually distinct editable surface |
+| Menu / Drawer / Modal    | `elevation.surface.overlay` | Fixed overlay semantic surface     |
 
 **Status colors in props** are Mantine `virtualColor` aliases, used as `color="danger"` and never `color="red"`:
 

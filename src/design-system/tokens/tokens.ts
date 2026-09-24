@@ -4,13 +4,7 @@
  * read `var(--app-*)` and TS reads `theme.other`.
  */
 
-import {
-  brand,
-  grid,
-  motion as primitiveMotion,
-  shell,
-  zIndex,
-} from './primitives';
+import { brand, grid, motion as primitiveMotion, shell, zIndex } from './primitives';
 
 export { brand, grid, shell, zIndex };
 

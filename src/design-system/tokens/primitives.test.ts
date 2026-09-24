@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { theme } from '../theme/theme';
-import { primitives, palette, spacing, spacingPx, radius, fontSizes, fontWeights, shadows } from './primitives';
+import {
+  primitives,
+  palette,
+  spacing,
+  spacingPx,
+  radius,
+  fontSizes,
+  fontWeights,
+  shadows,
+} from './primitives';
 
 describe('primitives token tier', () => {
   it('defines explicit 10-shade palette tuples for required colors', () => {

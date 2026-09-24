@@ -4,4 +4,4 @@ node_modules
 pnpm-lock.yaml
 src/app/routeTree.gen.ts
 .claude
-.agents/plan/archive
+.agents/plan
