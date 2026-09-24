@@ -3,6 +3,7 @@ import {
   IconChartDots3,
   IconDatabase,
   IconLayoutDashboard,
+  IconPlugConnected,
   IconSettings,
   IconTemplate,
 } from '@tabler/icons-react';
@@ -45,6 +46,7 @@ export const nav: Record<'main' | 'bottom', NavGroup[]> = {
         { id: 'templates', label: 'Templates', icon: IconTemplate, to: '/templates' },
         { id: 'datasources', label: 'Data sources', icon: IconDatabase, to: '/datasources' },
         { id: 'explore', label: 'Explore', icon: IconChartDots3, to: '/explore' },
+        { id: 'integrations', label: 'Integrations', icon: IconPlugConnected, to: '/integrations' },
       ],
     },
   ],
@@ -60,6 +62,7 @@ export const nav: Record<'main' | 'bottom', NavGroup[]> = {
 export const areas = [
   { value: 'dashboards', label: 'Dashboards', to: '/dashboards' },
   { value: 'datasources', label: 'Data sources', to: '/datasources' },
+  { value: 'integrations', label: 'Integrations', to: '/integrations' },
   { value: 'settings', label: 'Settings', to: '/settings' },
 ] as const;
 

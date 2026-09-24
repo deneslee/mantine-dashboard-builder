@@ -73,5 +73,9 @@ export const grid = {
   gap: 16,
 } as const;
 
-export const tokens = { shell, zIndex, chrome, surface, motion, grid } as const;
+export const brand = {
+  sentry: '#7553FF',
+} as const;
+
+export const tokens = { shell, zIndex, chrome, surface, motion, grid, brand } as const;
 export type Tokens = typeof tokens;

@@ -6,6 +6,7 @@ minimumReleaseAgeExclude:
 
 # Explicitly allowed lifecycle scripts (replaces onlyBuiltDependencies)
 allowBuilds:
+  '@sentry/cli': true
   esbuild: true
   msw: true
 
