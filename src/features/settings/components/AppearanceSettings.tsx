@@ -1,6 +1,6 @@
 import { Button, Group, Radio, SegmentedControl, Stack, Text } from '@mantine/core';
 import { IconDeviceDesktop, IconMoon, IconSun } from '@tabler/icons-react';
-import type { BurgerBehavior } from '@/features/shell';
+import type { BurgerBehavior } from '@/components/layouts/shell';
 import { useAppearanceForm } from '../hooks/useAppearanceForm';
 import { SettingsRow, SettingsSection } from './SettingsSection';
 import classes from './AppearanceSettings.module.css';

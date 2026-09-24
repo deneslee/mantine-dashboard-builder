@@ -1,6 +1,6 @@
 import { IconInfoCircle, IconLayoutGridAdd } from '@tabler/icons-react';
 import { lazy } from 'react';
-import type { ContextTab } from '@/features/shell';
+import type { ContextTab } from '@/components/layouts/shell';
 
 /** Context-bar tabs declared by the dashboard route. */
 export const dashboardTabs: ContextTab[] = [

@@ -3,12 +3,15 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { IconInfoCircle } from '@tabler/icons-react';
 import { useState } from 'react';
 import { Page } from '@/design-system';
+import { notificationsTab } from '@/features/notifications';
 import { StoryRouter } from '@/testing/storyRouter';
 import { Shell } from './Shell';
 import { ShellProvider } from './ShellProvider';
 import { createShellStore } from './store';
 import type { ContextTab } from './model/contextTabs';
 import type { ShellInit } from './store';
+
+const globalTabs = [notificationsTab];
 
 const detailsTab: ContextTab = {
   id: 'details',
@@ -48,7 +51,7 @@ function ShellStory({ state, path }: { state: ShellInit; path?: string }) {
       contextTabs={[detailsTab]}
       page={<Content />}
       wrap={(outlet) => (
-        <ShellProvider store={store}>
+        <ShellProvider store={store} globalTabs={globalTabs}>
           <Shell>{outlet}</Shell>
         </ShellProvider>
       )}

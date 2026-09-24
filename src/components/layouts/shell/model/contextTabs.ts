@@ -3,7 +3,7 @@ import type { ComponentType, LazyExoticComponent } from 'react';
 
 /**
  * A tab in the context bar. Routes declare theirs in `staticData.contextTabs`;
- * the global `notifications` tab is appended by `useContextTabs()`.
+ * tabs shown on every route (notifications) come from `ShellProvider`'s `globalTabs`.
  */
 export interface ContextTab {
   id: string;
