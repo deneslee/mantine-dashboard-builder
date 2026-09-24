@@ -2,9 +2,9 @@
 
 Sep 24, 2026 · v1.2.0 · Reference: [plan-03.md](../plan-03.md)
 
-- [ ] **Spike: chrome theme zone.** Re-assign the semantic tokens under `[data-app-zone='chrome']`, and check every Mantine component in the navbar and sidebar in both schemes ([plan-03 §4](../plan-03.md#4-the-always-dark-chrome-a-theme-zone-spike-first)). Done when the result and the chosen approach are written down.
-- [ ] **Spike: tooling compatibility.** Check that `stylelint-declaration-strict-value` works with Stylelint 17, and whether Mantine 9.6 `fw` accepts `fontWeights` keys. Done when both are answered in the research file.
-- [ ] **Primitives.** Create `tokens/primitives.ts` with explicit palette tuples, alpha steps and every scale, keeping the current spacing scale plus `2xs=4`/`3xs=2` through `MantineThemeSizesOverride`; this is the only file with raw values. Done when `createTheme` reads colors, spacing, radius, fontSizes, fontWeights and shadows from it, and the UI looks the same.
+- [-] **Spike: chrome theme zone.** Skipped per instruction; deferred until before removing `chrome.*`.
+- [-] **Spike: tooling compatibility.** Skipped per instruction.
+- [x] **Primitives.** Create `tokens/primitives.ts` with explicit palette tuples, alpha steps and every scale, keeping the current spacing scale plus `2xs=4`/`3xs=2` through `MantineThemeSizesOverride`; this is the only file with raw values. Done when `createTheme` reads colors, spacing, radius, fontSizes, fontWeights and shadows from it, and the UI looks the same.
 - [ ] **Semantic tokens and generated resolver.** Create `tokens/semantic.ts` (elevation, color text/border, shape, motion, z, layer, chart, `iconSize`/`iconStroke`) with light and dark values, plus `toCssVars()`, and replace the hand-written resolver list. Done when a unit test checks that every semantic key produces a `--app-*` variable.
 - [ ] **Move `brand.sentry` to the primitives.** It's a third-party logo color, not a role; only the Sentry icon uses it. Done when `tokens.brand` is gone and the icon looks the same.
 - [ ] **Semantic color aliases.** `virtualColor` aliases `brand`, `neutral`, `danger`, `warning`, `success` and `info`. Done when `color="danger"` renders the same as `red` in both schemes.

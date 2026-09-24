@@ -1,6 +1,7 @@
 import { createTheme, mergeThemeOverrides, type CSSVariablesResolver, rem } from '@mantine/core';
 import { components } from './components';
 import { tokens } from '../tokens/tokens';
+import { primitives } from '../tokens/primitives';
 
 export const theme = createTheme({
   primaryColor: 'indigo',
@@ -12,16 +13,15 @@ export const theme = createTheme({
     '"Source Code Pro Variable", "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
   headings: {
     fontFamily: 'inherit',
-    fontWeight: '600',
-    sizes: {
-      h1: { fontSize: rem(24), lineHeight: '1.25' },
-      h2: { fontSize: rem(22), lineHeight: '1.3' },
-      h3: { fontSize: rem(18), lineHeight: '1.35' },
-      h4: { fontSize: rem(16), lineHeight: '1.4' },
-    },
+    fontWeight: primitives.fontWeights.medium,
+    sizes: primitives.headings,
   },
-  fontSizes: { xs: rem(11), sm: rem(13), md: rem(14), lg: rem(16), xl: rem(18) },
-  spacing: { xs: rem(6), sm: rem(10), md: rem(16), lg: rem(24), xl: rem(36) },
+  colors: primitives.palette,
+  fontSizes: primitives.fontSizes,
+  fontWeights: primitives.fontWeights,
+  spacing: primitives.spacing,
+  radius: primitives.radius,
+  shadows: primitives.shadows,
   cursorType: 'pointer',
   focusRing: 'auto',
   // Mantine transitions (Drawer, Menu, Collapse, Tooltip) go instant under the OS reduced-motion setting.

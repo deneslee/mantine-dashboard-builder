@@ -20,28 +20,47 @@ Every visual decision is stored once and then referenced by name everywhere else
 
 ## Design
 
-### 1. Three tiers (in `src/design-system/tokens/`)
+### 1. Token Contract: 3 Token Categories across 4 Implementation Layers
 
-| Tier              | File                         | Contains                                                                                                                                                                                                                                                                                          | Who may read it                                               |
-| ----------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| **1. Primitives** | `primitives.ts`              | The **only** place with raw values: palette tuples (gray, dark, indigo, red, green, yellow, blue, written out explicitly), white/black alpha steps, spacing / radius / font-size / weight / line-height scales, shadows, durations, easings, z-index numbers, icon sizes and strokes, shell sizes | `design-system/theme/**` only (lint-enforced)                 |
-| **2. Semantic**   | `semantic.ts`                | Role names that point to primitives, per scheme where needed: surfaces, text, border, shape, motion, status colors                                                                                                                                                                                | Everything; emitted as `--app-*` and exported as TS constants |
-| **3. Component**  | `theme/components/<Name>.ts` | Mantine `Component.extend({ defaultProps, vars, classNames })`, using **semantic tokens only**                                                                                                                                                                                                    | Mantine applies it automatically                              |
+The resource-backed model is:
+`constant / primitive` ↓ (aliases) `semantic role` ↓ (inherited by placement) `contextual layer role` ↓ (bound by design system) `Mantine component styling`
 
-**Semantic token names** follow Atlassian's `foundation-property-modifier`, flattened into CSS variables:
+| Implementation Layer | File / Mechanism | Token Category (GitLab/Carbon) | Contains | Who may read it |
+| -------------------- | ---------------- | ------------------------------ | -------- | --------------- |
+| **1. Primitives (Constants)** | `tokens/primitives.ts` | Constant | The **only** place with raw values: palette tuples (10 shades each for gray, dark, indigo, red, green, yellow, blue), white/black alpha steps, spacing / radius / font-size / weight / line-height scales, shadows, durations, easings, z-index numbers, icon sizes and strokes, shell sizes, brand colors | `design-system/theme/**` only (lint-enforced); application UI never consumes these directly |
+| **2. Semantic** | `tokens/semantic.ts` | Semantic | Global visual meaning aliasing primitives, per scheme where needed: surfaces (`canvas`, `sunken`, `raised`, `overlay`), text (`primary`, `subtle`, `inverse`, `disabled`), border (`default`, `subtle`, `strong`, `focused`), shadows, shape, motion | Emitted as `--app-*` CSS variables and exported as TS constants |
+| **3. Contextual Layers** | `theme/layers.css` | Contextual | Nested depth tokens resolving dynamically by DOM placement: `--app-layer-surface`, `--app-layer-surface-hovered`, `--app-layer-surface-pressed`, `--app-layer-border`, `--app-layer-field` | Inherited CSS custom properties via `[data-layer]` hierarchy |
+| **4. Component Bindings** | `theme/components/<Name>.ts` + CSS modules | Component Styling | Mantine `Component.extend({ defaultProps, vars, classNames })` binding Mantine components to contextual or semantic tokens | Mantine components apply automatically; not a consumable token tier |
 
+**Exact surface and color vocabulary:**
 ```
---app-elevation-surface            --app-elevation-surface-hovered     --app-elevation-surface-pressed
---app-elevation-surface-sunken
---app-elevation-surface-raised     --app-elevation-surface-raised-hovered  --app-elevation-surface-raised-pressed
---app-elevation-surface-overlay    --app-elevation-surface-overlay-hovered
---app-elevation-shadow-raised      --app-elevation-shadow-overlay
---app-color-text  -text-subtle  -text-subtlest  -text-inverse
---app-color-border  -border-subtle  -border-strong  -border-focused
---app-radius-control  -radius-container  -radius-pill
---app-motion-duration-fast|base|slow  --app-motion-easing-standard
---app-z-*   --app-layer*  (contextual, §3)
+elevation.surface.canvas            dashboard/page canvas
+elevation.surface.sunken            recessed region, such as grid background
+elevation.surface.raised            first-level cards, panels, widgets
+elevation.surface.overlay           menus, popovers, drawers, modals
+elevation.shadow.raised             paired with raised surfaces
+elevation.shadow.overlay            paired with overlay surfaces
+color.text.primary | subtle | inverse | disabled
+color.border.default | subtle | strong | focused
 ```
+
+**Contextual tokens (`theme/layers.css`):**
+```
+--app-layer-surface
+--app-layer-surface-hovered
+--app-layer-surface-pressed
+--app-layer-border
+--app-layer-field                   visually distinct editable surface for inputs
+```
+
+**Component resolution mapping:**
+| Situation | Component consumes | Resolved meaning |
+| --------- | ------------------ | ---------------- |
+| Page or dashboard canvas | `elevation.surface.sunken` | Fixed semantic surface |
+| Widget on the canvas | `layer.surface` | First contextual layer → raised |
+| Nested panel in a widget | `layer.surface` | Next contextual layer |
+| Input inside a panel | `layer.field` | Visually distinct editable surface |
+| Menu / Drawer / Modal | `elevation.surface.overlay` | Fixed overlay semantic surface |
 
 **Status colors in props** are Mantine `virtualColor` aliases, used as `color="danger"` and never `color="red"`:
 
@@ -62,15 +81,6 @@ export const shape = { control: 'sm', container: 'md', pill: 'xl' } as const;
 
 // theme/components/Button.ts: every Button, one place
 export const ButtonTheme = Button.extend({ defaultProps: { radius: shape.control } });
-
-// If only *primary* (filled) buttons should differ:
-Button.extend({
-  vars: (theme, p) => ({
-    root: {
-      '--button-radius': (p.variant ?? 'filled') === 'filled' ? theme.radius[shape.primary] : undefined,
-    },
-  }),
-});
 ```
 
 - **Controls:** `shape.control` covers Button, ActionIcon, Input, Select and SegmentedControl.
@@ -83,23 +93,23 @@ Button.extend({
 ### 3. Surfaces and layering (Atlassian vocabulary, Carbon mechanism)
 
 - **Surfaces:**
-  - `sunken`: the page canvas behind the dashboard grid
-  - `default`
-  - `raised`: panels, widgets, cards; always paired with `shadow-raised`
-  - `overlay`: Menu, Popover, Modal, Drawer, Spotlight; paired with `shadow-overlay` and set through `theme.components`
+  - `canvas`: base page canvas
+  - `sunken`: recessed region behind dashboard grid
+  - `raised`: panels, widgets, cards; paired with `shadow.raised`
+  - `overlay`: Menu, Popover, Modal, Drawer, Spotlight; paired with `shadow.overlay` and set through `theme.components`
 - **Contextual layers (Carbon):**
-  - Any element with `data-layer` gets `--app-layer`, `--app-layer-hovered` and `--app-layer-border`, based on **how deeply it is nested**. This is pure CSS descendant rules in `theme/layers.css`, up to 3 levels, with no React context.
-  - `Paper` variants `panel` and `widget` set `data-layer` and use `var(--app-layer)`.
-  - A widget inside a context-bar panel therefore automatically gets the next step, and the same widget on the dashboard canvas gets the first raised step.
-- **Portals** leave the nesting and use `overlay` tokens. That is intended.
+  - Any element with `data-layer` inherits `--app-layer-surface`, `--app-layer-surface-hovered`, `--app-layer-border`, and `--app-layer-field` based on **how deeply it is nested**. Pure CSS descendant rules in `theme/layers.css`, up to 3 levels, with no React context.
+  - `Paper` variants `panel` and `widget` set `data-layer` and consume `var(--app-layer-surface)` and `var(--app-layer-border)`.
+  - Reusable Card/Paper has one contextual implementation: background = `layer.surface`. Fixed surface card on a page uses `elevation.surface.raised`.
+- **Portals** leave the nesting and use `overlay` tokens.
 
 ### 4. The always-dark chrome: a "theme zone" (spike first)
 
-- **Today:** 12 `chrome.*` tokens plus `rgb(255 255 255 / x%)` literals exist only because the navbar and sidebar are dark in both schemes.
-- **Proposal:** `[data-app-zone='chrome']` **re-assigns the semantic tokens** (surface, text, border, hovered) to dark values inside that subtree, the way Carbon's inline theme works. Sidebar and navbar CSS then use the same `--app-elevation-*` and `--app-color-text-*` names as the content.
-- **Result:** `chrome.*` and the white-alpha literals disappear. The `ActionIcon chrome` and `NavLink sidebar` variants stay, but only reference semantic tokens.
-- **Spike question:** Mantine's own scheme variables (`--mantine-color-text`, the default hover) are defined on `:root[data-mantine-color-scheme]` and aren't re-assigned inside a subtree. The spike lists every Mantine component inside the chrome (NavLink, ActionIcon, Menu target, Autocomplete/Spotlight trigger, Burger, Avatar) and confirms each one looks correct.
-- **If the spike fails:** keep a small `chrome` group in `semantic.ts` (text, muted, hovered, active, border, surface), built from primitives rather than rgba literals.
+- Carbon validates the design intent of the always-dark shell: inline themes are for major contrast regions such as shells and side panels, while normal depth changes use layers.
+- `[data-app-zone='chrome']` re-assigns the semantic tokens (`--app-color-text-*`, `--app-elevation-*`, `--app-color-border-*`) to dark values in that subtree.
+- **Spike requirement:** Because Mantine's built-in variables (such as `--mantine-color-body` and default hover styles) are emitted on `:root[data-mantine-color-scheme]` and do not automatically switch in an arbitrary subtree, the chrome-zone compatibility spike remains necessary before removing `chrome.*`.
+- The spike verifies NavLink, ActionIcon, Burger, Avatar, the search control, and menus in both light and dark app modes.
+- If the spike fails: keep a small `chrome` group in `semantic.ts`, built from primitives rather than rgba literals.
 
 ### 5. Enforcement: making the tokens mandatory
 

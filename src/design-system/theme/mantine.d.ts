@@ -1,6 +1,10 @@
 import type { Tokens } from '../tokens/tokens';
 
 declare module '@mantine/core' {
+  export interface MantineThemeSizesOverride {
+    spacing: Record<'3xs' | '2xs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl', string>;
+  }
+
   // Declaration merging: theme.other is typed as the token object.
   // oxlint-disable-next-line typescript/no-empty-object-type
   export interface MantineThemeOther extends Tokens {}
