@@ -27,6 +27,8 @@ Every visual decision is stored once and then referenced by name everywhere else
 
 ## Status (Sep 27, 2026)
 
+**All tasks in task-r03-04 are done (Sep 27).** Still deferred: the nested-layer rules and the "Outline layers" debug switch (§3, §7). The notes below describe the state before that work.
+
 **Done:**
 
 - `tokens/primitives.ts` (tier 1)

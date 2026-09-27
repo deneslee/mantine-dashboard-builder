@@ -2,6 +2,7 @@ import { EmptyState, Tabs } from '@mantine/core';
 import { IconAdjustments } from '@tabler/icons-react';
 import { Link } from '@tanstack/react-router';
 import { Page } from '@/design-system/components/Page/Page';
+import { iconSize, iconStroke } from '@/design-system/tokens/semantic';
 import { settingsTabs, type SettingsTab } from '../model/tabs';
 import { AppearanceSettings } from './AppearanceSettings';
 
@@ -27,8 +28,8 @@ export function SettingsPage({ tab }: { tab: SettingsTab }) {
           <Tabs.Panel value="general">
             <EmptyState
               variant="light"
-              color="gray"
-              icon={<IconAdjustments size={22} stroke={1.75} />}
+              color="neutral"
+              icon={<IconAdjustments size={iconSize.lg} stroke={iconStroke} />}
               title="No general settings yet"
               description="Workspace and member settings will live here."
             />

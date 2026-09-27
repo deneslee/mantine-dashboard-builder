@@ -67,7 +67,7 @@ export function AppearanceSettings() {
                 {burgerOptions.map((o) => (
                   <Radio.Card key={o.value} value={o.value} radius="md" className={classes.option}>
                     <Group wrap="nowrap" align="flex-start" gap="sm">
-                      <Radio.Indicator mt={2} />
+                      <Radio.Indicator mt="3xs" />
                       <div>
                         <Text className={classes.optionLabel}>{o.label}</Text>
                         <Text className={classes.optionHelp}>{o.description}</Text>
@@ -96,7 +96,7 @@ export function AppearanceSettings() {
               data={themeOptions.map((o) => ({
                 value: o.value,
                 label: (
-                  <Group gap={6} wrap="nowrap" justify="center">
+                  <Group gap="xs" wrap="nowrap" justify="center">
                     <o.icon size={16} stroke={1.75} />
                     <span>{o.label}</span>
                   </Group>

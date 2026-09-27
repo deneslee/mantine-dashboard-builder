@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { shape } from '../tokens/semantic';
+import { shadow, shape } from '../tokens/semantic';
 import { components } from './components';
 import { ActionIconTheme } from './components/ActionIcon';
 import { AlertTheme } from './components/Alert';
@@ -14,6 +14,7 @@ import { PaperTheme } from './components/Paper';
 import { PopoverTheme } from './components/Popover';
 import { SelectTheme } from './components/Select';
 import { SkeletonTheme } from './components/Skeleton';
+import { SpotlightTheme } from './components/Spotlight';
 import { TooltipTheme } from './components/Tooltip';
 import { theme } from './theme';
 
@@ -35,6 +36,12 @@ describe('Component tier defaults', () => {
     expect(ModalTheme.defaultProps?.radius).toBe(shape.container);
     expect(MenuTheme.defaultProps?.radius).toBe(shape.container);
     expect(PopoverTheme.defaultProps?.radius).toBe(shape.container);
+  });
+
+  it('gives every overlay the overlay shadow token', () => {
+    for (const overlay of [MenuTheme, PopoverTheme, ModalTheme, DrawerTheme, SpotlightTheme]) {
+      expect(overlay.defaultProps?.shadow).toBe(shadow.overlay);
+    }
   });
 
   it('leaves Drawer square, since it docks to the viewport edge', () => {
@@ -63,5 +70,6 @@ describe('Component tier defaults', () => {
     expect(theme.components?.Skeleton).toBe(components.Skeleton);
     expect(theme.components?.Tabs).toBe(components.Tabs);
     expect(theme.components?.Tooltip).toBe(components.Tooltip);
+    expect(theme.components?.Spotlight).toBe(components.Spotlight);
   });
 });

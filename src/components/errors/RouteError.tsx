@@ -4,6 +4,7 @@ import { useQueryErrorResetBoundary } from '@tanstack/react-query';
 import { useRouter, type ErrorComponentProps } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { errorTitles, toAppError } from '@/lib/errors/AppError';
+import { iconSize } from '@/design-system/tokens/semantic';
 import { ErrorState } from './ErrorState';
 
 /** Route `errorComponent`: loader or render failure inside the content area; chrome keeps working. */
@@ -36,7 +37,7 @@ export function RouteError({ error, reset }: ErrorComponentProps) {
       actions={
         <Button
           size="sm"
-          leftSection={<IconRefresh size={16} />}
+          leftSection={<IconRefresh size={iconSize.sm} />}
           onClick={() => void retry()}
           loading={retrying}
         >

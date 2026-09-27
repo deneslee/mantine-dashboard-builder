@@ -3,11 +3,11 @@
   flex-direction: column;
   color: inherit;
   text-decoration: none;
-  background: var(--app-surface-raised);
-  border-color: var(--app-border);
+  background: var(--app-elevation-surface-raised);
+  border-color: var(--app-color-border-default);
   transition:
-    border-color var(--app-motion-fast) var(--app-motion-ease),
-    transform var(--app-motion-fast) var(--app-motion-ease);
+    border-color var(--app-motion-duration-fast) var(--app-motion-easing-standard),
+    transform var(--app-motion-duration-fast) var(--app-motion-easing-standard);
 
   &:hover {
     border-color: var(--mantine-primary-color-filled);
@@ -24,9 +24,9 @@
   align-items: center;
   color: inherit;
   text-decoration: none;
-  background: var(--app-surface-raised);
-  border-color: var(--app-border);
-  transition: border-color var(--app-motion-fast) var(--app-motion-ease);
+  background: var(--app-elevation-surface-raised);
+  border-color: var(--app-color-border-default);
+  transition: border-color var(--app-motion-duration-fast) var(--app-motion-easing-standard);
 
   &:hover {
     border-color: var(--mantine-primary-color-filled);

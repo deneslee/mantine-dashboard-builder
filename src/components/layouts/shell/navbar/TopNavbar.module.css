@@ -21,12 +21,12 @@
 
 .selectInput {
   --input-bg: transparent;
-  --input-bd: rgb(255 255 255 / 12%);
+  --input-bd: var(--app-navbar-input-border);
   --input-color: var(--app-navbar-text);
   --input-placeholder-color: var(--app-navbar-muted);
 
   &:hover {
-    --input-bg: rgb(255 255 255 / 8%);
+    --input-bg: var(--app-navbar-input-bg);
   }
 }
 

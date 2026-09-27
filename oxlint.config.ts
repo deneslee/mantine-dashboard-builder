@@ -21,9 +21,15 @@ const barrels = {
   message: 'No barrel files: import the file that defines the name, e.g. @/components/errors/ErrorState.',
 };
 
-/** Layer rule for one layer's files; it replaces the global rule there, so it repeats the barrel ban. */
-const layerRule = (group: string[], message: string) =>
-  ['error', { patterns: [{ group, message }, barrels] }] as [
+/** Raw values stay in the design system; everything else reads the semantic tier (plan-03 §5). */
+const primitives = {
+  group: ['@/design-system/tokens/primitives'],
+  message: 'Only design-system/ may import the primitives: use @/design-system/tokens/semantic.',
+};
+
+/** Layer rule for one layer's files; it replaces the global rule there, so it repeats the shared bans. */
+const layerRule = (group: string[], message: string, shared = [barrels, primitives]) =>
+  ['error', { patterns: [{ group, message }, ...shared] }] as [
     'error',
     { patterns: { group: string[]; message: string }[] },
   ];
@@ -78,9 +84,11 @@ export default defineConfig({
 
     // Design system rule: no inline styles outside design-system/. Use CSS modules or Mantine style props.
     'app/no-inline-style': 'error',
+    // Token keys, not raw values, in Mantine props (plan-03 §5).
+    'app/no-raw-style-props': 'error',
 
     // No barrel files (bulletproof-react: they defeat tree-shaking); import the file that defines a name.
-    'no-restricted-imports': ['error', { patterns: [barrels] }],
+    'no-restricted-imports': ['error', { patterns: [barrels, primitives] }],
   },
   overrides: [
     {
@@ -91,7 +99,16 @@ export default defineConfig({
         'src/testing/**',
         '.storybook/**',
       ],
-      rules: { 'app/no-inline-style': 'off', 'react/only-export-components': 'off' },
+      rules: {
+        'app/no-inline-style': 'off',
+        'app/no-raw-style-props': 'off',
+        'react/only-export-components': 'off',
+      },
+    },
+    // The Sentry prototype UI is rebuilt or removed in Plan 06; until then it keeps its raw values.
+    {
+      files: ['src/features/integrations/**'],
+      rules: { 'app/no-raw-style-props': 'off' },
     },
     {
       files: ['src/app/routes/**/*.tsx'],
@@ -110,6 +127,7 @@ export default defineConfig({
         'no-restricted-imports': layerRule(
           above('app', 'features', ...shared),
           'design-system/ is the lowest layer: it imports nothing from the rest of the app.',
+          [barrels],
         ),
       },
     },

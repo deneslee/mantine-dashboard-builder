@@ -1,4 +1,4 @@
-import { Box, Drawer, Splitter, useMantineTheme } from '@mantine/core';
+import { Box, Drawer, Splitter } from '@mantine/core';
 import {
   useHotkeys,
   useMediaQuery,
@@ -7,6 +7,7 @@ import {
 } from '@mantine/hooks';
 import { spotlight } from '@mantine/spotlight';
 import { useEffect, useLayoutEffect, useRef, type MouseEvent, type ReactNode } from 'react';
+import { tokens } from '@/design-system/tokens/tokens';
 import { useMainLock } from './hooks/useMainLock';
 import { useContextBar, useShellActions, useSidebar } from './hooks/useShell';
 import { NARROW_QUERY } from './store';
@@ -29,8 +30,7 @@ const toPx = (size: SplitterPaneSize | undefined) => parseFloat(String(size ?? 0
  *   change, not per frame (see useMainLock).
  */
 export function Shell({ children }: { children: ReactNode }) {
-  const { other } = useMantineTheme();
-  const { shell, zIndex } = other;
+  const { shell, zIndex } = tokens;
   const sidebar = useSidebar();
   const contextBar = useContextBar();
   const actions = useShellActions();

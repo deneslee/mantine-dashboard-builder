@@ -1,9 +1,9 @@
 import { Menu } from '@mantine/core';
-import { shape } from '../../tokens/semantic';
+import { shadow, shape } from '../../tokens/semantic';
 
 export const MenuTheme = Menu.extend({
   defaultProps: {
-    shadow: 'md',
+    shadow: shadow.overlay,
     radius: shape.container,
     width: 200,
     position: 'bottom-end',

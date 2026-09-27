@@ -1,3 +1,4 @@
+import { Tooltip } from '@mantine/core';
 import { useShellActions, useSidebar } from '../hooks/useShell';
 import { nav } from '../model/nav';
 import { Panel } from '../panel/Panel';
@@ -17,23 +18,25 @@ export function Sidebar() {
 
   return (
     <Panel.Root className={classes.root} data-compact={isCompact || undefined}>
-      <Panel.Header className={classes.header}>
-        <Brand />
-      </Panel.Header>
+      <Tooltip.Group>
+        <Panel.Header className={classes.header}>
+          <Brand />
+        </Panel.Header>
 
-      <Panel.Body>
-        <SidebarNav groups={nav.main} />
-      </Panel.Body>
+        <Panel.Body>
+          <SidebarNav groups={nav.main} />
+        </Panel.Body>
 
-      {nav.bottom.length > 0 ? <SidebarNav groups={nav.bottom} className={classes.bottom} /> : null}
+        {nav.bottom.length > 0 ? <SidebarNav groups={nav.bottom} className={classes.bottom} /> : null}
 
-      <Panel.Footer className={classes.footer}>
-        {/* The compact rail only fits one button: docking moves into the menu there. */}
-        {narrow || isCompact ? null : (
-          <Panel.DockToggle variant="chrome" docked={prefersDocked} onChange={setSidebarDocked} />
-        )}
-        <SidebarMenu />
-      </Panel.Footer>
+        <Panel.Footer className={classes.footer}>
+          {/* The compact rail only fits one button: docking moves into the menu there. */}
+          {narrow || isCompact ? null : (
+            <Panel.DockToggle variant="chrome" docked={prefersDocked} onChange={setSidebarDocked} />
+          )}
+          <SidebarMenu />
+        </Panel.Footer>
+      </Tooltip.Group>
     </Panel.Root>
   );
 }

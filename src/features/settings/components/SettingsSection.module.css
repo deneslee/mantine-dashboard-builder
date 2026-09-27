@@ -4,7 +4,7 @@
 
 .header {
   padding: var(--mantine-spacing-md) var(--mantine-spacing-lg);
-  border-bottom: 1px solid var(--app-border);
+  border-bottom: 1px solid var(--app-color-border-default);
 }
 
 /* Label and help text on the left, the control on the right; stacked on small screens. */
@@ -15,7 +15,7 @@
   padding: var(--mantine-spacing-lg);
 
   & + & {
-    border-top: 1px solid var(--app-border);
+    border-top: 1px solid var(--app-color-border-default);
   }
 
   @media (max-width: $mantine-breakpoint-sm) {
@@ -33,7 +33,7 @@
 
 .help {
   margin-top: rem(2px);
-  color: var(--app-text-muted);
+  color: var(--app-color-text-subtle);
   font-size: var(--mantine-font-size-xs);
   line-height: 1.45;
 }

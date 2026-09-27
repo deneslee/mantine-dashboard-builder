@@ -19,8 +19,8 @@
     padding-inline: var(--nl-inset, var(--mantine-spacing-sm)) var(--mantine-spacing-sm);
     font-size: var(--mantine-font-size-sm);
     transition:
-      background-color var(--app-motion-fast) var(--app-motion-ease),
-      color var(--app-motion-fast) var(--app-motion-ease);
+      background-color var(--app-motion-duration-fast) var(--app-motion-easing-standard),
+      color var(--app-motion-duration-fast) var(--app-motion-easing-standard);
 
     /*
      * Sidebar chrome is scheme-invariant (always dark), but Mantine's own NavLink
@@ -42,7 +42,7 @@
       width: rem(3px);
       border-radius: 0 rem(3px) rem(3px) 0;
       background: transparent;
-      transition: background-color var(--app-motion-fast) var(--app-motion-ease);
+      transition: background-color var(--app-motion-duration-fast) var(--app-motion-easing-standard);
     }
 
     &[data-active] {
@@ -65,7 +65,7 @@
 
     & .body,
     & .section[data-position='right'] {
-      transition: opacity var(--app-motion-fast) var(--app-motion-ease);
+      transition: opacity var(--app-motion-duration-fast) var(--app-motion-easing-standard);
     }
 
     &[data-compact] {

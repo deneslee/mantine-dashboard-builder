@@ -1,12 +1,13 @@
+/* Contextual surfaces: at depth 1 the layer tokens equal the raised surface and default border. */
 .root {
   &[data-variant='panel'] {
-    background-color: var(--app-surface-raised);
-    border: 1px solid var(--app-border);
+    background-color: var(--app-layer-surface);
+    border: 1px solid var(--app-layer-border);
   }
 
   &[data-variant='widget'] {
-    background-color: var(--app-surface-raised);
-    border: 1px solid var(--app-border);
+    background-color: var(--app-layer-surface);
+    border: 1px solid var(--app-layer-border);
     display: flex;
     flex-direction: column;
     overflow: hidden;

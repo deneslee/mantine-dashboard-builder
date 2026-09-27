@@ -1,4 +1,4 @@
-import { Box, Group, Paper, SimpleGrid, Skeleton, Stack } from '@mantine/core';
+import { Box, Group, Paper, SimpleGrid, Skeleton, Stack, VisuallyHidden } from '@mantine/core';
 import type { ReactNode } from 'react';
 import classes from './Skeletons.module.css';
 
@@ -9,7 +9,7 @@ import classes from './Skeletons.module.css';
 function Region({ label, children, className }: { label: string; children: ReactNode; className?: string }) {
   return (
     <Box aria-busy="true" aria-live="polite" className={className}>
-      <span className={classes.srOnly}>{label}</span>
+      <VisuallyHidden>{label}</VisuallyHidden>
       <Box aria-hidden="true" h="100%">
         {children}
       </Box>
@@ -20,7 +20,7 @@ function Region({ label, children, className }: { label: string; children: React
 export function TextSkeleton({ lines = 4, label = 'Loading text' }: { lines?: number; label?: string }) {
   return (
     <Region label={label}>
-      <Stack gap={8}>
+      <Stack gap="sm">
         {Array.from({ length: lines }, (_, i) => (
           <Skeleton key={i} height={10} width={i === lines - 1 ? '60%' : '100%'} />
         ))}
@@ -87,7 +87,7 @@ export function PanelSkeleton({ label = 'Loading panel' }: { label?: string }) {
         {[0, 1, 2].map((i) => (
           <Group key={i} gap="sm" wrap="nowrap" align="flex-start">
             <Skeleton height={28} circle />
-            <Stack gap={6} className={classes.grow}>
+            <Stack gap="xs" className={classes.grow}>
               <Skeleton height={10} width="70%" />
               <Skeleton height={8} />
               <Skeleton height={8} width="40%" />
@@ -105,7 +105,7 @@ export function DashboardSkeleton({ label = 'Loading dashboard' }: { label?: str
     <Region label={label}>
       <Stack gap="lg" p="lg">
         <Group justify="space-between">
-          <Stack gap={8}>
+          <Stack gap="sm">
             <Skeleton height={20} width={220} />
             <Skeleton height={10} width={320} />
           </Stack>
@@ -142,7 +142,7 @@ export function ListSkeleton({ rows = 6, label = 'Loading list' }: { rows?: numb
             <Paper key={i} variant="panel" p="sm">
               <Group gap="sm" wrap="nowrap">
                 <Skeleton height={32} width={32} />
-                <Stack gap={6} className={classes.grow}>
+                <Stack gap="xs" className={classes.grow}>
                   <Skeleton height={10} width="35%" />
                   <Skeleton height={8} width="60%" />
                 </Stack>

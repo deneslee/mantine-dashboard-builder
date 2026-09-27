@@ -2,6 +2,7 @@ import { Box, Group, Paper, Text } from '@mantine/core';
 import { useIntersection } from '@mantine/hooks';
 import { Suspense, useId, useState } from 'react';
 import { WidgetBoundary } from '@/components/errors/WidgetBoundary';
+import { fontWeight } from '@/design-system/tokens/semantic';
 import type { WidgetProps } from '../../model/types';
 import { widgetKinds } from '../widgets/widgetKinds';
 import classes from './WidgetTile.module.css';
@@ -25,7 +26,7 @@ export function WidgetTile({ dashboardId, widget }: WidgetProps) {
   return (
     <Paper variant="widget" component="section" aria-labelledby={titleId}>
       <Group className={classes.header} justify="space-between" wrap="nowrap">
-        <Text id={titleId} size="sm" fw={600} truncate>
+        <Text id={titleId} size="sm" fw={fontWeight.medium} truncate>
           {widget.title}
         </Text>
       </Group>

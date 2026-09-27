@@ -1,6 +1,8 @@
 import { ActionIcon, Box, Group, ScrollArea, Tooltip, type BoxProps } from '@mantine/core';
 import { IconPinned, IconPinnedOff } from '@tabler/icons-react';
+import { clsx } from 'clsx';
 import type { ReactNode } from 'react';
+import { iconSize, iconStroke } from '@/design-system/tokens/semantic';
 import classes from './Panel.module.css';
 
 /**
@@ -14,7 +16,7 @@ interface PartProps extends BoxProps {
 
 export function PanelRoot({ children, className, ...rest }: PartProps) {
   return (
-    <Box className={[classes.root, className].filter(Boolean).join(' ')} {...rest}>
+    <Box className={clsx(classes.root, className)} {...rest}>
       {children}
     </Box>
   );
@@ -23,7 +25,7 @@ export function PanelRoot({ children, className, ...rest }: PartProps) {
 export function PanelHeader({ children, className, ...rest }: PartProps) {
   return (
     <Group
-      className={[classes.header, className].filter(Boolean).join(' ')}
+      className={clsx(classes.header, className)}
       justify="space-between"
       gap="xs"
       wrap="nowrap"
@@ -36,7 +38,7 @@ export function PanelHeader({ children, className, ...rest }: PartProps) {
 
 export function PanelBody({ children, className, ...rest }: PartProps) {
   return (
-    <ScrollArea className={[classes.body, className].filter(Boolean).join(' ')} {...rest}>
+    <ScrollArea className={clsx(classes.body, className)} {...rest}>
       {children}
     </ScrollArea>
   );
@@ -45,7 +47,7 @@ export function PanelBody({ children, className, ...rest }: PartProps) {
 export function PanelFooter({ children, className, ...rest }: PartProps) {
   return (
     <Group
-      className={[classes.footer, className].filter(Boolean).join(' ')}
+      className={clsx(classes.footer, className)}
       justify="space-between"
       gap="xs"
       wrap="nowrap"
@@ -73,7 +75,7 @@ export function PanelDockToggle({ docked, onChange, variant = 'subtle' }: DockTo
         aria-pressed={docked}
         onClick={() => onChange(!docked)}
       >
-        <Icon size={18} stroke={1.75} />
+        <Icon size={iconSize.md} stroke={iconStroke} />
       </ActionIcon>
     </Tooltip>
   );

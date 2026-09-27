@@ -2,6 +2,7 @@ import { ActionIcon, Badge, Group, Tabs, Tooltip } from '@mantine/core';
 import { IconX } from '@tabler/icons-react';
 import { Suspense, useEffect } from 'react';
 import { PanelSkeleton } from '@/components/feedback/skeletons/Skeletons';
+import { iconSize, iconStroke } from '@/design-system/tokens/semantic';
 import { useBadgeCount } from '../hooks/useBadgeCount';
 import { useContextTabs } from '../hooks/useContextTabs';
 import { useContextBar, useShellActions, useSidebar } from '../hooks/useShell';
@@ -35,7 +36,7 @@ export function ContextBar() {
       keepMountedMode="activity"
       classNames={{ root: classes.root, list: classes.list, tab: classes.tab, panel: classes.panel }}
     >
-      <Group className={classes.header} gap={4} wrap="nowrap">
+      <Group className={classes.header} gap="2xs" wrap="nowrap">
         <Tabs.List aria-label="Context">
           {tabs.map((tab) => {
             // Active tab shows its label; the rest are icons with tooltips so many tabs fit 280px.
@@ -54,11 +55,11 @@ export function ContextBar() {
             );
           })}
         </Tabs.List>
-        <Group gap={2} wrap="nowrap" className={classes.actions}>
+        <Group gap="3xs" wrap="nowrap" className={classes.actions}>
           {narrow ? null : <Panel.DockToggle docked={prefersDocked} onChange={setContextBarDocked} />}
           <Tooltip label="Close">
             <ActionIcon aria-label="Close context panel" onClick={closeContextBar}>
-              <IconX size={18} stroke={1.75} />
+              <IconX size={iconSize.md} stroke={iconStroke} />
             </ActionIcon>
           </Tooltip>
         </Group>
@@ -80,7 +81,7 @@ export function ContextBar() {
 function TabCount({ badge }: { badge?: TabBadge }) {
   const count = useBadgeCount(badge);
   return count ? (
-    <Badge size="xs" circle color="red" variant="filled">
+    <Badge size="xs" circle color="danger" variant="filled">
       {count > 9 ? '9+' : count}
     </Badge>
   ) : null;

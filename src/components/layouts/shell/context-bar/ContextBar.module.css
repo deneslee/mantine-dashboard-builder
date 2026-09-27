@@ -3,14 +3,14 @@
   flex-direction: column;
   height: 100%;
   min-height: 0;
-  background: var(--app-surface-raised);
+  background: var(--app-elevation-surface-raised);
 }
 
 .header {
   flex: 0 0 auto;
   height: var(--app-navbar-height);
   padding-inline-end: var(--mantine-spacing-xs);
-  border-bottom: 1px solid var(--app-border);
+  border-bottom: 1px solid var(--app-color-border-default);
 }
 
 /* Tabs fill the header height so the active underline sits on the header border. */

@@ -30,7 +30,42 @@
     "declaration-property-value-no-unknown": null,
     "media-query-no-invalid": null,
     "property-no-vendor-prefix": null,
-    "import-notation": "string"
+    "import-notation": "string",
+    "function-disallowed-list": [
+      ["rgb", "rgba", "hsl", "hsla"],
+      {
+        "message": "Use a semantic token (var(--app-…)), not a raw color function."
+      }
+    ],
+    "declaration-property-value-disallowed-list": [
+      {
+        "/.*/": ["/--mantine-color-[a-z]+-\\d/"]
+      },
+      {
+        "message": "Use a semantic token (var(--app-…)), not a Mantine palette shade."
+      }
+    ],
+    "declaration-property-value-allowed-list": [
+      {
+        "/^(color|background|background-color|border|border-(top|right|bottom|left)|border-color|outline|outline-color|fill|stroke|box-shadow|z-index|border-radius|transition|transition-duration)$/": [
+          "/var\\(--/",
+          "/^(0|none|transparent|currentcolor|inherit|unset)$/i"
+        ]
+      },
+      {
+        "message": "Use a token (var(--app-…) or a Mantine variable) for this property, not a raw value."
+      }
+    ]
   },
+  "overrides": [
+    {
+      "files": ["src/design-system/**/*.css", "src/features/integrations/**/*.css"],
+      "rules": {
+        "function-disallowed-list": null,
+        "declaration-property-value-disallowed-list": null,
+        "declaration-property-value-allowed-list": null
+      }
+    }
+  ],
   "ignoreFiles": ["src/design-system/tokens/**/*.css"]
 }

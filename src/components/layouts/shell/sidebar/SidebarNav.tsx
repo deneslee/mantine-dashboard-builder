@@ -1,7 +1,9 @@
 import { Menu, NavLink, Stack, Text, Tooltip } from '@mantine/core';
 import { Link, useRouterState } from '@tanstack/react-router';
+import { clsx } from 'clsx';
 import { useId, useState } from 'react';
 import { tokens } from '@/design-system/tokens/tokens';
+import { fontWeight, iconStroke } from '@/design-system/tokens/semantic';
 import { useShellActions, useSidebar } from '../hooks/useShell';
 import type { NavGroup, NavItem } from '../model/nav';
 import classes from './Sidebar.module.css';
@@ -15,7 +17,7 @@ type NavChild = NonNullable<NavItem['children']>[number];
  */
 export function SidebarNav({ groups, className }: { groups: NavGroup[]; className?: string }) {
   return (
-    <Stack gap="lg" className={[classes.nav, className].filter(Boolean).join(' ')}>
+    <Stack gap="lg" className={clsx(classes.nav, className)}>
       {groups.map((group) => (
         <SidebarGroup key={group.id} group={group} />
       ))}
@@ -27,12 +29,12 @@ function SidebarGroup({ group }: { group: NavGroup }) {
   const labelId = useId();
   return (
     <Stack
-      gap={2}
+      gap="3xs"
       role={group.label ? 'group' : undefined}
       aria-labelledby={group.label ? labelId : undefined}
     >
       {group.label ? (
-        <Text id={labelId} size="xs" fw={500} className={classes.groupLabel}>
+        <Text id={labelId} size="xs" fw={fontWeight.medium} className={classes.groupLabel}>
           <span>{group.label}</span>
         </Text>
       ) : null}
@@ -61,7 +63,7 @@ function useAfterNavigate() {
 }
 
 function NavIcon({ icon: Icon }: { icon: NavItem['icon'] }) {
-  return <Icon size={tokens.shell.sidebar.iconSize} stroke={1.75} />;
+  return <Icon size={tokens.shell.sidebar.iconSize} stroke={iconStroke} />;
 }
 
 /** Leaf entry. Active on its own route and nested paths; the tooltip only shows on the compact rail. */

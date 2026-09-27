@@ -29,7 +29,7 @@
 }
 
 .receiptCard {
-  background: color-mix(in srgb, var(--mantine-color-teal-9) 14%, var(--app-surface-raised));
+  background: color-mix(in srgb, var(--mantine-color-teal-9) 14%, var(--app-elevation-surface-raised));
   border: 1px solid var(--mantine-color-teal-6);
 }
 

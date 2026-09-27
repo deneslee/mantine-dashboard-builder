@@ -4,7 +4,7 @@
 }
 
 .toolbar {
-  border-bottom: 1px solid var(--app-border);
+  border-bottom: 1px solid var(--app-color-border-default);
 }
 
 .list {
@@ -15,8 +15,8 @@
 
 .item {
   padding: var(--mantine-spacing-sm);
-  border-bottom: 1px solid var(--app-border);
-  transition: background-color var(--app-motion-fast) var(--app-motion-ease);
+  border-bottom: 1px solid var(--app-color-border-default);
+  transition: background-color var(--app-motion-duration-fast) var(--app-motion-easing-standard);
 
   &[data-unread] {
     background: var(--mantine-primary-color-light);

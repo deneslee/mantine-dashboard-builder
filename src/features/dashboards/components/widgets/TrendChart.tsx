@@ -4,7 +4,7 @@ import { fetchSeries } from '../../api/demo';
 import type { WidgetProps } from '../../model/types';
 
 // Module constants keep chart props stable across renders (docs/grid-and-charts.md, Charts).
-const series = [{ name: 'value', label: 'Value', color: 'indigo.5' }];
+const series = [{ name: 'value', label: 'Value', color: 'brand.5' }];
 /** Dashboards load many charts at once; per-series entry animations are noise and cost. */
 const noAnimation = { isAnimationActive: false };
 

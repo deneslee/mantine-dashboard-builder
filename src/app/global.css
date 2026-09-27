@@ -17,7 +17,7 @@
   }
 
   body {
-    background: var(--app-surface);
+    background: var(--app-elevation-surface-canvas);
     color: var(--mantine-color-text);
     -webkit-font-smoothing: antialiased;
   }
@@ -37,6 +37,8 @@
     display: none;
   }
 
+  /* Reduced motion has to beat every duration token, so these two blocks use raw values. */
+  /* stylelint-disable declaration-property-value-allowed-list */
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -53,4 +55,5 @@
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
   }
+  /* stylelint-enable declaration-property-value-allowed-list */
 }

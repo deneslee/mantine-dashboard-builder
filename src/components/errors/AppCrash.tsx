@@ -1,6 +1,7 @@
 import { Button, Center } from '@mantine/core';
 import { IconRefresh } from '@tabler/icons-react';
 import type { FallbackProps } from 'react-error-boundary';
+import { iconSize } from '@/design-system/tokens/semantic';
 import { ErrorState } from './ErrorState';
 
 /** Last-resort boundary around the whole app. Rendered without the chrome, so it can't depend on it. */
@@ -18,7 +19,7 @@ export function AppCrash({ error, resetErrorBoundary }: FallbackProps) {
             </Button>
             <Button
               size="sm"
-              leftSection={<IconRefresh size={16} />}
+              leftSection={<IconRefresh size={iconSize.sm} />}
               onClick={() => window.location.reload()}
             >
               Reload

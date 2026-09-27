@@ -1,9 +1,9 @@
 import { Popover } from '@mantine/core';
-import { shape } from '../../tokens/semantic';
+import { shadow, shape } from '../../tokens/semantic';
 
 export const PopoverTheme = Popover.extend({
   defaultProps: {
-    shadow: 'md',
+    shadow: shadow.overlay,
     radius: shape.container,
     withinPortal: true,
   },

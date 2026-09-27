@@ -5,6 +5,7 @@ import { useParams } from '@tanstack/react-router';
 import { useMemo } from 'react';
 import { Page } from '@/design-system/components/Page/Page';
 import { notify } from '@/lib/notify/notify';
+import { iconSize, iconStroke } from '@/design-system/tokens/semantic';
 import { demoWidgets } from '../api/demo';
 import { dashboardQuery } from '../api/queries';
 import { DashboardGrid } from './grid/DashboardGrid';
@@ -40,7 +41,7 @@ export function DashboardView() {
               loading={fetching}
               onClick={() => void refresh()}
             >
-              <IconRefresh size={18} stroke={1.75} />
+              <IconRefresh size={iconSize.md} stroke={iconStroke} />
             </ActionIcon>
           </Tooltip>
         }

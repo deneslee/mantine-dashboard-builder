@@ -1,7 +1,7 @@
 .root {
   height: 100dvh;
   overflow: hidden;
-  background: var(--app-surface);
+  background: var(--app-elevation-surface-canvas);
 }
 
 .skip {
@@ -33,7 +33,7 @@
 
   /* Animate open/close/compact; not while the user is dragging. */
   .root:not([data-resizing]) & {
-    transition: flex-basis var(--app-motion-base) var(--app-motion-ease);
+    transition: flex-basis var(--app-motion-duration-base) var(--app-motion-easing-standard);
   }
 }
 
@@ -43,7 +43,7 @@
 }
 
 .contextPane {
-  background: var(--app-surface-raised);
+  background: var(--app-elevation-surface-raised);
   z-index: var(--app-z-context);
 }
 
@@ -73,7 +73,7 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    border-radius: rem(6px);
+    border-radius: var(--app-radius-pill);
     background: var(--app-color-border-strong);
   }
 
@@ -114,7 +114,7 @@
  * Hidden next to a collapsed (0px) or fixed-size pane.
  */
 .handle {
-  --splitter-handle-color: var(--app-border);
+  --splitter-handle-color: var(--app-color-border-default);
 
   z-index: calc(var(--app-z-navbar) + 1);
 

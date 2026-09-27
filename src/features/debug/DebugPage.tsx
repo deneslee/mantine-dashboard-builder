@@ -15,6 +15,7 @@ import {
 import { notify } from '@/lib/notify/notify';
 import { useInbox } from '@/stores/inbox';
 import { AppError } from '@/lib/errors/AppError';
+import { chart } from '@/design-system/tokens/semantic';
 import { wait } from '@/utils/wait';
 
 /** Visual QA for chrome states. Not linked from the sidebar; open /debug. */
@@ -91,7 +92,7 @@ export function DebugPage() {
               </Button>
               <Button
                 variant="subtle"
-                color="gray"
+                color="neutral"
                 onClick={() => {
                   notify.clean();
                   clearInbox();
@@ -122,10 +123,10 @@ export function DebugPage() {
               </Anchor>
             </Group>
             <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md" mt="md">
-              <Paper variant="widget" h={200}>
+              <Paper variant="widget" h={chart.height.md}>
                 <ThrowingWidget />
               </Paper>
-              <Paper variant="widget" h={200}>
+              <Paper variant="widget" h={chart.height.md}>
                 <ErrorState.Inline
                   title="Data source error"
                   description="Haystack server returned 502."
@@ -147,16 +148,16 @@ export function DebugPage() {
 
           <Section title="Skeletons">
             <SimpleGrid cols={{ base: 1, md: 2, xl: 4 }} spacing="md">
-              <Paper variant="panel" p="md" h={180}>
+              <Paper variant="panel" p="md" h={chart.height.sm}>
                 <TextSkeleton />
               </Paper>
-              <Paper variant="panel" p="md" h={180}>
+              <Paper variant="panel" p="md" h={chart.height.sm}>
                 <ChartSkeleton />
               </Paper>
-              <Paper variant="panel" p="md" h={180}>
+              <Paper variant="panel" p="md" h={chart.height.sm}>
                 <TableSkeleton rows={4} columns={3} />
               </Paper>
-              <Paper variant="panel" h={180}>
+              <Paper variant="panel" h={chart.height.sm}>
                 <PanelSkeleton />
               </Paper>
             </SimpleGrid>

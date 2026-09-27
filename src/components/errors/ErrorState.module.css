@@ -1,5 +1,9 @@
 .full {
+  /* EmptyState draws its disc at twice the indicator size: 24px icon, 48px disc. */
+  --empty-state-indicator-size-lg: rem(24px);
+
   flex: 1 1 auto;
+  justify-content: center;
   min-height: calc(100dvh - var(--app-navbar-height) - var(--mantine-spacing-xl) * 2);
   padding: var(--mantine-spacing-xl);
 }
@@ -10,18 +14,29 @@
   line-height: 1;
   letter-spacing: rem(-4px);
   font-variant-numeric: tabular-nums;
-  color: var(--app-border);
+  color: var(--app-color-border-default);
   user-select: none;
 }
 
 .inline {
+  --empty-state-indicator-size-sm: rem(20px);
+
+  justify-content: center;
   height: 100%;
   min-height: rem(140px);
   padding: var(--mantine-spacing-md);
 }
 
+.clamp {
+  display: -webkit-box;
+  max-width: rem(320px);
+  overflow: hidden;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
 .banner {
-  border-bottom: 1px solid var(--app-border);
+  border-bottom: 1px solid var(--app-color-border-default);
 }
 
 .details {
@@ -32,7 +47,7 @@
 }
 
 .chevron {
-  transition: transform var(--app-motion-fast) var(--app-motion-ease);
+  transition: transform var(--app-motion-duration-fast) var(--app-motion-easing-standard);
 
   &[data-open] {
     transform: rotate(180deg);

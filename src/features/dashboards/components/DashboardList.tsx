@@ -5,6 +5,7 @@ import { Link } from '@tanstack/react-router';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { Page } from '@/design-system/components/Page/Page';
+import { fontWeight, iconSize, iconStroke } from '@/design-system/tokens/semantic';
 import { dashboardsQuery } from '../api/queries';
 import classes from './DashboardList.module.css';
 
@@ -19,7 +20,12 @@ export function DashboardList() {
         title="Dashboards"
         description={`${data.length} dashboards`}
         actions={
-          <Button size="sm" leftSection={<IconPlus size={16} />} disabled title="Builder arrives in phase 3">
+          <Button
+            size="sm"
+            leftSection={<IconPlus size={iconSize.sm} />}
+            disabled
+            title="Builder arrives in phase 3"
+          >
             New dashboard
           </Button>
         }
@@ -29,7 +35,7 @@ export function DashboardList() {
           <EmptyState
             mt="xl"
             variant="light"
-            icon={<IconLayoutDashboard size={22} stroke={1.75} />}
+            icon={<IconLayoutDashboard size={iconSize.lg} stroke={iconStroke} />}
             title="No dashboards yet"
             description="Create one from scratch or start from a template."
           />
@@ -43,8 +49,8 @@ export function DashboardList() {
                 className={classes.card}
                 renderRoot={(props) => <Link to="/dashboards/$id" params={{ id: d.id }} {...props} />}
               >
-                <Group justify="space-between" wrap="nowrap" mb={6}>
-                  <Text fw={600} truncate>
+                <Group justify="space-between" wrap="nowrap" mb="xs">
+                  <Text fw={fontWeight.medium} truncate>
                     {d.title}
                   </Text>
                   <Text size="xs" c="dimmed" className={classes.nowrap}>
@@ -55,9 +61,9 @@ export function DashboardList() {
                   {d.description}
                 </Text>
                 <Group justify="space-between" mt="auto">
-                  <Group gap={4}>
+                  <Group gap="2xs">
                     {d.tags.map((t) => (
-                      <Badge key={t} size="xs" variant="light" color="gray">
+                      <Badge key={t} size="xs" variant="light" color="neutral">
                         {t}
                       </Badge>
                     ))}

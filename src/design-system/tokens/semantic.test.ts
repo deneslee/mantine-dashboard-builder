@@ -146,25 +146,26 @@ describe('semantic tokens and toCssVars generator', () => {
     expect(cssVars.dark['--app-chart-text']).toBe(chart.text.dark);
   });
 
-  it('maintains backwards-compatible CSS variables for existing CSS modules', () => {
-    expect(cssVars.variables['--app-brand-sentry']).toBeDefined();
+  it('emits shell and chrome variables without their group name', () => {
     expect(cssVars.variables['--app-navbar-height']).toBeDefined();
     expect(cssVars.variables['--app-sidebar-expanded']).toBeDefined();
     expect(cssVars.variables['--app-sidebar-compact']).toBeDefined();
     expect(cssVars.variables['--app-navbar-bg']).toBeDefined();
     expect(cssVars.variables['--app-sidebar-bg']).toBeDefined();
-    expect(cssVars.variables['--app-motion-fast']).toBeDefined();
-    expect(cssVars.variables['--app-motion-ease']).toBeDefined();
+    expect(cssVars.variables['--app-navbar-input-bg']).toBeDefined();
+  });
 
-    expect(cssVars.light['--app-surface']).toBeDefined();
-    expect(cssVars.light['--app-surface-raised']).toBeDefined();
-    expect(cssVars.light['--app-border']).toBeDefined();
-    expect(cssVars.light['--app-text-muted']).toBeDefined();
-
-    expect(cssVars.dark['--app-surface']).toBeDefined();
-    expect(cssVars.dark['--app-surface-raised']).toBeDefined();
-    expect(cssVars.dark['--app-border']).toBeDefined();
-    expect(cssVars.dark['--app-text-muted']).toBeDefined();
+  it('has no legacy variable names left', () => {
+    const all = { ...cssVars.variables, ...cssVars.light };
+    for (const name of [
+      '--app-surface',
+      '--app-border',
+      '--app-text-muted',
+      '--app-motion-fast',
+      '--app-brand-sentry',
+    ]) {
+      expect(all[name]).toBeUndefined();
+    }
   });
 
   it('has identical keys for light and dark schemes (theme symmetry)', () => {
@@ -182,10 +183,22 @@ describe('semantic tokens and toCssVars generator', () => {
   });
 
   it('is connected to theme.ts cssVariablesResolver', () => {
-    // Calling cssVariablesResolver with theme
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const resolved = cssVariablesResolver(theme as any);
-    expect(resolved).toEqual(cssVars);
+    expect(resolved.variables).toEqual(cssVars.variables);
+    expect(resolved.light).toMatchObject(cssVars.light);
+    expect(resolved.dark).toMatchObject(cssVars.dark);
+  });
+
+  it("points Mantine's body and dimmed colors at our tokens in both schemes", () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const resolved = cssVariablesResolver(theme as any);
+    for (const scheme of [resolved.light, resolved.dark]) {
+      expect(scheme['--mantine-color-body']).toBe('var(--app-elevation-surface-overlay)');
+      expect(scheme['--mantine-color-dimmed']).toBe('var(--app-color-text-subtle)');
+    }
+    expect(cssVars.light['--app-elevation-surface-overlay']).toBeDefined();
+    expect(cssVars.light['--app-color-text-subtle']).toBeDefined();
   });
 
   it('defines virtualColor aliases for semantic prop usage', () => {

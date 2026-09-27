@@ -1,9 +1,10 @@
 import { Modal } from '@mantine/core';
-import { shape } from '../../tokens/semantic';
+import { shadow, shape } from '../../tokens/semantic';
 
 export const ModalTheme = Modal.extend({
   defaultProps: {
     centered: true,
+    shadow: shadow.overlay,
     radius: shape.container,
     overlayProps: { backgroundOpacity: 0.45, blur: 2 },
   },

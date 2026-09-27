@@ -1,13 +1,11 @@
 import { Button, Group, Text } from '@mantine/core';
-import { useEffect, useState } from 'react';
+import { useTimeout } from '@mantine/hooks';
+import { useState } from 'react';
 
 /** Appears after `after` ms of loading: says it's still working and offers Cancel. */
 export function SlowHint({ after = 5000, onCancel }: { after?: number; onCancel?: () => void }) {
   const [slow, setSlow] = useState(false);
-  useEffect(() => {
-    const t = window.setTimeout(() => setSlow(true), after);
-    return () => window.clearTimeout(t);
-  }, [after]);
+  useTimeout(() => setSlow(true), after, { autoInvoke: true });
   if (!slow) return null;
   return (
     <Group gap="xs" justify="center" py="xs">
@@ -15,7 +13,7 @@ export function SlowHint({ after = 5000, onCancel }: { after?: number; onCancel?
         Still loading…
       </Text>
       {onCancel ? (
-        <Button size="compact-xs" variant="subtle" color="gray" onClick={onCancel}>
+        <Button size="compact-xs" variant="subtle" color="neutral" onClick={onCancel}>
           Cancel
         </Button>
       ) : null}

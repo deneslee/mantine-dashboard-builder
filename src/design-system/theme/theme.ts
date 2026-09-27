@@ -1,6 +1,5 @@
 import { createTheme, mergeThemeOverrides, type CSSVariablesResolver } from '@mantine/core';
 import { components } from './components';
-import { tokens } from '../tokens/tokens';
 import { primitives } from '../tokens/primitives';
 import { semantic, shape, toCssVars, virtualColors } from '../tokens/semantic';
 
@@ -31,7 +30,6 @@ export const theme = createTheme({
   focusRing: 'auto',
   // Mantine transitions (Drawer, Menu, Collapse, Tooltip) go instant under the OS reduced-motion setting.
   respectReducedMotion: true,
-  other: tokens,
   components,
 });
 
@@ -60,7 +58,22 @@ export const reducedMotionTheme = mergeThemeOverrides(
   }),
 );
 
+/**
+ * Mantine's own variables, pointed at our tokens. Mantine deep-merges this resolver over its
+ * defaults, so Paper, Menu, Popover, Modal, Drawer and Spotlight follow the tokens without their
+ * own classNames. They sit in the scheme blocks because that's where Mantine defines them.
+ */
+const mantineVars = {
+  '--mantine-color-body': 'var(--app-elevation-surface-overlay)',
+  '--mantine-color-dimmed': 'var(--app-color-text-subtle)',
+};
+
 /** Emits app tokens as CSS variables so CSS modules can read them. */
 export const cssVariablesResolver: CSSVariablesResolver = () => {
-  return toCssVars(semantic, '--app');
+  const vars = toCssVars(semantic, '--app');
+  return {
+    variables: vars.variables,
+    light: { ...vars.light, ...mantineVars },
+    dark: { ...vars.dark, ...mantineVars },
+  };
 };

@@ -1,5 +1,6 @@
 import { Group, Text } from '@mantine/core';
 import { appName } from '@/config/config';
+import { fontWeight } from '@/design-system/tokens/semantic';
 import classes from './Brand.module.css';
 
 /**
@@ -15,7 +16,7 @@ export function Brand() {
         <i />
         <i />
       </span>
-      <Text component="span" fw={600} size="sm" className={classes.name}>
+      <Text component="span" fw={fontWeight.medium} size="sm" className={classes.name}>
         {appName}
       </Text>
     </Group>

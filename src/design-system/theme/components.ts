@@ -14,8 +14,9 @@ import { PopoverTheme } from './components/Popover';
 import { ScrollAreaTheme } from './components/ScrollArea';
 import { SelectTheme } from './components/Select';
 import { SkeletonTheme } from './components/Skeleton';
+import { SpotlightTheme } from './components/Spotlight';
 import { TabsTheme } from './components/Tabs';
-import { TooltipTheme } from './components/Tooltip';
+import { TooltipGroupTheme, TooltipTheme } from './components/Tooltip';
 
 /**
  * Component-level defaults and custom variants.
@@ -37,6 +38,8 @@ export const components: MantineThemeComponents = {
   ScrollArea: ScrollAreaTheme,
   Select: SelectTheme,
   Skeleton: SkeletonTheme,
+  Spotlight: SpotlightTheme,
   Tabs: TabsTheme,
   Tooltip: TooltipTheme,
+  TooltipGroup: TooltipGroupTheme,
 };

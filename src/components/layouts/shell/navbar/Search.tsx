@@ -4,6 +4,7 @@ import { Spotlight, spotlight, type SpotlightActionData } from '@mantine/spotlig
 import { IconSearch } from '@tabler/icons-react';
 import { useNavigate } from '@tanstack/react-router';
 import { useMemo } from 'react';
+import { iconSize, iconStroke } from '@/design-system/tokens/semantic';
 import { nav } from '../model/nav';
 import classes from './Search.module.css';
 
@@ -51,10 +52,10 @@ export function Search() {
         onClick={spotlight.open}
         aria-label="Search"
         classNames={{ wrapper: classes.wrapper, input: classes.input, section: classes.section }}
-        leftSection={<IconSearch size={16} stroke={1.75} />}
+        leftSection={<IconSearch size={iconSize.sm} stroke={iconStroke} />}
         rightSectionWidth={72}
         rightSection={
-          <Group gap={4} wrap="nowrap" visibleFrom="sm">
+          <Group gap="2xs" wrap="nowrap" visibleFrom="sm">
             <Kbd size="xs">{modKey}</Kbd>
             <Kbd size="xs">K</Kbd>
           </Group>
@@ -69,7 +70,10 @@ export function Search() {
         nothingFound="Nothing matches that"
         highlightQuery
         limit={8}
-        searchProps={{ leftSection: <IconSearch size={18} stroke={1.75} />, placeholder: 'Search…' }}
+        searchProps={{
+          leftSection: <IconSearch size={iconSize.md} stroke={iconStroke} />,
+          placeholder: 'Search…',
+        }}
       />
     </>
   );

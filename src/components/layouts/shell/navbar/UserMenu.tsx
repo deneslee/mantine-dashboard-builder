@@ -2,6 +2,7 @@ import { Avatar, Menu, Text } from '@mantine/core';
 import { IconLogout, IconUserCircle } from '@tabler/icons-react';
 import { use } from 'react';
 import { CurrentUserContext } from '@/lib/user';
+import { fontWeight, iconSize } from '@/design-system/tokens/semantic';
 import classes from './UserMenu.module.css';
 
 /** Placeholder until auth exists; reads the `CurrentUser` context so it swaps cleanly later. */
@@ -22,7 +23,7 @@ export function UserMenu() {
           type="button"
           size={28}
           radius="xl"
-          color="indigo"
+          color="brand"
           variant="filled"
           aria-label={`Account: ${user.name}`}
           className={classes.avatar}
@@ -32,7 +33,7 @@ export function UserMenu() {
       </Menu.Target>
       <Menu.Dropdown>
         <Menu.Label>
-          <Text size="sm" fw={500} c="var(--mantine-color-text)">
+          <Text size="sm" fw={fontWeight.medium} c="var(--mantine-color-text)">
             {user.name}
           </Text>
           <Text size="xs" c="dimmed">
@@ -40,8 +41,8 @@ export function UserMenu() {
           </Text>
         </Menu.Label>
         <Menu.Divider />
-        <Menu.Item leftSection={<IconUserCircle size={16} />}>Profile</Menu.Item>
-        <Menu.Item leftSection={<IconLogout size={16} />} color="red">
+        <Menu.Item leftSection={<IconUserCircle size={iconSize.sm} />}>Profile</Menu.Item>
+        <Menu.Item leftSection={<IconLogout size={iconSize.sm} />} color="danger">
           Sign out
         </Menu.Item>
       </Menu.Dropdown>

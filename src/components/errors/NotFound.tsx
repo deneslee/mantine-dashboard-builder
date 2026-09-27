@@ -2,6 +2,7 @@ import { Button } from '@mantine/core';
 import { spotlight } from '@mantine/spotlight';
 import { IconArrowLeft, IconHome, IconSearch } from '@tabler/icons-react';
 import { useNavigate, useRouter, useRouterState } from '@tanstack/react-router';
+import { iconSize } from '@/design-system/tokens/semantic';
 import { ErrorState } from './ErrorState';
 
 /** 404 inside the chrome: the shell stays, only the content area changes. */
@@ -20,17 +21,22 @@ export function NotFound() {
           <Button
             variant="default"
             size="sm"
-            leftSection={<IconArrowLeft size={16} />}
+            leftSection={<IconArrowLeft size={iconSize.sm} />}
             onClick={() => router.history.back()}
           >
             Go back
           </Button>
-          <Button variant="default" size="sm" leftSection={<IconSearch size={16} />} onClick={spotlight.open}>
+          <Button
+            variant="default"
+            size="sm"
+            leftSection={<IconSearch size={iconSize.sm} />}
+            onClick={spotlight.open}
+          >
             Search
           </Button>
           <Button
             size="sm"
-            leftSection={<IconHome size={16} />}
+            leftSection={<IconHome size={iconSize.sm} />}
             onClick={() => void navigate({ to: '/dashboards' })}
           >
             Dashboards

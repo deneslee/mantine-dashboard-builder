@@ -10,7 +10,7 @@ export function Regions({ dashboardId }: WidgetProps) {
     queryFn: ({ signal }) => fetchRegions(dashboardId, signal),
   });
   return (
-    <Table verticalSpacing={6} fz="sm">
+    <Table verticalSpacing="xs" fz="sm">
       <Table.Thead>
         <Table.Tr>
           <Table.Th>Region</Table.Th>

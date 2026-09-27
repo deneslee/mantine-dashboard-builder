@@ -1,10 +1,12 @@
 import { ActionIcon, Badge, Button, Group, Stack, Text, ThemeIcon, Tooltip } from '@mantine/core';
+import { useTimeout } from '@mantine/hooks';
 import { IconAlertTriangle, IconBellOff, IconX } from '@tabler/icons-react';
 import dayjs from 'dayjs';
 import { useEffect } from 'react';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { useShallow } from 'zustand/shallow';
 import { useInbox } from '@/stores/inbox';
+import { fontWeight, iconSize, iconStroke } from '@/design-system/tokens/semantic';
 import classes from './Inbox.module.css';
 
 dayjs.extend(relativeTime);
@@ -23,19 +25,20 @@ export function Inbox() {
   const unread = items.filter((i) => !i.read).length;
 
   // The tab is hidden with React Activity, so this runs each time it becomes visible.
+  const { start: startReadTimer, clear: clearReadTimer } = useTimeout(markAllRead, 1500);
   useEffect(() => {
     if (!unread) return;
-    const t = window.setTimeout(markAllRead, 1500);
-    return () => window.clearTimeout(t);
-  }, [unread, markAllRead]);
+    startReadTimer();
+    return clearReadTimer;
+  }, [unread, startReadTimer, clearReadTimer]);
 
   if (items.length === 0) {
     return (
       <Stack align="center" gap="xs" p="xl" className={classes.empty}>
-        <ThemeIcon variant="light" color="gray" size="xl" radius="xl">
-          <IconBellOff size={20} stroke={1.75} />
+        <ThemeIcon variant="light" color="neutral" size="xl" radius="xl">
+          <IconBellOff size={iconSize.lg} stroke={iconStroke} />
         </ThemeIcon>
-        <Text size="sm" fw={500}>
+        <Text size="sm" fw={fontWeight.medium}>
           No notifications
         </Text>
         <Text size="xs" c="dimmed" ta="center" maw={220}>
@@ -51,11 +54,11 @@ export function Inbox() {
         <Text size="xs" c="dimmed">
           {unread ? `${unread} unread` : 'All read'}
         </Text>
-        <Group gap={4}>
+        <Group gap="2xs">
           <Button size="compact-xs" variant="subtle" onClick={markAllRead} disabled={!unread}>
             Mark all read
           </Button>
-          <Button size="compact-xs" variant="subtle" color="red" onClick={clear}>
+          <Button size="compact-xs" variant="subtle" color="danger" onClick={clear}>
             Clear all
           </Button>
         </Group>
@@ -75,18 +78,22 @@ export function Inbox() {
                 color={item.level === 'error' ? 'red' : 'yellow'}
                 size="md"
                 radius="xl"
-                mt={2}
+                mt="3xs"
               >
-                {item.level === 'error' ? <IconX size={14} /> : <IconAlertTriangle size={14} />}
+                {item.level === 'error' ? (
+                  <IconX size={iconSize.xs} />
+                ) : (
+                  <IconAlertTriangle size={iconSize.xs} />
+                )}
               </ThemeIcon>
 
-              <Stack gap={2} className={classes.body}>
-                <Group gap={6} wrap="nowrap">
+              <Stack gap="3xs" className={classes.body}>
+                <Group gap="xs" wrap="nowrap">
                   <Text size="sm" fw={item.read ? 400 : 600} lineClamp={1}>
                     {item.title}
                   </Text>
                   {item.count > 1 ? (
-                    <Badge size="xs" variant="light" color="gray">
+                    <Badge size="xs" variant="light" color="neutral">
                       ×{item.count}
                     </Badge>
                   ) : null}
@@ -104,7 +111,7 @@ export function Inbox() {
 
               <Tooltip label="Dismiss">
                 <ActionIcon size="sm" aria-label={`Dismiss ${item.title}`} onClick={() => dismiss(item.id)}>
-                  <IconX size={14} />
+                  <IconX size={iconSize.xs} />
                 </ActionIcon>
               </Tooltip>
             </Group>

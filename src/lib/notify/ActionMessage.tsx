@@ -18,7 +18,7 @@ export function ActionMessage({
       <Button
         size="compact-xs"
         variant="light"
-        mt={6}
+        mt="xs"
         onClick={() => {
           action.onClick();
           notifications.hide(id);

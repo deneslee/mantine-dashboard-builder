@@ -9,6 +9,7 @@ import {
   IconSettings,
 } from '@tabler/icons-react';
 import { Link } from '@tanstack/react-router';
+import { iconSize, iconStroke } from '@/design-system/tokens/semantic';
 import { useShellActions, useSidebar } from '../hooks/useShell';
 
 const iconProps = { size: 16, stroke: 1.75 };
@@ -32,7 +33,7 @@ export function SidebarMenu() {
       <Menu.Target>
         <Tooltip label="Sidebar menu" position={isCompact ? 'right' : 'top'}>
           <ActionIcon variant="chrome" aria-label="Sidebar menu">
-            <IconDots size={18} stroke={1.75} />
+            <IconDots size={iconSize.md} stroke={iconStroke} />
           </ActionIcon>
         </Tooltip>
       </Menu.Target>

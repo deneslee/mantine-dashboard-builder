@@ -13,7 +13,7 @@
 
   & i {
     display: block;
-    border-radius: rem(2px);
+    border-radius: var(--mantine-radius-xs);
     background: var(--mantine-primary-color-filled);
   }
 
@@ -30,7 +30,7 @@
 .name {
   letter-spacing: rem(-0.2px);
   white-space: nowrap;
-  transition: opacity var(--app-motion-fast) var(--app-motion-ease);
+  transition: opacity var(--app-motion-duration-fast) var(--app-motion-easing-standard);
 
   [data-compact] & {
     opacity: 0;

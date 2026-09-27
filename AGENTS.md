@@ -15,7 +15,35 @@ Vite 8 · React 19 · TypeScript 7 strict · Mantine 9.6.2 · TanStack Router (f
    - Wrong: a hand-built resize handle. Right: `Splitter` / `useSplitter`.
 3. **Dropdowns, selects and searchable lists** use `Combobox` (or `Select` / `Autocomplete` / `MultiSelect`, which wrap it).
 4. **Router links inside Mantine components** use `renderRoot={(props) => <Link to="…" {...props} />}` so they stay real anchors with preloading.
-5. **Styling:** theme defaults and variants in `src/design-system/theme/components.ts`; CSS modules for anything else. No inline style objects (oxlint rule `app/no-inline-style` blocks them outside `design-system/`), no raw hex colors (Stylelint blocks them). Colors, sizes and z-index come from `src/design-system/tokens/tokens.ts` via `var(--app-*)` or Mantine variables.
+5. **Styling:** theme defaults and variants in `src/design-system/theme/components/<Name>.ts`; CSS modules for anything else. See **Styling and tokens** below.
+6. **Check the installed `@mantine/core` and `@mantine/hooks` exports before writing a hook or component.** Several custom ones turned out to exist already (`useTimeout`, `VisuallyHidden`, `EmptyState`, `Tooltip.Group`).
+
+## Styling and tokens
+
+Every visual value is stored once, in tiers ([plan-03](.agents/plan/plan-03.md)):
+
+| Tier                  | Where                                                               | Who reads it                                        |
+| --------------------- | ------------------------------------------------------------------- | --------------------------------------------------- |
+| 1. Primitives         | `design-system/tokens/primitives.ts`: the only file with raw values | `design-system/` only (oxlint blocks other imports) |
+| 2. Semantic           | `design-system/tokens/semantic.ts`, emitted as `--app-*` variables  | everyone                                            |
+| 3. Contextual layers  | `--app-layer-*` (surface, border, field)                            | `Paper` `panel` / `widget`; later nested surfaces   |
+| 4. Component bindings | `theme/components/<Name>.ts`, `theme/styles/*.module.css`, resolver | Mantine applies them                                |
+
+- **Outside `design-system/`, use semantic tokens only.**
+  - CSS: `var(--app-*)`, or Mantine variables that aren't palette shades (`--mantine-spacing-*`, `--mantine-radius-*`, `--mantine-primary-color-filled`).
+  - TSX: token keys and the TS constants from `semantic.ts`: `gap="xs"`, `fw={fontWeight.medium}`, `size={iconSize.sm} stroke={iconStroke}`, `h={chart.height.md}`.
+  - `tokens.ts` holds only the layout numbers TS needs (`shell`, `zIndex`, `grid`).
+- **Status colors are aliases:** `color="danger"`, never `color="red"`. The aliases are `brand`, `neutral`, `danger`, `warning`, `success` and `info`; `dimmed` and `bright` are fine too.
+- **Radius and shadow come from the theme:** `shape.control` / `shape.container` in `semantic.ts` set every component's radius; overlays use `shadow.overlay`. Don't pass `radius=` or `shadow=` in feature code.
+- **Enforced:**
+  - oxlint `app/no-inline-style` blocks `style={{…}}`.
+  - oxlint `app/no-raw-style-props` blocks numeric spacing, `fw`, `fz`, `radius`, palette colors, and numeric icon `size` / `stroke`.
+  - Stylelint blocks hex, `rgb()` / `hsl()`, palette shades (`--mantine-color-red-6`), and raw colors, radii, shadows, z-index and durations.
+  - `lint/rules.test.ts` proves each rule fires. `design-system/**`, stories and tests are exempt; so is `features/integrations/**` until Plan 06.
+- **Mantine static classes:** `className="mantine-focus-auto"` for the focus ring on custom focusable elements (no custom `:focus-visible` CSS); `mantine-active` for press feedback.
+- **Viewport classes** (`visibleFrom` / `hiddenFrom`) only in the shell. Inside a page, use `@container` queries: `<main>`'s width depends on the panels, not the screen.
+- **Scheme-dependent CSS** (`light-dark()`, `@mixin light/dark`) only in `design-system/`. Feature CSS reads semantic variables that already switch.
+- **Debugging:** the `Design system/Tokens` story lists every semantic variable in both schemes with the primitive it points to.
 
 ## Structure (bulletproof-react, lightly adapted)
 

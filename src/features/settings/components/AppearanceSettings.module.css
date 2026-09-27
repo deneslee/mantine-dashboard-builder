@@ -19,8 +19,8 @@
 .option {
   padding: var(--mantine-spacing-sm) var(--mantine-spacing-md);
   transition:
-    border-color var(--app-motion-fast) var(--app-motion-ease),
-    background-color var(--app-motion-fast) var(--app-motion-ease);
+    border-color var(--app-motion-duration-fast) var(--app-motion-easing-standard),
+    background-color var(--app-motion-duration-fast) var(--app-motion-easing-standard);
 
   &[data-checked] {
     border-color: var(--mantine-primary-color-filled);
@@ -35,7 +35,7 @@
 }
 
 .optionHelp {
-  color: var(--app-text-muted);
+  color: var(--app-color-text-subtle);
   font-size: var(--mantine-font-size-xs);
   line-height: 1.45;
 }
@@ -49,6 +49,6 @@
 
 .status {
   margin-right: auto;
-  color: var(--app-text-muted);
+  color: var(--app-color-text-subtle);
   font-size: var(--mantine-font-size-sm);
 }

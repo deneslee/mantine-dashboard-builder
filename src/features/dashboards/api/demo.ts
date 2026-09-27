@@ -1,4 +1,5 @@
 import { AppError } from '@/lib/errors/AppError';
+import { wait } from '@/utils/wait';
 import type { ChartForm, DashboardWidget } from '../model/types';
 
 /**
@@ -22,18 +23,9 @@ function seeded(seed: string) {
   };
 }
 
-const sleep = (ms: number, signal?: AbortSignal) =>
-  new Promise<void>((resolve, reject) => {
-    const t = setTimeout(resolve, ms);
-    signal?.addEventListener('abort', () => {
-      clearTimeout(t);
-      reject(new DOMException('Aborted', 'AbortError'));
-    });
-  });
-
 export async function fetchKpis(dashboardId: string, signal?: AbortSignal): Promise<Kpi[]> {
   const rand = seeded(dashboardId);
-  await sleep(500 + Math.random() * 900, signal);
+  await wait(500 + Math.random() * 900, signal);
   return [
     { label: 'Revenue', value: Math.round(80_000 + rand() * 120_000), unit: '€', delta: rand() * 0.3 - 0.1 },
     { label: 'Active sites', value: Math.round(20 + rand() * 60), delta: rand() * 0.2 - 0.05 },
@@ -49,7 +41,7 @@ export interface RegionRow {
 
 export async function fetchRegions(dashboardId: string, signal?: AbortSignal): Promise<RegionRow[]> {
   const rand = seeded(`${dashboardId}:regions`);
-  await sleep(700 + Math.random() * 1200, signal);
+  await wait(700 + Math.random() * 1200, signal);
   const regions = ['Central Europe', 'Nordics', 'Iberia', 'UK & Ireland', 'Benelux'];
   const values = regions.map(() => Math.round(5_000 + rand() * 40_000));
   const total = values.reduce((a, b) => a + b, 0);
@@ -64,7 +56,7 @@ export interface SeriesPoint {
 /** A day of half-hourly values: a seeded random walk, so each widget keeps its own shape. */
 export async function fetchSeries(seed: string, signal?: AbortSignal): Promise<SeriesPoint[]> {
   const rand = seeded(seed);
-  await sleep(300 + Math.random() * 700, signal);
+  await wait(300 + Math.random() * 700, signal);
   let value = 40 + rand() * 40;
   return Array.from({ length: 48 }, (_, i) => {
     value = Math.max(0, value + (rand() - 0.48) * 12);
@@ -112,6 +104,6 @@ export function demoWidgets(dashboardId: string): DashboardWidget[] {
 
 /** Always fails, to demonstrate the per-widget error boundary. */
 export async function fetchBroken(signal?: AbortSignal): Promise<never> {
-  await sleep(800, signal);
+  await wait(800, signal);
   throw new AppError('datasource', 'Haystack server returned 502 for query "equip and hvac".');
 }

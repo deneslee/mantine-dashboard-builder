@@ -9,7 +9,7 @@
   flex: 0 0 auto;
   min-height: var(--app-navbar-height);
   padding-inline: var(--mantine-spacing-sm);
-  border-bottom: 1px solid var(--panel-border, var(--app-border));
+  border-bottom: 1px solid var(--panel-border, var(--app-color-border-default));
 }
 
 .body {
@@ -20,5 +20,5 @@
 .footer {
   flex: 0 0 auto;
   padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
-  border-top: 1px solid var(--panel-border, var(--app-border));
+  border-top: 1px solid var(--panel-border, var(--app-color-border-default));
 }

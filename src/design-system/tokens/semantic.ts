@@ -151,6 +151,22 @@ export const radius = {
   pill: primitives.radius[shape.pill],
 } as const;
 
+/**
+ * Values for Mantine `fw=` props. Mantine passes `fw` through as-is (`fw="medium"` would be invalid
+ * CSS), so these point at the theme's font-weight variables.
+ */
+export const fontWeight = {
+  regular: 'var(--mantine-font-weight-regular)',
+  medium: 'var(--mantine-font-weight-medium)',
+  bold: 'var(--mantine-font-weight-bold)',
+} as const;
+
+/** Values for Mantine `shadow=` props. Mantine passes `var(…)` through unchanged. */
+export const shadow = {
+  raised: 'var(--app-elevation-shadow-raised)',
+  overlay: 'var(--app-elevation-shadow-overlay)',
+} as const;
+
 // 5. Motion: semantic durations and easings
 export const motion = {
   duration: {
@@ -197,12 +213,15 @@ export const shell = {
   contextDefault: rem(primitives.shell.contextBar.default),
 } as const;
 
-// 10. Chrome: always-dark chrome tokens (retained until chrome-zone spike completes)
+// 10. Chrome: the navbar and sidebar stay dark in both schemes (plan-03 §4)
 export const chrome = {
   navbarBg: primitives.alpha.black[92],
   navbarBorder: primitives.alpha.white[8],
   navbarText: primitives.palette.gray[2],
   navbarMuted: primitives.palette.gray[5],
+  navbarInputBg: primitives.alpha.white[8],
+  navbarInputBgHover: primitives.alpha.white[12],
+  navbarInputBorder: primitives.alpha.white[10],
   sidebarBg: primitives.palette.dark[7],
   sidebarBorder: primitives.palette.dark[5],
   sidebarText: primitives.palette.gray[4],
@@ -211,19 +230,6 @@ export const chrome = {
   sidebarActiveBg: `color-mix(in srgb, ${primitives.palette.indigo[5]} 24%, transparent)`,
   sidebarActiveText: primitives.white,
   sidebarActiveBar: primitives.palette.indigo[4],
-} as const;
-
-// 11. Legacy compatibility aliases for existing CSS modules until Tasks 13 & 14
-export const legacy = {
-  surface: elevation.surface.canvas,
-  surfaceRaised: elevation.surface.raised,
-  border: color.border.default,
-  textMuted: color.text.subtle,
-  motionFast: motion.duration.fast,
-  motionBase: motion.duration.base,
-  motionSlow: motion.duration.slow,
-  motionEase: motion.easing.standard,
-  brandSentry: primitives.brand.sentry,
 } as const;
 
 /** Complete semantic token tree. */
@@ -237,7 +243,6 @@ export const semantic = {
   chart,
   shell,
   chrome,
-  legacy,
 } as const;
 
 export type SemanticTokens = typeof semantic;
@@ -264,7 +269,7 @@ function toKebabCase(str: string): string {
  * - Theme-dependent nodes (`{ light, dark }`) produce variables in `light` and `dark`.
  * - Fixed values (strings or numbers) produce variables in `variables`.
  * - Keys are transformed to kebab-case and joined with `-`.
- * - `legacy` container keys are flattened to avoid `--app-legacy-*`.
+ * - `shell` and `chrome` keys are flattened (`--app-navbar-height`, not `--app-shell-navbar-height`).
  */
 export function toCssVars(obj: Record<string, unknown>, prefix = '--app'): CssVarsResult {
   const result: CssVarsResult = {
@@ -273,7 +278,7 @@ export function toCssVars(obj: Record<string, unknown>, prefix = '--app'): CssVa
     dark: {},
   };
 
-  const skipTopLevel = new Set(['legacy', 'shell', 'chrome']);
+  const skipTopLevel = new Set(['shell', 'chrome']);
 
   function walk(current: unknown, path: string[]) {
     if (isSchemeValue(current)) {
@@ -291,7 +296,7 @@ export function toCssVars(obj: Record<string, unknown>, prefix = '--app'): CssVa
 
     if (typeof current === 'object' && current !== null) {
       for (const [key, value] of Object.entries(current)) {
-        // Strip top-level namespace for legacy, shell, and chrome so variables match expectations
+        // Strip the top-level namespace for shell and chrome
         const nextPath = path.length === 0 && skipTopLevel.has(key) ? path : [...path, key];
         walk(value, nextPath);
       }

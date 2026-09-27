@@ -1,4 +1,5 @@
 import { AppError } from '@/lib/errors/AppError';
+import { wait } from '@/utils/wait';
 import { dashboardListDto } from './dto';
 import { toDashboardSummary } from './mapper';
 import type { DashboardSummary } from '../model/types';
@@ -7,14 +8,6 @@ const BASE = `${import.meta.env.BASE_URL}data/dashboards`;
 
 /** Simulated latency so loading states are visible in development. */
 const LATENCY = import.meta.env.DEV ? 600 : 0;
-const wait = (ms: number, signal?: AbortSignal) =>
-  new Promise<void>((resolve, reject) => {
-    const t = setTimeout(resolve, ms);
-    signal?.addEventListener('abort', () => {
-      clearTimeout(t);
-      reject(new DOMException('Aborted', 'AbortError'));
-    });
-  });
 
 async function getJson(url: string, signal?: AbortSignal): Promise<unknown> {
   let res: Response;

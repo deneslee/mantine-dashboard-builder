@@ -1,6 +1,7 @@
 import { ActionIcon, Burger, Group, Indicator, Select, Tooltip } from '@mantine/core';
 import { IconHelp } from '@tabler/icons-react';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
+import { iconSize, iconStroke } from '@/design-system/tokens/semantic';
 import { useContextBar, useShellActions, useSidebar } from '../hooks/useShell';
 import { useTotalBadgeCount } from '../hooks/useBadgeCount';
 import { useContextTabs } from '../hooks/useContextTabs';
@@ -48,11 +49,13 @@ export function TopNavbar() {
         <Search />
       </Group>
 
-      <Group gap={4} wrap="nowrap" className={classes.right} justify="flex-end">
-        <AreaSelect />
-        <ContextButton open={contextOpen} active={contextDocked} onClick={toggleContextBar} />
-        <ColorSchemeToggle />
-        <UserMenu />
+      <Group gap="2xs" wrap="nowrap" className={classes.right} justify="flex-end">
+        <Tooltip.Group>
+          <AreaSelect />
+          <ContextButton open={contextOpen} active={contextDocked} onClick={toggleContextBar} />
+          <ColorSchemeToggle />
+          <UserMenu />
+        </Tooltip.Group>
       </Group>
     </Group>
   );
@@ -83,20 +86,12 @@ function AreaSelect() {
 }
 
 /** `active` (selected look) only while the panel is docked open; an open drawer covers the navbar anyway. */
-function ContextButton({
-  open,
-  active,
-  onClick,
-}: {
-  open: boolean;
-  active: boolean;
-  onClick: () => void;
-}) {
+function ContextButton({ open, active, onClick }: { open: boolean; active: boolean; onClick: () => void }) {
   const count = useTotalBadgeCount(useContextTabs());
 
   return (
     <Tooltip label={open ? 'Close context panel' : 'Open context panel'}>
-      <Indicator label={count > 9 ? '9+' : count} size={16} offset={6} disabled={count === 0} color="red">
+      <Indicator label={count > 9 ? '9+' : count} size={16} offset={6} disabled={count === 0} color="danger">
         <ActionIcon
           variant="chrome"
           aria-label={open ? 'Close context panel' : 'Open context panel'}
@@ -104,7 +99,7 @@ function ContextButton({
           data-active={active || undefined}
           onClick={onClick}
         >
-          <IconHelp size={20} stroke={1.75} />
+          <IconHelp size={iconSize.md} stroke={iconStroke} />
         </ActionIcon>
       </Indicator>
     </Tooltip>

@@ -4,6 +4,7 @@ import { QueryErrorResetBoundary } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { errorTitles, toAppError } from '@/lib/errors/AppError';
+import { iconSize } from '@/design-system/tokens/semantic';
 import { ErrorState } from './ErrorState';
 
 /**
@@ -28,7 +29,7 @@ export function WidgetBoundary({ children, name }: { children: ReactNode; name?:
                     <Button
                       size="xs"
                       variant="default"
-                      leftSection={<IconRefresh size={14} />}
+                      leftSection={<IconRefresh size={iconSize.xs} />}
                       onClick={resetErrorBoundary}
                     >
                       Retry

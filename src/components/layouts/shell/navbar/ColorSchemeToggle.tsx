@@ -1,5 +1,6 @@
 import { ActionIcon, Tooltip, useComputedColorScheme, useMantineColorScheme } from '@mantine/core';
 import { IconDeviceDesktop, IconMoon, IconSun } from '@tabler/icons-react';
+import { iconSize, iconStroke } from '@/design-system/tokens/semantic';
 
 const order = ['light', 'dark', 'auto'] as const;
 const icons = { light: IconSun, dark: IconMoon, auto: IconDeviceDesktop };
@@ -20,7 +21,7 @@ export function ColorSchemeToggle() {
         data-scheme={computed}
         onClick={() => setColorScheme(next)}
       >
-        <Icon size={18} stroke={1.75} />
+        <Icon size={iconSize.md} stroke={iconStroke} />
       </ActionIcon>
     </Tooltip>
   );
