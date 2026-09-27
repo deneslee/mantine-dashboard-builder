@@ -51,7 +51,7 @@ function stringOf(value) {
 }
 
 /**
- * Design system rule: Mantine props take token keys, not raw values (plan-03 §5). Numbers in
+ * Design system rule: Mantine props take token keys, not raw values (docs/design-system.md). Numbers in
  * spacing, `fw`, `fz` and `radius`; palette or raw colors in `c`, `color` and `bg`; numeric
  * `size` / `stroke` on Tabler icons.
  */

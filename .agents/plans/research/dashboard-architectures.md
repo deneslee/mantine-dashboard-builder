@@ -1,6 +1,6 @@
 # Research: Industry Dashboard Architectures
 
-Sep 24, 2026 · Reference: [plan-05.md](../plan-05.md)
+Sep 24, 2026 · Reference: [05-dashboard-read](../05-dashboard-read.md)
 
 This research evaluates state-of-the-art dashboard implementations—specifically **Grafana**, **Perses**, and **Metabase**—to inform the architectural decisions for Phase 2 and beyond in Dashboard Builder.
 

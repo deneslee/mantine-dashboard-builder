@@ -1,6 +1,6 @@
 # Research: Design Tokens on Top of Mantine
 
-Sep 24, 2026 · Reference: [plan-03.md](../plan-03.md)
+Sep 24, 2026 · Reference: [03-design-tokens](../done/03-design-tokens.md)
 
 How Atlassian and Carbon structure tokens, what Mantine 9.6 already provides for each tier, and where this repo stands today.
 

@@ -1,6 +1,6 @@
 # App shell
 
-How the chrome around every page works today: panes, state, sidebar, context bar. The original design and its reasoning are in [plan.md](plan.md#app-chrome); where the two differ, this file describes the code.
+How the chrome around every page works: panes, state, navbar, sidebar, context bar. Colors come from the always-dark `chrome` tokens ([design-system.md](design-system.md)).
 
 Code: `src/components/layouts/shell`. Used from outside: `Shell`, `ShellProvider` (takes `globalTabs`), `useSidebar`, `useContextBar`, `useShellActions` (`hooks/useShell.ts`), `createShellStore`. No barrel; import the file.
 
@@ -89,6 +89,21 @@ sequenceDiagram
 | Double-click on a handle             | Saves the token default; the store change then animates like a toggle                            |
 
 While pinned, the root has `data-moving`: the main pane clips sideways instead of scrolling, and the content ignores the pointer. The release waits for the panes' transitions to finish (`getAnimations()`), with a timer as fallback. When transitions are zero (reduced motion) nothing is pinned. Details: `hooks/useMainLock.ts`.
+
+## Top navbar
+
+48px, inside the main pane, so a docked context bar pushes it left. Left to right:
+
+| Slot           | Component                                         | Behaviour                                                                                                                                         |
+| -------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Burger         | `Burger` with a tooltip                           | Moves a docked sidebar between modes (above); opens and closes the drawer when undocked                                                           |
+| Search         | `Input` rendered as a button, opening `Spotlight` | `Ctrl+K` or `/`; the actions are the `nav` entries                                                                                                |
+| Area           | `Select` over `areas` in `model/nav.ts`           | Switches the top-level area (Dashboards, Data sources, Integrations, Settings) and navigates                                                      |
+| Context button | `ActionIcon` with an `Indicator`                  | Opens and closes the context bar; the dot sums the tab badges                                                                                     |
+| Theme          | `ColorSchemeToggle`                               | Cycles light → dark → auto through `useMantineColorScheme`; Mantine stores it, and an inline script in `index.html` applies it before first paint |
+| User           | `UserMenu`                                        | Placeholder `CurrentUser`                                                                                                                         |
+
+The icon buttons on the right share one `Tooltip.Group`, so once one tooltip is open its neighbours open instantly.
 
 ## Sidebar
 

@@ -20,7 +20,7 @@ Vite 8 · React 19 · TypeScript 7 strict · Mantine 9.6.2 · TanStack Router (f
 
 ## Styling and tokens
 
-Every visual value is stored once, in tiers ([plan-03](.agents/plan/plan-03.md)):
+Every visual value is stored once, in tiers ([docs/design-system.md](docs/design-system.md)):
 
 | Tier                  | Where                                                               | Who reads it                                        |
 | --------------------- | ------------------------------------------------------------------- | --------------------------------------------------- |
@@ -39,7 +39,7 @@ Every visual value is stored once, in tiers ([plan-03](.agents/plan/plan-03.md))
   - oxlint `app/no-inline-style` blocks `style={{…}}`.
   - oxlint `app/no-raw-style-props` blocks numeric spacing, `fw`, `fz`, `radius`, palette colors, and numeric icon `size` / `stroke`.
   - Stylelint blocks hex, `rgb()` / `hsl()`, palette shades (`--mantine-color-red-6`), and raw colors, radii, shadows, z-index and durations.
-  - `lint/rules.test.ts` proves each rule fires. `design-system/**`, stories and tests are exempt; so is `features/integrations/**` until Plan 06.
+  - `lint/rules.test.ts` proves each rule fires. `design-system/**`, stories and tests are exempt; so is `features/integrations/**` until [06-sentry](.agents/plans/06-sentry.md) rebuilds it.
 - **Mantine static classes:** `className="mantine-focus-auto"` for the focus ring on custom focusable elements (no custom `:focus-visible` CSS); `mantine-active` for press feedback.
 - **Viewport classes** (`visibleFrom` / `hiddenFrom`) only in the shell. Inside a page, use `@container` queries: `<main>`'s width depends on the panels, not the screen.
 - **Scheme-dependent CSS** (`light-dark()`, `@mixin light/dark`) only in `design-system/`. Feature CSS reads semantic variables that already switch.
@@ -113,32 +113,27 @@ pnpm test             # Vitest
 pnpm storybook        # http://localhost:6006
 ```
 
-Every chrome component gets a story per state and a test for its behaviour.
+Every chrome component gets a story per state and a test for its behaviour. Commits follow Conventional Commits, and Prettier formats everything. Load the `frontend-design` skill before designing or reshaping a screen.
 
 <!-- Workflow instructions -->
 
-## Workflow
+## Planning
 
-All planning artifacts live inside `.agents/plan/`:
+Two levels: the big picture in `docs/`, the detail for agents in `.agents/plans/`.
 
-1. **Plans**:
-   - Location: `.agents/plan/` (root)
-   - Naming: `plan-{number}.md`, e.g. `plan-01.md`
-   - Header format: First line after title always includes date, version, and references to task files (and research files if applicable).
+| File                                | Holds                                                                                    |
+| ----------------------------------- | ---------------------------------------------------------------------------------------- |
+| `docs/plan.md`                      | What we're building, locked decisions, stack, roadmap (phases and their plans)           |
+| `docs/tasks.md`                     | The big-picture checklist: done, in progress, and notes for phases that have no plan     |
+| `.agents/plans/NN-slug.md`          | One piece of work, with its design and file-level tasks in one file; `NN` is build order |
+| `.agents/plans/research/<topic>.md` | Background for one or more plans                                                         |
+| `.agents/plans/done/`               | Finished plans, kept in git                                                              |
 
-2. **Tasks**:
-   - Location: `.agents/plan/tasks/`
-   - Naming: `task-r{plan_num}-{version}.md`, e.g. `task-r01-01.md` (where `r01` references `plan-01`, and `01` is versioning).
-   - Item format: `- [ ] **Task title.** task description with ref if needed.`
-
-3. **Research**:
-   - Location: `.agents/plan/research/`
-   - Naming: `research-{topic}.md` or `research-r{plan_num}-{topic}.md`
-   - Reference: Always reference the relevant plan on the second line after title if created for a specific plan.
-
-4. **Archive**:
-   - Location: `.agents/plan/archive/`
-   - Completed/deprecated plan, task, and research files are moved to `archive/` when finished.
-   - This folder is gitignored.
+- **Plan layout:** `# NN Title`, then one line: `Status: open | done (date) · Phase N | Cross-cutting · Depends on: … · Research: …`. Sections: Goal, Design, Tasks, Decisions, Verification; add Out of scope or Risks when they help.
+- **Tasks:** `- [ ] **Title.** What to do. Done when …`. Tick `[x]` as you go; `[-]` for dropped or moved work, saying why or where to.
+- **Changing a plan:** edit it in place and add a dated line to Decisions. No version numbers in file names or headers; git keeps the history.
+- **Research:** the second line links the plan it serves.
+- **New work:** add a line to `docs/tasks.md`; write a plan when it needs a design or more than a few tasks.
+- **Finishing:** move the plan to `done/`, tick its line in `docs/tasks.md`, and move any tasks it leaves open to `docs/tasks.md`.
 
 <!-- /Workflow instructions -->

@@ -21,7 +21,7 @@ const barrels = {
   message: 'No barrel files: import the file that defines the name, e.g. @/components/errors/ErrorState.',
 };
 
-/** Raw values stay in the design system; everything else reads the semantic tier (plan-03 §5). */
+/** Raw values stay in the design system; everything else reads the semantic tier (docs/design-system.md). */
 const primitives = {
   group: ['@/design-system/tokens/primitives'],
   message: 'Only design-system/ may import the primitives: use @/design-system/tokens/semantic.',
@@ -84,7 +84,7 @@ export default defineConfig({
 
     // Design system rule: no inline styles outside design-system/. Use CSS modules or Mantine style props.
     'app/no-inline-style': 'error',
-    // Token keys, not raw values, in Mantine props (plan-03 §5).
+    // Token keys, not raw values, in Mantine props (docs/design-system.md).
     'app/no-raw-style-props': 'error',
 
     // No barrel files (bulletproof-react: they defeat tree-shaking); import the file that defines a name.

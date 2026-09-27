@@ -1,20 +1,8 @@
-# Plan 04: Composable Page Header & Control Bar
+# 04 Page header
 
-Sep 27, 2026 · v1.2.0 · Tasks: [task-r04-03.md](./tasks/task-r04-03.md) · Research: [research-page-header-composition.md](./research/research-page-header-composition.md)
+Status: open · Phase 2 · Depends on: 02 (done) · Blocks: 05's pickers (`TimeRangePicker` sits in `Page.ControlBar`) · Research: [page-header-composition](research/page-header-composition.md)
 
-**v1.2 changes:**
-
-- **Actions:** no `OverflowList`. It takes data (`data`, `renderItem`, `renderOverflow`), not children, and no page has more than one action.
-- **Parts:** `Page.TitleRow` and `Page.Heading` are gone. `Page.Header` is a CSS grid with named areas, so callers write flat children.
-- **Breadcrumbs:** the hook moves to shared `hooks/`, because the pages that show crumbs are features and can't import `app/`. A shared `RouteBreadcrumbs` renders the router links, so the design system stays router-free.
-- **Crumbs:** the middle-crumb collapse is cut; routes are at most two levels deep.
-- **Migration:** covers all 8 callers, including the two integrations pages, unless Plan 06 removes them first.
-
-**Earlier:** v1.1 added container queries and router-driven breadcrumbs, and cut the editable title and the sticky control bar.
-
-**Order:** 4 of 6 · **Depends on:** Plan 02 (done); Plan 03 only for spacing variables that already exist, so it can run alongside Plan 03's lint rollout; **Plan 06 decision 3** before the migration task (it decides whether the two integrations pages get migrated or deleted) · **Blocks:** Plan 05's pickers (`TimeRangePicker` sits in `Page.ControlBar`)
-
-## Objective
+## Goal
 
 Replace the fixed `title / description / actions` props of `Page.Header` with compound parts. Breadcrumbs, title, description, actions and a control bar each get their own slot, in the style of Grafana's `PageToolbar` and Metabase's parameter bar, without boolean props.
 
@@ -56,24 +44,21 @@ Page.Root              container-type: inline-size
 - **Spacing:** the parts space themselves with margins, not `row-gap`. An empty grid row still gets its gap, so a page without breadcrumbs would start with a blank line.
 - **Named exports:** `PageRoot`, `PageHeader`, `PageBreadcrumbs`, `PageTitle`, `PageDescription`, `PageActions`, `PageControlBar` and `PageBody`, each exported by name and through the `Page` object. `Page` is already allowed in `react/only-export-components`.
 - **No feature or router imports:** the design system only lays out the children it gets.
-- **Actions don't overflow.**
-  - Every page has at most one action today, and one of them is a `SegmentedControl`, which a Menu can't hold.
-  - Mantine `OverflowList` renders from `data` + `renderItem` + `renderOverflow`, so actions would have to become data, not children.
-  - Revisit when a page has more than three actions.
-- **No editable title in v1.** Editing is phase 3. It will be a separate part (`Page.EditableTitle`), not a boolean prop.
-- **Control bar not sticky in v1.** If it's needed later, it becomes a separate part (`Page.StickyControlBar`).
+- **Actions don't overflow.** Every page has at most one action today, and one of them is a `SegmentedControl`, which a Menu can't hold. Revisit when a page has more than three actions.
+- **No editable title yet.** Editing is phase 3. It will be a separate part (`Page.EditableTitle`), not a boolean prop.
+- **Control bar not sticky yet.** If it's needed later, it becomes a separate part (`Page.StickyControlBar`).
 
 ### 2. Breadcrumbs
 
 - **Source:** `useMatches()`, one crumb per match that has `staticData.crumb`.
   - `crumb` is a string, or a function of the match's loader data (the dashboard title from the `$id` loader).
   - Typing: add `crumb` to a `StaticDataRouteOption` augmentation next to the hook. The shell's augmentation for `contextTabs` is the model.
-- **Hook:** `useBreadcrumbs()` in `src/hooks/useBreadcrumbs.ts`. The pages that show crumbs (DashboardView, SettingsPage, DebugPage) are features and can't import `app/`; the hook only reads the router, so the shared layer is its place.
+- **Hook:** `useBreadcrumbs()` in `src/hooks/useBreadcrumbs.ts`. The pages that show crumbs (DashboardView, SettingsPage, DebugPage, the integrations pages) are features and can't import `app/`; the hook only reads the router, so the shared layer is its place.
 - **Rendering:** `src/components/navigation/RouteBreadcrumbs.tsx` calls the hook and renders Mantine `Breadcrumbs` inside `Page.Breadcrumbs`.
   - Each link is an `Anchor` with `renderRoot={(p) => <Link to=… {...p} />}` (AGENTS.md rule 4).
   - The last crumb is plain text with `aria-current="page"`.
   - Callers write `<RouteBreadcrumbs />` inside `Page.Header`.
-- **No collapse:** routes are at most two levels deep (`/dashboards/$id`).
+- **No collapse:** routes are at most two levels deep (`/dashboards/$id`, `/integrations/sentry`).
 
 ### 3. Responsiveness (container queries)
 
@@ -90,17 +75,44 @@ Update all 8 callers of `Page.Header` in one change, with no compatibility wrapp
 - `SettingsPage`
 - `routes/-placeholder.tsx`
 - `Shell.stories.tsx`
-- `IntegrationsCatalog`, only if Plan 06 keeps Integrations as a product feature
-- `SentryPage`, same condition; its hand-built `Breadcrumbs` becomes `RouteBreadcrumbs`
+- `IntegrationsCatalog`
+- `SentryPage`: its hand-built `Breadcrumbs` becomes `RouteBreadcrumbs`
 
 ## Out of scope
 
-Editable title, a sticky control bar, action overflow, crumb collapse, and the actual `TimeRangePicker`, refresh picker and filter controls (Plan 05).
+Editable title, a sticky control bar, action overflow, crumb collapse, and the actual `TimeRangePicker`, refresh picker and filter controls (05).
 
 ## Risks
 
 - **Container queries and portals:** container queries don't reach content in portals (Menus). That is expected.
 - **Empty areas:** see "Spacing" in §1; the full and minimal stories check both.
+
+## Tasks
+
+- [x] **Check `OverflowList` before building on it.** Sep 27: in 9.6.2 it renders from `data` + `renderItem` + `renderOverflow`, so actions would have to be data, not children. Cut; the note is in [page-header-composition §4](research/page-header-composition.md#4-decision-sep-27-2026).
+- [ ] **Split `Page` into named parts.**
+  - Parts: `PageRoot`, `PageHeader`, `PageBreadcrumbs`, `PageTitle`, `PageDescription`, `PageActions`, `PageControlBar` and `PageBody`, each exported by name and through `Page`.
+  - `Page.Header` is a grid with named areas ([§1](#1-parts)).
+  - The parts space themselves with margins, so a missing part leaves no gap.
+  - `Page.ControlBar` is a wrapping group that takes children only.
+  - Done when `pnpm lint` passes (`react/only-export-components` covers Fast Refresh) and the full story shows every area.
+- [ ] **Container queries on `Page.Root`.** `container-type: inline-size`, and one `@container` rule in `Page.module.css` that stacks the areas into a single column; no viewport media queries. Done when the narrow-container story wraps correctly at 375, 768 and 1280 px.
+- [ ] **`useBreadcrumbs()` and `RouteBreadcrumbs`.**
+  - The hook goes in `src/hooks/useBreadcrumbs.ts` and reads `useMatches()` and `staticData.crumb`; the `crumb` typing sits next to it.
+  - `src/components/navigation/RouteBreadcrumbs.tsx` renders Mantine `Breadcrumbs` inside `Page.Breadcrumbs`: links as `Anchor` + `<Link>` via `renderRoot`, and the last crumb with `aria-current="page"`.
+  - Add `crumb` to the Dashboards, `$id` (the title from loader data), Settings, Debug, Integrations and Sentry routes.
+  - Done when tests check the `<a href>` values and `aria-current`.
+- [ ] **Migrate the callers.** All 8 in [§4](#4-migration), including `IntegrationsCatalog` and `SentryPage` (06 decision 3). Done when no `Page.Header title=` remains and the tests pass.
+- [ ] **Stories and tests.** Stories: minimal, standard, full (placeholder controls in the control bar), narrow container. Tests: one `h1`, the breadcrumb landmark, and actions and controls reached by keyboard in reading order. Done when these run in `pnpm test` and Storybook a11y reports no new violations.
+
+## Decisions
+
+- **Sep 27: no `OverflowList` for actions.** It takes data (`data`, `renderItem`, `renderOverflow`), not children, and no page has more than one action.
+- **Sep 27: no `Page.TitleRow` or `Page.Heading`.** `Page.Header` is a CSS grid with named areas, so callers write flat children.
+- **Sep 27: the breadcrumb hook lives in shared `hooks/`.** The pages that show crumbs are features and can't import `app/`. A shared `RouteBreadcrumbs` renders the router links, so the design system stays router-free.
+- **Sep 27: no middle-crumb collapse.** Routes are at most two levels deep.
+- **Sep 27: both integrations pages are migrated.** Sentry stays a product feature ([06 decision 3](06-sentry.md#decisions)).
+- **Sep 24: container queries and router-driven breadcrumbs.** The editable title and the sticky control bar were cut from the first version.
 
 ## Verification
 

@@ -21,7 +21,7 @@ import { iconSize, iconStroke, semantic, shape, toCssVars } from './semantic';
 import { tokens } from './tokens';
 
 /**
- * The token tiers (plan-03): primitives hold the raw values, semantic tokens name them per scheme,
+ * The token tiers (docs/design-system.md): primitives hold the raw values, semantic tokens name them per scheme,
  * and the Mantine theme binds components to them. The semantic table shows light and dark side by
  * side, whatever the toolbar scheme is.
  */

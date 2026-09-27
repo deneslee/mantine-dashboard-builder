@@ -12,12 +12,12 @@ CSS variables      --app-layer-surface              what CSS modules read
 theme/components   Paper.extend + Paper.module.css  what Mantine components apply
 ```
 
-**1. Primitives** ([primitives.ts](src/design-system/tokens/primitives.ts))
+**1. Primitives** ([primitives.ts](../src/design-system/tokens/primitives.ts))
 
 - The only file with raw values: palette tuples (`palette.dark[7] = '#242424'`), alpha steps, and the spacing, radius, type, weight, shadow, motion, z-index, icon and shell scales.
 - Nothing outside `design-system/` may import it; oxlint blocks the import.
 
-**2. Semantic tokens** ([semantic.ts](src/design-system/tokens/semantic.ts)) name what a value is *for*.
+**2. Semantic tokens** ([semantic.ts](../src/design-system/tokens/semantic.ts)) name what a value is _for_.
 
 - **Per-scheme roles** have a light and a dark value:
   - `elevation.surface.canvas | sunken | raised | overlay`
@@ -36,12 +36,13 @@ theme/components   Paper.extend + Paper.module.css  what Mantine components appl
 **3. Contextual layers** (`--app-layer-surface`, `-border`, `-field`)
 
 - These are meant to follow placement: a panel nested inside a widget would get the next step.
-- Today there's only one level, equal to `raised`. The nesting CSS is deferred until something actually nests.
+- Today there's only one level, equal to `raised`. The nesting CSS is deferred to phase 4 ([tasks.md](tasks.md#phase-4-widgets-and-data)), where the `container` widget first puts widgets inside a widget.
 
 **4. Component bindings** (`theme/`)
 
-- [theme.ts](src/design-system/theme/theme.ts) builds `createTheme` from the primitives: colors plus the aliases, spacing, radius, font sizes and weights, shadows, and `defaultRadius: shape.control`.
+- [theme.ts](../src/design-system/theme/theme.ts) builds `createTheme` from the primitives: colors plus the aliases, spacing, radius, font sizes and weights, shadows, and `defaultRadius: shape.control`.
 - `theme/components/<Name>.ts` sets defaults with `X.extend({ defaultProps, classNames })`. Examples: radius from `shape.*`, the overlay shadow, and variant styles in `theme/styles/*.module.css`.
+- The variants today: ActionIcon `chrome` (the dark navbar and sidebar), Paper `panel` and `widget` (read `--app-layer-*`), NavLink `sidebar` (with the compact rail state).
 - `cssVariablesResolver` emits the semantic variables. It also points two of Mantine's own variables at ours (`--mantine-color-body` → overlay surface, `--mantine-color-dimmed` → subtle text), so Mantine's internals follow the tokens.
 
 ## How it reaches the page
@@ -58,31 +59,31 @@ Switching the color scheme only flips that `data-` attribute. Every `var()` upda
 
 Components then get their styling in one of three ways:
 
-| Route | Example | Resolves through |
-| --- | --- | --- |
-| Mantine props with theme keys | `gap="xs"`, `color="danger"`, `radius` from the theme default | Mantine's `--mantine-spacing-xs`, `--mantine-color-danger-*`, … built from the primitives |
-| Component bindings | every `<Button>` gets `radius: shape.control`; every `<Menu>` gets the overlay shadow | `theme/components/<Name>.ts` |
-| CSS modules | `border-bottom: 1px solid var(--app-color-border-default)` | the semantic variables |
+| Route                         | Example                                                                               | Resolves through                                                                          |
+| ----------------------------- | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Mantine props with theme keys | `gap="xs"`, `color="danger"`, `radius` from the theme default                         | Mantine's `--mantine-spacing-xs`, `--mantine-color-danger-*`, … built from the primitives |
+| Component bindings            | every `<Button>` gets `radius: shape.control`; every `<Menu>` gets the overlay shadow | `theme/components/<Name>.ts`                                                              |
+| CSS modules                   | `border-bottom: 1px solid var(--app-color-border-default)`                            | the semantic variables                                                                    |
 
 ## Example: a widget tile's background
 
 **1. The raw values** (primitives):
 
 ```ts
-white = '#ffffff'
-palette.dark[7] = '#242424'
+white = '#ffffff';
+palette.dark[7] = '#242424';
 ```
 
 **2. A role, per scheme** (semantic):
 
 ```ts
-elevation.surface.raised = { light: primitives.white, dark: primitives.palette.dark[7] }
-layer.surface = elevation.surface.raised        // depth 1 = raised
+elevation.surface.raised = { light: primitives.white, dark: primitives.palette.dark[7] };
+layer.surface = elevation.surface.raised; // depth 1 = raised
 ```
 
 **3. Emitted:** `toCssVars` produces `--app-layer-surface: #ffffff` in the light block and `#242424` in the dark block.
 
-**4. Bound to a component:** [Paper.module.css](src/design-system/theme/styles/Paper.module.css) plus `Paper.ts`:
+**4. Bound to a component:** [Paper.module.css](../src/design-system/theme/styles/Paper.module.css) plus `Paper.ts`:
 
 ```css
 .root[data-variant='widget'] {
@@ -95,7 +96,7 @@ layer.surface = elevation.surface.raised        // depth 1 = raised
 export const PaperTheme = Paper.extend({ defaultProps: { radius: shape.container }, classNames: paper });
 ```
 
-**5. Used in a feature:** [WidgetTile.tsx](src/features/dashboards/components/grid/WidgetTile.tsx) only says what the element is:
+**5. Used in a feature:** [WidgetTile.tsx](../src/features/dashboards/components/grid/WidgetTile.tsx) only says what the element is:
 
 ```tsx
 <Paper variant="widget" component="section">
@@ -116,6 +117,6 @@ The same path, shorter:
 - **A reusable look** (like `widget`): a variant in `theme/styles/<Name>.module.css`, selected with `[data-variant]`.
 - **One-off layout in a feature:** a CSS module reading semantic variables.
 
-The lint rules keep this honest. oxlint rejects numeric spacing, `fw`, `fz` and `radius`, palette colors, numeric icon sizes, and primitive imports. Stylelint rejects hex, `rgb()`, palette shades, and raw colors, radii, z-index and durations. [lint/rules.test.ts](lint/rules.test.ts) proves each rule fires.
+The lint rules keep this honest. oxlint rejects numeric spacing, `fw`, `fz` and `radius`, palette colors, numeric icon sizes, and primitive imports. Stylelint rejects hex, `rgb()`, palette shades, and raw colors, radii, z-index and durations. [lint/rules.test.ts](../lint/rules.test.ts) proves each rule fires.
 
 **One subtlety:** a plain `<Paper>` or `<Card>` with no variant is painted by Mantine's `--mantine-color-body`, which now points at the **overlay** surface, not `raised`. The two have the same values today, so nothing looks wrong. If they ever diverge, give those components a variant or a bound background.

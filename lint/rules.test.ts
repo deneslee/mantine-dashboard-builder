@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process';
 import stylelint from 'stylelint';
 import { describe, expect, it } from 'vitest';
 
-/** The token rules must fire, or `pnpm lint` passing proves nothing (plan-03 §5). */
+/** The token rules must fire, or `pnpm lint` passing proves nothing (docs/design-system.md). */
 describe('token lint rules', () => {
   it('Stylelint reports raw colors, palette shades and raw values as errors', async () => {
     const { results } = await stylelint.lint({

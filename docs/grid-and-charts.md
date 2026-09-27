@@ -1,6 +1,6 @@
 # Dashboard grid and charts
 
-Performance rules for the dashboard canvas: react-grid-layout v2 (RGL) tiles holding charts (`@mantine/charts`, Recharts 3). The read-only grid is built (`features/dashboards/components/grid`); dragging and resizing tiles come with editing in phase 3. Model and registries are in [plan.md](plan.md#dashboard-core-phases-3-to-6); the shell side is in [shell.md](shell.md). The "Grid performance" dashboard (`/dashboards/perf`, 20 charts) is the test bed.
+Performance rules for the dashboard canvas: react-grid-layout v2 (RGL) tiles holding charts (`@mantine/charts`, Recharts 3). The read-only grid is built (`features/dashboards/components/grid`); dragging and resizing tiles come with editing in phase 3. Model and registries are in [dashboard.md](dashboard.md); the shell side is in [shell.md](shell.md). The "Grid performance" dashboard (`/dashboards/perf`, 20 charts) is the test bed.
 
 ## The cost to avoid
 

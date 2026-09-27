@@ -11,9 +11,6 @@ coverage
 .kiro/skills
 .junie/skills
 
-# Agent plans archive
-.agents/plan/archive/
-
 .env
 .env.local
 .env.production

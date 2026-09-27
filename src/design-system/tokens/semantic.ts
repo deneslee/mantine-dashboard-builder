@@ -213,7 +213,7 @@ export const shell = {
   contextDefault: rem(primitives.shell.contextBar.default),
 } as const;
 
-// 10. Chrome: the navbar and sidebar stay dark in both schemes (plan-03 §4)
+// 10. Chrome: the navbar and sidebar stay dark in both schemes (docs/design-system.md)
 export const chrome = {
   navbarBg: primitives.alpha.black[92],
   navbarBorder: primitives.alpha.white[8],
