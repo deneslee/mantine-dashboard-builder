@@ -116,3 +116,16 @@ export const Page = {
   Body: PageBody,
 };
 ```
+
+---
+
+## 4. Decision (Sep 27, 2026)
+
+Checked against the installed `@mantine/core` 9.6.2 types (`OverflowList.d.ts`):
+
+- **`OverflowList` renders from data:** `data: T[]`, `renderItem(item, index)`, `renderOverflow(hiddenItems)`, plus `maxRows`, `maxVisibleItems`, `collapseFrom` and `getItemKey`.
+  - It can't take arbitrary children. `Page.Actions` would have to accept `{ label, icon, onClick }[]`, which goes against AGENTS.md's "children over render props".
+  - A child such as a `SegmentedControl` has no Menu equivalent anyway.
+- **No need yet:** every page has at most one header action.
+- **Chosen:** `Page.Actions` is a wrapping `Group` with no overflow. Revisit when a page has more than three actions, and then pass the overflow as data.
+- **Also dropped from §3:** `Page.TitleRow` and a separate heading wrapper. `Page.Header` places the parts with CSS grid areas instead (see [plan-04 §1](../plan-04.md#1-parts)).

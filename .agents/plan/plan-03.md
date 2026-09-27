@@ -1,12 +1,19 @@
 # Plan 03: Design Tokens (one source of truth, Mantine-native)
 
-Sep 24, 2026 · v1.2.0 · Tasks: [task-r03-03.md](./tasks/task-r03-03.md) · Research: [research-r03-design-tokens.md](./research/research-r03-design-tokens.md)
+Sep 27, 2026 · v1.3.0 · Tasks: [task-r03-04.md](./tasks/task-r03-04.md) · Research: [research-r03-design-tokens.md](./research/research-r03-design-tokens.md)
 
-**v1.1 changes:** the open decisions are settled (see Decisions). New §8 lists custom code that Mantine 9.6.2 already covers, checked against the installed package's exports.
+**v1.3 changes:**
 
-**v1.2 changes:** the Sentry prototype UI (`features/integrations/**` after Plan 02) is exempt from the new lint rules until Plan 06 rebuilds it. Third-party brand colors (`brand.sentry`, added by the prototype) belong in the primitives tier.
+- **Status:** new section; tiers 1–2, the color aliases and the component split are done.
+- **Leftovers from the done tasks:** `tokens.ts` still duplicates `semantic.ts`, and the `legacy` group still emits the old variable names. Each has a task now.
+- **Chrome:** stays the `chrome` semantic group, which is already built from primitives. The theme-zone spike is dropped.
+- **Overlays:** bound through Mantine's own variables in the resolver instead of styling each component.
+- **Layers:** the depth rules wait until a surface actually nests inside another.
+- **Lint:** Stylelint's built-in rules only, with no plugin to check first. A Vitest test replaces the "CI expects to fail" fixtures.
 
-**Order:** 3 of 6 · **Depends on:** Plan 02 (files already in their final places) · **Blocks:** Plan 04 (Page uses spacing and surface tokens), Plan 05 (widgets use the layer tokens)
+**Earlier:** v1.1 settled the decisions and added §8. v1.2 exempted `features/integrations/**` from the lint rules and moved third-party brand colors to the primitives.
+
+**Order:** 3 of 6 · **Depends on:** Plan 02 (done) · **Blocks:** nothing hard. Plan 04 only uses spacing variables that already exist, so it can run alongside the lint rollout here; Plan 05 only needs `--app-layer-surface`, which is already emitted.
 
 ## Objective
 
@@ -18,21 +25,41 @@ Every visual decision is stored once and then referenced by name everywhere else
 
 **This is not a rewrite of Mantine.** Mantine stays the component library and its theme stays the engine. The token tiers feed `createTheme`, `virtualColor`, `Component.extend` and `cssVariablesResolver`. Nothing replaces them.
 
+## Status (Sep 27, 2026)
+
+**Done:**
+
+- `tokens/primitives.ts` (tier 1)
+- `tokens/semantic.ts` with `toCssVars()` (tier 2), plus its unit test
+- `virtualColor` aliases
+- `theme/components/<Name>.ts` with radius from `shape.*`; `theme/components.ts` now only collects them
+
+**Left over from those tasks:**
+
+- **`tokens.ts` is a second source of truth.**
+  - Its `chrome` (which has an `rgba()` literal), `surface` and `motion` groups duplicate `semantic.ts`, and nothing outside the design system reads them.
+  - Only `shell`, `zIndex` and `grid` are read outside the design system: Splitter sizes, the shell store and the RGL breakpoints.
+  - `theme.other = tokens` has no reader.
+- **The `legacy` group in `semantic.ts` still emits the old names:** `--app-surface`, `--app-surface-raised`, `--app-border`, `--app-text-muted`, `--app-motion-*` and `--app-brand-sentry`.
+  - About 17 CSS files use them.
+  - `--app-brand-sentry` has no reader at all, because the Sentry icon hard-codes its hex value.
+
 ## Design
 
-### 1. Token Contract: 3 Token Categories across 4 Implementation Layers
+### 1. Token contract: 3 token categories across 4 implementation layers
 
-The resource-backed model is:
 `constant / primitive` ↓ (aliases) `semantic role` ↓ (inherited by placement) `contextual layer role` ↓ (bound by design system) `Mantine component styling`
 
-| Implementation Layer          | File / Mechanism                           | Token Category (GitLab/Carbon) | Contains                                                                                                                                                                                                                                                                                                   | Who may read it                                                                             |
-| ----------------------------- | ------------------------------------------ | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| **1. Primitives (Constants)** | `tokens/primitives.ts`                     | Constant                       | The **only** place with raw values: palette tuples (10 shades each for gray, dark, indigo, red, green, yellow, blue), white/black alpha steps, spacing / radius / font-size / weight / line-height scales, shadows, durations, easings, z-index numbers, icon sizes and strokes, shell sizes, brand colors | `design-system/theme/**` only (lint-enforced); application UI never consumes these directly |
-| **2. Semantic**               | `tokens/semantic.ts`                       | Semantic                       | Global visual meaning aliasing primitives, per scheme where needed: surfaces (`canvas`, `sunken`, `raised`, `overlay`), text (`primary`, `subtle`, `inverse`, `disabled`), border (`default`, `subtle`, `strong`, `focused`), shadows, shape, motion                                                       | Emitted as `--app-*` CSS variables and exported as TS constants                             |
-| **3. Contextual Layers**      | `theme/layers.css`                         | Contextual                     | Nested depth tokens resolving dynamically by DOM placement: `--app-layer-surface`, `--app-layer-surface-hovered`, `--app-layer-surface-pressed`, `--app-layer-border`, `--app-layer-field`                                                                                                                 | Inherited CSS custom properties via `[data-layer]` hierarchy                                |
-| **4. Component Bindings**     | `theme/components/<Name>.ts` + CSS modules | Component Styling              | Mantine `Component.extend({ defaultProps, vars, classNames })` binding Mantine components to contextual or semantic tokens                                                                                                                                                                                 | Mantine components apply automatically; not a consumable token tier                         |
+| Implementation layer          | File / mechanism                                       | Contains                                                                                                                                                                                                           | Who may read it                                                             |
+| ----------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------- |
+| **1. Primitives (constants)** | `tokens/primitives.ts`                                 | The **only** place with raw values: palette tuples, white/black alpha steps, spacing / radius / font-size / weight / line-height scales, shadows, durations, easings, z-index numbers, icon sizes and strokes, shell sizes, brand colors | `design-system/**` only (lint-enforced)                                     |
+| **2. Semantic**               | `tokens/semantic.ts`                                   | Global visual meaning aliasing primitives, per scheme where needed: surfaces, text, border, shadows, shape, motion, z, chart, chrome                                                                              | Emitted as `--app-*` CSS variables and exported as TS constants            |
+| **3. Contextual layers**      | `--app-layer-*` (baseline now; `theme/layers.css` later) | Tokens that follow placement: `--app-layer-surface`, `-surface-hovered`, `-surface-pressed`, `-border`, `-field`                                                                                                   | Inherited CSS custom properties                                             |
+| **4. Component bindings**     | `theme/components/<Name>.ts` + CSS modules + the resolver | `Component.extend({ defaultProps, vars, classNames })`, and Mantine's own variables mapped to semantic tokens (§3)                                                                                              | Mantine components apply them automatically; not a consumable token tier   |
 
-**Exact surface and color vocabulary:**
+**`tokens.ts`** keeps only `{ shell, zIndex, grid }`, re-exported from the primitives, for TS code that needs layout numbers outside the design system. `theme.other` is dropped.
+
+**Surface and color vocabulary:**
 
 ```
 elevation.surface.canvas            dashboard/page canvas
@@ -41,18 +68,8 @@ elevation.surface.raised            first-level cards, panels, widgets
 elevation.surface.overlay           menus, popovers, drawers, modals
 elevation.shadow.raised             paired with raised surfaces
 elevation.shadow.overlay            paired with overlay surfaces
-color.text.primary | subtle | inverse | disabled
+color.text.primary | subtle | subtlest | inverse | disabled
 color.border.default | subtle | strong | focused
-```
-
-**Contextual tokens (`theme/layers.css`):**
-
-```
---app-layer-surface
---app-layer-surface-hovered
---app-layer-surface-pressed
---app-layer-border
---app-layer-field                   visually distinct editable surface for inputs
 ```
 
 **Component resolution mapping:**
@@ -61,116 +78,107 @@ color.border.default | subtle | strong | focused
 | ------------------------ | --------------------------- | ---------------------------------- |
 | Page or dashboard canvas | `elevation.surface.sunken`  | Fixed semantic surface             |
 | Widget on the canvas     | `layer.surface`             | First contextual layer → raised    |
-| Nested panel in a widget | `layer.surface`             | Next contextual layer              |
+| Nested panel in a widget | `layer.surface`             | Next contextual layer (later, §3)  |
 | Input inside a panel     | `layer.field`               | Visually distinct editable surface |
 | Menu / Drawer / Modal    | `elevation.surface.overlay` | Fixed overlay semantic surface     |
 
-**Status colors in props** are Mantine `virtualColor` aliases, used as `color="danger"` and never `color="red"`:
+**Status colors in props** are `virtualColor` aliases, used as `color="danger"`, never `color="red"`: `brand` → indigo, `neutral` → gray, `danger` → red, `warning` → yellow, `success` → green, `info` → blue.
 
-- `brand` → indigo
-- `neutral` → gray
-- `danger` → red
-- `warning` → yellow
-- `success` → green
-- `info` → blue
+**Generated variables:** `cssVariablesResolver` walks the semantic object (`toCssVars(semantic, '--app')`), so a new token can't be forgotten and the TS and CSS names can't drift apart.
 
-**Generated variables:** `cssVariablesResolver` builds its output by **walking the semantic object** (a `toCssVars(semantic, '--app')` helper) instead of listing every variable by hand. A new token can't be forgotten, and the TS names and CSS names can't drift apart.
+### 2. "Change it in one place": shape and sizes (done)
 
-### 2. "Change it in one place": shape and sizes
-
-```ts
-// tokens/semantic.ts
-export const shape = { control: 'sm', container: 'md', pill: 'xl' } as const;
-
-// theme/components/Button.ts: every Button, one place
-export const ButtonTheme = Button.extend({ defaultProps: { radius: shape.control } });
-```
-
-- **Controls:** `shape.control` covers Button, ActionIcon, Input, Select and SegmentedControl.
+- **Controls:** `shape.control` covers Button, ActionIcon, Input, Select and SegmentedControl (the last through `defaultRadius`).
 - **Containers:** `shape.container` covers Paper, Card, Alert, Notification, Modal and Menu dropdowns.
 - **Why it holds:** feature code can't pass `radius=` literals (§5), so the theme default always wins.
-- **Spacing:** keep Mantine's keys and add `2xs` / `3xs` through `MantineThemeSizesOverride` for the current `gap={2|4}` uses.
-- **Font weights:** use Mantine 9 `fontWeights` keys (`regular`, `medium`, `bold`) instead of `fw={600}`.
-- **Icons:** `iconSize.{xs,sm,md,lg}` and `iconStroke` constants. Tabler sets `size` as an SVG attribute, where `var()` doesn't work, so these are TS constants rather than CSS variables.
+- **Spacing:** Mantine's keys, plus `2xs` / `3xs` through `MantineThemeSizesOverride` for the current `gap={4|2}` uses.
+- **Font weights:** Mantine 9 `fontWeights` keys (`regular`, `medium`, `bold`) instead of `fw={600}`.
+- **Icons:** `iconSize.{xs,sm,md,lg}` and `iconStroke` constants.
+  - Tabler sets `size` as an SVG attribute, where `var()` doesn't work, so these are TS constants rather than CSS variables.
 
-### 3. Surfaces and layering (Atlassian vocabulary, Carbon mechanism)
+### 3. Surfaces and layering
 
-- **Surfaces:**
-  - `canvas`: base page canvas
-  - `sunken`: recessed region behind dashboard grid
-  - `raised`: panels, widgets, cards; paired with `shadow.raised`
-  - `overlay`: Menu, Popover, Modal, Drawer, Spotlight; paired with `shadow.overlay` and set through `theme.components`
-- **Contextual layers (Carbon):**
-  - Any element with `data-layer` inherits `--app-layer-surface`, `--app-layer-surface-hovered`, `--app-layer-border`, and `--app-layer-field` based on **how deeply it is nested**. Pure CSS descendant rules in `theme/layers.css`, up to 3 levels, with no React context.
-  - `Paper` variants `panel` and `widget` set `data-layer` and consume `var(--app-layer-surface)` and `var(--app-layer-border)`.
-  - Reusable Card/Paper has one contextual implementation: background = `layer.surface`. Fixed surface card on a page uses `elevation.surface.raised`.
+- **Overlays go through Mantine's own variables.**
+  - Mantine deep-merges our resolver over its defaults (`deepMerge(defaultResolver, providerGenerator)` in `get-merged-variables`).
+  - So the resolver maps two variables, light and dark: `--mantine-color-body` → `elevation.surface.overlay` and `--mantine-color-dimmed` → `color.text.subtle`.
+  - Menu, Popover, Modal, Drawer, Spotlight and Paper then follow our tokens without their own `classNames`.
+- **Overlay shadow:** overlay components get `shadow: 'var(--app-elevation-shadow-overlay)'` as a default prop. Mantine passes `var(…)` values through unchanged (`isNumberLike`).
+- **No visual change today:** our values match Mantine's defaults (white / dark-7, gray-6 / dark-2).
+  - Mantine's border and text defaults differ from ours: gray-4 vs gray-3, and black vs gray-9. Mapping those is a visual change and not part of this plan.
+- **Canvas:** `--mantine-color-body` also paints `<body>`. The shell paints the canvas itself (`global.css`, `Shell.module.css`), so nothing changes there.
+- **Paper variants:** `panel` and `widget` read `--app-layer-surface` and `--app-layer-border`. At depth 1 these equal `raised` and `border.default`.
+- **Nesting (deferred):** `theme/layers.css` with `[data-layer]` descendant rules (up to 3 levels, no React context).
+  - Written when the first surface nests inside another (likely panels inside widgets in the phase 3 editor).
+  - The variables and the Paper binding are already in place, so it's CSS only.
 - **Portals** leave the nesting and use `overlay` tokens.
 
-### 4. The always-dark chrome: a "theme zone" (spike first)
+### 4. The always-dark chrome: the `chrome` semantic group
 
-- Carbon validates the design intent of the always-dark shell: inline themes are for major contrast regions such as shells and side panels, while normal depth changes use layers.
-- `[data-app-zone='chrome']` re-assigns the semantic tokens (`--app-color-text-*`, `--app-elevation-*`, `--app-color-border-*`) to dark values in that subtree.
-- **Spike requirement:** Because Mantine's built-in variables (such as `--mantine-color-body` and default hover styles) are emitted on `:root[data-mantine-color-scheme]` and do not automatically switch in an arbitrary subtree, the chrome-zone compatibility spike remains necessary before removing `chrome.*`.
-- The spike verifies NavLink, ActionIcon, Burger, Avatar, the search control, and menus in both light and dark app modes.
-- If the spike fails: keep a small `chrome` group in `semantic.ts`, built from primitives rather than rgba literals.
+- **Decision (Sep 27):** keep the `chrome` group in `semantic.ts`, built from primitives and emitted as `--app-navbar-*` / `--app-sidebar-*`.
+- **New tokens:** add `navbarInputBg`, `navbarInputBgHover` and `navbarInputBorder` from `primitives.alpha.white` (with a new `10` step) for the `rgb(255 255 255 / 8–12%)` values in `Search.module.css` and `TopNavbar.module.css`.
+- **Dropped: the theme zone** (`[data-app-zone='chrome']` re-assigning the semantic tokens in a subtree).
+  - Mantine emits its own variables only on `:root[data-mantine-color-scheme]`, so the zone needed a spike to prove NavLink, ActionIcon, Burger and the menus would follow.
+  - The fallback it would have ended in already exists.
+  - Revisit only if the chrome must follow light mode.
 
 ### 5. Enforcement: making the tokens mandatory
 
-- **Stylelint** (in `src/**` except `design-system/**`):
+- **Stylelint, built-in rules only.** They apply to `src/**` except `design-system/**` and `features/integrations/**`, through `overrides` in `.stylelintrc.json`.
   - `function-disallowed-list: [rgb, rgba, hsl, hsla]`
-  - a regex ban on palette variables `--mantine-color-<name>-<n>`
-  - `stylelint-declaration-strict-value` for color, background, border-color, fill, stroke, box-shadow, z-index, border-radius and transition-duration
+  - `declaration-property-value-disallowed-list`: any property, `/--mantine-color-[a-z]+-\d/` (no palette shades)
+  - `declaration-property-value-allowed-list` for color, background-color, border-color, fill, stroke, box-shadow, z-index, border-radius and transition-duration: `var(--…)`, `calc(…)` over variables, or a keyword (`0`, `none`, `transparent`, `currentcolor`, `inherit`)
+  - No `stylelint-declaration-strict-value`: its Stylelint 17 support was never checked, and the built-ins cover these cases.
 - **oxlint `app/no-raw-style-props`** (in `lint/plugin.js`, next to `no-inline-style`). It reports:
   - numeric spacing props other than `0`
   - numeric `fw` / `fz` / `radius`
   - palette names in `c` / `color` / `bg` (allowed: `dimmed`, `bright`, and the semantic aliases)
   - numeric `size` / `stroke` on `Icon*` elements
-  - Exempt: `design-system/**`, stories and tests.
-  - Exempt **for now**: `features/integrations/**`, the Sentry prototype UI, which is for show and gets rebuilt or dropped in Plan 06. Spending migration time on it would be wasted. Plan 06 removes the exemption.
-- **Import boundary:** only `design-system/theme/**` may import `tokens/primitives.ts`.
+  - **Exempt:** `design-system/**`, stories and tests.
+  - **Exempt for now:** `features/integrations/**`. Plan 06 rebuilds or removes it and drops the exemption.
+- **Import boundary:** only `src/design-system/**` may import `tokens/primitives`. `semantic.ts`, `tokens.ts` and the theme alias it.
 - **Rollout:** start the rules as **warn**, migrate, then switch them to **error** in the same PR that finishes the migration.
+- **Proof the rules fire:** one Vitest test runs `stylelint.lint({ code, config })` on a bad snippet per rule, runs `oxlint` on `lint/fixtures/*.tsx`, and checks each rule id appears.
+  - The fixtures sit outside `src`, so `pnpm lint` stays green.
 
 ### 6. Mantine static classes and helpers (rules for AGENTS.md)
 
 - **Custom focusable elements:** add `className="mantine-focus-auto"` for the standard focus ring. Don't write custom `:focus-visible` CSS.
 - **Custom pressable elements:** add `mantine-active` for press feedback.
-- **Viewport visibility:** `visibleFrom` / `hiddenFrom` (the `mantine-visible-from-*` / `mantine-hidden-from-*` classes) only for shell chrome. Inside the page, use `@container` (Plan 04).
+- **Viewport visibility:** `visibleFrom` / `hiddenFrom` only for shell chrome. Inside the page, use `@container` (Plan 04).
 - **Scheme-dependent values in CSS:** `light-dark()` or `@mixin light/dark`, and only in `design-system/`. Feature CSS reads semantic variables that already switch by scheme.
 
 ### 7. Debugging
 
-- **Tokens story:** rebuild `Tokens.stories.tsx` to show the primitives, semantic tokens in both schemes (swatch, variable name, the primitive it points to), a demo of nested layers, and a shape demo.
-- **Layer outlines:** the Debug page gets an "Outline layers" switch that sets `html[data-debug-layers]`, which outlines each `data-layer` by depth. Dev builds only.
+- **Tokens story:** rebuild `Tokens.stories.tsx` to show the primitives, the semantic tokens in both schemes (swatch, variable name, the primitive it points to), and a shape demo.
+- **Deferred with the nesting rules:** the nested-layer demo and the Debug page's "Outline layers" switch (`html[data-debug-layers]`).
 
-## Migration inventory (measured, see research §1)
+## Migration inventory (re-measured Sep 27, excluding `design-system/**` and `features/integrations/**`)
 
-- **TSX:** about 30 files with numeric props:
-  - about 40 icon sizes
-  - about 30 spacing values
+- **TSX:** 30 files.
+  - 28 numeric icon `size` / `stroke`
+  - 24 numeric spacing values
   - 9 `fw`
-  - 6 fixed chart heights (these become a `chart.height` semantic token)
   - 16 palette colors
-- **CSS:** 7 rgba literals in 3 modules.
-- **tokens.ts:** 12 `chrome.*` tokens.
-- **Resolver:** the hand-written list in `theme.ts`.
-- **Third-party brand colors:** `tokens.brand.sentry` (`--app-brand-sentry`) from the Sentry prototype. A raw brand value is a primitive; it moves to `primitives.ts` as `brand.sentry` and is only used for that logo. There is no semantic role for it.
-- **Not migrated:** `features/integrations/**` (exempt, see §5).
+  - 6 fixed chart heights on the Debug page (these become `chart.height`)
+- **CSS:**
+  - 5 `rgb(255 255 255 / n%)` in `Search.module.css` and `TopNavbar.module.css`
+  - 7 palette variables (`--mantine-color-<name>-<n>`)
+  - `legacy` variable names in about 17 files, including 2 in `features/integrations/**`, which get the rename too; it's a rename, not a restyle
+- **`tokens.ts`:** `chrome`, `surface` and `motion` are unused and go.
+- **Not migrated:** raw values in `features/integrations/**` (exempt, see §5).
 
 ### 8. Custom code that Mantine already covers
 
-Checked against the exports of the installed `@mantine/core` and `@mantine/hooks` 9.6.2 (124 hooks, 273 components).
+Checked against the exports of the installed `@mantine/core` and `@mantine/hooks` 9.6.2.
 
-| Our code                                                                                                             | Mantine replacement                                                                                 | Action                                                                                                                                                                                                    |
-| -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `.srOnly` class in `Skeletons.module.css` / `Skeletons.tsx`                                                          | `VisuallyHidden`                                                                                    | Replace, delete the class                                                                                                                                                                                 |
-| `SlowHint`: `useState` + `useEffect` + `setTimeout`                                                                  | `useTimeout(cb, after, { autoInvoke: true })`                                                       | Replace                                                                                                                                                                                                   |
-| `Inbox`: `setTimeout(markAllRead, 1500)` in an effect                                                                | `useTimeout`                                                                                        | Replace                                                                                                                                                                                                   |
-| `ErrorState.Full` / `.Inline`: hand-built `ThemeIcon` + `Title` + `Text` + actions `Group` with their own layout CSS | `EmptyState` (9.4+): `icon`, `title`, `description`, `color`, `size`, `align`, `EmptyState.Actions` | Build Full and Inline **on top of** `EmptyState` (`color="danger"`, sizes `lg` / `sm`). Keep our API, `role="alert"`, the 404 code display and the dev-only details panel. `Banner` already uses `Alert`. |
-| `Panel.*`: `[classes.x, className].filter(Boolean).join(' ')` ×5                                                     | `clsx` (Mantine uses it internally but doesn't re-export it)                                        | Add `clsx` as a direct dependency and use `cx(...)`                                                                                                                                                       |
-| Navbar and sidebar icon tooltips, each with its own 400 ms delay                                                     | `Tooltip.Group` (`TooltipGroup`): after the first tooltip, neighbours open instantly                | Wrap the navbar actions and the compact sidebar rail                                                                                                                                                      |
-| Plan 01 window resize: `addEventListener` + timers                                                                   | `useWindowEvent` + `useDebouncedCallback`                                                           | Already written into Plan 01                                                                                                                                                                              |
-| Plan 01 motion: OS media query                                                                                       | `useReducedMotion`                                                                                  | Already in Plan 01 (`useMotion` builds on it)                                                                                                                                                             |
-| Plan 05 dashboard-list paging                                                                                        | `Pagination` / `usePagination`                                                                      | Already in Plan 05                                                                                                                                                                                        |
+| Our code                                                                                         | Mantine replacement                                                                  | Action                                                                                                                                                  |
+| ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.srOnly` class in `Skeletons.module.css` / `Skeletons.tsx`                                      | `VisuallyHidden`                                                                     | Replace, delete the class                                                                                                                               |
+| `SlowHint`: `useState` + `useEffect` + `setTimeout`                                              | `useTimeout(cb, after, { autoInvoke: true })`                                        | Replace                                                                                                                                                 |
+| `Inbox`: `setTimeout(markAllRead, 1500)` in an effect                                            | `useTimeout`                                                                         | Replace                                                                                                                                                 |
+| `ErrorState.Full` / `.Inline`: hand-built `ThemeIcon` + `Title` + `Text` + actions with own CSS | `EmptyState` (`icon`, `title`, `description`, `color`, `size`, `align`, `EmptyState.Actions`) | Build Full and Inline **on top of** `EmptyState` (`color="danger"`, sizes `lg` / `sm`). Keep our API, `role="alert"`, the 404 code display and the details panel |
+| 5 class joins `[classes.x, className].filter(Boolean).join(' ')`: 4 in `Panel.tsx`, 1 in `SidebarNav.tsx` | `clsx` (Mantine depends on it but doesn't re-export it)                              | Add `clsx` as a direct dependency; it's already in the bundle through Mantine, so it adds no bytes                                                    |
+| Navbar and sidebar icon tooltips, each with its own 400 ms delay                                 | `Tooltip.Group`: after the first tooltip, neighbours open instantly                  | Wrap the navbar actions and the compact sidebar rail                                                                                                    |
 
 **Keep as they are** (checked; no Mantine equivalent, or it's app logic):
 
@@ -178,31 +186,34 @@ Checked against the exports of the installed `@mantine/core` and `@mantine/hooks
 - `useMainLock`: shell-specific width pinning.
 - `useBadgeCount` / `useTotalBadgeCount`: `useSyncExternalStore` over tab badges.
 - `useContextTabs`, `useShell*`, `useAfterNavigate`, `usePathname`: router and store glue.
-- `initialNarrow` in the shell store: the store needs the value before the first render. `Shell.tsx` already uses `useMediaQuery` after that.
+- `initialNarrow` in the shell store: the store needs the value before the first render.
 - `Panel` itself: layout parts over `Group` / `ScrollArea`.
 
-**Not Mantine, but duplicated:** `wait(ms)` is defined in both `DebugPage.tsx` and `useAppearanceForm.ts`. Move it to `utils/wait.ts` (Plan 02).
+**Not Mantine, but duplicated:** the abortable wait in `features/dashboards/api/client.ts` and `sleep` in `api/demo.ts`. Both become `utils/wait.ts` with an optional `signal`.
 
-## Decisions (settled Sep 24, 2026)
+## Decisions
 
-1. **Spacing scale: keep the current one** (`xs 6, sm 10, md 16, lg 24, xl 36`) and add `2xs = 4` and `3xs = 2` for the existing `gap={4|2}` uses. No switch to a strict 4 px grid, which would have rounded every step to a multiple of 4 and shifted spacing across the whole app.
-2. **Variable prefix:** keep `--app-`. It's already used everywhere and namespaced away from `--mantine-`.
-3. **Chrome:** theme zone if the spike passes, otherwise a small `chrome` semantic group.
-4. **Icons: token constants plus the lint rule.** `iconSize.{xs,sm,md,lg}` and `iconStroke` in `semantic.ts`, used as `size={iconSize.sm} stroke={iconStroke}`. There's no `<AppIcon>` wrapper: Tabler icons stay plain components, and the lint rule does the enforcing.
+1. **Spacing scale (Sep 24): keep the current one** (`xs 6, sm 10, md 16, lg 24, xl 36`) and add `2xs = 4` and `3xs = 2`. No strict 4 px grid.
+2. **Variable prefix (Sep 24):** keep `--app-`.
+3. **Chrome (Sep 27):** the `chrome` semantic group (§4). No theme zone.
+4. **Icons (Sep 24): token constants plus the lint rule.** No `<AppIcon>` wrapper.
+5. **Overlays (Sep 27):** Mantine's `--mantine-color-body` / `--mantine-color-dimmed` mapped in the resolver, not `classNames` per component.
+6. **Stylelint (Sep 27):** built-in rules only.
 
 ## Out of scope
 
-Changing the look itself (new palette or type scale), density themes, high-contrast theme. The tier structure makes all of these possible later.
+Changing the look itself (new palette or type scale), mapping Mantine's border and text defaults to ours, density themes, high-contrast theme, and the nested-layer rules until something nests.
 
 ## Risks
 
-- **Fighting Mantine's own styles.** Mitigation: tier 3 only ever uses `defaultProps`, `vars` and `classNames`. Never global overrides of `.mantine-*` classes.
-- **Churn in the migration PR.** Mitigation: do it after Plan 02, one tier at a time, with the lint rules on warn until the migration is finished.
-- **`stylelint-declaration-strict-value` and Stylelint 17.** Check compatibility first. If it doesn't work, fall back to `declaration-property-value-allowed-list` regexes.
+- **Fighting Mantine's own styles.** Mitigation: tier 4 only uses `defaultProps`, `vars`, `classNames` and the resolver. Never global overrides of `.mantine-*` classes.
+- **Overriding `--mantine-color-body` reaches every component that uses it.** Mitigation: the values equal Mantine's today; check the shell, dashboard, settings and overlay stories in both schemes.
+- **Churn in the migration PR.** Mitigation: the lint rules stay on warn until the migration is finished.
 
 ## Verification
 
-- `pnpm lint` passes with every new rule on **error**. A test fixture file with a violation for each rule fails lint in CI.
-- **"One place" check:** changing `shape.control` to `'lg'` changes every button, input and action icon in Storybook, with no other edit (record the before/after screenshots in the PR).
-- **Visual regression:** Storybook stories of the shell, dashboard, settings and errors look the same before and after the migration in both schemes, apart from intended changes.
-- The resolver's output is unit-tested: every key in `semantic.ts` produces a CSS variable.
+- `pnpm lint` passes with every new rule on **error**, and the rule test in `pnpm test` shows each rule firing on its bad snippet or fixture.
+- **"One place" check:** changing `shape.control` to `'lg'` changes every button, input and action icon in Storybook, with no other edit (record the before and after screenshots in the PR).
+- **Visual regression:** Storybook stories of the shell, dashboard, settings and errors look the same before and after in both schemes, apart from intended changes.
+- The resolver's output is unit-tested: every key in `semantic.ts` produces a CSS variable, and `--mantine-color-body` / `--mantine-color-dimmed` are overridden.
+- `grep -rn "theme.other\|legacy" src/design-system` finds nothing.

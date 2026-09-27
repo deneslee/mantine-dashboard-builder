@@ -42,7 +42,7 @@ Verified 22 Sep 2026: react-grid-layout 2.2.3 is current ([releases](https://git
 
 Light feature-based layout: one folder per feature, four fixed sub-folders, no layers or slices beyond that.
 
-Current layout and rules: [AGENTS.md › Structure](../AGENTS.md#structure-bulletproof-react-lightly-adapted) (bulletproof-react, adopted Sep 24, 2026 in `.agents/plan/plan-02.md`). Planned features slot into it like this:
+Current layout and rules: [AGENTS.md › Structure](../AGENTS.md#structure-bulletproof-react-lightly-adapted) (bulletproof-react, adopted Sep 24, 2026 in Plan 02, now archived). Planned features slot into it like this:
 
 ```markdown
 src/
