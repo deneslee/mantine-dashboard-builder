@@ -24,7 +24,7 @@ export function DetailsTab() {
         </DataList.Item>
         <DataList.Item>
           <DataList.ItemLabel>Widgets</DataList.ItemLabel>
-          <DataList.ItemValue>{data.widgetCount}</DataList.ItemValue>
+          <DataList.ItemValue>{data.widgets.length}</DataList.ItemValue>
         </DataList.Item>
         <DataList.Item>
           <DataList.ItemLabel>Updated</DataList.ItemLabel>

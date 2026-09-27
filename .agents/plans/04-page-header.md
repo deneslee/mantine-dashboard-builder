@@ -1,6 +1,6 @@
 # 04 Page header
 
-Status: open · Phase 2 · Depends on: 02 (done) · Blocks: 05's pickers (`TimeRangePicker` sits in `Page.ControlBar`) · Research: [page-header-composition](research/page-header-composition.md)
+Status: done (Sep 27, 2026) · Phase 2 · Depends on: 02 (done) · Blocks: 05's pickers (`TimeRangePicker` sits in `Page.ControlBar`) · Research: [page-header-composition](research/page-header-composition.md)
 
 ## Goal
 
@@ -90,20 +90,20 @@ Editable title, a sticky control bar, action overflow, crumb collapse, and the a
 ## Tasks
 
 - [x] **Check `OverflowList` before building on it.** Sep 27: in 9.6.2 it renders from `data` + `renderItem` + `renderOverflow`, so actions would have to be data, not children. Cut; the note is in [page-header-composition §4](research/page-header-composition.md#4-decision-sep-27-2026).
-- [ ] **Split `Page` into named parts.**
+- [x] **Split `Page` into named parts.**
   - Parts: `PageRoot`, `PageHeader`, `PageBreadcrumbs`, `PageTitle`, `PageDescription`, `PageActions`, `PageControlBar` and `PageBody`, each exported by name and through `Page`.
   - `Page.Header` is a grid with named areas ([§1](#1-parts)).
   - The parts space themselves with margins, so a missing part leaves no gap.
   - `Page.ControlBar` is a wrapping group that takes children only.
   - Done when `pnpm lint` passes (`react/only-export-components` covers Fast Refresh) and the full story shows every area.
-- [ ] **Container queries on `Page.Root`.** `container-type: inline-size`, and one `@container` rule in `Page.module.css` that stacks the areas into a single column; no viewport media queries. Done when the narrow-container story wraps correctly at 375, 768 and 1280 px.
-- [ ] **`useBreadcrumbs()` and `RouteBreadcrumbs`.**
+- [x] **Container queries on `Page.Root`.** `container-type: inline-size`, and one `@container` rule in `Page.module.css` that stacks the areas into a single column; no viewport media queries. Done when the narrow-container story wraps correctly at 375, 768 and 1280 px. *(Sep 27: measured in the app at 1400 and 560 px: two columns, then one with the actions under the description.)*
+- [x] **`useBreadcrumbs()` and `RouteBreadcrumbs`.** *(Sep 27: `/dashboards` and `/integrations` got layout routes (`route.tsx`) so the parent crumb has a match; crumb links match exactly, or the router marks the parent `aria-current`.)*
   - The hook goes in `src/hooks/useBreadcrumbs.ts` and reads `useMatches()` and `staticData.crumb`; the `crumb` typing sits next to it.
   - `src/components/navigation/RouteBreadcrumbs.tsx` renders Mantine `Breadcrumbs` inside `Page.Breadcrumbs`: links as `Anchor` + `<Link>` via `renderRoot`, and the last crumb with `aria-current="page"`.
   - Add `crumb` to the Dashboards, `$id` (the title from loader data), Settings, Debug, Integrations and Sentry routes.
   - Done when tests check the `<a href>` values and `aria-current`.
-- [ ] **Migrate the callers.** All 8 in [§4](#4-migration), including `IntegrationsCatalog` and `SentryPage` (06 decision 3). Done when no `Page.Header title=` remains and the tests pass.
-- [ ] **Stories and tests.** Stories: minimal, standard, full (placeholder controls in the control bar), narrow container. Tests: one `h1`, the breadcrumb landmark, and actions and controls reached by keyboard in reading order. Done when these run in `pnpm test` and Storybook a11y reports no new violations.
+- [x] **Migrate the callers.** All 8 in [§4](#4-migration), including `IntegrationsCatalog` and `SentryPage` (06 decision 3). Done when no `Page.Header title=` remains and the tests pass.
+- [x] **Stories and tests.** Stories: minimal, standard, full (placeholder controls in the control bar), narrow container. Tests: one `h1`, the breadcrumb landmark, and actions and controls reached by keyboard in reading order. Done when these run in `pnpm test` and Storybook a11y reports no new violations. *(Sep 27: tests pass; the Storybook a11y check is still open, in `docs/tasks.md`, because Storybook wasn't running.)*
 
 ## Decisions
 
@@ -112,6 +112,9 @@ Editable title, a sticky control bar, action overflow, crumb collapse, and the a
 - **Sep 27: the breadcrumb hook lives in shared `hooks/`.** The pages that show crumbs are features and can't import `app/`. A shared `RouteBreadcrumbs` renders the router links, so the design system stays router-free.
 - **Sep 27: no middle-crumb collapse.** Routes are at most two levels deep.
 - **Sep 27: both integrations pages are migrated.** Sentry stays a product feature ([06 decision 3](06-sentry.md#decisions)).
+- **Sep 27: `RouteBreadcrumbs` renders nothing below two crumbs.** A top-level page's only crumb would repeat its title. Every page still includes it, so a page that gains a child route gets a trail without edits.
+- **Sep 27: `Page.ControlBar` is a `role="group"`.** Its `aria-label` (e.g. "Dashboard controls") then names the set for screen readers; a plain `div` ignores the label.
+- **Sep 27: layout routes for the parent crumbs.** `/dashboards/$id` and `/integrations/sentry` were siblings of their index routes, so "Dashboards" and "Integrations" had no match to hang a crumb on. `dashboards/route.tsx` and `integrations/route.tsx` have no component; they render their child.
 - **Sep 24: container queries and router-driven breadcrumbs.** The editable title and the sticky control bar were cut from the first version.
 
 ## Verification

@@ -10,9 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardsRouteRouteImport } from './routes/dashboards/route'
 import { Route as DatasourcesRouteImport } from './routes/datasources'
 import { Route as DebugRouteImport } from './routes/debug'
 import { Route as ExploreRouteImport } from './routes/explore'
+import { Route as IntegrationsRouteRouteImport } from './routes/integrations/route'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as TemplatesRouteImport } from './routes/templates'
 import { Route as DashboardsIndexRouteImport } from './routes/dashboards/index'
@@ -23,6 +25,11 @@ import { Route as IntegrationsSentryRouteImport } from './routes/integrations/se
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardsRouteRoute = DashboardsRouteRouteImport.update({
+  id: '/dashboards',
+  path: '/dashboards',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DatasourcesRoute = DatasourcesRouteImport.update({
@@ -40,6 +47,11 @@ const ExploreRoute = ExploreRouteImport.update({
   path: '/explore',
   getParentRoute: () => rootRouteImport,
 } as any)
+const IntegrationsRouteRoute = IntegrationsRouteRouteImport.update({
+  id: '/integrations',
+  path: '/integrations',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -51,28 +63,30 @@ const TemplatesRoute = TemplatesRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardsIndexRoute = DashboardsIndexRouteImport.update({
-  id: '/dashboards/',
-  path: '/dashboards/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardsRouteRoute,
 } as any)
 const DashboardsIdRoute = DashboardsIdRouteImport.update({
-  id: '/dashboards/$id',
-  path: '/dashboards/$id',
-  getParentRoute: () => rootRouteImport,
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => DashboardsRouteRoute,
 } as any)
 const IntegrationsIndexRoute = IntegrationsIndexRouteImport.update({
-  id: '/integrations/',
-  path: '/integrations/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => IntegrationsRouteRoute,
 } as any)
 const IntegrationsSentryRoute = IntegrationsSentryRouteImport.update({
-  id: '/integrations/sentry',
-  path: '/integrations/sentry',
-  getParentRoute: () => rootRouteImport,
+  id: '/sentry',
+  path: '/sentry',
+  getParentRoute: () => IntegrationsRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboards': typeof DashboardsRouteRouteWithChildren
+  '/integrations': typeof IntegrationsRouteRouteWithChildren
   '/datasources': typeof DatasourcesRoute
   '/debug': typeof DebugRoute
   '/explore': typeof ExploreRoute
@@ -98,6 +112,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dashboards': typeof DashboardsRouteRouteWithChildren
+  '/integrations': typeof IntegrationsRouteRouteWithChildren
   '/datasources': typeof DatasourcesRoute
   '/debug': typeof DebugRoute
   '/explore': typeof ExploreRoute
@@ -112,6 +128,8 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/dashboards'
+    | '/integrations'
     | '/datasources'
     | '/debug'
     | '/explore'
@@ -136,6 +154,8 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/dashboards'
+    | '/integrations'
     | '/datasources'
     | '/debug'
     | '/explore'
@@ -149,15 +169,13 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardsRouteRoute: typeof DashboardsRouteRouteWithChildren
+  IntegrationsRouteRoute: typeof IntegrationsRouteRouteWithChildren
   DatasourcesRoute: typeof DatasourcesRoute
   DebugRoute: typeof DebugRoute
   ExploreRoute: typeof ExploreRoute
   SettingsRoute: typeof SettingsRoute
   TemplatesRoute: typeof TemplatesRoute
-  DashboardsIdRoute: typeof DashboardsIdRoute
-  IntegrationsSentryRoute: typeof IntegrationsSentryRoute
-  DashboardsIndexRoute: typeof DashboardsIndexRoute
-  IntegrationsIndexRoute: typeof IntegrationsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -167,6 +185,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboards': {
+      id: '/dashboards'
+      path: '/dashboards'
+      fullPath: '/dashboards'
+      preLoaderRoute: typeof DashboardsRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/datasources': {
@@ -190,6 +215,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExploreRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/integrations': {
+      id: '/integrations'
+      path: '/integrations'
+      fullPath: '/integrations'
+      preLoaderRoute: typeof IntegrationsRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -206,46 +238,71 @@ declare module '@tanstack/react-router' {
     }
     '/dashboards/': {
       id: '/dashboards/'
-      path: '/dashboards'
+      path: '/'
       fullPath: '/dashboards/'
       preLoaderRoute: typeof DashboardsIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof DashboardsRouteRoute
     }
     '/dashboards/$id': {
       id: '/dashboards/$id'
-      path: '/dashboards/$id'
+      path: '/$id'
       fullPath: '/dashboards/$id'
       preLoaderRoute: typeof DashboardsIdRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof DashboardsRouteRoute
     }
     '/integrations/': {
       id: '/integrations/'
-      path: '/integrations'
+      path: '/'
       fullPath: '/integrations/'
       preLoaderRoute: typeof IntegrationsIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof IntegrationsRouteRoute
     }
     '/integrations/sentry': {
       id: '/integrations/sentry'
-      path: '/integrations/sentry'
+      path: '/sentry'
       fullPath: '/integrations/sentry'
       preLoaderRoute: typeof IntegrationsSentryRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof IntegrationsRouteRoute
     }
   }
 }
 
+interface DashboardsRouteRouteChildren {
+  DashboardsIdRoute: typeof DashboardsIdRoute
+  DashboardsIndexRoute: typeof DashboardsIndexRoute
+}
+
+const DashboardsRouteRouteChildren: DashboardsRouteRouteChildren = {
+  DashboardsIdRoute: DashboardsIdRoute,
+  DashboardsIndexRoute: DashboardsIndexRoute,
+}
+
+const DashboardsRouteRouteWithChildren = DashboardsRouteRoute._addFileChildren(
+  DashboardsRouteRouteChildren,
+)
+
+interface IntegrationsRouteRouteChildren {
+  IntegrationsSentryRoute: typeof IntegrationsSentryRoute
+  IntegrationsIndexRoute: typeof IntegrationsIndexRoute
+}
+
+const IntegrationsRouteRouteChildren: IntegrationsRouteRouteChildren = {
+  IntegrationsSentryRoute: IntegrationsSentryRoute,
+  IntegrationsIndexRoute: IntegrationsIndexRoute,
+}
+
+const IntegrationsRouteRouteWithChildren =
+  IntegrationsRouteRoute._addFileChildren(IntegrationsRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardsRouteRoute: DashboardsRouteRouteWithChildren,
+  IntegrationsRouteRoute: IntegrationsRouteRouteWithChildren,
   DatasourcesRoute: DatasourcesRoute,
   DebugRoute: DebugRoute,
   ExploreRoute: ExploreRoute,
   SettingsRoute: SettingsRoute,
   TemplatesRoute: TemplatesRoute,
-  DashboardsIdRoute: DashboardsIdRoute,
-  IntegrationsSentryRoute: IntegrationsSentryRoute,
-  DashboardsIndexRoute: DashboardsIndexRoute,
-  IntegrationsIndexRoute: IntegrationsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

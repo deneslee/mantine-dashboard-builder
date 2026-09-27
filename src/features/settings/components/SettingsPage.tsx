@@ -1,6 +1,7 @@
 import { EmptyState, Tabs } from '@mantine/core';
 import { IconAdjustments } from '@tabler/icons-react';
 import { Link } from '@tanstack/react-router';
+import { RouteBreadcrumbs } from '@/components/navigation/RouteBreadcrumbs';
 import { Page } from '@/design-system/components/Page/Page';
 import { iconSize, iconStroke } from '@/design-system/tokens/semantic';
 import { settingsTabs, type SettingsTab } from '../model/tabs';
@@ -10,7 +11,11 @@ import { AppearanceSettings } from './AppearanceSettings';
 export function SettingsPage({ tab }: { tab: SettingsTab }) {
   return (
     <Page.Root>
-      <Page.Header title="Settings" description="Workspace and appearance preferences." />
+      <Page.Header>
+        <RouteBreadcrumbs />
+        <Page.Title>Settings</Page.Title>
+        <Page.Description>Workspace and appearance preferences.</Page.Description>
+      </Page.Header>
       <Page.Body>
         <Tabs value={tab}>
           <Tabs.List mb="lg">

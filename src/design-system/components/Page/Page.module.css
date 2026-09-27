@@ -3,14 +3,62 @@
   flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
+  container-type: inline-size;
 }
 
+/*
+ * The parts place themselves in these areas and space themselves with margins, not row-gap:
+ * an empty row would still get its gap, so a page without breadcrumbs would start with a blank line.
+ */
 .header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'crumbs   crumbs'
+    'title    actions'
+    'desc     actions'
+    'controls controls';
+  column-gap: var(--mantine-spacing-md);
   padding: var(--mantine-spacing-lg) var(--mantine-spacing-lg) var(--mantine-spacing-md);
 }
 
-.heading {
+.crumbs {
+  grid-area: crumbs;
+  margin-bottom: var(--mantine-spacing-xs);
+}
+
+.title {
+  grid-area: title;
   min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.description {
+  grid-area: desc;
+  margin-top: var(--mantine-spacing-2xs);
+}
+
+.actions {
+  grid-area: actions;
+  align-self: end;
+  justify-content: flex-end;
+}
+
+.controls {
+  grid-area: controls;
+  margin-top: var(--mantine-spacing-md);
+}
+
+@container (max-width: 40em) {
+  .header {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'crumbs' 'title' 'desc' 'actions' 'controls';
+  }
+
+  .actions {
+    justify-content: flex-start;
+    margin-top: var(--mantine-spacing-sm);
+  }
 }
 
 .body {

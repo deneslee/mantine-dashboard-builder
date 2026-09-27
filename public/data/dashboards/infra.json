@@ -1,0 +1,193 @@
+{
+  "version": 1,
+  "id": "infra",
+  "title": "Infrastructure health",
+  "description": "Datadog monitors, error budgets and latency",
+  "tags": ["datadog"],
+  "updatedAt": "2026-09-15T17:05:00Z",
+  "timeRange": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "refresh": "off",
+  "variables": [],
+  "widgets": {
+    "kpis": {
+      "type": "kpi",
+      "title": "Key figures",
+      "queries": [
+        {
+          "datasource": "mock",
+          "spec": {
+            "kind": "series",
+            "seed": "infra:kpis",
+            "points": 24,
+            "fields": [
+              {
+                "name": "revenue",
+                "label": "Revenue",
+                "unit": "€",
+                "base": 120000,
+                "spread": 4000
+              },
+              {
+                "name": "sites",
+                "label": "Active sites",
+                "base": 45,
+                "spread": 2
+              },
+              {
+                "name": "alarms",
+                "label": "Open alarms",
+                "base": 18,
+                "spread": 3
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "revenue": {
+      "type": "chart",
+      "title": "Revenue",
+      "options": {
+        "form": "area"
+      },
+      "queries": [
+        {
+          "datasource": "mock",
+          "spec": {
+            "kind": "series",
+            "seed": "infra:revenue",
+            "fields": [
+              {
+                "name": "revenue",
+                "label": "Revenue",
+                "unit": "€",
+                "base": 60,
+                "spread": 6
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "regions": {
+      "type": "table",
+      "title": "Revenue by region",
+      "options": {
+        "columns": {
+          "share": {
+            "format": "percent"
+          }
+        }
+      },
+      "queries": [
+        {
+          "datasource": "local-json",
+          "spec": {
+            "path": "frames/regions.json"
+          }
+        }
+      ]
+    },
+    "alarms": {
+      "type": "table",
+      "title": "HVAC alarms",
+      "queries": [
+        {
+          "datasource": "mock",
+          "spec": {
+            "kind": "error",
+            "message": "Haystack server returned 502 for query \"equip and hvac\"."
+          }
+        }
+      ]
+    },
+    "occupancy": {
+      "type": "chart",
+      "title": "Occupancy",
+      "options": {
+        "form": "line"
+      },
+      "queries": [
+        {
+          "datasource": "mock",
+          "spec": {
+            "kind": "series",
+            "seed": "infra:occupancy",
+            "fields": [
+              {
+                "name": "occupancy",
+                "label": "Occupancy",
+                "unit": "%",
+                "base": 55,
+                "spread": 5
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "requests": {
+      "type": "table",
+      "title": "Request log",
+      "queries": [
+        {
+          "datasource": "mock",
+          "spec": {
+            "kind": "table",
+            "seed": "infra:requests",
+            "rows": 10000
+          }
+        }
+      ]
+    }
+  },
+  "layouts": {
+    "lg": [
+      {
+        "i": "kpis",
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 3
+      },
+      {
+        "i": "revenue",
+        "x": 0,
+        "y": 3,
+        "w": 8,
+        "h": 6
+      },
+      {
+        "i": "regions",
+        "x": 8,
+        "y": 3,
+        "w": 4,
+        "h": 6
+      },
+      {
+        "i": "alarms",
+        "x": 0,
+        "y": 9,
+        "w": 6,
+        "h": 6
+      },
+      {
+        "i": "occupancy",
+        "x": 6,
+        "y": 9,
+        "w": 6,
+        "h": 6
+      },
+      {
+        "i": "requests",
+        "x": 0,
+        "y": 15,
+        "w": 12,
+        "h": 10
+      }
+    ]
+  }
+}

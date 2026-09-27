@@ -1,0 +1,17 @@
+.table {
+  font-variant-numeric: tabular-nums;
+}
+
+/* One line per row at a fixed height: the virtualizer places rows by ROW_HEIGHT in FrameTable.tsx. */
+.row {
+  height: rem(32px);
+  white-space: nowrap;
+}
+
+.sort {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mantine-spacing-3xs);
+  font: inherit;
+  white-space: nowrap;
+}

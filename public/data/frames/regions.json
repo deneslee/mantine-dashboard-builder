@@ -1,0 +1,30 @@
+{
+  "name": "regions",
+  "fields": [
+    {
+      "name": "region",
+      "type": "string",
+      "config": {
+        "label": "Region"
+      },
+      "values": ["Central Europe", "Nordics", "Iberia", "UK & Ireland", "Benelux"]
+    },
+    {
+      "name": "revenue",
+      "type": "number",
+      "config": {
+        "label": "Revenue",
+        "unit": "€"
+      },
+      "values": [38420, 21760, 17350, 29980, 12640]
+    },
+    {
+      "name": "share",
+      "type": "number",
+      "config": {
+        "label": "Share"
+      },
+      "values": [0.32, 0.181, 0.144, 0.25, 0.105]
+    }
+  ]
+}

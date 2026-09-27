@@ -1,7 +1,16 @@
+import { IconAbc } from '@tabler/icons-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { lazy } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { z } from 'zod';
 import { act, render, screen, waitFor } from '@/testing/render';
-import type { DashboardWidget } from '../../model/types';
+import type { DataFrame } from '@/types/dataframe';
+import type { DatasourceDefinition, QueryContext } from '@/types/datasource';
+import { defineWidget, type WidgetProps } from '@/types/widget';
+import { toLayouts } from '../../model/layouts';
+import type { RawRange } from '../../model/timeRange';
+import type { Dashboard } from '../../model/types';
+import { DashboardRegistryContext, type DashboardRegistry } from '../../registry';
 import { DashboardGrid } from './DashboardGrid';
 
 /** IntersectionObserver stub that the test drives by hand. */
@@ -25,21 +34,75 @@ class Observer {
   }
 }
 
-// Light widget kinds: what is under test is the tile, not the chart library.
-const widgets: DashboardWidget[] = [
-  { id: 'kpis', kind: 'kpis', title: 'Key figures', placement: { x: 0, y: 0, w: 6, h: 3 } },
-  { id: 'regions', kind: 'regions', title: 'Regions', placement: { x: 6, y: 0, w: 6, h: 6 } },
-];
+const enter = (tile: HTMLElement) =>
+  act(() => Observer.all.find((o) => o.target && tile.contains(o.target))?.enter());
+
+// A fake registry: what is under test is the tile, not a chart library or a real datasource.
+function FrameName({ frames }: WidgetProps<unknown>) {
+  return <p>{frames[0]?.name}</p>;
+}
+
+const nameWidget = defineWidget({
+  type: 'name',
+  name: 'Name',
+  icon: IconAbc,
+  defaultSize: { w: 6, h: 3 },
+  optionsSchema: z.object({}),
+  component: lazy(async () => ({ default: FrameName })),
+  skeleton: <p>Loading</p>,
+});
+
+/** Answers each query only when the test releases it, one answer per range. */
+function deferredDatasource() {
+  const waiting = new Map<string, (frame: DataFrame) => void>();
+  const query = vi.fn(
+    (_spec: unknown, ctx: QueryContext) =>
+      new Promise<DataFrame>((resolve) => waiting.set(ctx.raw.from, resolve)),
+  );
+  const release = (from: string) =>
+    act(async () => waiting.get(from)?.({ name: `frame ${from}`, length: 0, fields: [] }));
+  const datasource: DatasourceDefinition = { type: 'deferred', name: 'Deferred', query };
+  return { datasource, query, release };
+}
+
+const dashboard: Pick<Dashboard, 'widgets' | 'layouts'> = {
+  widgets: [
+    {
+      id: 'a',
+      type: 'name',
+      title: 'Revenue',
+      options: {},
+      queries: [{ datasource: 'deferred', spec: 'a' }],
+    },
+    { id: 'b', type: 'nope', title: 'Regions', options: {}, queries: [] },
+  ],
+  layouts: toLayouts({
+    lg: [
+      { i: 'a', x: 0, y: 0, w: 6, h: 3 },
+      { i: 'b', x: 6, y: 0, w: 6, h: 3 },
+    ],
+  }),
+};
+
+const day: RawRange = { from: 'now-24h', to: 'now' };
+const week: RawRange = { from: 'now-7d', to: 'now' };
 
 function renderGrid() {
-  const client = new QueryClient();
-  render(
+  const { datasource, query, release } = deferredDatasource();
+  const registry: DashboardRegistry = {
+    widgets: { name: nameWidget },
+    datasources: { deferred: datasource },
+  };
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const ui = (range: RawRange) => (
     <QueryClientProvider client={client}>
-      <DashboardGrid dashboardId="d" widgets={widgets} />
-    </QueryClientProvider>,
+      <DashboardRegistryContext value={registry}>
+        <DashboardGrid dashboard={dashboard} range={range} />
+      </DashboardRegistryContext>
+    </QueryClientProvider>
   );
-  const query = (id: string) => client.getQueryCache().find({ queryKey: ['widget', 'd', id] });
-  return { query };
+  const { rerender } = render(ui(day));
+  return { query, release, setRange: (range: RawRange) => rerender(ui(range)) };
 }
 
 describe('DashboardGrid', () => {
@@ -51,20 +114,44 @@ describe('DashboardGrid', () => {
 
   it('renders a named tile per widget', async () => {
     renderGrid();
-    expect(await screen.findByRole('region', { name: 'Key figures' })).toBeInTheDocument();
+    expect(await screen.findByRole('region', { name: 'Revenue' })).toBeInTheDocument();
     expect(screen.getByRole('region', { name: 'Regions' })).toBeInTheDocument();
   });
 
   it('starts a widget only when its tile comes near the viewport', async () => {
     const { query } = renderGrid();
-    const tile = await screen.findByRole('region', { name: 'Key figures' });
-    expect(query('kpis')).toBeUndefined();
-    expect(query('regions')).toBeUndefined();
+    const tile = await screen.findByRole('region', { name: 'Revenue' });
+    expect(query).not.toHaveBeenCalled();
 
-    const observer = Observer.all.find((o) => o.target && tile.contains(o.target));
-    act(() => observer?.enter());
+    enter(tile);
+    await waitFor(() => expect(query).toHaveBeenCalledTimes(1));
+    expect(query).toHaveBeenCalledWith('a', expect.objectContaining({ raw: day }), expect.anything());
+  });
 
-    await waitFor(() => expect(query('kpis')).toBeDefined());
-    expect(query('regions')).toBeUndefined();
+  it('keeps the tile and its data on screen while a new range loads', async () => {
+    const { query, release, setRange } = renderGrid();
+    const tile = await screen.findByRole('region', { name: 'Revenue' });
+    enter(tile);
+    await waitFor(() => expect(query).toHaveBeenCalledTimes(1));
+    await release('now-24h');
+    expect(await screen.findByText('frame now-24h')).toBeInTheDocument();
+
+    setRange(week);
+    await waitFor(() => expect(query).toHaveBeenCalledTimes(2));
+    expect(screen.getByText('frame now-24h')).toBeInTheDocument();
+    expect(screen.queryByText('Loading')).not.toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Revenue' })).toBe(tile);
+
+    await release('now-7d');
+    expect(await screen.findByText('frame now-7d')).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Revenue' })).toBe(tile);
+  });
+
+  it('shows an error in the tile for a widget type the registry does not have', async () => {
+    renderGrid();
+    const tile = await screen.findByRole('region', { name: 'Regions' });
+    enter(tile);
+    expect(await screen.findByText('No widget of type "nope".')).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Revenue' })).toBeInTheDocument();
   });
 });

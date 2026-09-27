@@ -1,0 +1,18 @@
+/* Stats share the row and wrap when the tile gets narrow. */
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mantine-spacing-lg);
+}
+
+.stat {
+  flex: 1 1 rem(160px);
+}
+
+.value {
+  font-size: rem(26px);
+  font-weight: var(--mantine-font-weight-medium);
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: rem(-0.5px);
+}

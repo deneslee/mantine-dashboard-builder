@@ -1,34 +1,32 @@
-export type WidgetKind = 'kpis' | 'regions' | 'broken' | 'trend';
-export type ChartForm = 'area' | 'line' | 'bar';
+import type { Query } from '@/types/datasource';
+import type { Breakpoint, GridItem } from './layouts';
+import type { RawRange } from './timeRange';
 
-/** Grid cell in the `lg` layout (12 columns); smaller breakpoints are derived from it. */
-export interface WidgetPlacement {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
-
-/**
- * A tile on a dashboard. Stand-in until the dashboard schema (phase 2), which adds options,
- * queries and per-breakpoint layouts.
- */
-export interface DashboardWidget {
+/** A tile: which widget draws it, the widget's options (the widget checks them) and its queries. */
+export interface Widget {
   id: string;
-  kind: WidgetKind;
+  type: string;
   title: string;
-  placement: WidgetPlacement;
-  /** Chart form for `trend` widgets. */
-  chart?: ChartForm;
+  options: unknown;
+  queries: Query[];
 }
 
-/** What every widget component receives. */
-export interface WidgetProps {
-  dashboardId: string;
-  widget: DashboardWidget;
+/** A dashboard as the UI uses it. Never the wire shape. */
+export interface Dashboard {
+  id: string;
+  title: string;
+  description: string;
+  tags: string[];
+  updatedAt: Date;
+  /** Defaults; the URL overrides them. */
+  timeRange: RawRange;
+  refresh: string;
+  /** In the reading order of the `lg` layout, so keyboard order follows the screen. */
+  widgets: Widget[];
+  layouts: Record<Breakpoint, GridItem[]>;
 }
 
-/** Domain shape the UI uses. Never the wire shape. */
+/** An entry in the dashboard list. */
 export interface DashboardSummary {
   id: string;
   title: string;

@@ -21,6 +21,7 @@ import {
 } from '@tabler/icons-react';
 import { Link } from '@tanstack/react-router';
 import { useState } from 'react';
+import { RouteBreadcrumbs } from '@/components/navigation/RouteBreadcrumbs';
 import { Page } from '@/design-system/components/Page/Page';
 import { getIntegrations } from '../registry';
 import classes from './IntegrationsCatalog.module.css';
@@ -39,10 +40,13 @@ export function IntegrationsCatalog() {
 
   return (
     <Page.Root>
-      <Page.Header
-        title="Integrations & Plugins"
-        description="Connect application observability, telemetry, and external providers"
-        actions={
+      <Page.Header>
+        <RouteBreadcrumbs />
+        <Page.Title>Integrations & Plugins</Page.Title>
+        <Page.Description>
+          Connect application observability, telemetry, and external providers
+        </Page.Description>
+        <Page.Actions>
           <SegmentedControl
             size="xs"
             value={viewMode}
@@ -66,8 +70,8 @@ export function IntegrationsCatalog() {
               },
             ]}
           />
-        }
-      />
+        </Page.Actions>
+      </Page.Header>
       <Page.Body>
         <Stack gap="md">
           <TextInput

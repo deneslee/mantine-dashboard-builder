@@ -27,7 +27,10 @@ const detailsTab: ContextTab = {
 function Content() {
   return (
     <Page.Root>
-      <Page.Header title="Sales overview" description="Revenue, pipeline and win rate by region" />
+      <Page.Header>
+        <Page.Title>Sales overview</Page.Title>
+        <Page.Description>Revenue, pipeline and win rate by region</Page.Description>
+      </Page.Header>
       <Page.Body>
         <SimpleGrid cols={{ base: 1, md: 2, xl: 3 }} spacing="md">
           {['Key figures', 'Revenue by region', 'Pipeline', 'Win rate', 'Top accounts', 'Alarms'].map((t) => (

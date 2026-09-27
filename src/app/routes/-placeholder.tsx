@@ -1,5 +1,6 @@
 import { EmptyState } from '@mantine/core';
 import { IconHammer } from '@tabler/icons-react';
+import { RouteBreadcrumbs } from '@/components/navigation/RouteBreadcrumbs';
 import { Page } from '@/design-system/components/Page/Page';
 import { iconSize, iconStroke } from '@/design-system/tokens/semantic';
 
@@ -7,7 +8,10 @@ import { iconSize, iconStroke } from '@/design-system/tokens/semantic';
 export function Placeholder({ title, description }: { title: string; description: string }) {
   return (
     <Page.Root>
-      <Page.Header title={title} />
+      <Page.Header>
+        <RouteBreadcrumbs />
+        <Page.Title>{title}</Page.Title>
+      </Page.Header>
       <Page.Body>
         <EmptyState
           mt="xl"

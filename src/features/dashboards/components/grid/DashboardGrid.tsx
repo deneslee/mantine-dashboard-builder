@@ -2,8 +2,8 @@ import { useMemo } from 'react';
 import { ResponsiveGridLayout, useContainerWidth } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import { tokens } from '@/design-system/tokens/tokens';
-import { toLayouts } from '../../model/layouts';
-import type { DashboardWidget } from '../../model/types';
+import type { RawRange } from '../../model/timeRange';
+import type { Dashboard } from '../../model/types';
 import { WidgetTile } from './WidgetTile';
 import classes from './DashboardGrid.module.css';
 
@@ -16,29 +16,34 @@ const noPadding = [0, 0] as const;
 const dragConfig = { enabled: false };
 const resizeConfig = { enabled: false };
 
+interface GridProps {
+  dashboard: Pick<Dashboard, 'widgets' | 'layouts'>;
+  range: RawRange;
+}
+
 /**
- * The dashboard canvas: react-grid-layout v2 with breakpoints on the canvas width.
- * Widgets carry their `lg` placement; smaller breakpoints reflow in reading order (`toLayouts`).
- * The canvas width comes from `useContainerWidth`; the shell keeps it still while panels animate
- * or are dragged, so tiles re-lay out once per shell change. A width change that crosses a
- * breakpoint takes two commits (the grid switches breakpoints in an effect); both normally land
- * before the next frame, since the width is set after the frame that measured it.
+ * The dashboard canvas: react-grid-layout v2 with breakpoints on the canvas width, one layout per
+ * breakpoint from the document (`toLayouts` filled in the missing ones). The canvas width comes
+ * from `useContainerWidth`; the shell keeps it still while panels animate or are dragged, so tiles
+ * re-lay out once per shell change. A width change that crosses a breakpoint takes two commits
+ * (the grid switches breakpoints in an effect); both normally land before the next frame, since
+ * the width is set after the frame that measured it.
  */
-export function DashboardGrid({ dashboardId, widgets }: { dashboardId: string; widgets: DashboardWidget[] }) {
+export function DashboardGrid({ dashboard, range }: GridProps) {
   // Measure before the first render: otherwise every chart renders once at a guessed width.
   const { width, containerRef, mounted } = useContainerWidth({ measureBeforeMount: true });
+  const { widgets, layouts } = dashboard;
 
-  const layouts = useMemo(() => toLayouts(widgets), [widgets]);
-
-  // Keyed by widget id, not by position: the grid positions the tiles (rule 4).
+  // Keyed by widget id, not by position: the grid positions the tiles (rule 4). A range change
+  // re-renders the tiles in place; the grid and the tiles stay mounted.
   const children = useMemo(
     () =>
       widgets.map((w) => (
         <div key={w.id}>
-          <WidgetTile dashboardId={dashboardId} widget={w} />
+          <WidgetTile widget={w} range={range} />
         </div>
       )),
-    [dashboardId, widgets],
+    [widgets, range],
   );
 
   return (

@@ -3,6 +3,7 @@ import { parseSettingsTab, type SettingsTab } from '@/features/settings/model/ta
 import { SettingsPage } from '@/features/settings/components/SettingsPage';
 
 export const Route = createFileRoute('/settings')({
+  staticData: { crumb: 'Settings' },
   validateSearch: (search: Record<string, unknown>): { tab?: SettingsTab } => ({
     tab: parseSettingsTab(search.tab),
   }),

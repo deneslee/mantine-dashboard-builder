@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "broken",
+  "title": "Broken example",
+  "description": "Fails to load on purpose, to show the route error screen",
+  "tags": ["demo"],
+  "updatedAt": "2026-09-10T09:00:00Z",
+  "timeRange": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "refresh": "off",
+  "variables": [],
+  "widgets": {
+    "status": {
+      "type": "kpi",
+      "title": "Status",
+      "queries": []
+    }
+  },
+  "layouts": {
+    "lg": [
+      {
+        "i": "status",
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 3
+      },
+      {
+        "i": "missing",
+        "x": 6,
+        "y": 0,
+        "w": 6,
+        "h": 3
+      }
+    ]
+  }
+}

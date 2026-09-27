@@ -2,7 +2,6 @@ import {
   Alert,
   Anchor,
   Badge,
-  Breadcrumbs,
   Button,
   Code,
   Group,
@@ -23,6 +22,7 @@ import {
 } from '@tabler/icons-react';
 import { Link } from '@tanstack/react-router';
 import { useState } from 'react';
+import { RouteBreadcrumbs } from '@/components/navigation/RouteBreadcrumbs';
 import { Page } from '@/design-system/components/Page/Page';
 import { getSentryStatus } from '@/lib/sentry/client';
 import { SentryIcon } from './sentry/SentryIcon';
@@ -40,8 +40,9 @@ export function SentryPage() {
 
   return (
     <Page.Root>
-      <Page.Header
-        title={
+      <Page.Header>
+        <RouteBreadcrumbs />
+        <Page.Title>
           <Group gap="xs" align="center">
             <ThemeIcon size="lg" radius="md" variant="filled" color="#7553FF" c="white">
               <SentryIcon size={22} />
@@ -51,9 +52,11 @@ export function SentryPage() {
               {status.isConfigured ? 'Connected' : 'Action Required: Set DSN'}
             </Badge>
           </Group>
-        }
-        description="Application monitoring, error tracking, structured logging, app metrics, session replay, and tracing"
-        actions={
+        </Page.Title>
+        <Page.Description>
+          Application monitoring, error tracking, structured logging, app metrics, session replay, and tracing
+        </Page.Description>
+        <Page.Actions>
           <Button
             variant="default"
             size="sm"
@@ -62,19 +65,10 @@ export function SentryPage() {
           >
             All Integrations
           </Button>
-        }
-      />
+        </Page.Actions>
+      </Page.Header>
       <Page.Body>
         <Stack gap="md">
-          <Breadcrumbs separator="/" fz="xs">
-            <Anchor component={Link} to="/integrations" fz="xs">
-              Integrations
-            </Anchor>
-            <Text fz="xs" c="dimmed">
-              Sentry
-            </Text>
-          </Breadcrumbs>
-
           {!status.isConfigured && (
             <Alert
               color="yellow"

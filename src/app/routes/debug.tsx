@@ -3,5 +3,6 @@ import { DebugPage } from '@/features/debug/DebugPage';
 
 /** Dev-only playground: fire every notification level, throw errors, show skeletons. */
 export const Route = createFileRoute('/debug')({
+  staticData: { crumb: 'Debug' },
   component: DebugPage,
 });

@@ -1,0 +1,640 @@
+{
+  "version": 1,
+  "id": "perf",
+  "title": "Grid performance",
+  "description": "20 charts, for checking that the grid and shell stay fast",
+  "tags": ["demo"],
+  "updatedAt": "2026-09-23T12:00:00Z",
+  "timeRange": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "refresh": "off",
+  "variables": [],
+  "widgets": {
+    "chart-1": {
+      "type": "chart",
+      "title": "Series 1",
+      "options": {
+        "form": "area"
+      },
+      "queries": [
+        {
+          "datasource": "mock",
+          "spec": {
+            "kind": "series",
+            "seed": "perf:chart-1",
+            "fields": [
+              {
+                "name": "value",
+                "label": "Value",
+                "base": 60,
+                "spread": 12
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "chart-2": {
+      "type": "chart",
+      "title": "Series 2",
+      "options": {
+        "form": "line"
+      },
+      "queries": [
+        {
+          "datasource": "mock",
+          "spec": {
+            "kind": "series",
+            "seed": "perf:chart-2",
+            "fields": [
+              {
+                "name": "value",
+                "label": "Value",
+                "base": 60,
+                "spread": 12
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "chart-3": {
+      "type": "chart",
+      "title": "Series 3",
+      "options": {
+        "form": "bar"
+      },
+      "queries": [
+        {
+          "datasource": "mock",
+          "spec": {
+            "kind": "series",
+            "seed": "perf:chart-3",
+            "fields": [
+              {
+                "name": "value",
+                "label": "Value",
+                "base": 60,
+                "spread": 12
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "chart-4": {
+      "type": "chart",
+      "title": "Series 4",
+      "options": {
+        "form": "area"
+      },
+      "queries": [
+        {
+          "datasource": "mock",
+          "spec": {
+            "kind": "series",
+            "seed": "perf:chart-4",
+            "fields": [
+              {
+                "name": "value",
+                "label": "Value",
+                "base": 60,
+                "spread": 12
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "chart-5": {
+      "type": "chart",
+      "title": "Series 5",
+      "options": {
+        "form": "line"
+      },
+      "queries": [
+        {
+          "datasource": "mock",
+          "spec": {
+            "kind": "series",
+            "seed": "perf:chart-5",
+            "fields": [
+              {
+                "name": "value",
+                "label": "Value",
+                "base": 60,
+                "spread": 12
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "chart-6": {
+      "type": "chart",
+      "title": "Series 6",
+      "options": {
+        "form": "bar"
+      },
+      "queries": [
+        {
+          "datasource": "mock",
+          "spec": {
+            "kind": "series",
+            "seed": "perf:chart-6",
+            "fields": [
+              {
+                "name": "value",
+                "label": "Value",
+                "base": 60,
+                "spread": 12
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "chart-7": {
+      "type": "chart",
+      "title": "Series 7",
+      "options": {
+        "form": "area"
+      },
+      "queries": [
+        {
+          "datasource": "mock",
+          "spec": {
+            "kind": "series",
+            "seed": "perf:chart-7",
+            "fields": [
+              {
+                "name": "value",
+                "label": "Value",
+                "base": 60,
+                "spread": 12
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "chart-8": {
+      "type": "chart",
+      "title": "Series 8",
+      "options": {
+        "form": "line"
+      },
+      "queries": [
+        {
+          "datasource": "mock",
+          "spec": {
+            "kind": "series",
+            "seed": "perf:chart-8",
+            "fields": [
+              {
+                "name": "value",
+                "label": "Value",
+                "base": 60,
+                "spread": 12
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "chart-9": {
+      "type": "chart",
+      "title": "Series 9",
+      "options": {
+        "form": "bar"
+      },
+      "queries": [
+        {
+          "datasource": "mock",
+          "spec": {
+            "kind": "series",
+            "seed": "perf:chart-9",
+            "fields": [
+              {
+                "name": "value",
+                "label": "Value",
+                "base": 60,
+                "spread": 12
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "chart-10": {
+      "type": "chart",
+      "title": "Series 10",
+      "options": {
+        "form": "area"
+      },
+      "queries": [
+        {
+          "datasource": "mock",
+          "spec": {
+            "kind": "series",
+            "seed": "perf:chart-10",
+            "fields": [
+              {
+                "name": "value",
+                "label": "Value",
+                "base": 60,
+                "spread": 12
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "chart-11": {
+      "type": "chart",
+      "title": "Series 11",
+      "options": {
+        "form": "line"
+      },
+      "queries": [
+        {
+          "datasource": "mock",
+          "spec": {
+            "kind": "series",
+            "seed": "perf:chart-11",
+            "fields": [
+              {
+                "name": "value",
+                "label": "Value",
+                "base": 60,
+                "spread": 12
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "chart-12": {
+      "type": "chart",
+      "title": "Series 12",
+      "options": {
+        "form": "bar"
+      },
+      "queries": [
+        {
+          "datasource": "mock",
+          "spec": {
+            "kind": "series",
+            "seed": "perf:chart-12",
+            "fields": [
+              {
+                "name": "value",
+                "label": "Value",
+                "base": 60,
+                "spread": 12
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "chart-13": {
+      "type": "chart",
+      "title": "Series 13",
+      "options": {
+        "form": "area"
+      },
+      "queries": [
+        {
+          "datasource": "mock",
+          "spec": {
+            "kind": "series",
+            "seed": "perf:chart-13",
+            "fields": [
+              {
+                "name": "value",
+                "label": "Value",
+                "base": 60,
+                "spread": 12
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "chart-14": {
+      "type": "chart",
+      "title": "Series 14",
+      "options": {
+        "form": "line"
+      },
+      "queries": [
+        {
+          "datasource": "mock",
+          "spec": {
+            "kind": "series",
+            "seed": "perf:chart-14",
+            "fields": [
+              {
+                "name": "value",
+                "label": "Value",
+                "base": 60,
+                "spread": 12
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "chart-15": {
+      "type": "chart",
+      "title": "Series 15",
+      "options": {
+        "form": "bar"
+      },
+      "queries": [
+        {
+          "datasource": "mock",
+          "spec": {
+            "kind": "series",
+            "seed": "perf:chart-15",
+            "fields": [
+              {
+                "name": "value",
+                "label": "Value",
+                "base": 60,
+                "spread": 12
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "chart-16": {
+      "type": "chart",
+      "title": "Series 16",
+      "options": {
+        "form": "area"
+      },
+      "queries": [
+        {
+          "datasource": "mock",
+          "spec": {
+            "kind": "series",
+            "seed": "perf:chart-16",
+            "fields": [
+              {
+                "name": "value",
+                "label": "Value",
+                "base": 60,
+                "spread": 12
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "chart-17": {
+      "type": "chart",
+      "title": "Series 17",
+      "options": {
+        "form": "line"
+      },
+      "queries": [
+        {
+          "datasource": "mock",
+          "spec": {
+            "kind": "series",
+            "seed": "perf:chart-17",
+            "fields": [
+              {
+                "name": "value",
+                "label": "Value",
+                "base": 60,
+                "spread": 12
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "chart-18": {
+      "type": "chart",
+      "title": "Series 18",
+      "options": {
+        "form": "bar"
+      },
+      "queries": [
+        {
+          "datasource": "mock",
+          "spec": {
+            "kind": "series",
+            "seed": "perf:chart-18",
+            "fields": [
+              {
+                "name": "value",
+                "label": "Value",
+                "base": 60,
+                "spread": 12
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "chart-19": {
+      "type": "chart",
+      "title": "Series 19",
+      "options": {
+        "form": "area"
+      },
+      "queries": [
+        {
+          "datasource": "mock",
+          "spec": {
+            "kind": "series",
+            "seed": "perf:chart-19",
+            "fields": [
+              {
+                "name": "value",
+                "label": "Value",
+                "base": 60,
+                "spread": 12
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "chart-20": {
+      "type": "chart",
+      "title": "Series 20",
+      "options": {
+        "form": "line"
+      },
+      "queries": [
+        {
+          "datasource": "mock",
+          "spec": {
+            "kind": "series",
+            "seed": "perf:chart-20",
+            "fields": [
+              {
+                "name": "value",
+                "label": "Value",
+                "base": 60,
+                "spread": 12
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "layouts": {
+    "lg": [
+      {
+        "i": "chart-1",
+        "x": 0,
+        "y": 0,
+        "w": 4,
+        "h": 6
+      },
+      {
+        "i": "chart-2",
+        "x": 4,
+        "y": 0,
+        "w": 4,
+        "h": 6
+      },
+      {
+        "i": "chart-3",
+        "x": 8,
+        "y": 0,
+        "w": 4,
+        "h": 6
+      },
+      {
+        "i": "chart-4",
+        "x": 0,
+        "y": 6,
+        "w": 4,
+        "h": 6
+      },
+      {
+        "i": "chart-5",
+        "x": 4,
+        "y": 6,
+        "w": 4,
+        "h": 6
+      },
+      {
+        "i": "chart-6",
+        "x": 8,
+        "y": 6,
+        "w": 4,
+        "h": 6
+      },
+      {
+        "i": "chart-7",
+        "x": 0,
+        "y": 12,
+        "w": 4,
+        "h": 6
+      },
+      {
+        "i": "chart-8",
+        "x": 4,
+        "y": 12,
+        "w": 4,
+        "h": 6
+      },
+      {
+        "i": "chart-9",
+        "x": 8,
+        "y": 12,
+        "w": 4,
+        "h": 6
+      },
+      {
+        "i": "chart-10",
+        "x": 0,
+        "y": 18,
+        "w": 4,
+        "h": 6
+      },
+      {
+        "i": "chart-11",
+        "x": 4,
+        "y": 18,
+        "w": 4,
+        "h": 6
+      },
+      {
+        "i": "chart-12",
+        "x": 8,
+        "y": 18,
+        "w": 4,
+        "h": 6
+      },
+      {
+        "i": "chart-13",
+        "x": 0,
+        "y": 24,
+        "w": 4,
+        "h": 6
+      },
+      {
+        "i": "chart-14",
+        "x": 4,
+        "y": 24,
+        "w": 4,
+        "h": 6
+      },
+      {
+        "i": "chart-15",
+        "x": 8,
+        "y": 24,
+        "w": 4,
+        "h": 6
+      },
+      {
+        "i": "chart-16",
+        "x": 0,
+        "y": 30,
+        "w": 4,
+        "h": 6
+      },
+      {
+        "i": "chart-17",
+        "x": 4,
+        "y": 30,
+        "w": 4,
+        "h": 6
+      },
+      {
+        "i": "chart-18",
+        "x": 8,
+        "y": 30,
+        "w": 4,
+        "h": 6
+      },
+      {
+        "i": "chart-19",
+        "x": 0,
+        "y": 36,
+        "w": 4,
+        "h": 6
+      },
+      {
+        "i": "chart-20",
+        "x": 4,
+        "y": 36,
+        "w": 4,
+        "h": 6
+      }
+    ]
+  }
+}

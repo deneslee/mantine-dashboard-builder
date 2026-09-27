@@ -5,7 +5,7 @@
       "title": "Sales overview",
       "description": "Revenue, pipeline and win rate by region",
       "updated_at": "2026-09-21T14:12:00Z",
-      "widget_count": 9,
+      "widget_count": 5,
       "tags": ["sales", "weekly"]
     },
     {
@@ -13,7 +13,7 @@
       "title": "Operations",
       "description": "Building energy, HVAC alarms and occupancy",
       "updated_at": "2026-09-19T08:40:00Z",
-      "widget_count": 12,
+      "widget_count": 5,
       "tags": ["haystack", "live"]
     },
     {
@@ -21,7 +21,7 @@
       "title": "Infrastructure health",
       "description": "Datadog monitors, error budgets and latency",
       "updated_at": "2026-09-15T17:05:00Z",
-      "widget_count": 7,
+      "widget_count": 6,
       "tags": ["datadog"]
     },
     {

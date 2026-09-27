@@ -4,6 +4,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import { RouteBreadcrumbs } from '@/components/navigation/RouteBreadcrumbs';
 import { Page } from '@/design-system/components/Page/Page';
 import { fontWeight, iconSize, iconStroke } from '@/design-system/tokens/semantic';
 import { dashboardsQuery } from '../api/queries';
@@ -16,10 +17,11 @@ export function DashboardList() {
 
   return (
     <Page.Root>
-      <Page.Header
-        title="Dashboards"
-        description={`${data.length} dashboards`}
-        actions={
+      <Page.Header>
+        <RouteBreadcrumbs />
+        <Page.Title>Dashboards</Page.Title>
+        <Page.Description>{`${data.length} dashboards`}</Page.Description>
+        <Page.Actions>
           <Button
             size="sm"
             leftSection={<IconPlus size={iconSize.sm} />}
@@ -28,8 +30,8 @@ export function DashboardList() {
           >
             New dashboard
           </Button>
-        }
-      />
+        </Page.Actions>
+      </Page.Header>
       <Page.Body>
         {data.length === 0 ? (
           <EmptyState

@@ -1,5 +1,4 @@
 import { tokens } from '@/design-system/tokens/tokens';
-import type { DashboardWidget } from './types';
 
 const { cols } = tokens.grid;
 
@@ -32,18 +31,27 @@ function reflow(items: GridItem[], columns: number, width: (lgWidth: number) => 
   });
 }
 
+/** Row by row, left to right: the order a reader meets the tiles. */
+export const byReadingOrder = (a: GridItem, b: GridItem) => a.y - b.y || a.x - b.x;
+
+/** Layouts as a document stores them: `lg` always, `md` / `sm` only where the author wrote one. */
+export interface AuthoredLayouts {
+  lg: GridItem[];
+  md?: GridItem[];
+  sm?: GridItem[];
+}
+
 /**
- * Grid layouts for every breakpoint from the widgets' `lg` placement. Smaller canvases reflow in
- * reading order (row by row, left to right): on `md` a tile is half or full width, on `sm` full
- * width. Until phase 2 stores a layout per breakpoint, this keeps the order the author set.
+ * A layout for every breakpoint. Authored `md` / `sm` layouts are kept; a missing one is reflowed
+ * from `lg` in reading order: on `md` a tile is half or full width, on `sm` full width. Authors
+ * only write a smaller layout where the reflow gets it wrong.
  */
-export function toLayouts(widgets: DashboardWidget[]): Record<Breakpoint, GridItem[]> {
-  const lg = widgets.map((w) => ({ i: w.id, ...w.placement }));
-  const readingOrder = lg.toSorted((a, b) => a.y - b.y || a.x - b.x);
+export function toLayouts({ lg, md, sm }: AuthoredLayouts): Record<Breakpoint, GridItem[]> {
+  const readingOrder = lg.toSorted(byReadingOrder);
   const half = cols.md / 2;
   return {
     lg,
-    md: reflow(readingOrder, cols.md, (w) => ((w * cols.md) / cols.lg <= half ? half : cols.md)),
-    sm: reflow(readingOrder, cols.sm, () => cols.sm),
+    md: md ?? reflow(readingOrder, cols.md, (w) => ((w * cols.md) / cols.lg <= half ? half : cols.md)),
+    sm: sm ?? reflow(readingOrder, cols.sm, () => cols.sm),
   };
 }
