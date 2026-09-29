@@ -2,7 +2,7 @@
   flex: 0 0 auto;
   min-height: rem(40px);
   padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
-  border-bottom: 1px solid var(--app-color-border-default);
+  
 }
 
 /*

@@ -1,6 +1,6 @@
 # 05 Dashboard read
 
-Status: open · Phase 2 · Depends on: 02 (done); 04 (`Page.ControlBar`) for the pickers only. The document, DataFrame, contract, datasource, table and registry tasks can start any time. · Blocks: phase 3 (editing) · Research: [dashboard-architectures](research/dashboard-architectures.md), [table-library](research/table-library.md)
+Status: done (Sep 27, 2026) · Phase 2 · Depends on: 02 (done); 04 (`Page.ControlBar`) for the pickers only. The document, DataFrame, contract, datasource, table and registry tasks can start any time. · Blocks: phase 3 (editing) · Research: [dashboard-architectures](../research/dashboard-architectures.md), [table-library](../research/table-library.md)
 
 ## Goal
 
@@ -74,7 +74,7 @@ Replace the hard-coded demo tiles with a versioned dashboard document, pluggable
 
 ### 5. Table widget and virtualization
 
-- **Dependencies:** `@tanstack/react-table` **v9** (stable; 9.2.4 on Sep 27) and `@tanstack/react-virtual`. See [table-library](research/table-library.md) for why this pair, and not mantine-react-table or AG Grid.
+- **Dependencies:** `@tanstack/react-table` **v9** (stable; 9.2.4 on Sep 27) and `@tanstack/react-virtual`. See [table-library](../research/table-library.md) for why this pair, and not mantine-react-table or AG Grid.
 - **Division of work:**
   - **TanStack Table** handles the table logic: column definitions, sorting, column visibility and sizing.
   - **Mantine `Table`** renders it: `Table.Thead`, `Table.Tr`, `Table.Td`, `TableScrollContainer`, `stickyHeader`.
@@ -97,33 +97,39 @@ Variables UI and interpolation (the schema only reserves the field), panel repea
 
 ## Tasks
 
-- [ ] **Dashboard DTO schema and mapper.** `DashboardDocV1` in `api/dto.ts` as a `discriminatedUnion('version')`, with `layouts.lg` required and `md` / `sm` optional; `api/mapper.ts` maps it to domain types in `model/`. Done when tests cover valid and invalid documents, rejection of an unknown version, a widget id missing from an authored layout, and the mapper output.
-- [ ] **One JSON file per dashboard.**
+- [x] **Dashboard DTO schema and mapper.** `DashboardDocV1` in `api/dto.ts` as a `discriminatedUnion('version')`, with `layouts.lg` required and `md` / `sm` optional; `api/mapper.ts` maps it to domain types in `model/`. Done when tests cover valid and invalid documents, rejection of an unknown version, a widget id missing from an authored layout, and the mapper output.
+- [x] **One JSON file per dashboard.**
   - Create `public/data/dashboards/<id>.json` for sales, ops, infra and perf with `lg` layouts; add `md` / `sm` only where the reflow gets it wrong.
   - `getDashboard(id)` fetches `<id>.json`, and a 404 becomes `AppError('not_found')`.
   - `broken.json` fails the schema, and the `id === 'broken'` check in `client.ts` goes.
   - Done when every file (except `broken`) passes the schema in a test, `widget_count` in `index.json` matches each document, and `demoWidgets()` is gone.
-- [ ] **`toLayouts` fills only the missing breakpoints.** Keep authored `md` / `sm` and reflow the rest. Done when `layouts.test.ts` covers an authored breakpoint and a reflowed one.
-- [ ] **DataFrame and `toRows`.** Columnar `DataFrame` in `src/types/dataframe.ts`, plus `toRows(frame)`. Done when unit tests cover the field types and an empty frame.
-- [ ] **Widget and datasource contracts.** `WidgetDefinition` and `DatasourceDefinition` types in the shared layer. Done when they typecheck against the four existing kinds.
-- [ ] **`local-json` and `mock` datasources.** They return `DataFrame`, honour the `AbortSignal` (through `utils/wait.ts`), and the mock is seeded by range. Done when their unit tests pass and `api/demo.ts` is deleted.
-- [ ] **Install `@tanstack/react-table` v9 and `@tanstack/react-virtual`.** A shared `useAppTable` from `createTableHook`, with sorting, column visibility and column sizing, and Mantine cell renderers. Done when a unit test sorts a `DataFrame`-backed table.
-- [ ] **Build the table widget.**
+- [x] **`toLayouts` fills only the missing breakpoints.** Keep authored `md` / `sm` and reflow the rest. Done when `layouts.test.ts` covers an authored breakpoint and a reflowed one.
+- [x] **DataFrame and `toRows`.** Columnar `DataFrame` in `src/types/dataframe.ts`, plus `toRows(frame)`. Done when unit tests cover the field types and an empty frame.
+- [x] **Widget and datasource contracts.** `WidgetDefinition` and `DatasourceDefinition` types in the shared layer. Done when they typecheck against the four existing kinds.
+- [x] **`local-json` and `mock` datasources.** They return `DataFrame`, honour the `AbortSignal` (through `utils/wait.ts`), and the mock is seeded by range. Done when their unit tests pass and `api/demo.ts` is deleted.
+- [x] **Install `@tanstack/react-table` v9 and `@tanstack/react-virtual`.** A shared `useAppTable` from `createTableHook`, with sorting, column visibility and column sizing, and Mantine cell renderers. Done when a unit test sorts a `DataFrame`-backed table.
+- [x] **Build the table widget.** _(Sep 27: rows stay 32 px; 22–37 of 10 000 rows in the DOM, and the window follows the scroll in the browser. The Chrome Performance trace is still open, in `docs/tasks.md`: the browser pane was hidden, so it had no animation frames.)_
   - Columns come from `DataFrame.fields`.
   - Rendered with Mantine `Table` (`stickyHeader`, `TableScrollContainer`), with rows virtualized inside `ScrollArea` (`viewportRef`).
   - Sortable headers are keyboard-accessible, with `aria-sort`.
   - Done when a Chrome Performance trace of scrolling 10k rows on `pnpm preview` shows no long task over 50 ms (summary in the PR), and a test sorts twice under the React Compiler without stale sort state.
-- [ ] **Registry in the app layer; retire `widgetKinds.tsx`.**
+- [x] **Registry in the app layer; retire `widgetKinds.tsx`.** _(Sep 27: the app passes the maps with `DashboardRegistryContext` directly; no provider component. `broken` became a mock datasource error on the HVAC alarms tile.)_
   - `app/registry.ts` builds the `widgets` (`kpi`, `chart` with area / line / bar, and `table`, which replaces `regions`) and `datasources` maps with `satisfies`.
   - `DashboardRegistryProvider` passes them to the grid.
   - `broken` moves to a story or test fixture.
   - Done when a test renders `DashboardGrid` with a fake registry, every demo dashboard renders as before, and `widgetKinds.tsx` is deleted.
-- [ ] **Time range in the URL.** `validateSearch` (zod) for `from` / `to` / `refresh` with defaults from the document, raw strings in the query keys, and conversion to absolute times in `queryFn`. Done when the integration test passes: changing the range refetches, the grid stays mounted and the previous data shows meanwhile.
-- [ ] **Auto-refresh with one timer.** `useInterval` in the dashboard view invalidates `['ds']` every `refresh` and skips ticks while `useDocumentVisibility()` is `hidden`; the Refresh button makes the same call. Done when a fake-timer test shows one invalidation per tick, none while hidden, and none with `refresh=off`.
-- [ ] **`TimeRangePicker` and `RefreshPicker`.** Built from `Combobox` with presets, a `@mantine/dates` range picker and a `Select`, placed in `Page.ControlBar` (needs 04). Done when there are stories and keyboard tests.
+- [x] **Time range in the URL.** `validateSearch` (zod) for `from` / `to` / `refresh` with defaults from the document, raw strings in the query keys, and conversion to absolute times in `queryFn`. Done when the integration test passes: changing the range refetches, the grid stays mounted and the previous data shows meanwhile.
+- [x] **Auto-refresh with one timer.** _(Sep 27: a plain `setInterval` effect, not Mantine `useInterval`; see Decisions.)_ `useInterval` in the dashboard view invalidates `['ds']` every `refresh` and skips ticks while `useDocumentVisibility()` is `hidden`; the Refresh button makes the same call. Done when a fake-timer test shows one invalidation per tick, none while hidden, and none with `refresh=off`.
+- [x] **`TimeRangePicker` and `RefreshPicker`.** Built from `Combobox` with presets, a `@mantine/dates` range picker and a `Select`, placed in `Page.ControlBar` (needs 04). Done when there are stories and keyboard tests.
 
 ## Decisions
 
+- **Sep 27: one query per widget, not per datasource query.** `useQueries` makes a new observer when a key changes, so `keepPreviousData` had nothing to keep and a range change showed the skeleton. `widgetDataQuery` runs a widget's queries with `Promise.all` under the key `['ds', queries, range]`; widgets with the same queries still share a request.
+- **Sep 27: auto-refresh is a plain interval effect.** Mantine `useInterval` restarts itself when its interval changes while running, so switching to `off` left a 0 ms timer.
+- **Sep 27: the virtualizer lives in a small `VirtualBody`.** TanStack Virtual opts its component out of the React Compiler; kept apart, only the rows re-render on scroll and the table logic stays memoized. The scroll element is passed as state from a callback ref: a child's layout effects run before its parent's ref is attached.
+- **Sep 27: failing tile, KPI and 10k table (with the user).** HVAC alarms is a `table` widget whose mock query returns a datasource error. The KPI widget shows one stat per number field: last value, change since the start of the range. Infrastructure health has a 10 000-row Request log.
+- **Sep 27: `tags` and `updatedAt` live in the document,** so the Details tab keeps them. The Regions share column shows a percent; no bar cell yet.
+- **Sep 27: `rangeLabel` sits next to the picker,** so dayjs stays out of the first load (the route's search validation loads `model/timeRange.ts` up front).
 - **Sep 27: `md` / `sm` layouts are optional.** The existing reading-order reflow fills in the missing ones instead of being deleted.
 - **Sep 27: one file per dashboard.** `getDashboard` fetches its own document instead of the whole list.
 - **Sep 27: `broken` is a document that fails the schema,** instead of an id check in `client.ts`.
@@ -131,7 +137,7 @@ Variables UI and interpolation (the schema only reserves the field), panel repea
 - **Sep 27: `regions` becomes the table widget,** so the table comes before the registry switch-over.
 - **Sep 27: the registry check is a test with a fake registry,** replacing a lint check that couldn't fail.
 - **Sep 27: dashboard-list pagination is cut.**
-- **Sep 24: TanStack Table v9 + Mantine `Table` + `@tanstack/react-virtual`** ([table-library](research/table-library.md)). Kept on Sep 27.
+- **Sep 24: TanStack Table v9 + Mantine `Table` + `@tanstack/react-virtual`** ([table-library](../research/table-library.md)). Kept on Sep 27.
 - **Sep 24: the time range lives in the URL, registries are filled in the app layer, `DataFrame` and zod sit in `api/dto.ts`, and `container` is a layout section.**
 
 ## Verification

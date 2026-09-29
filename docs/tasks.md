@@ -9,11 +9,12 @@ The big-picture checklist, by roadmap phase ([plan.md › Roadmap](plan.md#roadm
 - [x] **02 Project structure** (Sep 24): bulletproof-react layers, no barrels, import direction enforced by oxlint. [Plan](../.agents/plans/done/02-project-structure.md)
 - [x] **03 Design tokens** (Sep 27): primitives, semantic tokens, component bindings, token lint rules. [Plan](../.agents/plans/done/03-design-tokens.md)
 - [x] **Sentry prototype** (Sep 24, PR #13). [Plan](../.agents/plans/done/06-sentry-prototype.md)
+- [x] **Phase 2, dashboard read** (Sep 27):
+  - [x] **04 Page header:** named parts, breadcrumbs from the router, a control bar for pickers. [Plan](../.agents/plans/done/04-page-header.md)
+  - [x] **05 Dashboard read:** JSON documents, `DataFrame`, widget and datasource registries, time range in the URL, table widget. [Plan](../.agents/plans/done/05-dashboard-read.md)
 
-## In progress: phase 2, dashboard read
+## In progress
 
-- [ ] **04 Page header:** named parts, breadcrumbs from the router, a control bar for pickers. [Plan](../.agents/plans/04-page-header.md)
-- [ ] **05 Dashboard read:** JSON documents, `DataFrame`, widget and datasource registries, time range in the URL, table widget. [Plan](../.agents/plans/05-dashboard-read.md)
 - [ ] **06 Sentry** (cross-cutting): errors reported from every boundary, source maps in CI, the Integrations area rebuilt as a product feature. [Plan](../.agents/plans/06-sentry.md)
 
 ## Next: not planned yet
@@ -39,6 +40,11 @@ Nothing noted yet.
 - [ ] **Measure `<Activity>` for far tiles before building it.** Prototype a hide margin of about 2 viewport heights with the skeleton shown next to the hidden content, and compare one width change on `/dashboards/perf`. Done when the numbers are in `grid-and-charts.md` and the go/no-go decision is written down.
 - [ ] **Spike: force Mantine transitions off.** Check whether `[data-motion='reduce']` CSS is enough for Mantine `Transition`. If not, set `transitionProps.duration` through the theme. Done when a Drawer opens instantly with the setting on and the OS setting off.
 - [ ] **Trace the panel slide and breakpoint crossing.** Production build, `/dashboards/perf`. Done when the "Measured" column in `grid-and-charts.md` is filled in: no long task inside the 180 ms slide, and the number of chart resizes when a toggle crosses a breakpoint.
+
+### Left from 04 and 05
+
+- [ ] **Trace scrolling the 10k-row table.** Chrome Performance trace on `pnpm preview`, `/dashboards/infra`, Request log. Done when no long task is over 50 ms and the summary is in [05 Verification](../.agents/plans/done/05-dashboard-read.md#verification).
+- [ ] **Storybook a11y check.** `Design system/Page`, `Dashboards/Controls` and `Dashboards/Grid` in the a11y panel. Done when there are no new violations.
 
 ### Housekeeping
 

@@ -63,7 +63,7 @@ Loading UI matches the shape of what arrives, appears only when it would otherwi
 | Slow queries               | `SlowHint` after 5s                                        | "Still loading…" with Cancel that aborts the query. Built, _later_ wired in  |
 | Empty result               | Query success with no rows                                 | Mantine `EmptyState` with a hint and a primary action, never a blank tile    |
 
-- **Skeletons** live in `components/feedback/skeletons/Skeletons.tsx`: `TextSkeleton`, `ChartSkeleton`, `TableSkeleton`, `PanelSkeleton`, `DashboardSkeleton`, `ListSkeleton`. Animation and radius come from the `Skeleton` theme binding. With [05-dashboard-read](../.agents/plans/05-dashboard-read.md), each widget definition names its skeleton.
+- **Skeletons** live in `components/feedback/skeletons/Skeletons.tsx`: `TextSkeleton`, `ChartSkeleton`, `TableSkeleton`, `PanelSkeleton`, `DashboardSkeleton`, `ListSkeleton`. Animation and radius come from the `Skeleton` theme binding. Each widget definition names its skeleton ([05-dashboard-read](../.agents/plans/done/05-dashboard-read.md)).
 - **`useDelayedPending(isPending, 300)`** gates skeletons, so loads under 300ms render nothing. Each skeleton container is `aria-busy`, the skeleton itself `aria-hidden`, with one visually hidden "Loading" per region.
 - **Boot:** a static splash in `index.html`, replaced on first render. No full-screen spinner after that.
 - **Query defaults** (`app/queryClient.ts`): `staleTime` 30s, `gcTime` 5m, one retry for retryable errors, `refetchOnWindowFocus: false`, and `placeholderData: keepPreviousData`, so charts don't show a skeleton on every range change.
