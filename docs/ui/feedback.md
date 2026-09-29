@@ -1,6 +1,6 @@
 # Notifications, errors and loading
 
-How the app tells the user what's happening. Designed Sep 22 and built in phase 1; rows marked _later_ aren't built yet. The short rules for using it are in [AGENTS.md › Notifications, errors, loading](../AGENTS.md#notifications-errors-loading).
+How the app tells the user what's happening. Designed Sep 22 and built in phase 1; rows marked _later_ aren't built yet. The short rules for using it are in [AGENTS.md › Notifications, errors, loading](../../AGENTS.md#notifications-errors-loading).
 
 Code: `lib/notify/` (toasts), `stores/inbox.ts` (inbox), `lib/errors/AppError.ts`, `components/errors/`, `components/feedback/`, `app/queryClient.ts`, `app/router.ts`.
 
@@ -45,7 +45,7 @@ Errors are caught at the smallest boundary that can recover, and every boundary 
 - **Messages:** say what happened and what to do next. No stack traces, no error codes in the title. Dev builds show a collapsible details block with the cause.
 - **Variants:** `ErrorState.Full` (page), `.Inline` (card or tile), `.Banner` (top of content), chosen by the parent. Full and Inline are built on Mantine `EmptyState`.
 - **Retry** buttons call a real retry (`refetch`, `router.invalidate`, `resetErrorBoundary`) and are disabled while pending.
-- **Reporting:** only the app root reports to Sentry today; [06-sentry](../.agents/plans/06-sentry.md) adds the route, widget, query and mutation boundaries.
+- **Reporting:** only the app root reports to Sentry today; [06-sentry](../../.agents/plans/06-sentry.md) adds the route, widget, query and mutation boundaries.
 - **Tests:** every error component has a story and a Vitest test for role, message and the retry callback.
 
 ## Loading
@@ -63,7 +63,7 @@ Loading UI matches the shape of what arrives, appears only when it would otherwi
 | Slow queries               | `SlowHint` after 5s                                        | "Still loading…" with Cancel that aborts the query. Built, _later_ wired in  |
 | Empty result               | Query success with no rows                                 | Mantine `EmptyState` with a hint and a primary action, never a blank tile    |
 
-- **Skeletons** live in `components/feedback/skeletons/Skeletons.tsx`: `TextSkeleton`, `ChartSkeleton`, `TableSkeleton`, `PanelSkeleton`, `DashboardSkeleton`, `ListSkeleton`. Animation and radius come from the `Skeleton` theme binding. Each widget definition names its skeleton ([05-dashboard-read](../.agents/plans/done/05-dashboard-read.md)).
+- **Skeletons** live in `components/feedback/skeletons/Skeletons.tsx`: `TextSkeleton`, `ChartSkeleton`, `TableSkeleton`, `PanelSkeleton`, `DashboardSkeleton`, `ListSkeleton`. Animation and radius come from the `Skeleton` theme binding. Each widget definition names its skeleton ([05-dashboard-read](../../.agents/plans/done/05-dashboard-read.md)).
 - **`useDelayedPending(isPending, 300)`** gates skeletons, so loads under 300ms render nothing. Each skeleton container is `aria-busy`, the skeleton itself `aria-hidden`, with one visually hidden "Loading" per region.
 - **Boot:** a static splash in `index.html`, replaced on first render. No full-screen spinner after that.
 - **Query defaults** (`app/queryClient.ts`): `staleTime` 30s, `gcTime` 5m, one retry for retryable errors, `refetchOnWindowFocus: false`, and `placeholderData: keepPreviousData`, so charts don't show a skeleton on every range change.
