@@ -1,4 +1,4 @@
-import { MutationCache, QueryCache, QueryClient, keepPreviousData } from '@tanstack/react-query';
+import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query';
 import { notify } from '@/lib/notify/notify';
 import { errorTitles, toAppError } from '@/lib/errors/AppError';
 
@@ -48,7 +48,6 @@ export function createQueryClient() {
         staleTime: 30_000,
         gcTime: 5 * 60_000,
         refetchOnWindowFocus: false,
-        placeholderData: keepPreviousData,
         networkMode: 'offlineFirst',
         retry: (count, error) => count < 1 && toAppError(error).retryable,
       },

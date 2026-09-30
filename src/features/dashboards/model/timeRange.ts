@@ -65,6 +65,9 @@ export const refreshOptions = [
  * dropped, so the document's defaults apply instead.
  */
 export const dashboardSearch = z.object({
+  mode: z.enum(['view', 'edit']).default('view').catch('view'),
+  widget: z.string().min(1).optional().catch(undefined),
+  editor: z.literal('queries').optional().catch(undefined),
   from: z.string().refine(isValidTime).optional().catch(undefined),
   to: z.string().refine(isValidTime).optional().catch(undefined),
   refresh: z
@@ -74,4 +77,4 @@ export const dashboardSearch = z.object({
     .catch(undefined),
 });
 
-export type DashboardSearch = z.infer<typeof dashboardSearch>;
+export type DashboardSearch = Partial<z.output<typeof dashboardSearch>>;

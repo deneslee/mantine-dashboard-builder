@@ -41,6 +41,7 @@ const LATENCY = import.meta.env.DEV ? 400 : 0;
 export const localJsonDatasource: DatasourceDefinition = {
   type: 'local-json',
   name: 'Local JSON',
+  querySchema: spec,
   async query(input, _ctx, signal) {
     const parsedSpec = spec.safeParse(input);
     if (!parsedSpec.success)

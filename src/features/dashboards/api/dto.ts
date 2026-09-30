@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import { isValidTime } from '../model/timeRange';
+import { tokens } from '@/design-system/tokens/tokens';
+import type { Breakpoint } from '../model/layouts';
 
 /** Wire shapes. Today local JSON files, later the HTTP API; only this file and the mapper change. */
 export const dashboardSummaryDto = z.object({
@@ -29,7 +31,8 @@ const layout = z.array(
 
 const widget = z.object({
   type: z.string(),
-  title: z.string(),
+  title: z.string().trim().min(1),
+  description: z.string().optional(),
   options: z.record(z.string(), z.unknown()).default({}),
   queries: z.array(z.object({ datasource: z.string(), spec: z.unknown() })).default([]),
 });
@@ -57,7 +60,21 @@ export const dashboardDocV1 = z
   .superRefine((doc, ctx) => {
     for (const [breakpoint, items] of Object.entries(doc.layouts)) {
       if (!items) continue;
+      for (const item of items) {
+        if (item.x + item.w > tokens.grid.cols[breakpoint as Breakpoint])
+          ctx.addIssue({
+            code: 'custom',
+            path: ['layouts', breakpoint],
+            message: `Widget "${item.i}" exceeds the ${breakpoint} grid width.`,
+          });
+      }
       const placed = new Set(items.map((item) => item.i));
+      if (placed.size !== items.length)
+        ctx.addIssue({
+          code: 'custom',
+          path: ['layouts', breakpoint],
+          message: `The ${breakpoint} layout places a widget more than once.`,
+        });
       for (const id of Object.keys(doc.widgets)) {
         if (!placed.has(id))
           ctx.addIssue({

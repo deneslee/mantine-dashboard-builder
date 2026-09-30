@@ -1,4 +1,5 @@
 import type { DataFrame } from './dataframe';
+import type { z } from 'zod';
 
 export interface TimeRange {
   from: Date;
@@ -22,6 +23,7 @@ export interface QueryContext {
 export interface DatasourceDefinition {
   type: string;
   name: string;
+  querySchema?: z.ZodType;
   /** Rejects with an `AppError`; honours `signal`. */
   query(spec: unknown, ctx: QueryContext, signal?: AbortSignal): Promise<DataFrame>;
 }

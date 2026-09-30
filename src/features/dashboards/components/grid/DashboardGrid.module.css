@@ -1,5 +1,13 @@
 /* react-grid-layout overrides. The numbered rules are in docs/grid-and-charts.md. */
 .root {
+  & :global(.react-grid-placeholder) {
+    background: var(--app-color-border-focused);
+  }
+
+  & :global(.react-resizable-handle::after) {
+    border-color: var(--app-color-border-strong);
+  }
+
   /*
    * Rule 2: tiles move by transform only. RGL's default also animates width and height, which
    * would resize every chart on every frame after each layout change.

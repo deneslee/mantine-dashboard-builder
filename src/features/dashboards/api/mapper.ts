@@ -1,4 +1,4 @@
-import { byReadingOrder, toLayouts } from '../model/layouts';
+import { byReadingOrder } from '../model/layouts';
 import type { Dashboard, DashboardSummary } from '../model/types';
 import type { DashboardDocDto, DashboardSummaryDto } from './dto';
 
@@ -14,26 +14,28 @@ export function toDashboardSummary(dto: DashboardSummaryDto): DashboardSummary {
 }
 
 export function toDashboard(doc: DashboardDocDto): Dashboard {
-  const layouts = toLayouts(doc.layouts);
-  const order = new Map(layouts.lg.toSorted(byReadingOrder).map((item, n) => [item.i, n]));
-  const widgets = Object.entries(doc.widgets)
-    .map(([id, w]) => ({
-      id,
-      type: w.type,
-      title: w.title,
-      options: w.options,
-      queries: w.queries.map((q) => ({ datasource: q.datasource, spec: q.spec })),
-    }))
-    .toSorted((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
   return {
+    version: doc.version,
     id: doc.id,
     title: doc.title,
     description: doc.description,
     tags: doc.tags,
-    updatedAt: new Date(doc.updatedAt),
+    updatedAt: doc.updatedAt,
     timeRange: doc.timeRange,
     refresh: doc.refresh,
-    widgets,
-    layouts,
+    variables: doc.variables,
+    widgets: Object.fromEntries(Object.entries(doc.widgets).map(([id, widget]) => [id, { id, ...widget }])),
+    layouts: doc.layouts,
   };
+}
+
+/** The stored shape, ordered by lg; grid metadata never leaves the canvas. */
+export function toDocument(dashboard: Dashboard): DashboardDocDto {
+  const widgets = Object.fromEntries(
+    dashboard.layouts.lg.toSorted(byReadingOrder).map(({ i }) => {
+      const { id: _id, ...widget } = dashboard.widgets[i]!;
+      return [i, widget];
+    }),
+  );
+  return { ...dashboard, widgets } as DashboardDocDto;
 }

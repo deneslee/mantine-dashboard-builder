@@ -1,8 +1,12 @@
 import { Box } from '@mantine/core';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useState } from 'react';
 import { registry } from '@/app/registry';
 import { StoryRouter } from '@/testing/storyRouter';
-import { toLayouts, type GridItem } from '../../model/layouts';
+import type { GridItem } from '../../model/layouts';
+import { DashboardProvider } from '../../DashboardProvider';
+import { createDashboardStore } from '../../store';
+import { localRepository } from '../../api/client';
 import type { Dashboard, Widget } from '../../model/types';
 import { DashboardRegistryContext } from '../../registry';
 import { DashboardGrid } from './DashboardGrid';
@@ -12,8 +16,20 @@ const series = (seed: string, name: string, base: number) => [
   { datasource: 'mock', spec: { kind: 'series', seed, fields: [{ name, base, spread: base / 10 }] } },
 ];
 
-function dashboard(tiles: [Widget, GridItem][]): Pick<Dashboard, 'widgets' | 'layouts'> {
-  return { widgets: tiles.map(([w]) => w), layouts: toLayouts({ lg: tiles.map(([, item]) => item) }) };
+function dashboard(tiles: [Widget, GridItem][]): Dashboard {
+  return {
+    version: 1,
+    id: 'story',
+    title: 'Story',
+    description: '',
+    tags: [],
+    variables: [],
+    updatedAt: '2026-09-30',
+    timeRange: { from: 'now-24h', to: 'now' },
+    refresh: 'off',
+    widgets: Object.fromEntries(tiles.map(([w]) => [w.id, w])),
+    layouts: { lg: tiles.map(([, item]) => item) },
+  };
 }
 
 const sales = dashboard([
@@ -98,14 +114,17 @@ const perf = dashboard(
 
 const dashboards = { sales, perf };
 
-function GridStory({ id }: { id: keyof typeof dashboards }) {
+function GridStory({ id, mode = 'view' }: { id: keyof typeof dashboards; mode?: 'view' | 'edit' }) {
+  const [store] = useState(() => createDashboardStore(dashboards[id], localRepository, mode, false));
   return (
     <StoryRouter
       wrap={(outlet) => outlet}
       page={
         <DashboardRegistryContext value={registry}>
           <Box p="lg">
-            <DashboardGrid dashboard={dashboards[id]} range={{ from: 'now-24h', to: 'now' }} />
+            <DashboardProvider dashboard={dashboards[id]} store={store}>
+              <DashboardGrid range={{ from: 'now-24h', to: 'now' }} />
+            </DashboardProvider>
           </Box>
         </DashboardRegistryContext>
       }
@@ -125,3 +144,4 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = { args: { id: 'sales' } };
 /** 20 charts; tiles below the fold mount when scrolled near. Resize the canvas to see md and sm. */
 export const TwentyCharts: Story = { args: { id: 'perf' } };
+export const Editing: Story = { args: { id: 'sales', mode: 'edit' } };

@@ -1,8 +1,47 @@
 .header {
+  position: relative;
   flex: 0 0 auto;
   min-height: rem(40px);
   padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
-  
+}
+
+.controls {
+  flex: 0 0 auto;
+}
+
+.menu {
+  opacity: 0;
+}
+
+.header:focus-within .menu,
+:global(.react-grid-item):hover .menu,
+.header[data-editing='true'] .menu {
+  opacity: 1;
+}
+
+.header[data-editing='true'] {
+  cursor: grab;
+}
+
+@media (hover: none) {
+  .menu {
+    opacity: 1;
+  }
+}
+
+.status {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 2px;
+}
+
+.status[data-fetching] {
+  background: var(--mantine-primary-color-filled);
+}
+
+.status[data-failed] {
+  background: var(--app-color-border-strong);
 }
 
 /*

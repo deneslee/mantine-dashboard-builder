@@ -3,6 +3,8 @@ import { wait } from '@/utils/wait';
 import { dashboardDoc, dashboardListDto } from './dto';
 import { toDashboard, toDashboardSummary } from './mapper';
 import type { Dashboard, DashboardSummary } from '../model/types';
+import type { DashboardRepository } from './repository';
+import { readSaved, savedKey, writeSaved } from './storage';
 
 const BASE = `${import.meta.env.BASE_URL}data/dashboards`;
 
@@ -33,10 +35,24 @@ export async function listDashboards(signal?: AbortSignal): Promise<DashboardSum
     throw new AppError('validation', 'Dashboard list has an unexpected format.', {
       details: parsed.error.issues,
     });
-  return parsed.data.items.map(toDashboardSummary);
+  return parsed.data.items.map((item) => {
+    const saved = readSaved(item.id);
+    return saved
+      ? {
+          id: saved.id,
+          title: saved.title,
+          description: saved.description,
+          tags: saved.tags,
+          updatedAt: new Date(saved.updatedAt),
+          widgetCount: Object.keys(saved.widgets).length,
+        }
+      : toDashboardSummary(item);
+  });
 }
 
 export async function getDashboard(id: string, signal?: AbortSignal): Promise<Dashboard> {
+  const saved = readSaved(id);
+  if (saved) return saved;
   await wait(LATENCY, signal);
   const json = await getJson(
     `${BASE}/${encodeURIComponent(id)}.json`,
@@ -50,3 +66,11 @@ export async function getDashboard(id: string, signal?: AbortSignal): Promise<Da
     });
   return toDashboard(parsed.data);
 }
+
+/** Static files are the seed; saves are durable browser-local overrides until an HTTP backend exists. */
+export const localRepository: DashboardRepository = {
+  list: listDashboards,
+  load: getDashboard,
+  save: async (dashboard) => writeSaved(dashboard),
+  remove: async (id) => localStorage.removeItem(savedKey(id)),
+};

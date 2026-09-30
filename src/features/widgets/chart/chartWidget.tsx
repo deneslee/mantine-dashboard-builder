@@ -9,6 +9,8 @@ export const chartWidget = defineWidget({
   name: 'Chart',
   icon: IconChartArea,
   defaultSize: { w: 6, h: 6 },
+  minSize: { w: 2, h: 3 },
+  capabilities: { time: true, inspect: true, export: ['csv', 'json'], hoverSync: true },
   optionsSchema: chartOptions,
   component: lazy(() => import('./TimeSeriesChart').then((m) => ({ default: m.TimeSeriesChart }))),
   skeleton: <ChartSkeleton />,

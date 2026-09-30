@@ -1,55 +1,78 @@
-import { useMemo } from 'react';
-import { ResponsiveGridLayout, useContainerWidth } from 'react-grid-layout';
+import { useMemo, useRef } from 'react';
+import { useShallow } from 'zustand/shallow';
+import { ResponsiveGridLayout, useContainerWidth, type EventCallback } from 'react-grid-layout';
+import { gridBounds, minMaxSize } from 'react-grid-layout/core';
+import { fastVerticalCompactor } from 'react-grid-layout/extras';
 import 'react-grid-layout/css/styles.css';
 import { tokens } from '@/design-system/tokens/tokens';
+import { useDashboardActions, useDashboardState } from '../../hooks/useDashboard';
+import { byReadingOrder, toLayouts, type Breakpoint } from '../../model/layouts';
 import type { RawRange } from '../../model/timeRange';
-import type { Dashboard } from '../../model/types';
+import { useDashboardRegistry } from '../../registry';
 import { WidgetTile } from './WidgetTile';
 import classes from './DashboardGrid.module.css';
 
 const { grid } = tokens;
-
-// Module constants: the grid gets the same config objects on every render (docs/grid-and-charts.md, rule 5).
 const margin = [grid.gap, grid.gap] as const;
 const noPadding = [0, 0] as const;
-/** Read-only until editing lands (phase 3). */
-const dragConfig = { enabled: false };
-const resizeConfig = { enabled: false };
+const drag = {
+  enabled: true,
+  handle: '[data-widget-drag]',
+  cancel: 'button,a,input,textarea,[role="button"]',
+};
+const resize = { enabled: true, handles: ['se'] as ['se'] };
+const disabled = { enabled: false };
+const constraints = [gridBounds, minMaxSize];
 
-interface GridProps {
-  dashboard: Pick<Dashboard, 'widgets' | 'layouts'>;
-  range: RawRange;
-}
-
-/**
- * The dashboard canvas: react-grid-layout v2 with breakpoints on the canvas width, one layout per
- * breakpoint from the document (`toLayouts` filled in the missing ones). The canvas width comes
- * from `useContainerWidth`; the shell keeps it still while panels animate or are dragged, so tiles
- * re-lay out once per shell change. A width change that crosses a breakpoint takes two commits
- * (the grid switches breakpoints in an effect); both normally land before the next frame, since
- * the width is set after the frame that measured it.
- */
-export function DashboardGrid({ dashboard, range }: GridProps) {
-  // Measure before the first render: otherwise every chart renders once at a guessed width.
+export function DashboardGrid({ range }: { range: RawRange }) {
   const { width, containerRef, mounted } = useContainerWidth({ measureBeforeMount: true });
-  const { widgets, layouts } = dashboard;
-
-  // Keyed by widget id, not by position: the grid positions the tiles (rule 4). A range change
-  // re-renders the tiles in place; the grid and the tiles stay mounted.
+  const authored = useDashboardState((state) => state.doc.layouts);
+  const mode = useDashboardState((state) => state.mode);
+  const types = useDashboardState(
+    useShallow((s) =>
+      Object.fromEntries(Object.values(s.doc.widgets).map((widget) => [widget.id, widget.type])),
+    ),
+  );
+  const registry = useDashboardRegistry();
+  const actions = useDashboardActions();
+  const breakpoint = useRef<Breakpoint>('lg');
+  const layouts = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(toLayouts(authored)).map(([key, items]) => [
+          key,
+          items.map((item) => ({
+            ...item,
+            minW: Math.min(
+              registry.widgets[types[item.i] ?? '']?.minSize?.w ?? 1,
+              grid.cols[key as Breakpoint],
+            ),
+            minH: registry.widgets[types[item.i] ?? '']?.minSize?.h ?? 1,
+          })),
+        ]),
+      ),
+    [authored, types, registry],
+  );
+  const ids = useMemo(() => authored.lg.toSorted(byReadingOrder).map((item) => item.i), [authored.lg]);
   const children = useMemo(
     () =>
-      widgets.map((w) => (
-        <div key={w.id}>
-          <WidgetTile widget={w} range={range} />
+      ids.map((id) => (
+        <div key={id}>
+          <WidgetTile id={id} range={range} />
         </div>
       )),
-    [widgets, range],
+    [ids, range],
   );
-
+  const editing = mode === 'edit' && width >= grid.breakpoints.md;
+  const commit =
+    (action: 'Moved' | 'Resized'): EventCallback =>
+    (layout, _old, item) => {
+      if (editing && item) actions.commitLayout(breakpoint.current, layout, item.i, action);
+    };
   return (
-    <div ref={containerRef} className={classes.root}>
+    <div ref={containerRef} className={classes.root} data-editing={editing || undefined}>
       {mounted ? (
-        <ResponsiveGridLayout
+        <ResponsiveGridLayout<Breakpoint>
           width={width}
           breakpoints={grid.breakpoints}
           cols={grid.cols}
@@ -57,8 +80,16 @@ export function DashboardGrid({ dashboard, range }: GridProps) {
           rowHeight={grid.rowHeight}
           margin={margin}
           containerPadding={noPadding}
-          dragConfig={dragConfig}
-          resizeConfig={resizeConfig}
+          dragConfig={editing ? drag : disabled}
+          resizeConfig={editing ? resize : disabled}
+          constraints={constraints}
+          compactor={ids.length > 100 ? fastVerticalCompactor : undefined}
+          onBreakpointChange={(next) => {
+            breakpoint.current = next;
+            actions.setBreakpoint(next);
+          }}
+          onDragStop={commit('Moved')}
+          onResizeStop={commit('Resized')}
         >
           {children}
         </ResponsiveGridLayout>

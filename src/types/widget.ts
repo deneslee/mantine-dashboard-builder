@@ -16,6 +16,8 @@ export interface WidgetDefinition<Options = unknown> {
   icon: Icon;
   /** Size in `lg` grid cells when added from the palette (phase 3). */
   defaultSize: { w: number; h: number };
+  minSize?: { w: number; h: number };
+  capabilities: { time: boolean; inspect: boolean; export: ('csv' | 'json')[]; hoverSync: boolean };
   optionsSchema: z.ZodType<Options>;
   /** A lazy chunk: a dashboard loads only the widget code it shows. */
   component: LazyExoticComponent<ComponentType<WidgetProps<Options>>>;

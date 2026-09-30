@@ -1,4 +1,6 @@
-import { createFileRoute, notFound } from '@tanstack/react-router';
+import { createFileRoute, notFound, stripSearchParams } from '@tanstack/react-router';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { DashboardProvider } from '@/features/dashboards/DashboardProvider';
 import { DashboardView } from '@/features/dashboards/components/DashboardView';
 import { dashboardQuery } from '@/features/dashboards/api/queries';
 import { dashboardSearch } from '@/features/dashboards/model/timeRange';
@@ -14,7 +16,8 @@ export const Route = createFileRoute('/dashboards/$id')({
     crumb: (data) => (data as { title?: string } | undefined)?.title,
   },
   // Time range and refresh; the loader doesn't depend on them, so changing them never reloads the document.
-  validateSearch: (search) => dashboardSearch.parse(search),
+  validateSearch: dashboardSearch,
+  search: { middlewares: [stripSearchParams({ mode: 'view' })] },
   loader: async ({ context, params }) => {
     try {
       return await context.queryClient.ensureQueryData(dashboardQuery(params.id));
@@ -29,9 +32,14 @@ export const Route = createFileRoute('/dashboards/$id')({
 
 /** The app layer hands the widget and datasource plugins to the dashboard. */
 function DashboardRoute() {
+  const { id } = Route.useParams();
+  const { mode } = Route.useSearch();
+  const { data } = useSuspenseQuery(dashboardQuery(id));
   return (
     <DashboardRegistryContext value={registry}>
-      <DashboardView />
+      <DashboardProvider key={id} dashboard={data} mode={mode}>
+        <DashboardView />
+      </DashboardProvider>
     </DashboardRegistryContext>
   );
 }

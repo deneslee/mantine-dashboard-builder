@@ -105,6 +105,7 @@ function table(s: z.infer<typeof tableSpec>, ctx: QueryContext): DataFrame {
 export const mockDatasource: DatasourceDefinition = {
   type: 'mock',
   name: 'Mock data',
+  querySchema: spec,
   async query(input, ctx, signal) {
     const parsed = spec.safeParse(input);
     if (!parsed.success)

@@ -1,5 +1,5 @@
 import type { Query } from '@/types/datasource';
-import type { Breakpoint, GridItem } from './layouts';
+import type { AuthoredLayouts } from './layouts';
 import type { RawRange } from './timeRange';
 
 /** A tile: which widget draws it, the widget's options (the widget checks them) and its queries. */
@@ -8,22 +8,25 @@ export interface Widget {
   type: string;
   title: string;
   options: unknown;
+  description?: string;
   queries: Query[];
 }
 
 /** A dashboard as the UI uses it. Never the wire shape. */
 export interface Dashboard {
+  version: 1;
   id: string;
   title: string;
   description: string;
   tags: string[];
-  updatedAt: Date;
+  updatedAt: string;
   /** Defaults; the URL overrides them. */
   timeRange: RawRange;
   refresh: string;
-  /** In the reading order of the `lg` layout, so keyboard order follows the screen. */
-  widgets: Widget[];
-  layouts: Record<Breakpoint, GridItem[]>;
+  variables: unknown[];
+  widgets: Record<string, Widget>;
+  /** Only authored layouts are saved; missing breakpoints are projected by the canvas. */
+  layouts: AuthoredLayouts;
 }
 
 /** An entry in the dashboard list. */

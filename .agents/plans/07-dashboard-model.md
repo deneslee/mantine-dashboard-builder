@@ -1,6 +1,6 @@
 # 07 Dashboard model
 
-Status: design agreed Sep 29, revised Sep 30, not started · Phase 3: stages 1–3; phase 4: stage 4 · Order: stages 1 and 2 (the edit MVP) come first, before 06 Sentry and the Integrations foundation · Depends on: 05 (done). Stage 4's integration datasources need the Integrations foundation. · Reference: [dashboard.md](../../docs/dashboard/dashboard.md), [grid-and-charts.md](../../docs/dashboard/grid-and-charts.md)
+Status: open · Stages 1–2 implementation in progress (Sep 30); browser acceptance and performance measurements pending · Phase 3: stages 1–3; phase 4: stage 4 · Order: stages 1 and 2 (the edit MVP) come first, before 06 Sentry and the Integrations foundation · Depends on: 05 (done). Stage 4's integration datasources need the Integrations foundation. · Reference: [dashboard.md](../../docs/dashboard/dashboard.md), [grid-and-charts.md](../../docs/dashboard/grid-and-charts.md)
 
 ## Goal
 
@@ -255,7 +255,7 @@ Using Horizon's levels:
 
 ## Open decisions
 
-1. **Where the palette and the widget editor live.** The context bar is no longer for tools. Proposal: in edit mode a right-side edit drawer (the same component as Inspect) holds the palette and the selected widget's options (title, description, time override, sync group, display); "Edit queries" opens a main-pane editor with a live preview above the queries, like Grafana's panel editor.
+1. **Where the palette and the widget editor live.** Stage 2 uses the proposed right-side non-modal drawer inside the main pane for the palette, title, description and display options; "Edit queries" opens a main-pane editor with a live preview. Display options and queries use schema-validated JSON fields for this MVP. Time overrides and sync groups stay with their later stages. Sharing the drawer with Inspect remains for stage 3.
 2. **Backend:** TanStack Start in SPA mode or a separate API. Decide later.
 3. **Auth:** Better Auth, Clerk or WorkOS. Decide later.
 4. **Phase order:** whether the backend and auth move into phase 5, ahead of real datasources in phase 6. Decide later. Real datasources can't ship without auth either way.
@@ -268,20 +268,43 @@ Kiosk mode. Later, not scheduled: app-level tabs, folders, filters and cross-fil
 
 Build order: stage 1, stage 2 (together the edit MVP), stage 3; then 06 Sentry and the Integrations foundation; then stage 4.
 
+Checkpoint Sep 30: completed implementation parts are ticked below. Parent tasks remain open where their browser acceptance criteria have not yet been verified.
+
 ### Stage 1: foundation (phase 3)
 
 - [ ] **State layers and `DashboardProvider`.** A store per dashboard id holding the document, the saved baseline and `dirty`; view state in zod-validated search params with defaults stripped; `keepPreviousData` removed from the `QueryClient` defaults. Done when switching between two dashboards never shows the first one's data under the second's URL.
+  - [x] Per-dashboard provider/store, saved baseline, dirty comparison and isolated document selectors implemented; store isolation covered by a passing test.
+  - [x] Zod search validation, default view-mode stripping and removal of global previous-data placeholders implemented.
+  - [ ] Complete the browser check for dashboard switching during loading.
 - [ ] **Widget header and menu.** Title, info icon, status, and the menu's visibility rules (hover, focus inside, edit mode, touch); `capabilities` on `WidgetDefinition`, and the menu built from them. Done when a keyboard-only user reaches every header control and each widget type's story shows the right items.
+  - [x] Header, description tooltip, fetching/error status, visibility rules and registry capabilities implemented; grid stories include all three built-in widget types and edit mode.
+  - [ ] Finish keyboard/focus acceptance for every header control.
 
 ### Stage 2: edit MVP (phase 3)
 
 - [ ] **Edit mode** (`?mode=edit`): Save, Discard, Undo and Redo in the page header, the draft in localStorage, the leave guard, Save and Discard as in §3. Done when a reload keeps the draft, Undo after Save makes the dashboard dirty, and Discard restores the saved document with an empty history.
+  - [x] Controls, per-dashboard draft storage/recovery, navigation blocker and native unload guard implemented.
+  - [x] Save retains undo; Undo after Save becomes dirty; Discard restores the saved baseline and clears history/draft. Passing store tests cover these cases, pending-save edits and failed saves. Browser checks reached Save/Undo, draft reload and Discard successfully.
+  - [ ] Finish the complete leave-guard and back/forward browser run.
 - [ ] **Drag and resize** following grid rules 5–7: the header as handle, the `se` handle, `constraints` for minimum sizes, commit on stop and never in `onLayoutChange`; the drag placeholder and handles styled with tokens (react-grid-layout's defaults are red and black). Done when one drag and one resize each add exactly one undo step.
+  - [x] RGL v2 handles, plugin minimum sizes, token styling and stop-only commits implemented; store tests cover one history step per committed layout action.
+  - [ ] Verify actual pointer drag and resize each need exactly one Undo in the browser.
 - [ ] **Menu actions:** Move to…, Resize…, Duplicate and Remove, with live-region announcements and focus back on the menu button. Done when every action works without a pointer and adds one undo step.
+  - [x] Actions, placement dialogs, live region and focus-return handlers implemented; duplicate/remove history covered by store tests.
+  - [ ] Finish keyboard-only action/focus verification and check announcement wording.
 - [ ] **Add widget** at the end of the chosen grid, and reading order from the `lg` layout after each commit. Done when keyboard order follows the layout after a drag, and export writes items in reading order.
+  - [x] Palette adds at the bottom; tile order and JSON export derive from the `lg` reading order. Store tests cover placement and export order.
+  - [ ] Verify DOM/keyboard order after an actual browser drag.
 - [ ] **Widget editor and palette** once open decision 1 is settled; text fields commit on blur, one undo step per field.
+  - [x] Main-pane drawer, palette, title/description/display editing and query editor with preview/Apply implemented; editor states have stories.
+  - [x] Field no-op handling and schema validation implemented. Browser investigation found and fixed disabled Save during typing and an empty-description undo step.
+  - [ ] Finish acceptance for field blur grouping, query Apply/Undo and the latest non-modal drawer focus changes.
 - [ ] **Browser tests** for drag, resize, undo, and "edit, undo, export, import identical" (Storybook's Vitest addon or Playwright).
+  - [x] Playwright CLI scenario written in `scripts/dashboard-edit.browser.js`.
+  - [ ] Repair the runner's function-expression parsing/lint issues and obtain a complete passing run; earlier partial runs do not count as a pass.
 - [ ] **Measure** drag and resize on `/dashboards/perf` in a production build: chart resizes per interaction and long tasks. Done when the numbers are in grid-and-charts.md.
+  - [x] Production-browser measurement script drafted in `scripts/dashboard-perf.browser.js`.
+  - [ ] Correct and run the measurement script, then record actual chart-resize and long-task numbers in `grid-and-charts.md`. No measurements have been recorded yet.
 
 ### Stage 3: viewing (phase 3)
 
@@ -306,6 +329,9 @@ Integration datasources in the datasource manager need the Integrations foundati
 
 ## Decisions
 
+- **Sep 30: stage 2 editor placement.** Use the proposed drawer inside the main pane for palette/options and a separate main-pane query editor with preview. JSON fields are validated against the installed widget/datasource schemas.
+- **Sep 30: local persistence for the edit MVP.** Static JSON remains the initial read source; Save writes a separate browser-local saved document, drafts use a separate per-dashboard key, and Export produces portable JSON. Save does not attempt to overwrite a static public file.
+
 - **Sep 29: scopes that inherit** (dashboard → section → widget), with the precedence in §1.
 - **Sep 29: anyone can change a widget's time;** it stays in the URL until someone saves it in edit mode.
 - **Sep 29: the widget header** has a title always, an info icon for the description, a clock for time overrides, and a menu shown on hover.
@@ -329,6 +355,13 @@ Integration datasources in the datasource manager need the Integrations foundati
 - **Sep 30: variables go through `getVariableRefs`.** Identifiers are parameters only where the datasource supports it, otherwise allow-listed; filters stay separate from variables.
 
 ## Verification
+
+### Sep 30 implementation checkpoint
+
+- `pnpm test`: **38 files, 166 tests passed**.
+- `pnpm build`: passed with the current implementation.
+- `pnpm lint`: **not passing**; remaining errors are unused expressions in the new story/browser scripts and an unbound-method reference in the browser script.
+- Full browser acceptance, Storybook runtime verification and drag/resize performance measurements remain pending.
 
 - Reload, back/forward and a shared link keep the dashboard range, time zone, widget overrides, variable values, open tabs and mode.
 - A keyboard-only run reaches every widget action: view, inspect, time, and in edit mode move, resize, duplicate and remove.

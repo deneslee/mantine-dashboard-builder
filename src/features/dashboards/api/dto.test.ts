@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { dashboardDoc } from './dto';
-import { toDashboard } from './mapper';
+import { toDashboard, toDocument } from './mapper';
 
 const valid = {
   version: 1,
@@ -48,7 +48,7 @@ describe('dashboardDoc', () => {
   });
 
   it('rejects a widget missing from an authored layout, and a layout item without a widget', () => {
-    expect(issues({ ...valid, layouts: { lg: valid.layouts.lg, sm: [valid.layouts.lg[0]] } })).toEqual([
+    expect(issues({ ...valid, layouts: { lg: valid.layouts.lg, sm: [{ ...valid.layouts.lg[0], w: 4 }] } })).toEqual([
       'Widget "kpis" has no place in the sm layout.',
     ]);
     expect(
@@ -58,18 +58,19 @@ describe('dashboardDoc', () => {
 });
 
 describe('toDashboard', () => {
-  it('maps to the domain shape, widgets in reading order, every breakpoint laid out', () => {
+  it('keeps a serializable document with authored layouts and exports widgets in reading order', () => {
     const dashboard = toDashboard(dashboardDoc.parse(valid));
-    expect(dashboard.updatedAt).toEqual(new Date('2026-09-21T14:12:00Z'));
+    expect(dashboard.updatedAt).toBe('2026-09-21T14:12:00Z');
     expect(dashboard.timeRange).toEqual({ from: 'now-24h', to: 'now' });
-    expect(dashboard.widgets.map((w) => w.id)).toEqual(['kpis', 'chart']);
-    expect(dashboard.widgets[1]).toEqual({
+    expect(Object.keys(toDocument(dashboard).widgets)).toEqual(['kpis', 'chart']);
+    expect(dashboard.widgets.chart).toEqual({
       id: 'chart',
       type: 'chart',
       title: 'Revenue',
       options: { form: 'area' },
       queries: [{ datasource: 'mock', spec: {} }],
     });
-    expect(Object.keys(dashboard.layouts)).toEqual(['lg', 'md', 'sm']);
+    expect(dashboard.layouts).toEqual(valid.layouts);
+    expect(toDashboard(dashboardDoc.parse(toDocument(dashboard)))).toEqual(dashboard);
   });
 });

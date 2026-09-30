@@ -11,6 +11,9 @@ import { toLayouts } from '../../model/layouts';
 import type { RawRange } from '../../model/timeRange';
 import type { Dashboard } from '../../model/types';
 import { DashboardRegistryContext, type DashboardRegistry } from '../../registry';
+import { DashboardProvider } from '../../DashboardProvider';
+import { createDashboardStore } from '../../store';
+import { localRepository } from '../../api/client';
 import { DashboardGrid } from './DashboardGrid';
 
 /** IntersectionObserver stub that the test drives by hand. */
@@ -47,6 +50,7 @@ const nameWidget = defineWidget({
   name: 'Name',
   icon: IconAbc,
   defaultSize: { w: 6, h: 3 },
+  capabilities: { time: false, inspect: true, export: [], hoverSync: false },
   optionsSchema: z.object({}),
   component: lazy(async () => ({ default: FrameName })),
   skeleton: <p>Loading</p>,
@@ -65,17 +69,26 @@ function deferredDatasource() {
   return { datasource, query, release };
 }
 
-const dashboard: Pick<Dashboard, 'widgets' | 'layouts'> = {
-  widgets: [
-    {
+const dashboard: Dashboard = {
+  version: 1,
+  id: 'test',
+  title: 'Test',
+  description: '',
+  updatedAt: '2026-09-30',
+  tags: [],
+  variables: [],
+  timeRange: { from: 'now-24h', to: 'now' },
+  refresh: 'off',
+  widgets: {
+    a: {
       id: 'a',
       type: 'name',
       title: 'Revenue',
       options: {},
       queries: [{ datasource: 'deferred', spec: 'a' }],
     },
-    { id: 'b', type: 'nope', title: 'Regions', options: {}, queries: [] },
-  ],
+    b: { id: 'b', type: 'nope', title: 'Regions', options: {}, queries: [] },
+  },
   layouts: toLayouts({
     lg: [
       { i: 'a', x: 0, y: 0, w: 6, h: 3 },
@@ -94,10 +107,13 @@ function renderGrid() {
     datasources: { deferred: datasource },
   };
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const store = createDashboardStore(dashboard, localRepository, 'view', false);
   const ui = (range: RawRange) => (
     <QueryClientProvider client={client}>
       <DashboardRegistryContext value={registry}>
-        <DashboardGrid dashboard={dashboard} range={range} />
+        <DashboardProvider dashboard={dashboard} store={store}>
+          <DashboardGrid range={range} />
+        </DashboardProvider>
       </DashboardRegistryContext>
     </QueryClientProvider>
   );
