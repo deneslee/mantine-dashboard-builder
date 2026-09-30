@@ -12,6 +12,12 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["preview", "--port", "4173", "--strictPort"],
       "port": 4173
+    },
+    {
+      "name": "storybook",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["storybook", "--no-open"],
+      "port": 6006
     }
   ]
 }

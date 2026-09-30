@@ -300,6 +300,8 @@ Checkpoint Sep 30: completed implementation parts are ticked below. Parent tasks
   - [x] Field no-op handling and schema validation implemented. Browser investigation found and fixed disabled Save during typing and an empty-description undo step.
   - [ ] Finish acceptance for field blur grouping, query Apply/Undo and the latest non-modal drawer focus changes.
 - [-] **Browser tests** for drag, resize, undo, and "edit, undo, export, import identical". Moved to [08](08-structure-cleanup.md) step 2 (Sep 30): Storybook's Vitest addon runs the stories in Chromium, and play functions port the flows of the Playwright CLI script, which 08 deletes. The acceptance items above that those play functions prove get ticked when they pass.
+  - Sep 30, passing in Chromium: blur commits one undo step; Save, then Undo is dirty, then Redo is clean; Discard restores the saved document with an empty history; a draft is restored on load in edit mode; Duplicate, Remove and Add each undo in one step, and Add places the widget last; Move and Resize dialogs return focus to the menu button and announce the change; export, edit, undo, export and import give identical JSON; the leave guard keeps the page on "Keep editing".
+  - Still manual: pointer drag and resize (one undo each), keyboard-only runs, back and forward, switching dashboards while one loads, and query Apply and Undo.
 - [ ] **Measure** drag and resize on `/dashboards/perf` in a production build: chart resizes per interaction and long tasks. Done when the numbers are in grid-and-charts.md. Runs after 08; `scripts/dashboard-perf.browser.js` was a draft and is deleted in 08, so the measurement is a manual Performance trace or a play function.
 
 ### Stage 3: viewing (phase 3)

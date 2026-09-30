@@ -8,20 +8,20 @@ Plan [08](../.agents/planning/plans/08-structure-cleanup.md) is moving the code 
 
 Mantine 9 needs React 19.2+, so all React 19 APIs (`ref` as prop, `use()`, `Activity`, `useEffectEvent`) are fair game. The React Compiler is on.
 
-| Area    | Package                                                                                   | Notes                                                                                                              |
-| ------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Build   | Vite 8, TypeScript strict, pnpm                                                           | tsconfig paths are native in Vite 8                                                                                |
-| UI      | `@mantine/core` 9.6.3, `hooks`, `notifications`, `modals`, `dates`, `charts`, `spotlight` | Spotlight drives the navbar search; `postcss-preset-mantine`                                                       |
-| Fonts   | Fontsource variable fonts: DM Sans, Source Sans 3, Source Code Pro, JetBrains Mono        | Self-hosted, no runtime requests to Google                                                                         |
-| Routing | `@tanstack/react-router`                                                                  | File-based routes, `staticData` declares context-bar tabs and breadcrumbs                                          |
-| Data    | `@tanstack/react-query`                                                                   | One `QueryClient`                                                                                                  |
-| State   | `zustand` + `immer` + `zundo`                                                             | Shell store (persisted) and one dashboard store per open dashboard (undo history)                                  |
-| Grid    | `react-grid-layout` 2.x                                                                   | v2 API only, never `/legacy`                                                                                       |
-| Schemas | `zod`                                                                                     | Dashboard document, widget options, datasource query specs, search params                                          |
-| Tables  | `@tanstack/react-table` v9 + `@tanstack/react-virtual`                                    | Rendered with Mantine `Table`                                                                                      |
-| Later   | `@xyflow/react`, `react-markdown`                                                         | Each a lazy chunk                                                                                                  |
-| Icons   | `@tabler/icons-react`                                                                     | Direct file imports, no barrel                                                                                     |
-| Tooling | Storybook, Vitest + Testing Library, oxlint + Stylelint, Prettier                         | Browser tests through Storybook's Vitest addon arrive with [08](../.agents/planning/plans/08-structure-cleanup.md) |
+| Area    | Package                                                                                   | Notes                                                                                                                                            |
+| ------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Build   | Vite 8, TypeScript strict, pnpm                                                           | tsconfig paths are native in Vite 8                                                                                                              |
+| UI      | `@mantine/core` 9.6.3, `hooks`, `notifications`, `modals`, `dates`, `charts`, `spotlight` | Spotlight drives the navbar search; `postcss-preset-mantine`                                                                                     |
+| Fonts   | Fontsource variable fonts: DM Sans, Source Sans 3, Source Code Pro, JetBrains Mono        | Self-hosted, no runtime requests to Google                                                                                                       |
+| Routing | `@tanstack/react-router`                                                                  | File-based routes, `staticData` declares context-bar tabs and breadcrumbs                                                                        |
+| Data    | `@tanstack/react-query`                                                                   | One `QueryClient`                                                                                                                                |
+| State   | `zustand` + `immer` + `zundo`                                                             | Shell store (persisted) and one dashboard store per open dashboard (undo history)                                                                |
+| Grid    | `react-grid-layout` 2.x                                                                   | v2 API only, never `/legacy`                                                                                                                     |
+| Schemas | `zod`                                                                                     | Dashboard document, widget options, datasource query specs, search params                                                                        |
+| Tables  | `@tanstack/react-table` v9 + `@tanstack/react-virtual`                                    | Rendered with Mantine `Table`                                                                                                                    |
+| Later   | `@xyflow/react`, `react-markdown`                                                         | Each a lazy chunk                                                                                                                                |
+| Icons   | `@tabler/icons-react`                                                                     | Direct file imports, no barrel                                                                                                                   |
+| Tooling | Storybook, Vitest + Testing Library, oxlint + Stylelint, Prettier                         | Three Vitest projects: `node` (pure logic), `dom` (jsdom) and `storybook` (every story in Chromium with an a11y check, play functions for flows) |
 
 ## Layers
 

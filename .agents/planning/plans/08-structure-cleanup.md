@@ -218,22 +218,22 @@ Every step leaves `pnpm lint && pnpm format:check && pnpm build && pnpm test` gr
 
 ### 2. Browser tests
 
-- [ ] **Vitest projects.**
+- [x] **Vitest projects.**
   - Split into `node`, `dom` and `storybook` projects (`@storybook/addon-vitest`, `@vitest/browser-playwright`, Chromium).
   - Add `.storybook/vitest.setup.ts` and `staticDirs: ['../public']`.
   - Add the scripts `test`, `test:unit` and `test:stories`.
   - Done when `pnpm test` runs all three.
-- [ ] **CI.**
+- [ ] **CI.** Written Sep 30; it runs for the first time on the next push.
   - `github-pages.yaml` gets a `pull_request` trigger.
   - It runs lint, format check, `playwright install chromium` and `pnpm test` before the build.
   - It deploys only from main.
   - Done when a pull request runs the checks without deploying.
-- [ ] **AppStory.** `createAppRouter(queryClient, history?)` and `testing/AppStory.tsx` render the real routes at a URL. Done when `DashboardPage` stories load `/dashboards/sales` with live mock data.
-- [ ] **Editor play functions.** In `DashboardPage.stories.tsx`:
+- [x] **AppStory.** `createAppRouter(queryClient, { history, basepath })` and `testing/AppStory.tsx` render the real routes at a URL. Done when `DashboardPage` stories load `/dashboards/sales` with live mock data.
+- [x] **Editor play functions.** In `DashboardPage.stories.tsx`:
   - The states: View, Editing, WidgetOptions, QueryEditor, Empty, StorageError, RestoresDraft.
   - The flows ported from the deleted script: BlurCommitUndo, SaveThenUndo, Discard, DuplicateRemoveAdd (asserting the drawer is visible and clickable), MoveResizeDialogs (focus returns to the menu button; live-region text), ExportImportIdentity, LeaveGuard.
   - Done when they pass in Chromium. Then tick the matching 07 acceptance items.
-- [ ] **A11y.** Every existing story runs as an a11y test. A story that fails gets `a11y: { test: 'todo' }` and a tasks.md line. Done when `pnpm test:stories` passes.
+- [x] **A11y.** Every existing story runs as an a11y test (Sep 30: 48 stories). Fixed in the app: the route progress bar and the shell drawers had no accessible name, and the notification and modal close buttons had none either. `color-contrast` is off in the preview until the light-scheme tokens are fixed ([tasks.md › Light-scheme contrast](../tasks.md#housekeeping)); two stories switch off one landmark rule each, with the reason next to it. Done when `pnpm test:stories` passes.
 
 ### 3. Moves
 
@@ -297,6 +297,8 @@ Every step leaves `pnpm lint && pnpm format:check && pnpm build && pnpm test` gr
 - **Sep 30: tests next to their code**; browser tests through Storybook's Vitest addon, not Playwright scripts.
 - **Sep 30: PascalCase, short names**, with `is`/`has`/`should` booleans, `handle*` handlers, UPPER_SNAKE constants and verb-named utilities.
 - **Sep 30: no version in storage keys.** The version lives in the value, and there is no second envelope around dashboards, which already carry `schemaVersion`.
+- **Sep 30: Storybook 10.6.1** for Vitest 5 support (10.6.0's Vitest addon only allows Vitest 3–4). Installed once it cleared the repo's 24-hour `minimumReleaseAge`; the policy was not bypassed.
+- **Sep 30: `color-contrast` off in the story a11y tests**, not every failing story marked `todo`. The light-scheme tokens fail AA everywhere, so `todo` on each story would also hide new a11y regressions. Every other rule stays an error, and the token fix is tracked in tasks.md.
 - **Sep 30: planning moves to `.agents/planning/`.** `docs/` is for people, with `architecture.md` holding the stack and structure.
 
 ## Out of scope

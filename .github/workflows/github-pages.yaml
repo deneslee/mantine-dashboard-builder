@@ -1,18 +1,13 @@
-name: Deploy to GitHub Pages
+name: Check and deploy to GitHub Pages
 
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: false
 
 jobs:
   build:
@@ -39,23 +34,43 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Typecheck
-        run: pnpm typecheck
+      - name: Lint
+        run: pnpm lint
 
+      - name: Format
+        run: pnpm format:check
+
+      # Stories run as tests in Chromium (Storybook's Vitest addon).
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Test
+        run: pnpm test
+
+      # Typechecks too (tsc -b).
       - name: Build
         run: pnpm build
 
       - name: SPA fallback (TanStack Router deep links)
         run: cp dist/index.html dist/404.html
 
-      - uses: actions/configure-pages@v6
+      - if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v6
 
-      - uses: actions/upload-pages-artifact@v5
+      - if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v5
         with:
           path: ./dist
 
   deploy:
+    if: github.event_name != 'pull_request'
     needs: build
+    permissions:
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

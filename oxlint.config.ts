@@ -154,9 +154,9 @@ export default defineConfig({
         ),
       },
     },
-    // Tests and stories assemble things, like app/: no layer rule.
+    // Tests, stories and their helpers assemble things, like app/: no layer rule.
     {
-      files: ['**/*.test.{ts,tsx}', '**/*.stories.tsx'],
+      files: ['**/*.test.{ts,tsx}', '**/*.stories.tsx', 'src/testing/**'],
       rules: { 'no-restricted-imports': 'off' },
     },
   ],

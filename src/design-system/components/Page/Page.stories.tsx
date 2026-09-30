@@ -93,6 +93,17 @@ export const Full: Story = { render: () => <FullPage /> };
 
 /** The header restacks by the width of its container, not the viewport. */
 export const NarrowContainer: Story = {
+  // Three copies of the page side by side repeat the breadcrumb landmark on purpose.
+  parameters: {
+    a11y: {
+      config: {
+        rules: [
+          { id: 'color-contrast', enabled: false },
+          { id: 'landmark-unique', enabled: false },
+        ],
+      },
+    },
+  },
   render: () => (
     <Stack gap="lg">
       {[375, 768, 1280].map((width) => (

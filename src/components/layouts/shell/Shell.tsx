@@ -168,35 +168,40 @@ export function Shell({ children }: { children: ReactNode }) {
         </Splitter.Pane>
       </Splitter>
 
-      <Drawer
+      {/* Compound parts so the label lands on the dialog (Drawer.Content), not on its wrapper. */}
+      <Drawer.Root
         opened={sidebar.isOverlay}
         onClose={actions.closeSidebar}
         position="left"
         size={shell.sidebar.expanded}
-        withCloseButton={false}
         padding={0}
         zIndex={zIndex.drawer}
-        overlayProps={{ backgroundOpacity: 0.3, blur: 0 }}
         classNames={{ content: classes.drawerContent, body: classes.drawerBody }}
-        aria-label="Primary navigation"
       >
-        <Sidebar />
-      </Drawer>
+        <Drawer.Overlay backgroundOpacity={0.3} blur={0} />
+        <Drawer.Content aria-label="Primary navigation">
+          <Drawer.Body>
+            <Sidebar />
+          </Drawer.Body>
+        </Drawer.Content>
+      </Drawer.Root>
 
-      <Drawer
+      <Drawer.Root
         opened={contextBar.isOverlay}
         onClose={actions.closeContextBar}
         position="right"
         size={shell.contextBar.default}
-        withCloseButton={false}
         padding={0}
         zIndex={zIndex.drawer}
-        overlayProps={{ backgroundOpacity: 0.15, blur: 0 }}
         classNames={{ content: classes.drawerContent, body: classes.drawerBody }}
-        aria-label="Context panel"
       >
-        <ContextBar />
-      </Drawer>
+        <Drawer.Overlay backgroundOpacity={0.15} blur={0} />
+        <Drawer.Content aria-label="Context panel">
+          <Drawer.Body>
+            <ContextBar />
+          </Drawer.Body>
+        </Drawer.Content>
+      </Drawer.Root>
     </Box>
   );
 }

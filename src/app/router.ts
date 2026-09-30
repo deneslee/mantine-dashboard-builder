@@ -1,4 +1,4 @@
-import { createRouter } from '@tanstack/react-router';
+import { createRouter, type RouterHistory } from '@tanstack/react-router';
 import { NotFound } from '@/components/errors/NotFound';
 import { RouteError } from '@/components/errors/RouteError';
 import { ListSkeleton } from '@/components/feedback/skeletons/Skeletons';
@@ -6,10 +6,15 @@ import { connectRouter } from '@/lib/sentry/runtime';
 import { routeTree } from './routeTree.gen';
 import type { QueryClient } from '@tanstack/react-query';
 
-export function createAppRouter(queryClient: QueryClient) {
+/** Stories pass a memory history and base path '/'; the app uses the browser URL under the deploy base. */
+export function createAppRouter(
+  queryClient: QueryClient,
+  { history, basepath = import.meta.env.BASE_URL }: { history?: RouterHistory; basepath?: string } = {},
+) {
   const router = createRouter({
     routeTree,
-    basepath: import.meta.env.BASE_URL,
+    history,
+    basepath,
     context: { queryClient },
     defaultPreload: 'intent',
     defaultPreloadStaleTime: 0,

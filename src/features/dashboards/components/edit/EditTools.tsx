@@ -68,9 +68,12 @@ export function EditTools({ range }: { range: RawRange }) {
           withinPortal={false}
           trapFocus={false}
           lockScroll={false}
-          onEnterTransitionEnd={() =>
-            document.querySelector<HTMLInputElement>('[data-dashboard-tool] [data-autofocus]')?.focus()
-          }
+          onEnterTransitionEnd={() => {
+            // Move focus in, unless the user already clicked into the drawer while it slid open.
+            const tool = document.querySelector<HTMLElement>('[data-dashboard-tool]');
+            if (!tool?.contains(document.activeElement))
+              tool?.querySelector<HTMLElement>('[data-autofocus]')?.focus();
+          }}
           classNames={{ inner: classes.drawerInner, content: classes.drawerContent }}
         >
           <Drawer.Content

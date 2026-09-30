@@ -56,6 +56,7 @@ These come from the Sep 30 review of the edit MVP ([07 › Sep 30 review](plans/
   - The widget menu trigger loses `aria-haspopup` and `aria-expanded` under its Tooltip.
   - An identical live-region message isn't announced twice.
   - The remove toast's Undo undoes the latest change rather than the removal.
+  - Move and Resize announce positions counted from 0 ("column 0, row 3"), while their dialogs count from 1.
 - [ ] **Query editor preview.** Debounce the preview query instead of running one per keystroke.
 
 ### Integrations foundation (step 5, not planned yet)
@@ -94,10 +95,19 @@ Nested layer tokens are no longer planned: they were for widgets inside a `conta
 
 ### Deployment
 
-- [ ] **GitHub Pages deep links.** GitHub Pages has no SPA fallback, so `/dashboards/…` opened directly returns 404. Add a `404.html` fallback. Done when a deep link loads on the deployed site.
+- [ ] **GitHub Pages deep links.** GitHub Pages has no SPA fallback, so `/dashboards/…` opened directly returns 404. The workflow already copies `index.html` to `404.html`; what's left is to check it. Done when a deep link loads on the deployed site.
 - [ ] **Bundle budget in CI.** Add `size-limit` with the first-load number, stating whether it's raw or gzipped; integration manifests count toward it. Done when a pull request that pushes first load past it fails.
 
 ### Housekeeping
+
+- [ ] **Light-scheme contrast.** The light-scheme tokens are below WCAG AA, found by the story a11y tests (Sep 30):
+  - dimmed text (`#868e96` on `#f8f9fa`) is 3.15:1;
+  - white on the primary filled button (`#4c6ef5`) is 4.32:1;
+  - links on the canvas are 4.1:1;
+  - the warning and success badges and alert titles are 2.4–3.8:1;
+  - the avatar initials also fail.
+
+  Fix it in the semantic tokens ([design-system.md](../../docs/ui/design-system.md)): a darker dimmed shade, and a primary shade or text color for filled buttons. Done when `color-contrast` is enabled again in `.storybook/preview.tsx` and every story passes.
 
 - [ ] **`--mantine-color-body` points at the overlay surface.** Before the overlay and raised surfaces diverge, point it at the canvas surface, bind `ModalBase` (Modal, Drawer) to overlay, and bind the parts that must match the surface behind them (Table's sticky header, the active Tabs border, Scroller's fade) to `--app-layer-surface`. Details in [design-system.md](../../docs/ui/design-system.md#where-new-things-go). Done when a story shows each of those components on canvas and inside a widget.
 - [ ] **Components the React Compiler skips.** `RouteError` and `SentryVerificationCard` use `try`/`finally` without `catch`; `FrameTable` uses an incompatible library (TanStack Table). Restructure them if it ever matters. The `throw` and `?.` inside `try` in `DashboardView` and the editor forms, and the `@babel/core` 8 skip of components with destructured defaults, are fixed in [08](plans/08-structure-cleanup.md).

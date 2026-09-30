@@ -22,7 +22,9 @@ Rules for humans and coding agents working in this repo. Read before writing cod
     pnpm dev              # http://localhost:5173
     pnpm build            # typecheck + production build
     pnpm lint             # oxlint (type-aware) + Stylelint
-    pnpm test             # Vitest; `pnpm test <path>` runs one file
+    pnpm test             # Vitest: node + jsdom tests and every story in Chromium; `pnpm test <path>` runs one file
+    pnpm test:unit        # node + jsdom only (fast)
+    pnpm test:stories     # stories only (needs `pnpm exec playwright install chromium` once)
     pnpm storybook        # http://localhost:6006
 
 **Before you call a change done:**

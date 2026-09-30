@@ -9,5 +9,5 @@ export function RouteProgress() {
     if (loading) nprogress.start();
     else nprogress.complete();
   }, [loading]);
-  return <NavigationProgress size={2} />;
+  return <NavigationProgress size={2} aria-label="Page loading" />;
 }

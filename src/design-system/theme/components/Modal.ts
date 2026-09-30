@@ -7,5 +7,7 @@ export const ModalTheme = Modal.extend({
     shadow: shadow.overlay,
     radius: shape.container,
     overlayProps: { backgroundOpacity: 0.45, blur: 2 },
+    // Mantine's close button is an icon with no text; screen readers need a name.
+    closeButtonProps: { 'aria-label': 'Close dialog' },
   },
 });
