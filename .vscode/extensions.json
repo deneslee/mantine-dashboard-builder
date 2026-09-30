@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "oxc.oxc-vscode",
+    "stylelint.vscode-stylelint",
+    "TypeScriptTeam.native-preview"
+  ]
+}

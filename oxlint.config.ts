@@ -36,6 +36,11 @@ const layerRule = (group: string[], message: string, shared = [barrels, primitiv
 
 export default defineConfig({
   plugins: ['typescript', 'react', 'unicorn', 'oxc', 'import'],
+
+  options: {
+    typeAware: true,
+  },
+
   jsPlugins: ['./lint/plugin.js'],
   categories: { correctness: 'error' },
   env: { browser: true },

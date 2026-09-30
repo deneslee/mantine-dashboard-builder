@@ -1,10 +1,10 @@
 # 07 Dashboard model
 
-Status: design agreed Sep 29, not started · Cross-cutting: stage A and B are phase 3, stage C is phase 4 · Depends on: 05 (done). The Integrations foundation comes before stage C's datasource work. · Reference: [dashboard.md](../../docs/dashboard/dashboard.md), [grid-and-charts.md](../../docs/dashboard/grid-and-charts.md)
+Status: design agreed Sep 29, revised Sep 30, not started · Phase 3: stages 1–3; phase 4: stage 4 · Order: stages 1 and 2 (the edit MVP) come first, before 06 Sentry and the Integrations foundation · Depends on: 05 (done). Stage 4's integration datasources need the Integrations foundation. · Reference: [dashboard.md](../../docs/dashboard/dashboard.md), [grid-and-charts.md](../../docs/dashboard/grid-and-charts.md)
 
 ## Goal
 
-Decide how a dashboard works for the people who view it and the people who edit it: where each kind of state lives, how time range, refresh and variables pass from the dashboard down to one widget, what a widget shows and offers, which modes exist, how layout, variables and data flow work, and where dashboards sit in the navigation. The design was settled step by step on Sep 29; this file is the handoff for building it.
+Decide how a dashboard works for the people who view it and the people who edit it: where each kind of state lives, how time range, refresh and variables pass from the dashboard down to one widget, what a widget shows and offers, which modes exist, how layout, variables and data flow work, and where dashboards sit in the navigation. The design was settled step by step on Sep 29 and revised on Sep 30 after a review; this file is the handoff for building it.
 
 ## Design
 
@@ -12,14 +12,14 @@ Decide how a dashboard works for the people who view it and the people who edit 
 
 **Layers.** Each kind of state has one home:
 
-| Layer        | What's in it                                                                                | Where                                                                          | Why                                   |
-| ------------ | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------- |
-| Document     | Widgets, layout blocks, saved overrides, variable definitions, defaults                     | Dashboard store (zustand + immer + zundo), saved through `DashboardRepository` | Edited, undone, saved                 |
-| View state   | Dashboard time range and refresh, variable values, viewers' widget overrides, the mode (§3) | URL search params, validated with zod                                          | Shareable, back/forward               |
-| UI state     | Selection, the hovered widget (for hover sync), open menus, rows collapsed this session     | Component state or a small store                                               | Not shared, not undone                |
-| Server state | Query results                                                                               | TanStack Query, keyed by each widget's resolved inputs                         | Cache and refetch                     |
-| Static       | Widget, datasource and integration registries                                               | Context, built once in `app/`                                                  | Never changes at runtime              |
-| Personal     | Density (§2)                                                                                | The persisted settings store, next to theme and reduced motion                 | Follows the viewer, not the dashboard |
+| Layer        | What's in it                                                                                                                            | Where                                                                          | Why                                   |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------- |
+| Document     | Widgets, layout blocks, saved overrides, variable definitions, defaults                                                                 | Dashboard store (zustand + immer + zundo), saved through `DashboardRepository` | Edited, undone, saved                 |
+| View state   | Dashboard time range, refresh and time zone, variable values, viewers' widget overrides, the open tab of each tabs block, the mode (§3) | URL search params, validated with zod                                          | Shareable, back/forward               |
+| UI state     | Selection, the hovered widget (for hover sync), open menus, rows opened or closed this session                                          | Component state or a small store                                               | Not shared, not undone                |
+| Server state | Query results, one entry per datasource query                                                                                           | TanStack Query, keyed by the datasource, its spec and the context it uses (§6) | Cache and refetch                     |
+| Static       | Widget, datasource and integration registries                                                                                           | Context, built once in `app/`                                                  | Never changes at runtime              |
+| Personal     | Density (§2), time zone preference                                                                                                      | The persisted settings store, next to theme and reduced motion                 | Follows the viewer, not the dashboard |
 
 **Providers.** The shell's pattern: one store per provider, hooks that select from it.
 
@@ -40,14 +40,22 @@ A widget's time has three modes:
 
 **Which widgets get it.** The widget type declares time support, and at least one of its queries uses a time-aware datasource. A markdown widget, a heading or a static `local-json` file gets no time option.
 
+**Time zone.** Relative ranges such as `now/d` need one. Precedence: the URL (`tz`), the dashboard's saved time zone, the viewer's personal setting, the browser's. It is part of the query context (§6).
+
+**One `now` per refresh.** The dashboard takes one `now` when the range changes or a refresh fires, and every widget resolves its range against it, so all widgets cover the same window and Inspect shows the exact times.
+
 **URL.**
 
 ```text
-?from=now-24h&to=now&refresh=1m      dashboard range and refresh
-&var-region=eu                       variable values (§5)
-&wt={ <widgetId>: override }         viewers' widget overrides; the router serializes the object
-&view=<id> | &inspect=<id>&tab=data | &mode=edit[&widget=<id>]    modes (§3)
+?from=now-24h&to=now&refresh=1m&tz=Europe/Budapest    dashboard range, refresh, time zone
+&var-region=eu                                         variable values (§5)
+&wt={ <widgetId>: override }                           viewers' widget overrides, only where they differ from the saved value
+&tabs={ <tabsBlockId>: <tabId> }                       the open tab of each tabs block (§4)
+&view=<id> | &inspect=<id>&inspectTab=data | &mode=edit[&widget=<id>]    modes (§3)
 ```
+
+- Defaults are removed with the router's `stripSearchParams`, so a plain dashboard link stays short.
+- Arrays and objects use the router's default JSON encoding. Grafana-style repeated keys (`var-x=a&var-x=b`) would need a custom serializer; not now.
 
 ### 2. Widget
 
@@ -80,11 +88,10 @@ In edit mode the header is the drag handle. A `header` widget (a heading) has no
 
 Single-letter keys work only while a tile is hovered or focused, and never while typing in a field. `?` lists the shortcuts. Move, resize, duplicate and remove announce the result in a live region, naming the widget and its old and new position, and focus returns to the menu button (Atlassian's drag-and-drop guidance).
 
-**Registry additions.**
+**Registry and document additions.** Datasource additions are in §6.
 
 ```ts
 WidgetDefinition { …, capabilities: { time: boolean; inspect: boolean; export: ('csv' | 'json')[]; hoverSync: boolean } }
-DatasourceDefinition { …, timeAware: boolean; runsOn: 'browser' | 'server'; maxConcurrency: number }
 Widget (document) { type, title, description?, options, queries, time?: TimeOverride, syncGroup? }
 TimeOverride = { mode: 'range'; from; to } | { mode: 'shift'; by }      absent = inherit
 ```
@@ -115,13 +122,13 @@ TimeOverride = { mode: 'range'; from; to } | { mode: 'shift'; by }      absent =
 
 Every mode is in the URL, validated with zod, so reload, back/forward and shared links work.
 
-| Mode                   | URL                      | Behaviour                                                                                                                                                                                                                       |
-| ---------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| View                   | none                     | The default. Viewers' time and variable changes go in the URL (§1).                                                                                                                                                             |
-| One widget full screen | `?view=<id>`             | The widget fills the main pane; the chrome stays. The grid stays mounted inside `Activity` (hidden): its state is kept, its effects and query subscriptions are cleaned up, so hidden tiles don't refetch. Esc or Back returns. |
-| Inspect                | `?inspect=<id>&tab=…`    | A right-side drawer (below). Works together with full screen: the widget large, its data beside it.                                                                                                                             |
-| Edit                   | `?mode=edit`             | Save, Discard, Undo and Redo in the page header's control bar. The draft is kept in localStorage, so a reload stays in edit mode. Leaving with unsaved changes asks first.                                                      |
-| Edit one widget        | `?mode=edit&widget=<id>` | Where the options and the query editor live is open decision 1.                                                                                                                                                                 |
+| Mode                   | URL                          | Behaviour                                                                                                                                                                                                      |
+| ---------------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| View                   | none                         | The default. Viewers' time and variable changes go in the URL (§1).                                                                                                                                            |
+| One widget full screen | `?view=<id>`                 | The widget fills the main pane; the chrome stays. The grid stays mounted inside `Activity` to keep its state, and the hidden tiles' `dataActive` is false, so they make no requests (§6). Esc or Back returns. |
+| Inspect                | `?inspect=<id>&inspectTab=…` | A right-side drawer (below). Works together with full screen: the widget large, its data beside it.                                                                                                            |
+| Edit                   | `?mode=edit`                 | Save, Discard, Undo and Redo in the page header's control bar (Editing, below).                                                                                                                                |
+| Edit one widget        | `?mode=edit&widget=<id>`     | Where the options and the query editor live is open decision 1.                                                                                                                                                |
 
 **The context bar is for help, general information and notifications,** not for every tool. Working tools such as Inspect open in right-side drawers instead.
 
@@ -129,11 +136,30 @@ Every mode is in the URL, validated with zod, so reload, back/forward and shared
 
 - Opens from the right edge inside the main pane, so a docked context bar stays visible. Non-modal: the dashboard stays usable. Width is resizable, with sizes from shell tokens.
 - Focus moves into the drawer when it opens and back to the menu button when it closes; Esc closes it.
-- Four tabs:
-  - **Data:** the `DataFrame` as a table, with CSV and JSON download.
-  - **Query:** each query's datasource, spec, resolved time range, and request and response.
-  - **JSON:** the widget's JSON and the `DataFrame` JSON.
+- Four tabs, each per query when a widget has several:
+  - **Data:** the frames as a table, with CSV and JSON download.
+  - **Query:** the datasource, spec, resolved time range, time zone, variables used, and request and response.
+  - **JSON:** the widget's JSON and the frames' JSON.
   - **Stats:** duration, row count, whether it came from cache, when it was fetched.
+
+**Editing.**
+
+- **Undo steps follow user actions,** not store updates. zundo keeps up to 50 steps of the document, without the time range and selection.
+
+  | Action                                    | Undo steps                              |
+  | ----------------------------------------- | --------------------------------------- |
+  | Drag, resize                              | One, committed on stop (grid rules 5–7) |
+  | Move to…, Resize…, Duplicate, Remove, Add | One each                                |
+  | Typing in a title, description or option  | One per field, committed on blur        |
+  | Applying a query change                   | One per apply                           |
+
+  Text fields keep their own state and write the document on blur. Anything else that needs grouping uses zundo's `pause()` and `resume()`.
+
+- **Save** makes the current document the new baseline, and `dirty` becomes false. Undo after Save is allowed and makes the dashboard dirty again.
+- **Discard** restores the baseline and clears the undo history and the draft.
+- **Draft:** kept in localStorage per dashboard id, so a reload stays in edit mode with the changes. Leaving with unsaved changes asks first.
+- **Adding a widget** places it at the end of the chosen grid. Dragging from the palette (react-grid-layout's `dropConfig`) comes later.
+- **Reading order:** after each commit, tiles render in the reading order of the `lg` layout (by row, then column), so keyboard and screen-reader order follow what's on screen. Export writes items in the same order. The order isn't stored separately.
 
 ### 4. Layout
 
@@ -141,28 +167,34 @@ Layout is separate from widgets, as in Perses and Grafana's schema v2. The dashb
 
 ```text
 Block = { kind: 'grid', id, layouts: { lg, md?, sm? } }
-      | { kind: 'row',  id, title, collapsed, time?, refresh?, variables?, grid: { layouts } }
+      | { kind: 'row',  id, title, defaultCollapsed?, time?, refresh?, variables?, grid: { layouts } }
       | { kind: 'tabs', id, tabs: { id, title, time?, refresh?, variables?, body: (grid | row)[] }[] }
 Item  = { i: widgetId, x, y, w, h }
 ```
 
 - Tabs may contain rows; nothing nests deeper. Rows come first, tabs after.
 - Every grid is its own react-grid-layout instance, stacked vertically, so no grid is nested inside another. Dragging works within one grid; moving to another section uses the menu's "Move to…", which is also the WCAG alternative to dragging. Cross-section drag is left out: Kibana had to build its own layout engine for it.
-- Collapsed rows and never-opened tabs don't mount their widgets, as in Kibana. A visited tab stays inside `Activity`, so it keeps its state without refetching.
+- **Rows:** `defaultCollapsed` is saved with the dashboard. Opening or closing a row is UI state for the session and doesn't make the dashboard dirty.
+- **Tabs:** the open tab is in the URL (`tabs`); the first tab is the default.
+- Collapsed rows and never-opened tabs don't mount their widgets, as in Kibana. A visited tab stays inside `Activity` to keep its state, with `dataActive` false while hidden.
 - Rows and tabs are the section level of the scope chain (§1).
 - The `container` widget type, including its nested sub-dashboard grid, is dropped.
 - An empty dashboard shows "Add widget" and "Start from a template".
 
-**Document versions.** Optional widget fields (`description`, `time`, `syncGroup`) are added to v1; old documents still parse. Replacing `layouts` with `body` is v2, and its migration wraps a v1 document's layouts in one `grid` block. This is the first real migration.
+**Checks after parsing.** zod checks each object's shape. A domain check then rejects a document where a layout item points at a missing widget, a widget appears twice in the body, a block or tab id repeats, or a widget isn't placed anywhere, with an error that names the id.
+
+**Document versions.** `version` stays the schema version. Optional widget fields (`description`, `time`, `syncGroup`) are added to v1; old documents still parse. Replacing `layouts` with `body` is v2, and its migration wraps a v1 document's layouts in one `grid` block; this is the first real migration. Phase 5 adds a separate `revision` field for the stored copy, used for conflict checks; it is never folded into `version`.
 
 ### 5. Variables and filters
 
 - Definitions live in the document, values in the URL (`?var-region=eu`). Scope is the dashboard or a section (§1).
 - Types: custom list, query (values from a datasource), text, interval, and datasource (switch between configured connections of one type). Multi-select and "All" are supported.
 - A variable's query can use another variable. Variables are evaluated in dependency order, and a cycle is rejected.
-- SQL datasources get variables as bound parameters, never pasted into the query text. ClickHouse's HTTP interface supports this with `{name:Type}` placeholders and `param_<name>` values.
+- **Which queries use a variable:** each datasource type implements `getVariableRefs(spec)`; the dashboard never searches query text itself. The result drives evaluation order, cycle detection, which widgets a change affects, Inspect's variable list, and the query key.
+- **Values** are bound parameters, never pasted into query text. ClickHouse's HTTP interface supports this with `{name:Type}` placeholders and `param_<name>` values.
+- **Identifiers** (a table, a column, a function) can't be ordinary parameters in most SQL databases. Where the datasource supports identifier parameters (ClickHouse's `{name:Identifier}`) it uses them; otherwise the variable offers an allow-listed set of choices. Each datasource declares which (`identifierParams`).
 - The filter bar sits in the page header's control bar, next to the time picker.
-- Cross-filtering (click a bar to set a filter) comes later, opt-in per widget.
+- **Variables and filters are separate.** A variable is an input the author defines. A filter is a constraint a viewer adds, kept in view state. A cross-filter is a filter created by clicking a chart. Filters and cross-filtering come later and won't be modeled as variables; Grafana 13.1 also keeps "Filter and Group by" apart from its variable types.
 
 **Chosen: scope by reference.** A widget is affected by a variable when its query uses it, as in Grafana. Nothing extra is stored; Inspect lists which variables a widget uses.
 
@@ -174,16 +206,35 @@ Item  = { i: widgetId, x, y, w, h }
 
 ### 6. Data flow
 
-The pipeline is integration → datasource (a configured connection) → query (per widget) → adapter → `DataFrame[]` → transforms → widget.
+The pipeline is integration → datasource (a configured connection) → query → adapter → `DataFrame[]` → transforms → widget.
 
-- **Where a query runs:** each datasource type declares `runsOn`. Built-ins (`local-json`, `mock`, `csv`) run in the browser; integrations that hold secrets run through the backend.
-- **Query key:** the widget's resolved inputs: effective time range, variable values and interval. Identical queries share one cache entry.
-- **Previous data:** `placeholderData: keepPreviousData` moves from the `QueryClient` defaults to widget queries. A route component isn't remounted when only its params change, so a global default would show one dashboard's data under another's URL.
-- **Concurrency:** each datasource caps parallel requests (`maxConcurrency`). Visible widgets fetch first, since tiles mount only near the viewport.
-- **Refresh** follows the scope chain and pauses while the browser tab is hidden, as today.
-- **Errors grouped by datasource:** when two or more widgets fail on the same datasource, one banner says so ("Datadog unavailable, 12 widgets affected, Retry all") and the tiles show a compact state, following Primer's degraded-experience pattern. A widget with several queries shows what succeeded, with a warning.
-- **Stats:** each result keeps its timing, row count and request metadata for Inspect.
-- **Large data:** row limits and downsampling in the datasource; Arrow later for ClickHouse.
+```ts
+QueryContext {
+  range: { from: number; to: number; raw: { from: string; to: string } }   // epoch ms, resolved against the shared `now`
+  timezone: string
+  variables: ResolvedVariables
+  resolution: { maxDataPoints: number; intervalMs: number; minIntervalMs?: number }
+}
+DatasourceDefinition { …,
+  query(spec, ctx: QueryContext, signal): Promise<DataFrame[]>
+  getVariableRefs(spec): VariableRef[]
+  timeAware: boolean; usesResolution: boolean; identifierParams: boolean
+  runsOn: 'browser' | 'server'; maxConcurrency: number
+}
+```
+
+- **Where a query runs:** built-ins (`local-json`, `mock`, `csv`) run in the browser; integrations that hold secrets run through the backend (`runsOn`).
+- **One cache entry per datasource query.** The key is the datasource, its spec, and the parts of the context it uses: the raw range and time zone if it's time-aware, the variables `getVariableRefs` returns, and the resolution bucket if `usesResolution`. Identical queries in two widgets share one entry, and each query can fail, retry, be cancelled and be inspected on its own. Queries stay embedded in widgets in the document; only the cache unit changes.
+- **`useWidgetData(widgetId)`** runs the widget's queries with `useQueries` and `combine`, applies transforms, and returns the frames, each query's status, and a warning when only some succeeded. `useQueries` doesn't pass previous data to `placeholderData`, so the hook keeps the last complete result itself while new keys load. Widgets never handle raw query results. `keepPreviousData` leaves the `QueryClient` defaults: a route component isn't remounted when only its params change, so a global default would show one dashboard's data under another's URL.
+- **Gating:** each tile has `dataActive`, false while it's hidden (another widget full screen, a tab not showing). Its queries pass `enabled: dataActive`, so nothing is fetched or refetched while hidden. `Activity` only keeps hidden UI state; it isn't what stops requests.
+- **Resolution** comes from the committed layout: the widget's column span at the current breakpoint times a nominal column width, rounded into a few buckets. It never comes from live pixel width, so panel toggles, window resizes and drags don't refetch. Full screen uses a higher bucket. Only datasources with `usesResolution` include it in the key.
+- **Aggregation and drawing are separate.** Datasources aggregate using `intervalMs` (SQL time buckets, a Prometheus step); that is part of what the query means. Reducing points for drawing (LTTB) happens only after transforms, so totals and reducers use the real data.
+- **`DataFrame` contract:** every field in a frame has the same length; values may be `null`; time values are epoch milliseconds; field `config` holds unit, display name and labels; `meta` keeps the query id and request stats; nothing in a frame is a class instance (`Date`, `Map`), so frames serialize for Inspect and export. Transforms are pure `DataFrame[] → DataFrame[]`, and nothing datasource-specific leaves the adapter.
+- **Concurrency:** each datasource adapter limits parallel requests to `maxConcurrency`; TanStack Query has no limit of its own. Visible widgets fetch first, since tiles mount only near the viewport.
+- **Refresh** follows the scope chain, takes a new shared `now`, and pauses while the browser tab is hidden.
+- **Errors:** a failed query shows inline in its widget; `QueryCache.onError` reports it once per failed request ([06](06-sentry.md)). When two or more widgets fail on the same datasource, one banner says so ("Datadog unavailable, 12 widgets affected, Retry all") and the tiles show a compact state, following Primer's degraded-experience pattern.
+- **Stats:** each query keeps its timing, row count, cache hit and request metadata for Inspect.
+- **Large data:** row limits in the datasource; Arrow later for ClickHouse.
 
 ### 7. Navigation
 
@@ -200,7 +251,7 @@ Using Horizon's levels:
 
 - Persistence stays behind `DashboardRepository`, with versioned documents and migrations.
 - The backend (TanStack Start in SPA mode, or a separate API), auth (Better Auth, Clerk or WorkOS) and the phase order are open, to decide later (open decisions 2–4).
-- The Integrations foundation keeps its plan ([research](research/integrations.md)). Entries also get `category`, `dependsOn`, `conflicts` and described config fields, from TanStack's add-on manifest. The vocabulary is integration → datasource → query.
+- The Integrations foundation follows its [research](research/integrations.md): lightweight manifests with a `category`, and config, runtime and setup code in chunks loaded only for enabled entries. `dependsOn` and `conflicts` wait until an integration needs them. The vocabulary is integration → datasource → query.
 
 ## Open decisions
 
@@ -211,35 +262,46 @@ Using Horizon's levels:
 
 ## Out of scope
 
-Kiosk mode. Later, not scheduled: app-level tabs, folders, cross-filtering, a reusable saved-query library, dragging between sections, explicit variable wiring.
+Kiosk mode. Later, not scheduled: app-level tabs, folders, filters and cross-filtering, a reusable saved-query library, dragging between sections, dragging from the palette, explicit variable wiring.
 
 ## Tasks
 
-### Stage A: viewing (phase 3, before editing)
+Build order: stage 1, stage 2 (together the edit MVP), stage 3; then 06 Sentry and the Integrations foundation; then stage 4.
 
-- [ ] **State layers and `DashboardProvider`.** A store per dashboard id; view state in zod-validated search params; `keepPreviousData` moved to widget queries. Done when switching between two dashboards never shows the first one's data under the second's URL.
-- [ ] **Scope resolver.** `useEffectiveTimeRange(widgetId)` over the URL (`from`, `to`, `wt`) and the store, with the precedence in §1. Done when unit tests cover every level of the precedence and shift-over-shift, and one widget's override re-renders only that tile.
-- [ ] **Widget header.** Title, info icon, clock, status, and the menu's visibility rules, including focus-within and touch. Done when a keyboard-only user reaches every header control.
-- [ ] **Capabilities and the menu.** `capabilities` on `WidgetDefinition`, `timeAware` / `runsOn` / `maxConcurrency` on `DatasourceDefinition`; the View and Share groups. Done when each widget type's story shows the right items.
-- [ ] **Full-screen view** (`?view`), with the grid hidden in `Activity`. Done when a hidden tile makes no request.
-- [ ] **Inspect drawer** (`?inspect`, `&tab`) with its four tabs. Done when every tab has a story and a test, and focus returns to the menu button on close.
+### Stage 1: foundation (phase 3)
+
+- [ ] **State layers and `DashboardProvider`.** A store per dashboard id holding the document, the saved baseline and `dirty`; view state in zod-validated search params with defaults stripped; `keepPreviousData` removed from the `QueryClient` defaults. Done when switching between two dashboards never shows the first one's data under the second's URL.
+- [ ] **Widget header and menu.** Title, info icon, status, and the menu's visibility rules (hover, focus inside, edit mode, touch); `capabilities` on `WidgetDefinition`, and the menu built from them. Done when a keyboard-only user reaches every header control and each widget type's story shows the right items.
+
+### Stage 2: edit MVP (phase 3)
+
+- [ ] **Edit mode** (`?mode=edit`): Save, Discard, Undo and Redo in the page header, the draft in localStorage, the leave guard, Save and Discard as in §3. Done when a reload keeps the draft, Undo after Save makes the dashboard dirty, and Discard restores the saved document with an empty history.
+- [ ] **Drag and resize** following grid rules 5–7: the header as handle, the `se` handle, `constraints` for minimum sizes, commit on stop and never in `onLayoutChange`; the drag placeholder and handles styled with tokens (react-grid-layout's defaults are red and black). Done when one drag and one resize each add exactly one undo step.
+- [ ] **Menu actions:** Move to…, Resize…, Duplicate and Remove, with live-region announcements and focus back on the menu button. Done when every action works without a pointer and adds one undo step.
+- [ ] **Add widget** at the end of the chosen grid, and reading order from the `lg` layout after each commit. Done when keyboard order follows the layout after a drag, and export writes items in reading order.
+- [ ] **Widget editor and palette** once open decision 1 is settled; text fields commit on blur, one undo step per field.
+- [ ] **Browser tests** for drag, resize, undo, and "edit, undo, export, import identical" (Storybook's Vitest addon or Playwright).
+- [ ] **Measure** drag and resize on `/dashboards/perf` in a production build: chart resizes per interaction and long tasks. Done when the numbers are in grid-and-charts.md.
+
+### Stage 3: viewing (phase 3)
+
+- [ ] **One cache entry per datasource query.** Datasources return `DataFrame[]` under the contract in §6; `useWidgetData(widgetId)`; `dataActive` gating. Done when two widgets with the same query make one request, one failed query leaves the widget's other results showing, and a hidden widget makes no request.
+- [ ] **Scope resolver** with time zone and the shared `now`: `useEffectiveTimeRange(widgetId)` over the URL (`from`, `to`, `tz`, `wt`) and the store, with the precedence in §1. Done when unit tests cover every precedence level, shift over shift, and `now/d` in two time zones, and one widget's override re-renders only that tile.
+- [ ] **Time range per widget:** the menu's Time range…, the clock, and the saved override in edit mode (one undo step).
+- [ ] **Full-screen view** (`?view`). Done when the hidden tiles' `dataActive` is false and no request is made while they're hidden.
+- [ ] **Inspect drawer** (`?inspect`, `inspectTab`) with its four tabs, per query. Done when every tab has a story and a test, and focus returns to the menu button on close.
 - [ ] **Density.** Tokens, the Settings › Appearance option, `data-density`, the react-grid-layout constant. Done when switching density lays the grid out once and changes no layout units.
 - [ ] **Shortcuts** `v`, `i`, `t` and the `?` list. Done when no shortcut fires while typing in a field.
 
-### Stage B: editing (phase 3)
+### Stage 4: layout, variables, data (phase 4)
 
-- [ ] **Edit mode** (`?mode=edit`): draft in localStorage, Save, Discard, Undo and Redo, the leave guard.
-- [ ] **Saved time override:** in edit mode the time control writes the document.
-- [ ] **Move to…, Resize…, Duplicate, Remove** in the menu, with live-region announcements; drag and resize following grid rules 5–7.
-- [ ] **Widget editor and palette** once open decision 1 is settled.
-- [ ] **Browser tests** for drag, undo and "edit, undo, export, import identical" (Storybook's Vitest addon or Playwright).
+Integration datasources in the datasource manager need the Integrations foundation.
 
-### Stage C: layout, variables, data (phase 4)
-
-- [ ] **Document v2:** `body` blocks and the v1 → v2 migration. Done when every v1 fixture loads unchanged.
-- [ ] **Rows,** collapsed ones not mounted, with section scopes; then **tabs**.
+- [ ] **Document v2:** `body` blocks, the v1 → v2 migration, and the domain check after parsing. Done when every v1 fixture loads unchanged and each broken-reference case is rejected with an error naming the id.
+- [ ] **Rows** with `defaultCollapsed`, collapsed ones not mounted, and section scopes; then **tabs**, with the open tab in the URL.
+- [ ] **Resolution** from the committed layout, in buckets, for datasources with `usesResolution`. Done when a panel toggle refetches nothing and full screen fetches once at the higher bucket.
 - [ ] **Hover sync groups** with the timestamp `syncMethod`. Done when the measurement on `/dashboards/perf` is in grid-and-charts.md.
-- [ ] **Variables** by reference, with dependencies, bound parameters and the filter bar.
+- [ ] **Variables** by reference through `getVariableRefs`, with dependency order, bound parameters, identifier handling per datasource, and the filter bar.
 - [ ] **Grouped datasource errors** and **per-datasource concurrency.**
 
 ## Decisions
@@ -255,12 +317,24 @@ Kiosk mode. Later, not scheduled: app-level tabs, folders, cross-filtering, a re
 - **Sep 29: queries stay embedded in widgets;** cross-filtering comes later.
 - **Sep 29: navigation:** Favorites and Recent in the sidebar, tags now and folders later, app-level tabs in the future; the navbar area picker stays.
 - **Sep 29: kiosk mode is out of scope.** Backend, auth and phase order are decided later.
+- **Sep 30: build order.** The edit MVP (stages 1 and 2) comes first, then viewing (stage 3). 06 Sentry and the Integrations foundation follow; stage 4 is phase 4.
+- **Sep 30: one cache entry per datasource query,** combined by `useWidgetData`, which keeps the last complete result while new keys load.
+- **Sep 30: the time model has a time zone and one shared `now` per refresh.**
+- **Sep 30: `dataActive` gates requests;** `Activity` only keeps hidden UI state.
+- **Sep 30: undo steps follow user actions.** Undo after Save is allowed; Discard clears the history and the draft. Adding a widget places it at the end of a grid; palette drag comes later.
+- **Sep 30: rows save `defaultCollapsed`, not their current state; the open tab is in the URL.**
+- **Sep 30: reading order comes from the `lg` layout,** not a separate list; a domain check after zod rejects broken references.
+- **Sep 30: `version` stays the schema version;** phase 5 adds `revision`.
+- **Sep 30: resolution comes from the committed layout, in buckets.** Datasources aggregate; only drawing downsamples.
+- **Sep 30: variables go through `getVariableRefs`.** Identifiers are parameters only where the datasource supports it, otherwise allow-listed; filters stay separate from variables.
 
 ## Verification
 
-- Reload, back/forward and a shared link keep the dashboard range, widget overrides, variable values and mode.
+- Reload, back/forward and a shared link keep the dashboard range, time zone, widget overrides, variable values, open tabs and mode.
 - A keyboard-only run reaches every widget action: view, inspect, time, and in edit mode move, resize, duplicate and remove.
-- A hidden tile (full screen, collapsed row, unvisited tab) makes no request.
+- A drag, a resize and each menu action add exactly one undo step; Discard restores the saved document.
+- A hidden widget (another one full screen, a tab not showing) makes no request; a collapsed row doesn't mount its widgets.
+- Panel toggles and window resizes cause no refetch.
 - Every v1 dashboard fixture loads through the v2 migration and renders the same.
 
-Sources: [Grafana dynamic dashboards](https://grafana.com/docs/grafana/latest/visualizations/dashboards/build-dashboards/create-dynamic-dashboard/), [Grafana query options](https://grafana.com/docs/grafana/latest/panels-visualizations/query-transform-data/), [Grafana panel inspector](https://grafana.com/docs/grafana/latest/panels-visualizations/panel-inspector/), [Grafana Scenes](https://grafana.com/developers/scenes/core-concepts), [Kibana collapsible sections](https://www.elastic.co/search-labs/blog/kibana-dashboard-build-layout), [Kibana time badge](https://github.com/elastic/kibana/issues/178279), [Perses dashboard spec](https://perses.dev/perses/docs/api/dashboard/), [Metabase dashboards](https://www.metabase.com/docs/latest/dashboards/introduction), [Superset native filters](https://deepwiki.com/apache/superset/3.4-native-filters), [Horizon navigation](https://horizon.servicenow.com/workspace/patterns/navigation/navigation-pattern), [Primer degraded experiences](https://primer.style/product/ui-patterns/degraded-experiences/), [Atlassian drag-and-drop accessibility](https://atlassian.design/components/pragmatic-drag-and-drop/accessibility-guidelines), [Recharts synchronized charts](https://recharts.github.io/en-US/examples/SynchronizedAreaChart/), [React Activity](https://react.dev/reference/react/Activity), [ClickHouse query parameters](https://clickhouse.com/docs/interfaces/http#cli-queries-with-parameters), [WCAG 2.5.7](https://www.w3.org/WAI/WCAG22/Understanding/dragging-movements.html), [WCAG 1.4.13](https://www.w3.org/WAI/WCAG22/Understanding/content-on-hover-or-focus.html).
+Sources: [Grafana dynamic dashboards](https://grafana.com/docs/grafana/latest/visualizations/dashboards/build-dashboards/create-dynamic-dashboard/), [Grafana query options](https://grafana.com/docs/grafana/latest/panels-visualizations/query-transform-data/), [Grafana dashboard URL variables](https://grafana.com/docs/grafana/latest/visualizations/dashboards/build-dashboards/create-dashboard-url-variables/), [Grafana variable types](https://grafana.com/docs/grafana/latest/visualizations/dashboards/variables/add-template-variables/), [Grafana panel inspector](https://grafana.com/docs/grafana/latest/panels-visualizations/panel-inspector/), [Grafana Scenes](https://grafana.com/developers/scenes/core-concepts), [Kibana collapsible sections](https://www.elastic.co/search-labs/blog/kibana-dashboard-build-layout), [Kibana time badge](https://github.com/elastic/kibana/issues/178279), [Perses dashboard spec](https://perses.dev/perses/docs/api/dashboard/), [Metabase dashboards](https://www.metabase.com/docs/latest/dashboards/introduction), [Superset native filters](https://deepwiki.com/apache/superset/3.4-native-filters), [Horizon navigation](https://horizon.servicenow.com/workspace/patterns/navigation/navigation-pattern), [Primer degraded experiences](https://primer.style/product/ui-patterns/degraded-experiences/), [Atlassian drag-and-drop accessibility](https://atlassian.design/components/pragmatic-drag-and-drop/accessibility-guidelines), [Recharts synchronized charts](https://recharts.github.io/en-US/examples/SynchronizedAreaChart/), [React Activity](https://react.dev/reference/react/Activity), [TanStack Query useQueries](https://tanstack.com/query/latest/docs/framework/react/reference/useQueries), [TanStack Router search params](https://tanstack.com/router/latest/docs/framework/react/guide/search-params), [zundo](https://github.com/charkour/zundo), [ClickHouse query parameters](https://clickhouse.com/docs/sql-reference/syntax#defining-and-using-query-parameters), [WCAG 2.5.7](https://www.w3.org/WAI/WCAG22/Understanding/dragging-movements.html), [WCAG 1.4.13](https://www.w3.org/WAI/WCAG22/Understanding/content-on-hover-or-focus.html).

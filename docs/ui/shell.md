@@ -98,7 +98,7 @@ While pinned, the root has `data-moving`: the main pane clips sideways instead o
 | -------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Burger         | `Burger` with a tooltip                           | Moves a docked sidebar between modes (above); opens and closes the drawer when undocked                                                           |
 | Search         | `Input` rendered as a button, opening `Spotlight` | `Ctrl+K` or `/`; the actions are the `nav` entries                                                                                                |
-| Area           | `Select` over `areas` in `model/nav.ts`           | Switches the top-level area (Dashboards, Data sources, Integrations, Settings) and navigates                                                      |
+| Area           | `Select` over `areas` in `model/nav.ts`           | Switches the top-level area (Dashboards, Data sources, Integrations, Settings) and navigates; it may become a workspace or tenant switcher        |
 | Context button | `ActionIcon` with an `Indicator`                  | Opens and closes the context bar; the dot sums the tab badges                                                                                     |
 | Theme          | `ColorSchemeToggle`                               | Cycles light → dark → auto through `useMantineColorScheme`; Mantine stores it, and an inline script in `index.html` applies it before first paint |
 | User           | `UserMenu`                                        | Placeholder `CurrentUser`                                                                                                                         |
@@ -141,6 +141,8 @@ Compact is the expanded sidebar with its labels covered, not a second layout. Ev
 Navigating into a section opens it, so the current page is visible when the sidebar expands.
 
 ## Context bar
+
+The context bar holds help, general information and notifications, not every tool: working tools such as Inspect open in right-side drawers inside the main pane ([07 §3](../../.agents/plans/07-dashboard-model.md#3-modes)).
 
 Tabs come from the matched routes' `staticData.contextTabs`, merged root to leaf, plus the global `notifications` tab. The active tab shows its label; the others are icons with tooltips. Inactive panels stay mounted through `Activity`, so their state survives switching. A tab can carry a badge (`subscribe` / `getSnapshot`); the navbar button shows the sum.
 

@@ -3,5 +3,63 @@
   "explorer.fileNesting.expand": false,
   "explorer.fileNesting.patterns": {
     "*.tsx": "${capture}.module.css, ${capture}.css, ${capture}.stories.tsx, ${capture}.stories.ts, ${capture}.test.tsx, ${capture}.spec.tsx, ${capture}.types.ts"
-  }
+  },
+  "editor.formatOnSave": true,
+  "prettier.requireConfig": true,
+  "oxc.enable.oxlint": true,
+  "oxc.enable.oxfmt": false,
+  "oxc.lint.run": "onType",
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  // -----------------------------------------------------------------------
+  // Oxlint
+  // -----------------------------------------------------------------------
+  // "oxc.enable.oxlint": true,
+  // "oxc.enable.oxfmt": false,
+  "oxc.requireConfig": true,
+  // Fix safe Oxlint issues when explicitly saving.
+  // VS Code subsequently runs formatOnSave, so Prettier produces final layout.
+  "editor.codeActionsOnSave": {
+    "source.fixAll.oxc": "explicit",
+    "source.fixAll.stylelint": "explicit"
+  },
+  // -----------------------------------------------------------------------
+  // TypeScript 7
+  // -----------------------------------------------------------------------
+  "js/ts.experimental.useTsgo": true,
+  // Use this repo's TypeScript 7 installation.
+  "js/ts.tsdk.path": "./node_modules/typescript",
+  // -----------------------------------------------------------------------
+  // CSS
+  // Stylelint owns diagnostics in this repo.
+  // -----------------------------------------------------------------------
+  "css.validate": false,
+  "scss.validate": false,
+  "less.validate": false,
+  "stylelint.validate": [
+    "css",
+    "postcss"
+  ]
 }

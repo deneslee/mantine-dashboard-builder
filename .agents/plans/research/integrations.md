@@ -1,10 +1,10 @@
 # Integrations: feature flags or a registry
 
-Sep 29, 2026 · Outcome: option B, adopted in [plan.md › Integrations](../../../docs/planning/plan.md#locked-decisions) and [06 Sentry](../06-sentry.md)
+Sep 29, 2026 · revised Sep 30 · Outcome: option B, adopted in [plan.md › Integrations](../../../docs/planning/plan.md#locked-decisions) and [06 Sentry](../06-sentry.md)
 
 **Question.** Can Sentry, Datadog, Haystack, Azure SQL, New Relic, AWS and the like be feature flags, switched on through a central service, so the app stays as light as possible and a fresh install only reads local files?
 
-**Answer.** Make them integrations, not flags. A flag decides whether code runs; it doesn't stop the browser from downloading it. What keeps the app light is that each integration is its own chunk, loaded with `import()` only when it's enabled. Sentry already works that way since `1cc521f` (first-load JS from 1085 to 809 KiB). Which integrations a deployment has is configuration.
+**Answer.** Make them integrations, not flags. What keeps the app light is that each integration is its own chunk, loaded with `import()` only when it's enabled. A flag guarding that `import()` would save the same bytes; the reason not to use a flag service is that which integrations a deployment has is long-lived configuration, not a rollout or an experiment, and a service adds an SDK and a server. Sentry already works that way since `1cc521f` (first-load JS from 1085 to 809 KiB).
 
 ## Flags and plugins are different tools
 
@@ -44,7 +44,7 @@ In B, adding a new integration needs code, but enabling one that exists doesn't:
 - Every integration is compiled in, each in its own chunk.
 - A config port says which are enabled: a JSON file now, the API from phase 5.
 - The default config enables nothing, so a fresh install has only the built-in datasources.
-- First load stays at 809 KiB however many integrations exist.
+- Disabled integrations' config, runtime and setup chunks are never fetched. Their manifests add a little to first load, which a bundle budget keeps in check.
 - It's the widget and datasource registries (static maps in `app/registry.ts`, [05](../done/05-dashboard-read.md)) one step further.
 
 **C. Runtime plugins.** Only worth it if third parties write integrations. The costs:
@@ -64,19 +64,23 @@ In B, adding a new integration needs code, but enabling one that exists doesn't:
 - Datadog and New Relic can be both, so an entry declares what it provides rather than being one kind.
 - The built-in datasources (`local-json`, `mock`, and `csv` from phase 4) aren't integrations: they're always there.
 
-### Registry entry
+### Manifest
 
 ```ts
-IntegrationDefinition {
+IntegrationManifest {
   id: 'sentry', name, icon,
-  provides: ['telemetry'],                    // or ['datasource'], or both
-  configSchema: SentryConfig,                 // zod
-  load: () => import('…/sentry/runtime'),     // own chunk, only if enabled
-  Setup: lazy(() => import('…/SentrySetup')), // the page at /integrations/<id>
+  category: 'monitoring',                         // groups the catalog
+  provides: ['telemetry'],                        // or ['datasource'], or both
+  loadConfig: () => import('…/sentry/config'),    // zod schema; only for enabled entries and the Setup page
+  loadRuntime: () => import('…/sentry/runtime'),  // own chunk, only if enabled
+  loadSetup: () => import('…/sentry/Setup'),      // the page at /integrations/<id>
 }
 ```
 
-It lives in `app/registry.ts` next to widgets and datasources. `features/integrations` (the catalog) never imports an integration, the same way `features/dashboards` never imports a widget.
+- Only the manifest is imported statically, from `app/registry.ts`, next to widgets and datasources. A static import of the config schema would pull it, and whatever it imports, into first load.
+- At startup: validate the config file's outer shape, find the enabled ids, load and run only their config validators, then load their runtimes.
+- `features/integrations` (the catalog) never imports an integration, the same way `features/dashboards` never imports a widget.
+- `category` comes from TanStack's add-on manifest. Its `dependsOn` and `conflicts` wait until an integration needs them.
 
 ### Config
 
@@ -89,14 +93,14 @@ It lives in `app/registry.ts` next to widgets and datasources. `features/integra
 ```
 
 - Read at load through an `IntegrationConfigRepository` port, shaped like `DashboardRepository`: the JSON file now, the API from phase 5.
-- Versioned and validated with zod. An entry that fails its `configSchema` stays off, and its Setup page shows why.
+- Versioned and validated with zod. An entry that fails its config schema stays off, and its Setup page shows why.
 - The repo ships the default. A deployment supplies its own: on GitHub Pages, the workflow can write `dist/config/integrations.json` from a repository variable.
 
 ### Loading
 
-- **Telemetry:** `load()` runs after first render, as Sentry does now.
-- **Datasource:** the chunk loads when a widget first queries that type, or when the datasource manager (phase 4) opens its editor.
-- **Disabled:** nothing downloads. The catalog lists it with a Set up link.
+- **Telemetry:** `loadRuntime()` starts from `main.tsx` once the config is read, without blocking the first render. Reports made before it's ready are buffered ([06 §1](../06-sentry.md#1-report-errors-through-reporterror)).
+- **Datasource:** the runtime chunk loads when a widget first queries that type, or when the datasource manager (phase 4) opens its editor.
+- **Disabled:** none of its chunks are fetched. The catalog lists it with a Set up link.
 
 ### Secrets
 

@@ -4,4 +4,7 @@ node_modules
 pnpm-lock.yaml
 src/app/routeTree.gen.ts
 .claude
-.agents/plan
+.agents/skills
+coverage/
+.kiro
+.qartez

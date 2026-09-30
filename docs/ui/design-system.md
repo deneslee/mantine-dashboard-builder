@@ -1,3 +1,5 @@
+# Design system
+
 The design system stores every value once, as a raw primitive, and gives it a name (a semantic token). The name is published as a CSS variable, and Mantine components are bound to those names. Feature code only ever uses names, so changing a value in one place restyles the whole app.
 
 ## The four tiers
@@ -36,7 +38,7 @@ theme/components   Paper.extend + Paper.module.css  what Mantine components appl
 **3. Contextual layers** (`--app-layer-surface`, `-border`, `-field`)
 
 - These are meant to follow placement: a panel nested inside a widget would get the next step.
-- Today there's only one level, equal to `raised`. The nesting CSS is deferred to phase 4 ([tasks.md](../planning/tasks.md#phase-4-widgets-and-data)), where the `container` widget first puts widgets inside a widget.
+- Today there's only one level, equal to `raised`. The nesting CSS was meant for the `container` widget, which [07](../../.agents/plans/07-dashboard-model.md#4-layout) drops, so nothing nests yet ([tasks.md](../planning/tasks.md#phase-4-widgets-and-data)).
 
 **4. Component bindings** (`theme/`)
 
@@ -106,7 +108,7 @@ It never mentions a color, radius or border. To make dark-mode widgets lighter, 
 
 The same path, shorter:
 
-- **Button radius:** `shape.control = 'sm'` → `ButtonTheme` `radius: 'sm'` → `var(--mantine-radius-sm)` → `primitives.radius.sm` (4 px). Changing `shape.control` restyles every Button, ActionIcon and input. I checked this in Storybook last round.
+- **Button radius:** `shape.control = 'sm'` → `ButtonTheme` `radius: 'sm'` → `var(--mantine-radius-sm)` → `primitives.radius.sm` (4 px). Changing `shape.control` restyles every Button, ActionIcon and input.
 - **Status color:** `color="danger"` → the `danger` alias → `--mantine-color-danger-*` → the red palette, in both schemes.
 - **Icons:** `size={iconSize.sm} stroke={iconStroke}` → 16 and 1.75. These are TS constants because an SVG attribute can't read a CSS variable.
 
@@ -119,4 +121,4 @@ The same path, shorter:
 
 The lint rules keep this honest. oxlint rejects numeric spacing, `fw`, `fz` and `radius`, palette colors, numeric icon sizes, and primitive imports. Stylelint rejects hex, `rgb()`, palette shades, and raw colors, radii, z-index and durations. [lint/rules.test.ts](../../lint/rules.test.ts) proves each rule fires.
 
-**One subtlety:** a plain `<Paper>` or `<Card>` with no variant is painted by Mantine's `--mantine-color-body`, which now points at the **overlay** surface, not `raised`. The two have the same values today, so nothing looks wrong. If they ever diverge, give those components a variant or a bound background.
+**One subtlety, fix planned:** a plain `<Paper>` or `<Card>` with no variant is painted by Mantine's `--mantine-color-body`, which now points at the **overlay** surface, not `raised`, and so is the page body. The two have the same values today, so nothing looks wrong. Before they diverge: point `--mantine-color-body` at the canvas surface, bind `ModalBase` (Modal, Drawer) to overlay, and bind the parts that must match the surface behind them (Table's sticky header, the active Tabs border, Scroller's fade) to `--app-layer-surface`. In Mantine 9.6, Popover and Menu don't use `--mantine-color-body`. The task is in [tasks.md](../planning/tasks.md#housekeeping).
