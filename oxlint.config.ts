@@ -1,7 +1,7 @@
 import { defineConfig } from 'oxlint';
 
 /** The shared layer: everything features may build on (see AGENTS.md › Structure). */
-const shared = ['components', 'hooks', 'lib', 'stores', 'config', 'types', 'utils', 'testing'];
+const shared = ['core', 'shell', 'plugins', 'lib', 'utils', 'config', 'testing'];
 
 /** Alias patterns for the given top-level folders. */
 const above = (...dirs: string[]) => dirs.flatMap((dir) => [`@/${dir}`, `@/${dir}/**`]);
@@ -10,21 +10,27 @@ const above = (...dirs: string[]) => dirs.flatMap((dir) => [`@/${dir}`, `@/${dir
 const barrels = {
   group: [
     '@/features/*',
-    '@/components/*',
-    '@/components/layouts/*',
-    '@/design-system',
-    '@/design-system/components/*',
-    '@/lib/errors',
+    '@/core/*',
+    '@/ui',
+    '@/ui/components',
+    '@/ui/theme',
+    '@/ui/tokens',
+    '@/shell/navbar',
+    '@/shell/sidebar',
+    '@/shell/contextBar',
+    '@/shell/breadcrumbs',
+    '@/plugins/widgets/*',
+    '@/plugins/datasources/*',
     '@/lib/notify',
     '@/lib/sentry',
   ],
-  message: 'No barrel files: import the file that defines the name, e.g. @/components/errors/ErrorState.',
+  message: 'No barrel files: import the file that defines the name, e.g. @/ui/components/ErrorState.',
 };
 
 /** Raw values stay in the design system; everything else reads the semantic tier (docs/design-system.md). */
 const primitives = {
-  group: ['@/design-system/tokens/primitives'],
-  message: 'Only design-system/ may import the primitives: use @/design-system/tokens/semantic.',
+  group: ['@/ui/tokens/primitives'],
+  message: 'Only ui/ may import the primitives: use @/ui/tokens/semantic.',
 };
 
 /** Layer rule for one layer's files; it replaces the global rule there, so it repeats the shared bans. */
@@ -98,7 +104,9 @@ export default defineConfig({
   overrides: [
     {
       files: [
-        'src/design-system/**',
+        'src/ui/tokens/**',
+        'src/ui/theme/**',
+        'src/ui/components/Page.tsx',
         '**/*.stories.tsx',
         '**/*.test.{ts,tsx}',
         'src/testing/**',
@@ -124,14 +132,14 @@ export default defineConfig({
       env: { node: true, browser: false },
     },
 
-    // Layers (AGENTS.md › Structure): design-system ← shared ← features ← app. A layer imports only
-    // from itself and the layers below; features never import each other (app/ combines them).
+    // Layers (AGENTS.md › Structure): ui ← shared ← features ← app. A layer imports only from itself
+    // and the layers below; features never import each other (app/ combines them).
     {
-      files: ['src/design-system/**'],
+      files: ['src/ui/**'],
       rules: {
         'no-restricted-imports': layerRule(
-          above('app', 'features', ...shared),
-          'design-system/ is the lowest layer: it imports nothing from the rest of the app.',
+          above('app', 'features', 'shell', 'plugins', 'lib', 'config', 'testing'),
+          'ui/ is the design system: it imports only core/ and utils/.',
           [barrels],
         ),
       },

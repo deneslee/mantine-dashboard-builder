@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { parseSettingsTab, type SettingsTab } from '@/features/settings/model/tabs';
-import { SettingsPage } from '@/features/settings/components/SettingsPage';
+import { parseSettingsTab, type SettingsTab } from '@/features/settings/settingsTabs';
+import { SettingsPage } from '@/features/settings/SettingsPage';
 
 export const Route = createFileRoute('/settings')({
   staticData: { crumb: 'Settings' },

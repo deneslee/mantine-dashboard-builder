@@ -59,7 +59,12 @@
   },
   "overrides": [
     {
-      "files": ["src/design-system/**/*.css", "src/features/integrations/**/*.css"],
+      "files": [
+        "src/ui/tokens/**/*.css",
+        "src/ui/theme/**/*.css",
+        "src/ui/components/Page.module.css",
+        "src/features/integrations/**/*.css"
+      ],
       "rules": {
         "function-disallowed-list": null,
         "declaration-property-value-disallowed-list": null,
@@ -67,5 +72,5 @@
       }
     }
   ],
-  "ignoreFiles": ["src/design-system/tokens/**/*.css"]
+  "ignoreFiles": ["src/ui/tokens/**/*.css"]
 }

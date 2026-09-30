@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { getSentryStatus, testSentryConnection } from './client';
-import { loadSentryConfig, saveSentryConfig } from './settings';
+import { loadSentryConfig, saveSentryConfig } from './sentryConfig';
 import { logger, metrics } from './telemetry';
 
 describe('Sentry Integration', () => {

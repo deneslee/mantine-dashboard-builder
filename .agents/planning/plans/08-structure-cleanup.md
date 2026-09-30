@@ -237,11 +237,11 @@ Every step leaves `pnpm lint && pnpm format:check && pnpm build && pnpm test` gr
 
 ### 3. Moves
 
-- [ ] **`ui/`.** The design-system and the generic components, as in the table. Done when `design-system/` is gone.
-- [ ] **`shell/`.** Drop the `layouts/`, `hooks/`, `model/` and `panel/` levels. Done when `components/` holds nothing of the shell.
-- [ ] **`core/`, `plugins/`, `lib/`, error pages to `app/`.** Done when `types/`, `stores/`, `hooks/`, `config/`, `components/`, `features/widgets/` and `features/datasources/` are gone.
-- [ ] **Dashboards by area.** Move into `data/`, `state/`, `grid/`, `header/` and `editor/`; `DashboardView` moves whole to `DashboardPage` and `EditTools` whole to `editor/EditDrawer`. Done when `components/`, `api/`, `model/` and `hooks/` are gone from the feature.
-- [ ] **Small features flat.** Flatten settings, notifications and integrations; `storyRouter` becomes `TestRouter`.
+- [x] **`ui/`.** The design-system and the generic components, as in the table. Done when `design-system/` is gone.
+- [x] **`shell/`.** Drop the `layouts/`, `hooks/`, `model/` and `panel/` levels. Done when `components/` holds nothing of the shell.
+- [x] **`core/`, `plugins/`, `lib/`, error pages to `app/`.** Done when `types/`, `stores/`, `hooks/`, `config/`, `components/`, `features/widgets/` and `features/datasources/` are gone.
+- [x] **Dashboards by area.** Move into `data/`, `state/`, `grid/`, `header/` and `editor/`; `DashboardView` moves whole to `DashboardPage` and `EditTools` whole to `editor/EditDrawer`. Done when `components/`, `api/`, `model/` and `hooks/` are gone from the feature.
+- [x] **Small features flat.** Flatten settings, notifications and integrations; `storyRouter` becomes `TestRouter`.
 
 ### 4. Renames
 

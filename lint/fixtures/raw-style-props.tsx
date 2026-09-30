@@ -2,7 +2,7 @@
 // reported; `pnpm lint` skips this folder (`--ignore-pattern` in package.json).
 import { Group } from '@mantine/core';
 import { IconX } from '@tabler/icons-react';
-import { palette } from '@/design-system/tokens/primitives';
+import { palette } from '@/ui/tokens/primitives';
 
 export const RawStyleProps = () => (
   <Group gap={4} c="red" fw={600}>

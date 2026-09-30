@@ -7,13 +7,10 @@ import { configDefaults, defineConfig } from 'vitest/config';
 // Pure logic: no DOM, so no jsdom start-up cost. Everything else runs in jsdom.
 const NODE_TESTS = [
   'lint/**/*.test.ts',
+  'src/core/**/*.test.ts',
   'src/utils/**/*.test.ts',
-  'src/types/**/*.test.ts',
-  'src/lib/errors/**/*.test.ts',
-  'src/features/datasources/**/*.test.ts',
-  'src/features/dashboards/model/**/*.test.ts',
-  'src/features/dashboards/api/dto.test.ts',
-  'src/features/dashboards/api/data.test.ts',
+  'src/plugins/datasources/**/*.test.ts',
+  'src/features/dashboards/data/demoDashboards.test.ts',
 ];
 
 export default defineConfig({

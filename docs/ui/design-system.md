@@ -14,12 +14,12 @@ CSS variables      --app-layer-surface              what CSS modules read
 theme/components   Paper.extend + Paper.module.css  what Mantine components apply
 ```
 
-**1. Primitives** ([primitives.ts](../../src/design-system/tokens/primitives.ts))
+**1. Primitives** ([primitives.ts](../../src/ui/tokens/primitives.ts))
 
 - The only file with raw values: palette tuples (`palette.dark[7] = '#242424'`), alpha steps, and the spacing, radius, type, weight, shadow, motion, z-index, icon and shell scales.
 - Nothing outside `design-system/` may import it; oxlint blocks the import.
 
-**2. Semantic tokens** ([semantic.ts](../../src/design-system/tokens/semantic.ts)) name what a value is _for_.
+**2. Semantic tokens** ([semantic.ts](../../src/ui/tokens/semantic.ts)) name what a value is _for_.
 
 - **Per-scheme roles** have a light and a dark value:
   - `elevation.surface.canvas | sunken | raised | overlay`
@@ -42,7 +42,7 @@ theme/components   Paper.extend + Paper.module.css  what Mantine components appl
 
 **4. Component bindings** (`theme/`)
 
-- [theme.ts](../../src/design-system/theme/theme.ts) builds `createTheme` from the primitives: colors plus the aliases, spacing, radius, font sizes and weights, shadows, and `defaultRadius: shape.control`.
+- [theme.ts](../../src/ui/theme/theme.ts) builds `createTheme` from the primitives: colors plus the aliases, spacing, radius, font sizes and weights, shadows, and `defaultRadius: shape.control`.
 - `theme/components/<Name>.ts` sets defaults with `X.extend({ defaultProps, classNames })`. Examples: radius from `shape.*`, the overlay shadow, and variant styles in `theme/styles/*.module.css`.
 - The variants today: ActionIcon `chrome` (the dark navbar and sidebar), Paper `panel` and `widget` (read `--app-layer-*`), NavLink `sidebar` (with the compact rail state).
 - `cssVariablesResolver` emits the semantic variables. It also points two of Mantine's own variables at ours (`--mantine-color-body` → overlay surface, `--mantine-color-dimmed` → subtle text), so Mantine's internals follow the tokens.
@@ -85,7 +85,7 @@ layer.surface = elevation.surface.raised; // depth 1 = raised
 
 **3. Emitted:** `toCssVars` produces `--app-layer-surface: #ffffff` in the light block and `#242424` in the dark block.
 
-**4. Bound to a component:** [Paper.module.css](../../src/design-system/theme/styles/Paper.module.css) plus `Paper.ts`:
+**4. Bound to a component:** [Paper.module.css](../../src/ui/theme/components/PaperTheme.module.css) plus `Paper.ts`:
 
 ```css
 .root[data-variant='widget'] {
@@ -98,7 +98,7 @@ layer.surface = elevation.surface.raised; // depth 1 = raised
 export const PaperTheme = Paper.extend({ defaultProps: { radius: shape.container }, classNames: paper });
 ```
 
-**5. Used in a feature:** [WidgetTile.tsx](../../src/features/dashboards/components/grid/WidgetTile.tsx) only says what the element is:
+**5. Used in a feature:** [WidgetTile.tsx](../../src/features/dashboards/grid/WidgetTile.tsx) only says what the element is:
 
 ```tsx
 <Paper variant="widget" component="section">

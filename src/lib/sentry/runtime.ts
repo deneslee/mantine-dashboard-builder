@@ -3,7 +3,7 @@ import type { AnyRouter } from '@tanstack/react-router';
 import type * as ClientModule from './client';
 import type * as RouterModule from './router';
 import type * as TelemetryModule from './telemetry';
-import { loadSentryConfig } from './settings';
+import { loadSentryConfig } from './sentryConfig';
 
 /**
  * The app's only entry into Sentry. It never imports the SDK itself: `startSentry` loads it as a

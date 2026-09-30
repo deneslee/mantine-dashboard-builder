@@ -3,7 +3,7 @@ import { act } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { render, screen } from '@/testing/render';
 import { notify } from './notify';
-import { useInbox } from '@/stores/inbox';
+import { useInbox } from '@/lib/notify/useInbox';
 
 describe('notify', () => {
   beforeEach(() => {

@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react';
-import { loadSentryConfig, type SentryConfig } from './settings';
+import { loadSentryConfig, type SentryConfig } from './sentryConfig';
 import type { SentryStatus } from './types';
 
 let currentConfig: SentryConfig = loadSentryConfig();

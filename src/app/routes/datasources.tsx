@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { Placeholder } from './-placeholder';
+import { Placeholder } from './-PlaceholderPage';
 
 export const Route = createFileRoute('/datasources')({
   component: () => (

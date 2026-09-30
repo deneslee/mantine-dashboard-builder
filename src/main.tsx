@@ -1,8 +1,8 @@
-import '@/app/global.css';
+import '@/ui/global.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { startSentry } from '@/lib/sentry/runtime';
-import { App } from './app/App';
+import { App } from '@/app/App';
 
 startSentry();
 
