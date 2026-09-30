@@ -1,6 +1,6 @@
 # 02 Project structure (bulletproof-react, lightly adapted)
 
-Status: done (Sep 24, 2026) · Cross-cutting · Research: [project-structure](../research/project-structure.md)
+Status: done (Sep 24, 2026) · Cross-cutting · Research: [project-structure](../../research/project-structure.md)
 
 ## Objective
 

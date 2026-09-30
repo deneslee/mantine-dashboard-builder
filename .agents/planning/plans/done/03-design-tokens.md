@@ -1,6 +1,6 @@
 # 03 Design tokens (one source of truth, Mantine-native)
 
-Status: done (Sep 27, 2026) · Cross-cutting · Research: [design-tokens](../research/design-tokens.md) · How it works now: [docs/design-system.md](../../../docs/design-system.md)
+Status: done (Sep 27, 2026) · Cross-cutting · Research: [design-tokens](../../research/design-tokens.md) · How it works now: [docs/ui/design-system.md](../../../../docs/ui/design-system.md)
 
 ## Objective
 

@@ -1,6 +1,6 @@
 # Research: Page Header & Control Bar Composition
 
-Sep 24, 2026 · Reference: [04-page-header](../done/04-page-header.md)
+Sep 24, 2026 · Reference: [04-page-header](../plans/done/04-page-header.md)
 
 This research analyzes header and toolbar composition patterns across modern data and design systems (**Grafana PageToolbar**, **Metabase**, **Superset**, **Atlassian Design System**) to guide the refactoring of `Page.Header` in Dashboard Builder.
 
@@ -128,4 +128,4 @@ Checked against the installed `@mantine/core` 9.6.2 types (`OverflowList.d.ts`):
   - A child such as a `SegmentedControl` has no Menu equivalent anyway.
 - **No need yet:** every page has at most one header action.
 - **Chosen:** `Page.Actions` is a wrapping `Group` with no overflow. Revisit when a page has more than three actions, and then pass the overflow as data.
-- **Also dropped from §3:** `Page.TitleRow` and a separate heading wrapper. `Page.Header` places the parts with CSS grid areas instead (see [04 §1](../done/04-page-header.md#1-parts)).
+- **Also dropped from §3:** `Page.TitleRow` and a separate heading wrapper. `Page.Header` places the parts with CSS grid areas instead (see [04 §1](../plans/done/04-page-header.md#1-parts)).

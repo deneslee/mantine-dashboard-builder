@@ -1,6 +1,6 @@
 # 06 Sentry
 
-Status: open, paused until 07 stage 3 · Cross-cutting · Depends on: 02 (done). §1 and §2 come right after [07](07-dashboard-model.md) stage 3, which changes how queries run and fail. §3 needs the Integrations foundation ([plan.md › Roadmap](../../docs/planning/plan.md#roadmap)), 03 (tokens, done) and 04 (`Page`, done). · Research: [sentry-integration](research/sentry-integration.md), [integrations](research/integrations.md)
+Status: open, paused until 07 stage 3 · Cross-cutting · Depends on: 02 (done). §1 and §2 come right after [07](07-dashboard-model.md) stage 3, which changes how queries run and fail. §3 needs the Integrations foundation ([roadmap](../roadmap.md#roadmap)), 03 (tokens, done) and 04 (`Page`, done). · Research: [sentry-integration](../research/sentry-integration.md), [integrations](../research/integrations.md)
 
 ## Goal
 
@@ -25,7 +25,7 @@ A Sentry prototype was merged in PR #13 ([done/06-sentry-prototype](done/06-sent
   - Source maps are built only when uploading, and then deleted.
 - **SDK version:** keep the prototype's major version pinned. v11 (Sep 23, 2026) changed defaults (§3); upgrading is its own task.
 - **Tokens:** the token lint rules skip `features/integrations/**` until the catalog and the Sentry page are rebuilt.
-- **Integrations model (Sep 29):** a static registry of lazy chunks, enabled per deployment by a config read at load, not feature flags ([research](research/integrations.md)). The prototype's catalog, integration registry and sidebar entry move to the Integrations foundation. "Load the SDK when a DSN is configured" becomes "load it when the Sentry entry is enabled".
+- **Integrations model (Sep 29):** a static registry of lazy chunks, enabled per deployment by a config read at load, not feature flags ([research](../research/integrations.md)). The prototype's catalog, integration registry and sidebar entry move to the Integrations foundation. "Load the SDK when a DSN is configured" becomes "load it when the Sentry entry is enabled".
 
 ## Design
 
@@ -41,7 +41,7 @@ Each kind of failure is reported in one place:
 | Failed query             | Inline in its widget or editor; it never reaches a boundary | `QueryCache.onError`        | `boundary: 'query'`, `datasource`, `source` |
 | Failed mutation          | `MutationCache.onError`, which already toasts               | `MutationCache.onError`     | `boundary: 'mutation'`, `source`            |
 
-- **Query errors never reach a boundary.** TanStack Query's `throwOnError` defaults to false, and [feedback.md](../../docs/ui/feedback.md) renders query errors inline. So the query cache is the only place to report them. Its global callback runs once per failed request, however many widgets show the result, which also removes any need to tell first loads from background refetches.
+- **Query errors never reach a boundary.** TanStack Query's `throwOnError` defaults to false, and [feedback.md](../../../docs/ui/feedback.md) renders query errors inline. So the query cache is the only place to report them. Its global callback runs once per failed request, however many widgets show the result, which also removes any need to tell first loads from background refetches.
 - **A reportability policy instead of dropping errors by code.** `AppError` gets `expected` and `reportable`, set where the error is mapped, from the error and the operation's `meta.telemetry` (`'report' | 'expected'`):
 
   | Error                                                                       | Reported              |
@@ -96,7 +96,7 @@ Needs the Integrations foundation: the manifests in `app/registry.ts`, the `Inte
 - **Start:** from `main.tsx` once the integration config is read, only when the entry is enabled and its config parses. It doesn't wait for or block the first render; reports made before it's ready are buffered (§1). An invalid entry doesn't start the SDK, and the Sentry page shows the error.
 - **Deployment:** the repo's `public/config/integrations.json` stays the default (nothing enabled). The Pages workflow writes the deployment's config into `dist/config/integrations.json` from a repository variable, next to the source map secrets.
 - **Remove:**
-  - The runtime DSN settings on the Sentry page, and the `sentry.config.v1` key in `localStorage` (keep a one-line delete of the old key on load). The DSN doesn't come from build-time env either.
+  - The runtime DSN settings on the Sentry page, and the `dashboard-builder:sentry` key in `localStorage` (was `sentry.config.v1`, renamed in 08; keep a one-line delete of the key on load). The DSN doesn't come from build-time env either.
   - The `logger` / `metrics` wrappers if decision 1 leaves logs or metrics off.
 - **Sentry page** (`/integrations/sentry`, the entry's Setup), on tokens and `Page` parts:
   - State: off, on, or config invalid (with the error).
@@ -150,7 +150,7 @@ The integration registry, config port and catalog (the Integrations foundation),
 - **Sep 27: error reporting and CI source maps come first,** because they need no decision. _Changed Sep 30: they follow 07 stage 3._
 - **Sep 27: `reportError` drops expected errors in one place.** _Replaced Sep 30 by the reportability policy._
 - **Sep 27: no duplicates:** first-load errors reported at the boundaries only. _Replaced Sep 30: query errors never reach a boundary._
-- **Sep 29: Sentry is an entry in the integration registry** (option B in [research](research/integrations.md)). The deployment's integration config, read at load, enables and configures it; the SDK stays its own chunk. Not a flag service: install state is long-lived configuration, and a service adds an SDK and a server.
+- **Sep 29: Sentry is an entry in the integration registry** (option B in [research](../research/integrations.md)). The deployment's integration config, read at load, enables and configures it; the SDK stays its own chunk. Not a flag service: install state is long-lived configuration, and a service adds an SDK and a server.
 - **Sep 29: decision 2, the DSN comes from the integration config.** Not build-time env (one build per deployment) and not `localStorage` (anyone could point the app's telemetry elsewhere).
 - **Sep 29: the registry, config port and catalog move to the Integrations foundation,** which comes before §3. This plan keeps what is specific to Sentry.
 - **Sep 29: sample rates are config fields;** their production values are still decision 4.

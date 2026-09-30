@@ -48,7 +48,7 @@ Measured: during one sidebar collapse the unpinned navbar resized 22 times, the 
 
 - **`@mantine/charts` first.** Use raw Recharts only for what Mantine does not cover, with the `responsive` prop (Recharts 3.3+) instead of `ResponsiveContainer`.
 - **Stable props.** `data`, `series`, formatters and especially function `dataKey`s keep their reference between renders: module constants, `useMemo` or `useCallback`. The React Compiler memoizes most of this; module constants still cost nothing and survive a component the compiler skips. A new `dataKey` function makes Recharts recompute every point.
-- **Big series.** The datasource aggregates first, to the widget's resolution ([07 §6](../../.agents/plans/07-dashboard-model.md#6-data-flow)). If a series still has more points than the chart has pixels, reduce it for drawing only (LTTB), after transforms, so totals and reducers use the real data. No dots above about 100 points; `isAnimationActive={false}` for large series.
+- **Big series.** The datasource aggregates first, to the widget's resolution ([07 §6](../../.agents/planning/plans/07-dashboard-model.md#6-data-flow)). If a series still has more points than the chart has pixels, reduce it for drawing only (LTTB), after transforms, so totals and reducers use the real data. No dots above about 100 points; `isAnimationActive={false}` for large series.
 - **Tooltips.** Recharts 3.10 already throttles pointer events to animation frames (`throttleDelay: 'raf'`); nothing to add.
 - **Sizing.** Mantine charts wrap Recharts' `ResponsiveContainer` with no debounce option. That is fine because widths change once per layout change (grid rules 1 and 2).
 

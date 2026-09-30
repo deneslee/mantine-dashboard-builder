@@ -142,7 +142,7 @@ Navigating into a section opens it, so the current page is visible when the side
 
 ## Context bar
 
-The context bar holds help, general information and notifications, not every tool: working tools such as Inspect open in right-side drawers inside the main pane ([07 §3](../../.agents/plans/07-dashboard-model.md#3-modes)).
+The context bar holds help, general information and notifications, not every tool: working tools such as Inspect open in right-side drawers inside the main pane ([07 §3](../../.agents/planning/plans/07-dashboard-model.md#3-modes)).
 
 Tabs come from the matched routes' `staticData.contextTabs`, merged root to leaf, plus the global `notifications` tab. The active tab shows its label; the others are icons with tooltips. Inactive panels stay mounted through `Activity`, so their state survives switching. A tab can carry a badge (`subscribe` / `getSnapshot`); the navbar button shows the sum.
 

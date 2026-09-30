@@ -1,6 +1,6 @@
 # Research: Project Structure (bulletproof-react, adapted)
 
-Sep 24, 2026 · Reference: [02-project-structure](../done/02-project-structure.md)
+Sep 24, 2026 · Reference: [02-project-structure](../plans/done/02-project-structure.md)
 
 ---
 

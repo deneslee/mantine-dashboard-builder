@@ -1,48 +1,58 @@
 # Dashboard Builder
 
-Phase 0 + 1: project scaffold and app chrome. See `AGENTS.md` for the coding rules.
+A dashboard builder on Mantine 9 and React 19. An app frame (top navbar, docking sidebar, docking context bar) wraps a drag-and-resize widget canvas fed by pluggable datasources. Dashboards are JSON documents; widgets and datasources are plugins, and a `DataFrame` is the only contract between them.
+
+**Status:**
+
+- Phase 3. Reading dashboards is done. The edit MVP (edit mode, undo and redo, drag and resize, add, duplicate and remove widgets, a local save and draft, JSON export and import) is built.
+- [08 Structure cleanup](.agents/planning/plans/08-structure-cleanup.md) is in progress. It adds real-browser tests and package-shaped folders before the viewing tools.
+- The order of work is in [tasks.md](.agents/planning/tasks.md).
 
 ## Run
 
 ```bash
 pnpm install
-pnpm dev          # http://localhost:5173
+pnpm dev          # http://localhost:5173/mantine-dashboard-builder/
 pnpm storybook    # http://localhost:6006
 pnpm test
 pnpm lint
 pnpm build
 ```
 
-Recommended: add the Vercel agent skills referenced in `AGENTS.md`:
-
-```bash
-npx skills add vercel-labs/agent-skills
-```
-
-## What's here
-
-| Area                    | Where                                                              | Notes                                                                                                                                 |
-| ----------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Tokens, theme, variants | `src/design-system`                                                | `tokens.ts` → CSS variables via `cssVariablesResolver`; `ActionIcon` `chrome`, `Paper` `panel`/`widget`, `NavLink` `sidebar` variants |
-| App chrome              | `src/components/layouts/shell`                                     | Mantine `Splitter` panes: sidebar · main (navbar + content) · context bar; `Drawer` for undocked panels                               |
-| Notifications           | `src/lib/notify`, `src/stores/inbox`, `src/features/notifications` | `notify.*` API, dedupe, priority, persisted inbox tab with unread badge                                                               |
-| Errors                  | `src/components/errors`, `src/lib/errors`                          | `AppError`, `ErrorState.Full/Inline/Banner`, 404, route error, app crash, offline banner, widget boundary                             |
-| Loading                 | `src/components/feedback`                                          | Shaped skeletons, route pending (300 ms delay, 500 ms minimum), top progress bar                                                      |
-| Sample data             | `public/data/dashboards/index.json`                                | Read through `client → dto (zod) → mapper`, with simulated latency in dev                                                             |
+Node 24.15+ and pnpm 12.5+ (see `package.json › engines`).
 
 ## Try it
 
-| URL                                | Shows                                                                                         |
-| ---------------------------------- | --------------------------------------------------------------------------------------------- |
-| `/dashboards`                      | List page, route skeleton                                                                     |
-| `/dashboards/sales`                | Context tabs from the route, per-widget skeletons, one widget failing inside its own boundary |
-| `/dashboards/broken`               | Route error with retry                                                                        |
-| `/dashboards/missing`, `/anything` | 404 inside the chrome                                                                         |
-| `/debug`                           | Every toast level, dedupe, progress, mutation error, throwing widget, all skeletons           |
+| URL                                               | Shows                                                                                                        |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `/dashboards`                                     | The dashboard list                                                                                           |
+| `/dashboards/sales`                               | A dashboard with live mock data, context-bar tabs from the route, one widget failing inside its own boundary |
+| `/dashboards/sales?mode=edit`                     | Edit mode: Save, Discard, Undo, Redo, drag and resize, widget menu, Add widget, Import and Export JSON       |
+| `/dashboards/sales?from=now-7d&to=now&refresh=1m` | Time range and auto-refresh from the URL                                                                     |
+| `/dashboards/perf`                                | 20 charts; tiles below the fold mount when scrolled near                                                     |
+| `/dashboards/infra`                               | A virtualized 10k-row table                                                                                  |
+| `/dashboards/broken`                              | A document that fails validation: route error with retry                                                     |
+| `/dashboards/missing`, `/anything`                | 404 inside the frame                                                                                         |
+| `/settings`                                       | Appearance: theme, burger behaviour, reduced motion                                                          |
+| `/debug`                                          | Every toast level, dedupe, progress, mutation error, a throwing widget, all skeletons                        |
 
-## Chrome behaviour
+Saves and drafts stay in this browser's `localStorage`; the files in `public/data/` are never changed.
 
-| Control                    | Docked                                                   | Undocked or below 992 px  |
+## Repo map
+
+| Where               | What                                                                                                                                                                                                                                                                  |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/`              | The app. Layers, data flow and state are in [docs/architecture.md](docs/architecture.md)                                                                                                                                                                              |
+| `public/data/`      | Seed dashboards (`dashboards/*.json`) and data frames read by the `local-json` datasource                                                                                                                                                                             |
+| `docs/`             | How the built parts work: [architecture](docs/architecture.md), [shell](docs/ui/shell.md), [design system](docs/ui/design-system.md), [feedback](docs/ui/feedback.md), [dashboard](docs/dashboard/dashboard.md), [grid and charts](docs/dashboard/grid-and-charts.md) |
+| `.agents/planning/` | [Roadmap](.agents/planning/roadmap.md), [tasks](.agents/planning/tasks.md), one plan per piece of work in `plans/`, and `research/`                                                                                                                                   |
+| `AGENTS.md`         | Rules for anyone writing code here, people or agents                                                                                                                                                                                                                  |
+| `lint/`             | The local oxlint plugin for the token and style rules, and the tests proving each rule fires                                                                                                                                                                          |
+| `.storybook/`       | Storybook config; every chrome and dashboard state has a story                                                                                                                                                                                                        |
+
+## Frame behaviour
+
+| Control                    | Docked                                                   | Undocked or narrow        |
 | -------------------------- | -------------------------------------------------------- | ------------------------- |
 | Burger (`Ctrl+B`)          | Sidebar: full → icons → hidden                           | Opens / closes the drawer |
 | Sidebar footer             | Collapse to icons · undock                               | Dock                      |
@@ -51,4 +61,8 @@ npx skills add vercel-labs/agent-skills
 | Pane edges                 | Drag, arrow keys (Shift = 40 px), double-click resets    | –                         |
 | Search (`Ctrl+K` or `/`)   | Spotlight over navigation targets                        | same                      |
 
-Layout preferences persist in `localStorage` (`shell.v1`); open drawers never do, so nothing pops open on load.
+Layout preferences persist in `localStorage`; open drawers never do, so nothing pops open on load. The keys are listed in [architecture.md › Browser storage](docs/architecture.md#browser-storage).
+
+## Agent skills
+
+The skills this repo uses are listed in [AGENTS.md › Skills](AGENTS.md#skills); local ones are in `.agents/skills/`, and `pnpm exec intent list` shows the ones shipped with dependencies.

@@ -1,6 +1,6 @@
 # Integrations: feature flags or a registry
 
-Sep 29, 2026 · revised Sep 30 · Outcome: option B, adopted in [plan.md › Integrations](../../../docs/planning/plan.md#locked-decisions) and [06 Sentry](../06-sentry.md)
+Sep 29, 2026 · revised Sep 30 · Outcome: option B, adopted in [roadmap › Integrations](../roadmap.md#locked-decisions) and [06 Sentry](../plans/06-sentry.md)
 
 **Question.** Can Sentry, Datadog, Haystack, Azure SQL, New Relic, AWS and the like be feature flags, switched on through a central service, so the app stays as light as possible and a fresh install only reads local files?
 
@@ -45,7 +45,7 @@ In B, adding a new integration needs code, but enabling one that exists doesn't:
 - A config port says which are enabled: a JSON file now, the API from phase 5.
 - The default config enables nothing, so a fresh install has only the built-in datasources.
 - Disabled integrations' config, runtime and setup chunks are never fetched. Their manifests add a little to first load, which a bundle budget keeps in check.
-- It's the widget and datasource registries (static maps in `app/registry.ts`, [05](../done/05-dashboard-read.md)) one step further.
+- It's the widget and datasource registries (static maps in `app/registry.ts`, [05](../plans/done/05-dashboard-read.md)) one step further.
 
 **C. Runtime plugins.** Only worth it if third parties write integrations. The costs:
 
@@ -92,13 +92,13 @@ IntegrationManifest {
 { "version": 1, "enabled": { "sentry": { "dsn": "https://…", "tracesSampleRate": 0.1 } } }
 ```
 
-- Read at load through an `IntegrationConfigRepository` port, shaped like `DashboardRepository`: the JSON file now, the API from phase 5.
+- Read at load through an `IntegrationConfigRepository` port, the JSON file now, the API from phase 5. (`DashboardRepository`, its model, was replaced by a plain module in 08; add the interface only when a second source exists.)
 - Versioned and validated with zod. An entry that fails its config schema stays off, and its Setup page shows why.
 - The repo ships the default. A deployment supplies its own: on GitHub Pages, the workflow can write `dist/config/integrations.json` from a repository variable.
 
 ### Loading
 
-- **Telemetry:** `loadRuntime()` starts from `main.tsx` once the config is read, without blocking the first render. Reports made before it's ready are buffered ([06 §1](../06-sentry.md#1-report-errors-through-reporterror)).
+- **Telemetry:** `loadRuntime()` starts from `main.tsx` once the config is read, without blocking the first render. Reports made before it's ready are buffered ([06 §1](../plans/06-sentry.md#1-report-errors-through-reporterror)).
 - **Datasource:** the runtime chunk loads when a widget first queries that type, or when the datasource manager (phase 4) opens its editor.
 - **Disabled:** none of its chunks are fetched. The catalog lists it with a Set up link.
 

@@ -38,7 +38,7 @@ theme/components   Paper.extend + Paper.module.css  what Mantine components appl
 **3. Contextual layers** (`--app-layer-surface`, `-border`, `-field`)
 
 - These are meant to follow placement: a panel nested inside a widget would get the next step.
-- Today there's only one level, equal to `raised`. The nesting CSS was meant for the `container` widget, which [07](../../.agents/plans/07-dashboard-model.md#4-layout) drops, so nothing nests yet ([tasks.md](../planning/tasks.md#phase-4-widgets-and-data)).
+- Today there's only one level, equal to `raised`. The nesting CSS was meant for the `container` widget, which [07](../../.agents/planning/plans/07-dashboard-model.md#4-layout) drops, so nothing nests yet ([tasks.md](../../.agents/planning/tasks.md#phase-4-widgets-and-data)).
 
 **4. Component bindings** (`theme/`)
 
@@ -121,4 +121,4 @@ The same path, shorter:
 
 The lint rules keep this honest. oxlint rejects numeric spacing, `fw`, `fz` and `radius`, palette colors, numeric icon sizes, and primitive imports. Stylelint rejects hex, `rgb()`, palette shades, and raw colors, radii, z-index and durations. [lint/rules.test.ts](../../lint/rules.test.ts) proves each rule fires.
 
-**One subtlety, fix planned:** a plain `<Paper>` or `<Card>` with no variant is painted by Mantine's `--mantine-color-body`, which now points at the **overlay** surface, not `raised`, and so is the page body. The two have the same values today, so nothing looks wrong. Before they diverge: point `--mantine-color-body` at the canvas surface, bind `ModalBase` (Modal, Drawer) to overlay, and bind the parts that must match the surface behind them (Table's sticky header, the active Tabs border, Scroller's fade) to `--app-layer-surface`. In Mantine 9.6, Popover and Menu don't use `--mantine-color-body`. The task is in [tasks.md](../planning/tasks.md#housekeeping).
+**One subtlety, fix planned:** a plain `<Paper>` or `<Card>` with no variant is painted by Mantine's `--mantine-color-body`, which now points at the **overlay** surface, not `raised`, and so is the page body. The two have the same values today, so nothing looks wrong. Before they diverge: point `--mantine-color-body` at the canvas surface, bind `ModalBase` (Modal, Drawer) to overlay, and bind the parts that must match the surface behind them (Table's sticky header, the active Tabs border, Scroller's fade) to `--app-layer-surface`. In Mantine 9.6, Popover and Menu don't use `--mantine-color-body`. The task is in [tasks.md](../../.agents/planning/tasks.md#housekeeping).

@@ -1,6 +1,6 @@
 # 01 Shell polish, performance and bundle size
 
-Status: done (Sep 24, 2026) · Cross-cutting · The three open measurements moved to the backlog in [docs/tasks.md](../../../docs/tasks.md) on Sep 27.
+Status: done (Sep 24, 2026) · Cross-cutting · The three open measurements moved to the backlog in [tasks.md](../../tasks.md) on Sep 27.
 
 ## Objective
 

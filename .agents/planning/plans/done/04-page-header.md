@@ -1,6 +1,6 @@
 # 04 Page header
 
-Status: done (Sep 27, 2026) · Phase 2 · Depends on: 02 (done) · Blocks: 05's pickers (`TimeRangePicker` sits in `Page.ControlBar`) · Research: [page-header-composition](../research/page-header-composition.md)
+Status: done (Sep 27, 2026) · Phase 2 · Depends on: 02 (done) · Blocks: 05's pickers (`TimeRangePicker` sits in `Page.ControlBar`) · Research: [page-header-composition](../../research/page-header-composition.md)
 
 ## Goal
 
@@ -89,7 +89,7 @@ Editable title, a sticky control bar, action overflow, crumb collapse, and the a
 
 ## Tasks
 
-- [x] **Check `OverflowList` before building on it.** Sep 27: in 9.6.2 it renders from `data` + `renderItem` + `renderOverflow`, so actions would have to be data, not children. Cut; the note is in [page-header-composition §4](../research/page-header-composition.md#4-decision-sep-27-2026).
+- [x] **Check `OverflowList` before building on it.** Sep 27: in 9.6.2 it renders from `data` + `renderItem` + `renderOverflow`, so actions would have to be data, not children. Cut; the note is in [page-header-composition §4](../../research/page-header-composition.md#4-decision-sep-27-2026).
 - [x] **Split `Page` into named parts.**
   - Parts: `PageRoot`, `PageHeader`, `PageBreadcrumbs`, `PageTitle`, `PageDescription`, `PageActions`, `PageControlBar` and `PageBody`, each exported by name and through `Page`.
   - `Page.Header` is a grid with named areas ([§1](#1-parts)).

@@ -1,6 +1,6 @@
 # Research: Table Library for the Table Widget
 
-Sep 24, 2026 · Reference: [05-dashboard-read](../done/05-dashboard-read.md)
+Sep 24, 2026 · Reference: [05-dashboard-read](../plans/done/05-dashboard-read.md)
 
 Question: add `@tanstack/react-table`, use something else, or only Mantine `Table`?
 

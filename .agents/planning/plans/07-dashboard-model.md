@@ -1,6 +1,6 @@
 # 07 Dashboard model
 
-Status: open · Stages 1–2 implementation in progress (Sep 30); browser acceptance and performance measurements pending · Phase 3: stages 1–3; phase 4: stage 4 · Order: stages 1 and 2 (the edit MVP) come first, before 06 Sentry and the Integrations foundation · Depends on: 05 (done). Stage 4's integration datasources need the Integrations foundation. · Reference: [dashboard.md](../../docs/dashboard/dashboard.md), [grid-and-charts.md](../../docs/dashboard/grid-and-charts.md)
+Status: open · Stages 1–2 built (Sep 30); their browser acceptance runs as [08](08-structure-cleanup.md) step 2, the drag and resize measurement after 08 · Phase 3: stages 1–3; phase 4: stage 4 · Order: stages 1 and 2 (the edit MVP), then 08, then stage 3, before 06 Sentry and the Integrations foundation · Depends on: 05 (done). Stage 4's integration datasources need the Integrations foundation. · Reference: [dashboard.md](../../../docs/dashboard/dashboard.md), [grid-and-charts.md](../../../docs/dashboard/grid-and-charts.md)
 
 ## Goal
 
@@ -14,7 +14,7 @@ Decide how a dashboard works for the people who view it and the people who edit 
 
 | Layer        | What's in it                                                                                                                            | Where                                                                          | Why                                   |
 | ------------ | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------- |
-| Document     | Widgets, layout blocks, saved overrides, variable definitions, defaults                                                                 | Dashboard store (zustand + immer + zundo), saved through `DashboardRepository` | Edited, undone, saved                 |
+| Document     | Widgets, layout blocks, saved overrides, variable definitions, defaults                                                                 | Dashboard store (zustand + immer + zundo), saved through `dashboardApi` (08)   | Edited, undone, saved                 |
 | View state   | Dashboard time range, refresh and time zone, variable values, viewers' widget overrides, the open tab of each tabs block, the mode (§3) | URL search params, validated with zod                                          | Shareable, back/forward               |
 | UI state     | Selection, the hovered widget (for hover sync), open menus, rows opened or closed this session                                          | Component state or a small store                                               | Not shared, not undone                |
 | Server state | Query results, one entry per datasource query                                                                                           | TanStack Query, keyed by the datasource, its spec and the context it uses (§6) | Cache and refetch                     |
@@ -249,9 +249,9 @@ Using Horizon's levels:
 
 ### 8. Backend, persistence, integrations
 
-- Persistence stays behind `DashboardRepository`, with versioned documents and migrations.
+- Persistence goes through one module, `dashboardApi` (list, get, save), with versioned documents (`schemaVersion`) and migrations ([08](08-structure-cleanup.md)). An interface arrives with a second implementation.
 - The backend (TanStack Start in SPA mode, or a separate API), auth (Better Auth, Clerk or WorkOS) and the phase order are open, to decide later (open decisions 2–4).
-- The Integrations foundation follows its [research](research/integrations.md): lightweight manifests with a `category`, and config, runtime and setup code in chunks loaded only for enabled entries. `dependsOn` and `conflicts` wait until an integration needs them. The vocabulary is integration → datasource → query.
+- The Integrations foundation follows its [research](../research/integrations.md): lightweight manifests with a `category`, and config, runtime and setup code in chunks loaded only for enabled entries. `dependsOn` and `conflicts` wait until an integration needs them. The vocabulary is integration → datasource → query.
 
 ## Open decisions
 
@@ -299,12 +299,8 @@ Checkpoint Sep 30: completed implementation parts are ticked below. Parent tasks
   - [x] Main-pane drawer, palette, title/description/display editing and query editor with preview/Apply implemented; editor states have stories.
   - [x] Field no-op handling and schema validation implemented. Browser investigation found and fixed disabled Save during typing and an empty-description undo step.
   - [ ] Finish acceptance for field blur grouping, query Apply/Undo and the latest non-modal drawer focus changes.
-- [ ] **Browser tests** for drag, resize, undo, and "edit, undo, export, import identical" (Storybook's Vitest addon or Playwright).
-  - [x] Playwright CLI scenario written in `scripts/dashboard-edit.browser.js`.
-  - [ ] Repair the runner's function-expression parsing/lint issues and obtain a complete passing run; earlier partial runs do not count as a pass.
-- [ ] **Measure** drag and resize on `/dashboards/perf` in a production build: chart resizes per interaction and long tasks. Done when the numbers are in grid-and-charts.md.
-  - [x] Production-browser measurement script drafted in `scripts/dashboard-perf.browser.js`.
-  - [ ] Correct and run the measurement script, then record actual chart-resize and long-task numbers in `grid-and-charts.md`. No measurements have been recorded yet.
+- [-] **Browser tests** for drag, resize, undo, and "edit, undo, export, import identical". Moved to [08](08-structure-cleanup.md) step 2 (Sep 30): Storybook's Vitest addon runs the stories in Chromium, and play functions port the flows of the Playwright CLI script, which 08 deletes. The acceptance items above that those play functions prove get ticked when they pass.
+- [ ] **Measure** drag and resize on `/dashboards/perf` in a production build: chart resizes per interaction and long tasks. Done when the numbers are in grid-and-charts.md. Runs after 08; `scripts/dashboard-perf.browser.js` was a draft and is deleted in 08, so the measurement is a manual Performance trace or a play function.
 
 ### Stage 3: viewing (phase 3)
 
@@ -329,6 +325,7 @@ Integration datasources in the datasource manager need the Integrations foundati
 
 ## Decisions
 
+- **Sep 30: 08 before the rest of 07.** After the review, 08's gate fixes and browser tests come first. They close stage 2's acceptance items, and stage 3 is built on the new folder layout.
 - **Sep 30: stage 2 editor placement.** Use the proposed drawer inside the main pane for palette/options and a separate main-pane query editor with preview. JSON fields are validated against the installed widget/datasource schemas.
 - **Sep 30: local persistence for the edit MVP.** Static JSON remains the initial read source; Save writes a separate browser-local saved document, drafts use a separate per-dashboard key, and Export produces portable JSON. Save does not attempt to overwrite a static public file.
 
@@ -362,6 +359,16 @@ Integration datasources in the datasource manager need the Integrations foundati
 - `pnpm build`: passed with the current implementation.
 - `pnpm lint`: **not passing**; remaining errors are unused expressions in the new story/browser scripts and an unbound-method reference in the browser script.
 - Full browser acceptance, Storybook runtime verification and drag/resize performance measurements remain pending.
+
+### Sep 30 review of the edit MVP
+
+Checked in the dev server at 1440, 667 and 375 px. Every item is fixed or tracked in [08](08-structure-cleanup.md) or [tasks.md › Edit UI polish](../tasks.md#edit-ui-polish-not-planned-yet).
+
+- **The edit drawer is invisible.** Mantine's `max-height: 100%` on `Drawer.Content` resolves against the 0px-tall sticky `.tools` wrapper, so the palette and widget editor render 0px tall, and clicks land on the tiles underneath. Fixed in 08 step 1.
+- **The React Compiler skips 10 components.** `@babel/core` 8 with `babel-plugin-react-compiler` 1.0 silently skips any component with a destructured default (`DashboardProvider`, `ShellProvider`, `ErrorState`, `TimeSeriesChart`, …). Pinning `@babel/core` 7 fixes it (08 step 1). `DashboardView` and the editor forms are also skipped because of `throw` and `?.` inside `try` (08 splits them).
+- **One corrupt saved copy breaks `/dashboards`.** `readSaved` throws inside `listDashboards`. Fixed in 08 step 1.
+- **Two definitions of "wide".** The edit toolbar checks the viewport width and the grid checks its own width, so at 667 px the toolbar shows but dragging is off. Tracked in Edit UI polish.
+- **Accessibility.** The widget menu trigger has no `aria-haspopup` or `aria-expanded` under its Tooltip; the live region doesn't repeat an identical message; the remove toast's Undo undoes whatever came last. Tracked in Edit UI polish.
 
 - Reload, back/forward and a shared link keep the dashboard range, time zone, widget overrides, variable values, open tabs and mode.
 - A keyboard-only run reaches every widget action: view, inspect, time, and in edit mode move, resize, duplicate and remove.

@@ -34,16 +34,17 @@ Rules for humans and coding agents working in this repo. Read before writing cod
 
 ## Read first
 
-Versions are in `package.json`; the stack and why it was chosen are in [plan.md › Stack](docs/planning/plan.md#stack).
+Versions are in `package.json`; the stack, the layers, the data flow and where state lives are in [architecture.md](docs/architecture.md).
 
 | Working on                               | Read                                                                                                 |
 | ---------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| What to build next, and fixed decisions  | [plan.md](docs/planning/plan.md), [tasks.md](docs/planning/tasks.md)                                 |
+| What to build next, and fixed decisions  | [roadmap.md](.agents/planning/roadmap.md), [tasks.md](.agents/planning/tasks.md)                     |
+| How the app fits together                | [architecture.md](docs/architecture.md)                                                              |
 | Navbar, sidebar, context bar, panes      | [shell.md](docs/ui/shell.md)                                                                         |
 | Styles, tokens, the Mantine theme        | [design-system.md](docs/ui/design-system.md)                                                         |
 | Toasts, errors, loading                  | [feedback.md](docs/ui/feedback.md)                                                                   |
 | Dashboards, widgets, datasources, charts | [dashboard.md](docs/dashboard/dashboard.md), [grid-and-charts.md](docs/dashboard/grid-and-charts.md) |
-| Planned work                             | Its plan in `.agents/plans/`                                                                         |
+| Planned work                             | Its plan in `.agents/planning/plans/`                                                                |
 
 ## Mantine first
 
@@ -67,7 +68,7 @@ How the tiers work and where a new value goes: [design-system.md](docs/ui/design
 - **Focus and press:** `className="mantine-focus-auto"` for the focus ring on custom focusable elements (no custom `:focus-visible` CSS); `mantine-active` for press feedback.
 - **Viewport classes** (`visibleFrom` / `hiddenFrom`) only in the shell. Inside a page, use `@container` queries: `<main>`'s width depends on the panels, not the screen.
 - **Scheme-dependent CSS** (`light-dark()`, `@mixin light/dark`) only in `design-system/`.
-- **Lint enforces these rules**, and `lint/rules.test.ts` proves each one fires. Exempt: `design-system/**`, stories, tests, and `features/integrations/**` until [06](.agents/plans/06-sentry.md) rebuilds it. The `Design system/Tokens` story shows every semantic variable in both schemes.
+- **Lint enforces these rules**, and `lint/rules.test.ts` proves each one fires. Exempt: `design-system/**`, stories, tests, and `features/integrations/**` until [06](.agents/planning/plans/06-sentry.md) rebuilds it. The `Design system/Tokens` story shows every semantic variable in both schemes.
 
 ## Structure (bulletproof-react, lightly adapted)
 
@@ -134,20 +135,24 @@ Don't use `frontend-design` in this repo: it picks its own fonts and palettes, a
 
 ## Planning
 
-| Where                               | Holds                                                                        |
-| ----------------------------------- | ---------------------------------------------------------------------------- |
-| `docs/planning/plan.md`             | What we're building, locked decisions, stack, roadmap                        |
-| `docs/planning/tasks.md`            | The checklist: done, next in order, notes for work that has no plan          |
-| `docs/ui/`, `docs/dashboard/`       | How the built parts work ([Read first](#read-first))                         |
-| `.agents/plans/NN-slug.md`          | One piece of work, with its design and file-level tasks; `NN` is build order |
-| `.agents/plans/research/<topic>.md` | Background for one or more plans; its second line links the plan it serves   |
-| `.agents/plans/done/`               | Finished plans, kept in git                                                  |
+Planning lives in `.agents/planning/`; `docs/` holds only human-facing docs about what is built.
 
-- **One home per fact.** Link to the doc or plan that holds a fact instead of restating it.
+| Where                                  | Holds                                                                        |
+| -------------------------------------- | ---------------------------------------------------------------------------- |
+| `.agents/planning/roadmap.md`          | What we're building, locked decisions, phases, open questions                |
+| `.agents/planning/tasks.md`            | The checklist: done, next in order, notes for work that has no plan          |
+| `.agents/planning/plans/NN-slug.md`    | One piece of work, with its design and file-level tasks; `NN` is build order |
+| `.agents/planning/plans/done/`         | Finished plans, kept in git                                                  |
+| `.agents/planning/research/<topic>.md` | Background for one or more plans; its second line links the plan it serves   |
+| `docs/architecture.md`                 | Stack, layers, data flow, state owners, storage keys: how the app fits today |
+| `docs/ui/`, `docs/dashboard/`          | How the built parts work ([Read first](#read-first))                         |
+| `README.md`                            | What the app is, how to run it, a map of the repo                            |
+
+- **One home per fact.** Link to the doc or plan that holds a fact instead of restating it. Relative links must resolve; `lint/docs.test.ts` checks them.
 - **Plan layout:** `# NN Title`, then one line: `Status: open | done (date) · Phase N | Cross-cutting · Depends on: … · Research: …`. Sections: Goal, Design, Tasks, Decisions, Verification; add Out of scope, Open decisions or Risks when they help.
 - **Tasks:** `- [ ] **Title.** What to do. Done when …`. Tick `[x]` as you go; `[-]` for dropped or moved work, saying why or where to.
 - **Changing a plan:** edit it in place and add a dated line to Decisions. No version numbers in file names or headers; git keeps the history.
-- **New work:** add a line to `docs/planning/tasks.md`; write a plan when it needs a design or more than a few tasks.
-- **Finishing:** move the plan to `done/`, tick its line in `tasks.md`, move any tasks it leaves open there, and update the doc in `docs/` that describes what was built.
+- **New work:** add a line to `.agents/planning/tasks.md`; write a plan when it needs a design or more than a few tasks.
+- **Finishing:** move the plan to `done/`, tick its line in `tasks.md`, move any tasks it leaves open there, and update the doc in `docs/` (and the README, if the repo map or the try-it URLs changed) that describes what was built.
 
 <!-- /Workflow instructions -->

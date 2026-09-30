@@ -1,6 +1,6 @@
 # 06 Sentry prototype
 
-Status: done (Sep 24, 2026, PR #13) · Followed by [06-sentry](../06-sentry.md) · Research: [sentry-integration](../research/sentry-integration.md)
+Status: done (Sep 24, 2026, PR #13) · Followed by [06-sentry](../06-sentry.md) · Research: [sentry-integration](../../research/sentry-integration.md)
 
 The code has moved since: `src/integrations/sentry/` is now `lib/sentry/` and the UI is in `features/integrations/` (02).
 

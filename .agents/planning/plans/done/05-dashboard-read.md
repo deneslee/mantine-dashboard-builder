@@ -1,6 +1,6 @@
 # 05 Dashboard read
 
-Status: done (Sep 27, 2026) · Phase 2 · Depends on: 02 (done); 04 (`Page.ControlBar`) for the pickers only. The document, DataFrame, contract, datasource, table and registry tasks can start any time. · Blocks: phase 3 (editing) · Research: [dashboard-architectures](../research/dashboard-architectures.md), [table-library](../research/table-library.md)
+Status: done (Sep 27, 2026) · Phase 2 · Depends on: 02 (done); 04 (`Page.ControlBar`) for the pickers only. The document, DataFrame, contract, datasource, table and registry tasks can start any time. · Blocks: phase 3 (editing) · Research: [dashboard-architectures](../../research/dashboard-architectures.md), [table-library](../../research/table-library.md)
 
 ## Goal
 
@@ -74,7 +74,7 @@ Replace the hard-coded demo tiles with a versioned dashboard document, pluggable
 
 ### 5. Table widget and virtualization
 
-- **Dependencies:** `@tanstack/react-table` **v9** (stable; 9.2.4 on Sep 27) and `@tanstack/react-virtual`. See [table-library](../research/table-library.md) for why this pair, and not mantine-react-table or AG Grid.
+- **Dependencies:** `@tanstack/react-table` **v9** (stable; 9.2.4 on Sep 27) and `@tanstack/react-virtual`. See [table-library](../../research/table-library.md) for why this pair, and not mantine-react-table or AG Grid.
 - **Division of work:**
   - **TanStack Table** handles the table logic: column definitions, sorting, column visibility and sizing.
   - **Mantine `Table`** renders it: `Table.Thead`, `Table.Tr`, `Table.Td`, `TableScrollContainer`, `stickyHeader`.
@@ -137,7 +137,7 @@ Variables UI and interpolation (the schema only reserves the field), panel repea
 - **Sep 27: `regions` becomes the table widget,** so the table comes before the registry switch-over.
 - **Sep 27: the registry check is a test with a fake registry,** replacing a lint check that couldn't fail.
 - **Sep 27: dashboard-list pagination is cut.**
-- **Sep 24: TanStack Table v9 + Mantine `Table` + `@tanstack/react-virtual`** ([table-library](../research/table-library.md)). Kept on Sep 27.
+- **Sep 24: TanStack Table v9 + Mantine `Table` + `@tanstack/react-virtual`** ([table-library](../../research/table-library.md)). Kept on Sep 27.
 - **Sep 24: the time range lives in the URL, registries are filled in the app layer, `DataFrame` and zod sit in `api/dto.ts`, and `container` is a layout section.**
 
 ## Verification
