@@ -36,7 +36,12 @@ export async function listDashboards(signal?: AbortSignal): Promise<DashboardSum
       details: parsed.error.issues,
     });
   return parsed.data.items.map((item) => {
-    const saved = readSaved(item.id);
+    let saved: Dashboard | undefined;
+    try {
+      saved = readSaved(item.id);
+    } catch {
+      // The list shows the file's summary; opening the dashboard reports the broken saved copy.
+    }
     return saved
       ? {
           id: saved.id,

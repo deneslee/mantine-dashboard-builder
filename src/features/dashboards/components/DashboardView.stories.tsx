@@ -37,8 +37,8 @@ function DashboardStory({ state }: { state: State }) {
     const dashboard = toDashboard(
       dashboardDoc.parse(state === 'empty' ? { ...sales, widgets: {}, layouts: { lg: [] } } : sales),
     );
-    dashboard.widgets.revenue &&
-      (dashboard.widgets.revenue.description = 'Revenue for the selected time range.');
+    if (dashboard.widgets.revenue)
+      dashboard.widgets.revenue.description = 'Revenue for the selected time range.';
     const store = createDashboardStore(dashboard, localRepository, state === 'view' ? 'view' : 'edit', false);
     if (state === 'dirty') store.getState().actions.editWidget('revenue', { title: 'Edited revenue' });
     if (state === 'storage-error')

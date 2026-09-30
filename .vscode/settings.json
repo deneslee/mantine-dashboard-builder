@@ -58,8 +58,5 @@
   "css.validate": false,
   "scss.validate": false,
   "less.validate": false,
-  "stylelint.validate": [
-    "css",
-    "postcss"
-  ]
+  "stylelint.validate": ["css", "postcss"]
 }

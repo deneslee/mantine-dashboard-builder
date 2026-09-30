@@ -1,4 +1,4 @@
-import { IconInfoCircle, IconLayoutGridAdd } from '@tabler/icons-react';
+import { IconInfoCircle } from '@tabler/icons-react';
 import { lazy } from 'react';
 import type { ContextTab } from '@/components/layouts/shell/model/contextTabs';
 
@@ -9,11 +9,5 @@ export const dashboardTabs: ContextTab[] = [
     label: 'Details',
     icon: IconInfoCircle,
     component: lazy(() => import('./components/DetailsTab').then((m) => ({ default: m.DetailsTab }))),
-  },
-  {
-    id: 'widgets',
-    label: 'Widgets',
-    icon: IconLayoutGridAdd,
-    component: lazy(() => import('./components/WidgetsTab').then((m) => ({ default: m.WidgetsTab }))),
   },
 ];

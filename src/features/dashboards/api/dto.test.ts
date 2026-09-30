@@ -48,9 +48,9 @@ describe('dashboardDoc', () => {
   });
 
   it('rejects a widget missing from an authored layout, and a layout item without a widget', () => {
-    expect(issues({ ...valid, layouts: { lg: valid.layouts.lg, sm: [{ ...valid.layouts.lg[0], w: 4 }] } })).toEqual([
-      'Widget "kpis" has no place in the sm layout.',
-    ]);
+    expect(
+      issues({ ...valid, layouts: { lg: valid.layouts.lg, sm: [{ ...valid.layouts.lg[0], w: 4 }] } }),
+    ).toEqual(['Widget "kpis" has no place in the sm layout.']);
     expect(
       issues({ ...valid, layouts: { lg: [...valid.layouts.lg, { i: 'ghost', x: 0, y: 9, w: 1, h: 1 }] } }),
     ).toEqual([`The lg layout places a widget that doesn't exist: "ghost".`]);

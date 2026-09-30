@@ -3,6 +3,5 @@
   "semi": true,
   "printWidth": 110,
   "trailingComma": "all",
-  "arrowParens": "always",
-  "overrides": [{ "files": "scripts/*.browser.js", "options": { "semi": false } }]
+  "arrowParens": "always"
 }

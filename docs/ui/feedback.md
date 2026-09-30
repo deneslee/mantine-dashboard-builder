@@ -57,15 +57,15 @@ Loading UI matches the shape of what arrives, appears only when it would otherwi
 | Route navigation           | Router `defaultPendingMs: 300`, `defaultPendingMinMs: 500` | A skeleton shaped like the route after 300ms, shown at least 500ms           |
 | Route transition with data | `defaultPreload: 'intent'` (preload on hover and focus)    | Thin top bar (`RouteProgress`, Mantine `NavigationProgress`); old page stays |
 | Widget first load          | `useQuery` `isPending`                                     | The widget type's skeleton inside the tile                                   |
-| Widget refetch             | `isFetching && !isPending`                                 | _Later:_ a 2px bar under the widget header; never a skeleton                 |
+| Widget refetch             | `isFetching && !isPending`                                 | A 2px bar under the widget header; never a skeleton                          |
 | Lazy chunk (widget, tab)   | `React.lazy` + `Suspense` per tile or tab                  | Same skeleton as the data load, so code and data loading look the same       |
 | Button actions             | Mutation `isPending`                                       | Button `loading`, disabled, label unchanged                                  |
-| Slow queries               | `SlowHint` after 5s                                        | "Still loading…" with Cancel that aborts the query. Built, _later_ wired in  |
+| Slow queries               | _Not built_                                                | "Still loading…" with Cancel that aborts the query, after 5s                 |
 | Empty result               | Query success with no rows                                 | Mantine `EmptyState` with a hint and a primary action, never a blank tile    |
 
 - **Skeletons** live in `components/feedback/skeletons/Skeletons.tsx`: `TextSkeleton`, `ChartSkeleton`, `TableSkeleton`, `PanelSkeleton`, `DashboardSkeleton`, `ListSkeleton`. Animation and radius come from the `Skeleton` theme binding. Each widget definition names its skeleton ([05-dashboard-read](../../.agents/planning/plans/done/05-dashboard-read.md)).
-- **`useDelayedPending(isPending, 300)`** gates skeletons, so loads under 300ms render nothing. Each skeleton container is `aria-busy`, the skeleton itself `aria-hidden`, with one visually hidden "Loading" per region.
+- **Delays:** the router's `defaultPendingMs` keeps route skeletons away for loads under 300ms; a widget shows its skeleton until its first data arrives. Each skeleton container is `aria-busy`, the skeleton itself `aria-hidden`, with one visually hidden "Loading" per region.
 - **Boot:** a static splash in `index.html`, replaced on first render. No full-screen spinner after that.
-- **Query defaults** (`app/queryClient.ts`): `staleTime` 30s, `gcTime` 5m, one retry for retryable errors, `refetchOnWindowFocus: false`, and `placeholderData: keepPreviousData`, so charts don't show a skeleton on every range change. _Planned ([07 §6](../../.agents/planning/plans/07-dashboard-model.md#6-data-flow)):_ `keepPreviousData` moves to widget queries only. A route component isn't remounted when only its params change, so as a default it can show one dashboard's data under another's URL.
+- **Query defaults** (`app/queryClient.ts`): `staleTime` 30s, `gcTime` 5m, one retry for retryable errors, `refetchOnWindowFocus: false`. Widget data queries set `placeholderData: keepPreviousData`, so charts don't show a skeleton on every range change. It isn't a default: a route component isn't remounted when only its params change, so as a default it could show one dashboard's data under another's URL ([07 §6](../../.agents/planning/plans/07-dashboard-model.md#6-data-flow)).
 - **Non-urgent updates** (search filtering, re-layout on resize, range changes) go through `startTransition` / `useDeferredValue`, so input stays responsive.
 - **Stories:** `Skeletons.stories.tsx` shows each skeleton.

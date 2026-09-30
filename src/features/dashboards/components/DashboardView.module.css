@@ -5,13 +5,17 @@
   z-index: var(--app-z-drawer);
 }
 
+/*
+ * The height goes on the inner wrapper, not the content: Mantine gives Drawer.Content
+ * `max-height: 100%`, which would resolve against the 0px-tall `.tools` and hide the drawer.
+ */
 .drawerInner {
   position: absolute;
+  height: calc(100dvh - var(--app-navbar-height));
   pointer-events: none;
 }
 
 .drawerContent {
-  height: calc(100dvh - var(--app-navbar-height));
   pointer-events: auto;
   border-inline-start: 1px solid var(--app-color-border-default);
 }

@@ -210,11 +210,11 @@ Every step leaves `pnpm lint && pnpm format:check && pnpm build && pnpm test` gr
 
 ### 1. Gate fixes
 
-- [ ] **React Compiler.** Pin `@babel/core` to `^7.29` (the peer range of `@rolldown/plugin-babel` allows it). Add `lint/compiler.test.ts`: a component with a destructured default must compile. Done when the test passes and the built `DashboardProvider` chunk imports `react/compiler-runtime`.
-- [ ] **Lint and format.** Fix `DashboardView.stories.tsx:40` and Prettier on `api/dto.test.ts`, and delete `scripts/` (step 2 replaces them). Done when `pnpm lint` and `pnpm format:check` pass.
-- [ ] **Dead code.** Delete the 4 decision-math tests, `useDelayedPending` (+ test), `SlowHint`, and `WidgetsTab` with its tab entry. Done when nothing imports them.
-- [ ] **Edit drawer height.** Move the height from `.drawerContent` to `.drawerInner`. Done when the palette's inputs are visible and clickable at 1440 × 900.
-- [ ] **Corrupt saved copy.** `listDashboards` falls back to the static summary per item; `getDashboard` still reports the problem. Done when a test with a corrupt copy shows the list intact.
+- [x] **React Compiler.** Pin `@babel/core` to `^7.29` (the peer range of `@rolldown/plugin-babel` allows it). Add `lint/compiler.test.ts`: a component with a destructured default must compile. Done when the test passes and the built `DashboardProvider` chunk imports `react/compiler-runtime`.
+- [x] **Lint and format.** Fix `DashboardView.stories.tsx:40` and Prettier on `api/dto.test.ts`, and delete `scripts/` (step 2 replaces them). Done when `pnpm lint` and `pnpm format:check` pass.
+- [x] **Dead code.** Delete the 4 decision-math tests, `useDelayedPending` (+ test), `SlowHint`, and `WidgetsTab` with its tab entry. Done when nothing imports them.
+- [x] **Edit drawer height.** Move the height from `.drawerContent` to `.drawerInner`. Done when the palette's inputs are visible and clickable at 1440 × 900.
+- [x] **Corrupt saved copy.** `listDashboards` falls back to the static summary per item; `getDashboard` still reports the problem. Done when a test with a corrupt copy shows the list intact.
 
 ### 2. Browser tests
 
