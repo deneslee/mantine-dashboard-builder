@@ -62,7 +62,6 @@
       "files": [
         "src/ui/tokens/**/*.css",
         "src/ui/theme/**/*.css",
-        "src/ui/components/Page.module.css",
         "src/features/integrations/**/*.css"
       ],
       "rules": {

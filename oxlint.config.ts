@@ -106,7 +106,6 @@ export default defineConfig({
       files: [
         'src/ui/tokens/**',
         'src/ui/theme/**',
-        'src/ui/components/Page.tsx',
         '**/*.stories.tsx',
         '**/*.test.{ts,tsx}',
         'src/testing/**',

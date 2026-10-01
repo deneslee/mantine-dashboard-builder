@@ -277,7 +277,7 @@ Every step leaves `pnpm lint && pnpm format:check && pnpm build && pnpm test` gr
   - Switch every key over, and add `migrateLegacyKeys` in `main.tsx`. (Oct 1: it runs inside `lib/storage.ts` instead; see Decisions.)
   - [-] Parse the Sentry config with zod. Plan 06 deletes the runtime Sentry settings and their key, so validating them now is wasted work.
   - Done when no `.v1` key is written. Oct 1: done. Checked in the dev server: a browser with the old shell, inbox, color-scheme and saved-copy keys reloads onto the new keys, with the stores migrated to version 2 and the saved copy opening.
-- [ ] **Style exemptions.** Narrow them to `ui/tokens` and `ui/theme`, and fix any hits.
+- [x] **Style exemptions.** Narrow them to `ui/tokens` and `ui/theme`, and fix any hits. Oct 1: only `ui/components/Page` was extra, and nothing fired without it. Stories, tests and `features/integrations` (until 06) stay exempt, as AGENTS.md says.
 
 ### 6. Lint
 

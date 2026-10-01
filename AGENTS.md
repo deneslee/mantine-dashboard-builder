@@ -70,7 +70,7 @@ How the tiers work and where a new value goes: [design-system.md](docs/ui/design
 - **Focus and press:** `className="mantine-focus-auto"` for the focus ring on custom focusable elements (no custom `:focus-visible` CSS); `mantine-active` for press feedback.
 - **Viewport classes** (`visibleFrom` / `hiddenFrom`) only in the shell. Inside a page, use `@container` queries: `<main>`'s width depends on the panels, not the screen.
 - **Scheme-dependent CSS** (`light-dark()`, `@mixin light/dark`) only in `ui/tokens` and `ui/theme`.
-- **Lint enforces these rules**, and `lint/rules.test.ts` proves each one fires. Exempt: `ui/tokens/**`, `ui/theme/**`, `ui/components/Page`, stories, tests, and `features/integrations/**` until [06](.agents/planning/plans/06-sentry.md) rebuilds it. The `ui/tokens/Tokens` story shows every semantic variable in both schemes.
+- **Lint enforces these rules**, and `lint/rules.test.ts` proves each one fires. Exempt: `ui/tokens/**`, `ui/theme/**`, stories, tests, and `features/integrations/**` until [06](.agents/planning/plans/06-sentry.md) rebuilds it. The `ui/tokens/Tokens` story shows every semantic variable in both schemes.
 
 ## Structure
 
