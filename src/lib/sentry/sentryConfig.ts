@@ -1,3 +1,5 @@
+import { storageKey } from '../storage';
+
 export interface SentryConfig {
   dsn: string;
   environment: string;
@@ -8,7 +10,7 @@ export interface SentryConfig {
   enableLogs: boolean;
 }
 
-const STORAGE_KEY = 'sentry.config.v1';
+const STORAGE_KEY = storageKey('sentry');
 
 export function getDefaultSentryConfig(): SentryConfig {
   return {

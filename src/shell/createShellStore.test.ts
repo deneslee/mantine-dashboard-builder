@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { dimensions } from '@/ui/tokens/dimensions';
-import { createShellStore, type ShellInit } from './createShellStore';
+import { createShellStore, STORAGE_KEY, type ShellInit } from './createShellStore';
 
 const make = (init?: ShellInit) => createShellStore({ isNarrow: false, ...init }, false);
 
@@ -116,7 +116,7 @@ describe('shell store: persistence', () => {
     const store = createShellStore({ isNarrow: true });
     store.getState().actions.setSidebarMode('compact');
     store.getState().actions.toggleSidebar();
-    const saved = JSON.parse(localStorage.getItem('shell.v1') ?? '{}');
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}');
     expect(saved.version).toBe(2);
     expect(saved.state.sidebar).toEqual({
       mode: 'compact',
@@ -131,7 +131,7 @@ describe('shell store: persistence', () => {
   it('loads v1 preferences saved before the boolean rename', () => {
     const sidebar = { mode: 'compact', burger: 'hide', docked: false, width: 300 };
     const contextBar = { open: true, docked: false, width: 400, activeTab: 'notifications' };
-    localStorage.setItem('shell.v1', JSON.stringify({ version: 1, state: { sidebar, contextBar } }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 1, state: { sidebar, contextBar } }));
     const { sidebar: s, contextBar: c } = createShellStore({ isNarrow: false }).getState();
     expect(s).toEqual({ mode: 'compact', burger: 'hide', isDocked: false, width: 300, isDrawerOpen: false });
     expect(c).toEqual({

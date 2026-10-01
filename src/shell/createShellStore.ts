@@ -1,6 +1,7 @@
 import { clamp } from '@mantine/hooks';
 import { persist } from 'zustand/middleware';
 import { createStore, type StateCreator } from 'zustand/vanilla';
+import { storageKey } from '@/lib/storage';
 import { dimensions } from '@/ui/tokens/dimensions';
 
 export type SidebarMode = 'expanded' | 'compact' | 'closed';
@@ -69,7 +70,7 @@ export interface PersistedShell {
 
 const { sidebar: sb, contextBar: cb } = dimensions.shell;
 
-export const STORAGE_KEY = 'shell.v1';
+export const STORAGE_KEY = storageKey('shell');
 /** Mantine's default `md` breakpoint; below it both panels are overlays. */
 export const NARROW_QUERY = '(max-width: 61.99em)';
 

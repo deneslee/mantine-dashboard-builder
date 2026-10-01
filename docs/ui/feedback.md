@@ -21,7 +21,7 @@ Two surfaces, one API: transient toasts (`@mantine/notifications`) and a persist
 - **Placement:** at most 3 toasts visible (`limit={3}`), bottom-right.
 - **Actions:** every error toast has an action when one exists (Retry, Undo, Open settings). _Later (phase 3):_ success toasts for destructive actions carry Undo for 8s, wired to the dashboard store's undo.
 - **Accessibility:** `success` / `info` use `role="status"`, `warning` / `error` use `role="alert"`. Toasts pause on hover and focus, and are never the only signal (inline error UI still appears).
-- **Inbox:** the last 50 `warning` / `error` items, persisted as `notifications.v1`, each with `read` state. The navbar context button shows an unread badge; "Clear all" and per-item dismiss.
+- **Inbox:** the last 50 `warning` / `error` items, persisted as `dashboard-builder:notifications`, each with `isRead` state. The navbar context button shows an unread badge; "Clear all" and per-item dismiss.
 - **Mutations:** a global `MutationCache.onError` calls `notify.error` with the mapped message, so features don't repeat toast logic. Success toasts are opt-in per mutation via `meta.successMessage`. _Planned (06):_ `meta.telemetry` (`'report' | 'expected'`) and `meta.errorPresentation` (`'inline' | 'toast' | 'silent'`), so one failure isn't shown as a field error, a toast and an inbox entry at once.
 - **No toast** for errors that already have a full-page or in-place UI (404, widget error boundary).
 - **Trying it:** `/debug` fires every level.

@@ -135,7 +135,7 @@ The integration registry, config port and catalog (the Integrations foundation),
   - The manifest and `SentryConfig`; start from `main.tsx` only when enabled and valid.
   - `dataCollection` set explicitly.
   - The Pages workflow writes the deployment's `integrations.json`.
-  - Delete the runtime DSN settings and the `sentry.config.v1` key (on load), and the wrappers decision 1 drops.
+  - Delete the runtime DSN settings and the `dashboard-builder:sentry` key (on load), and the wrappers decision 1 drops.
   - Done when the default config fetches no Sentry chunk, enabling Sentry in the config of the same build starts it with the configured rates, an invalid entry doesn't start it, and no dead exports remain.
 - [ ] **Rebuild the Sentry page ([§3](#3-sentry-as-the-first-telemetry-integration)).**
   - Tokens and `Page` parts; state, snippet, effective config.

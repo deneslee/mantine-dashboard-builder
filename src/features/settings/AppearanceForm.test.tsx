@@ -3,6 +3,7 @@ import { notify } from '@/lib/notify/notify';
 import { createShellStore } from '@/shell/createShellStore';
 import { ShellProvider } from '@/shell/ShellProvider';
 import { fireEvent, render, screen, waitFor } from '@/testing/render';
+import { MOTION_STORAGE_KEY } from '@/lib/useMotion';
 import { AppearanceForm } from './AppearanceForm';
 
 function setup() {
@@ -51,10 +52,10 @@ describe('AppearanceForm', () => {
   it('saves the motion setting', async () => {
     setup();
     fireEvent.click(screen.getByRole('radio', { name: 'Reduce' }));
-    expect(localStorage.getItem('motion.v1')).not.toBe('reduce'); // still a draft
+    expect(localStorage.getItem(MOTION_STORAGE_KEY)).not.toBe('reduce'); // still a draft
 
     fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
-    await waitFor(() => expect(localStorage.getItem('motion.v1')).toBe('reduce'));
+    await waitFor(() => expect(localStorage.getItem(MOTION_STORAGE_KEY)).toBe('reduce'));
     await waitFor(() => expect(screen.getByRole('button', { name: 'Save changes' })).toBeDisabled());
   });
 

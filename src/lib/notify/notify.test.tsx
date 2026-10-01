@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { render, screen } from '@/testing/render';
 import { notify } from './notify';
 import { useInbox } from '@/lib/notify/useInbox';
+import { storageKey } from '../storage';
 
 describe('notify', () => {
   beforeEach(() => {
@@ -26,7 +27,10 @@ describe('notify', () => {
 
   it('loads v1 inbox items saved before the boolean rename', async () => {
     const item = { id: 'a', level: 'error', title: 'Old', at: 1, count: 1, read: true };
-    localStorage.setItem('notifications.v1', JSON.stringify({ version: 1, state: { items: [item] } }));
+    localStorage.setItem(
+      storageKey('notifications'),
+      JSON.stringify({ version: 1, state: { items: [item] } }),
+    );
     await useInbox.persist.rehydrate();
     expect(useInbox.getState().items).toEqual([
       { id: 'a', level: 'error', title: 'Old', at: 1, count: 1, isRead: true },

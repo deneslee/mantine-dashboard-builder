@@ -122,8 +122,8 @@ A store comes from a `create*Store` factory. One `*Provider` puts it into React,
   - Dashboards carry `schemaVersion`.
   - Zustand stores use persist's own `version` and `migrate`.
   - Mantine keys hold single tokens.
-- **API:** `readStored(key, parse)`, `writeStored` and `removeStored`. A corrupt value throws `AppError('validation')` and is kept.
-- **Legacy keys:** `migrateLegacyKeys()` runs once in `main.tsx`: it copies each of the six `.v1` keys to its new name if that is absent, then removes the old one (`// ponytail: delete after 2027-01`). `color-scheme` starts fresh.
+- **API:** only `storageKey`. Each reader keeps its own handling of a bad value (see Decisions, Oct 1).
+- **Legacy keys:** `migrateLegacyKeys()` runs when `lib/storage.ts` is first evaluated: it copies each old key, `color-scheme` included, to its new name if that is absent, then removes the old one (`// ponytail: delete after 2027-01`).
 - **Pre-paint script:** `index.html` reads `dashboard-builder:color-scheme`, and a test pins that.
 
 | Old                                                                      | New                                                                     |
@@ -272,11 +272,11 @@ Every step leaves `pnpm lint && pnpm format:check && pnpm build && pnpm test` gr
   - Done when the compiler test script shows no bailouts in these files. Oct 1: done; no file under `features/dashboards` bails out. `WidgetForm` and `AddWidgetForm` keep only the parse inside `try`. The page keeps layout and an `Announcer` leaf; `EditToolbar` owns the dirty, undo and save state, and `RefreshButton` the fetch state. `EditTools` is now `EditDrawer`, the focus-return logic lives in `grid/focusWidgetMenu.ts`, and the route search schema moved from `core/time` to `dashboardSearch.ts` (+ test) as `dashboardSearchSchema`. `rangePresets` and `refreshOptions` are `RANGE_PRESETS` and `REFRESH_OPTIONS`.
 - [x] **Mode in the URL.** Remove `mode` from the store. The route's `beforeLoad` redirects to `?mode=edit` when a draft exists, and `isEditing` is passed as props. Done when the RestoresDraft story passes and the sync effect is gone. Oct 1: done before **Split the page and the editor**, so the split starts from simpler code. The redirect runs only when `cause === 'enter'`; checked in the dev server that "Leave dashboard" into view mode with a draft stays in view mode.
 - [x] **Shell.** Nav comes from `app/nav.ts` through `ShellProvider`; the context and hooks live in `useShell.ts`. Done when `shell/` has no app route data. Oct 1: `shell/Nav.ts` holds only the types (`Nav` gains `areas`); one `ShellContext` carries the store, `nav` and `globalTabs`, read through `useNav` and `useGlobalTabs`. `types.ts` merged into `createShellStore.ts`, and the dashboards' `state/context.ts` into `useDashboard.ts`. Tests and stories that show the sidebar pass the real `app/nav`; no nav fixture.
-- [ ] **Storage.**
-  - Add `lib/storage.ts` (+ test): round trip, corrupt value kept, legacy move, the index.html key.
-  - Switch every key over, and add `migrateLegacyKeys` in `main.tsx`.
-  - Parse the Sentry config with zod.
-  - Done when no `.v1` key is written.
+- [x] **Storage.**
+  - Add `lib/storage.ts` (+ test): round trip, corrupt value kept, legacy move, the index.html key. (Oct 1: `storageKey` and `migrateLegacyKeys` only; the test covers the legacy move and the index.html key.)
+  - Switch every key over, and add `migrateLegacyKeys` in `main.tsx`. (Oct 1: it runs inside `lib/storage.ts` instead; see Decisions.)
+  - [-] Parse the Sentry config with zod. Plan 06 deletes the runtime Sentry settings and their key, so validating them now is wasted work.
+  - Done when no `.v1` key is written. Oct 1: done. Checked in the dev server: a browser with the old shell, inbox, color-scheme and saved-copy keys reloads onto the new keys, with the stores migrated to version 2 and the saved copy opening.
 - [ ] **Style exemptions.** Narrow them to `ui/tokens` and `ui/theme`, and fix any hits.
 
 ### 6. Lint
@@ -307,6 +307,8 @@ Every step leaves `pnpm lint && pnpm format:check && pnpm build && pnpm test` gr
 - **Oct 1: the list summary is camelCase** (`updatedAt`, `widgetCount`) and `updatedAt` stays a string, like the dashboard's own, so the summary needs no mapper either.
 - **Oct 1: `GRID_COLUMNS` lives in `core/dashboard/layout.ts`** because layouts are validated against it; `dimensions.grid.cols` points at it, so `core/` no longer imports `ui/`.
 - **Oct 1: `widgetDataQuery` stays in `dashboardQueries.ts`.** The file is about 60 lines and shares `dashboardKeys`; a separate file would split one small module in two.
+- **Oct 1: `lib/storage.ts` has no read/write helpers.** The saved copy, the draft and the Sentry config each handle a bad value differently (an error with a recovery hint, a banner, the defaults); a shared reader would need an option for each.
+- **Oct 1: the legacy-key migration runs when `lib/storage.ts` is evaluated**, not in `main.tsx`. ES imports are evaluated before `main.tsx`'s body, and `useInbox` hydrates at module load, so a call there came too late (the dev-server check caught the inbox keeping its v1 shape). Every key reader imports `storageKey` from that module, so the migration always runs first. `color-scheme` is migrated too; it costs one entry.
 - **Oct 1: docs follow each step**, not only step 7. Agents read AGENTS.md and the architecture page before coding, so stale paths there cost more than a second edit.
 - **Oct 1: `config/config.ts` folded into `sidebar/Brand.tsx`**, the only user of `APP_NAME`; `config/` is gone.
 - **Oct 1: renamed persisted fields migrate through zustand's `version`/`migrate`**, not a reset. A reset would silently drop users' panel layout and unread inbox. Each migration is marked `ponytail: delete after 2027-01`.

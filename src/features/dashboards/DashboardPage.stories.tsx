@@ -3,7 +3,7 @@ import { expect, spyOn, userEvent, waitFor, within } from 'storybook/test';
 import { AppStory } from '@/testing/AppStory';
 import { loadDemoDashboard } from '@/testing/fixtures/dashboards';
 import { saveDashboard } from './data/dashboardApi';
-import { writeDraft } from './data/drafts';
+import { draftKey, writeDraft } from './data/drafts';
 
 /**
  * The dashboard page in the real app (routes, loaders, plugins), at a URL. The play functions are the
@@ -57,7 +57,7 @@ export const StorageError: Story = {
   beforeEach: () => {
     const setItem = localStorage.setItem.bind(localStorage);
     spyOn(Storage.prototype, 'setItem').mockImplementation((key, value) => {
-      if (key.startsWith('dashboard.draft')) throw new DOMException('Quota exceeded', 'QuotaExceededError');
+      if (key.startsWith(draftKey(''))) throw new DOMException('Quota exceeded', 'QuotaExceededError');
       setItem(key, value);
     });
   },

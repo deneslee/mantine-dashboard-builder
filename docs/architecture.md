@@ -82,14 +82,16 @@ Widget data is cached per widget (`['ds', queries, range]`); auto-refresh and th
 
 ## Browser storage
 
-| Key                       | Holds                                                                  |
-| ------------------------- | ---------------------------------------------------------------------- |
-| `shell.v1`                | Sidebar and context bar layout (zustand persist)                       |
-| `notifications.v1`        | Inbox items (zustand persist)                                          |
-| `motion.v1`               | Reduced-motion preference                                              |
-| `color-scheme`            | Light, dark or auto; also read by the pre-paint script in `index.html` |
-| `dashboard.saved.v1:<id>` | A saved dashboard, which overrides the static file                     |
-| `dashboard.draft.v1:<id>` | Unsaved edits and the baseline they started from                       |
-| `sentry.config.v1`        | Sentry prototype settings                                              |
+Every key is `storageKey(name)` from `lib/storage.ts`: `dashboard-builder:<name>`, because the GitHub Pages origin is shared with other projects.
 
-The zustand stores already keep their version inside the value (persist `version` 2, with a `migrate` from 1). Plan [08](../.agents/planning/plans/08-structure-cleanup.md) renames the keys to `dashboard-builder:<name>` and drops the `.v1` suffixes.
+| Key (`dashboard-builder:` + …) | Holds                                                                  |
+| ------------------------------ | ---------------------------------------------------------------------- |
+| `shell`                        | Sidebar and context bar layout (zustand persist, `version` 2)          |
+| `notifications`                | Inbox items (zustand persist, `version` 2)                             |
+| `motion`                       | Reduced-motion preference                                              |
+| `color-scheme`                 | Light, dark or auto; also read by the pre-paint script in `index.html` |
+| `saved:<id>`                   | A saved dashboard (with `schemaVersion`), which overrides the file     |
+| `draft:<id>`                   | Unsaved edits and the baseline they started from                       |
+| `sentry`                       | Sentry prototype settings (plan 06 deletes them)                       |
+
+No key carries a version; each value does: zustand persist's `version` with a `migrate`, and a dashboard's `schemaVersion`. The keys from before Oct 2026 (`shell.v1`, `dashboard.saved.v1:<id>`, …) move to these names when `lib/storage.ts` is first evaluated, before any store hydrates; that code goes after 2027-01.

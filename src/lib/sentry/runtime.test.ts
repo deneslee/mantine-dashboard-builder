@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { storageKey } from '../storage';
 
 const initSentry = vi.fn();
 const captureException = vi.fn();
@@ -9,7 +10,7 @@ vi.mock('./router', () => ({ bindRouterToSentry }));
 
 /** A fresh copy of the runtime (it keeps module state) with the given stored DSN. */
 async function runtime(dsn: string) {
-  localStorage.setItem('sentry.config.v1', JSON.stringify({ dsn }));
+  localStorage.setItem(storageKey('sentry'), JSON.stringify({ dsn }));
   vi.resetModules();
   return import('./runtime');
 }

@@ -6,11 +6,12 @@ import { useEffect, type ReactNode } from 'react';
 import { cssVariablesResolver, reducedMotionTheme, theme } from '@/ui/theme/theme';
 import { dimensions } from '@/ui/tokens/dimensions';
 import { useMotion } from '@/lib/useMotion';
+import { storageKey } from '@/lib/storage';
 import { CurrentUserContext, placeholderUser } from '@/lib/useCurrentUser';
 import { PluginsContext } from '@/plugins/usePlugins';
 import { plugins } from './plugins';
 
-const colorSchemeManager = localStorageColorSchemeManager({ key: 'color-scheme' });
+const colorSchemeManager = localStorageColorSchemeManager({ key: storageKey('color-scheme') });
 
 /**
  * App-wide providers, the only provider stack: the app, `testing/render` and the Storybook preview

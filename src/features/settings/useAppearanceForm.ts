@@ -41,7 +41,7 @@ export function useAppearanceForm() {
   const mutation = useMutation({
     mutationFn: async (next: AppearanceValues) => {
       await wait(MIN_SAVING_MS);
-      // Each setter persists: the shell store to `shell.v1`, Mantine to its color-scheme key, motion to `motion.v1`.
+      // Each setter persists: the shell store, Mantine's color scheme and the motion setting each to their own key.
       setBurgerBehavior(next.burger);
       setColorScheme(next.colorScheme);
       setMotion(next.motion);

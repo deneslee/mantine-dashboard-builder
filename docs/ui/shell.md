@@ -29,11 +29,11 @@ Below `md` (992px) both panels are drawers whatever the preference says.
 
 ## State
 
-One Zustand store per `ShellProvider`, persisted as `shell.v1`. Only the provider knows it is Zustand; components use the hooks, which return derived values with shallow comparison.
+One Zustand store per `ShellProvider`, persisted as `dashboard-builder:shell`. Only the provider knows it is Zustand; components use the hooks, which return derived values with shallow comparison.
 
 ```mermaid
 flowchart LR
-  Store["createShellStore<br/>state + actions, shell.v1"] --> Provider[ShellProvider]
+  Store["createShellStore<br/>state + actions, persisted"] --> Provider[ShellProvider]
   Provider --> Hooks["useSidebar<br/>useContextBar<br/>useShellActions"]
   Hooks --> Consumers["Shell · TopNavbar · Sidebar<br/>ContextBar · settings feature"]
 ```

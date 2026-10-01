@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { InboxItem, NotifyLevel } from '@/lib/notify/types';
+import { storageKey } from '../storage';
 
 const MAX_ITEMS = 50;
 
@@ -47,7 +48,7 @@ export const useInbox = create<InboxStore>()(
       clear: () => set({ items: [] }),
     }),
     {
-      name: 'notifications.v1',
+      name: storageKey('notifications'),
       version: 2,
       partialize: (s) => ({ items: s.items }),
       // ponytail: v1 (`read`) migration; delete after 2027-01.

@@ -1,8 +1,9 @@
 import { z } from 'zod';
 import { storedDashboardSchema, type Dashboard } from '@/core/dashboard/dashboardSchema';
+import { storageKey } from '@/lib/storage';
 
 /** Unsaved edits per dashboard, with the baseline they started from, so a reload keeps them. */
-export const draftKey = (id: string) => `dashboard.draft.v1:${id}`;
+export const draftKey = (id: string) => storageKey(`draft:${id}`);
 
 const draft = z.object({ baseline: storedDashboardSchema, document: storedDashboardSchema });
 

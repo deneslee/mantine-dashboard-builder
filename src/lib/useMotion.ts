@@ -1,9 +1,10 @@
 import { useLocalStorage, useReducedMotion } from '@mantine/hooks';
+import { storageKey } from './storage';
 
 /** The user's motion setting: follow the operating system, or always reduce. */
 export type MotionPreference = 'system' | 'reduce';
 
-export const MOTION_STORAGE_KEY = 'motion.v1';
+export const MOTION_STORAGE_KEY = storageKey('motion');
 
 /**
  * The stored motion setting and its setter. Every caller stays in sync (Mantine's storage hook

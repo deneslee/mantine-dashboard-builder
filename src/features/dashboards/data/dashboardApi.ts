@@ -1,4 +1,5 @@
 import { AppError } from '@/core/errors/AppError';
+import { storageKey } from '@/lib/storage';
 import { wait } from '@/utils/wait';
 import {
   dashboardListSchema,
@@ -18,7 +19,7 @@ const BASE = `${import.meta.env.BASE_URL}data/dashboards`;
 /** Simulated latency so loading states are visible in development. */
 const LATENCY = import.meta.env.DEV ? 600 : 0;
 
-export const savedKey = (id: string) => `dashboard.saved.v1:${id}`;
+export const savedKey = (id: string) => storageKey(`saved:${id}`);
 
 function readSaved(id: string): Dashboard | undefined {
   const raw = localStorage.getItem(savedKey(id));
