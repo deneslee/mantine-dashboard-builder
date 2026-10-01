@@ -13,7 +13,7 @@ import { useMediaQuery } from '@mantine/hooks';
 import { IconRefresh } from '@tabler/icons-react';
 import { useIsFetching, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useBlocker, useNavigate, useParams, useSearch } from '@tanstack/react-router';
-import { lazy, Suspense, useEffect, useRef } from 'react';
+import { lazy, Suspense } from 'react';
 import { RouteBreadcrumbs } from '@/shell/breadcrumbs/RouteBreadcrumbs';
 import { Page } from '@/ui/components/Page';
 import { iconSize, iconStroke } from '@/ui/tokens/semantic';
@@ -45,7 +45,6 @@ export function DashboardPage() {
   const defaultRefresh = useDashboard((s) => s.refresh);
   const isDirty = useDashboard((s) => s.isDirty);
   const draftError = useDashboard((s) => s.draftError);
-  const mode = useDashboard((s) => s.mode);
   const announcement = useDashboard((s) => s.announcement);
   const isEmpty = useDashboard((s) => s.doc.layouts.lg.length === 0);
   const isQueryEditorOpen = useDashboard(
@@ -53,18 +52,7 @@ export function DashboardPage() {
   );
   const { canUndo, canRedo } = useUndoState();
   const isWide = useMediaQuery(`(min-width: ${dimensions.grid.breakpoints.md}px)`, true);
-  const first = useRef(true);
-  useEffect(() => {
-    if (first.current) {
-      first.current = false;
-      if (mode === 'edit' && search.mode !== 'edit') {
-        void navigate({ search: (prev) => ({ ...prev, mode: 'edit' }), replace: true });
-        return;
-      }
-    }
-    actions.setMode(search.mode ?? 'view');
-  }, [search.mode, actions, mode, navigate]);
-  const isEditing = mode === 'edit';
+  const isEditing = search.mode === 'edit';
   const range = isEditing
     ? defaultRange
     : { from: search.from ?? defaultRange.from, to: search.to ?? defaultRange.to };
@@ -256,7 +244,7 @@ export function DashboardPage() {
             </Button>
           </Group>
         ) : (
-          !(isEditing && isWide && isQueryEditorOpen) && <DashboardGrid range={range} />
+          !(isEditing && isWide && isQueryEditorOpen) && <DashboardGrid range={range} isEditing={isEditing} />
         )}
       </Page.Body>
       <Modal

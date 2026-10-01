@@ -19,3 +19,6 @@ export function writeDraft(baseline: Dashboard, document: Dashboard): void {
 }
 
 export const clearDraft = (id: string) => localStorage.removeItem(draftKey(id));
+
+/** Whether a draft is stored, readable or not; the route opens such a dashboard in edit mode. */
+export const hasDraft = (id: string) => localStorage.getItem(draftKey(id)) !== null;

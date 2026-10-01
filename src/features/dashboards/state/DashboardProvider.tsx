@@ -7,14 +7,12 @@ import { createDashboardStore, type DashboardStore } from './createDashboardStor
 export function DashboardProvider({
   dashboard,
   store,
-  mode = 'view',
   children,
 }: {
   dashboard: Dashboard;
   store?: DashboardStore;
-  mode?: 'view' | 'edit';
   children: ReactNode;
 }) {
-  const [value] = useState(() => store ?? createDashboardStore(dashboard, { mode }));
+  const [value] = useState(() => store ?? createDashboardStore(dashboard));
   return <DashboardContext value={value}>{children}</DashboardContext>;
 }

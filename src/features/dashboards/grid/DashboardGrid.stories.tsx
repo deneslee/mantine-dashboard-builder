@@ -15,13 +15,13 @@ interface Args {
 }
 
 function Grid({ dashboard, mode }: { dashboard: Dashboard; mode: 'view' | 'edit' }) {
-  const [store] = useState(() => createDashboardStore(dashboard, { mode, shouldPersist: false }));
+  const [store] = useState(() => createDashboardStore(dashboard, { shouldPersist: false }));
   return (
     <TestRouter
       page={
         <Box p="lg">
           <DashboardProvider dashboard={dashboard} store={store}>
-            <DashboardGrid range={{ from: 'now-24h', to: 'now' }} />
+            <DashboardGrid range={{ from: 'now-24h', to: 'now' }} isEditing={mode === 'edit'} />
           </DashboardProvider>
         </Box>
       }

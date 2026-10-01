@@ -86,7 +86,7 @@ function renderGrid() {
   const ui = (range: TimeRange) => (
     <PluginsContext value={plugins}>
       <DashboardProvider dashboard={dashboard} store={store}>
-        <DashboardGrid range={range} />
+        <DashboardGrid range={range} isEditing={false} />
       </DashboardProvider>
     </PluginsContext>
   );

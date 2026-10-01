@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { dashboardSchema, orderWidgets } from '@/core/dashboard/dashboardSchema';
 import { testDashboard } from '@/testing/fixtures/dashboards';
 import { getDashboard } from '../data/dashboardApi';
-import { draftKey } from '../data/drafts';
+import { draftKey, hasDraft } from '../data/drafts';
 import { createDashboardStore, selectDashboard } from './createDashboardStore';
 
 const readingOrder = (store: ReturnType<typeof createDashboardStore>) =>
@@ -10,7 +10,7 @@ const readingOrder = (store: ReturnType<typeof createDashboardStore>) =>
 
 describe('dashboard editing', () => {
   it('keeps one step per drag/resize or field blur and ignores identical updates', () => {
-    const store = createDashboardStore(testDashboard(), { mode: 'edit', shouldPersist: false });
+    const store = createDashboardStore(testDashboard(), { shouldPersist: false });
     const actions = store.getState().actions;
     actions.commitLayout(
       'lg',
@@ -68,11 +68,11 @@ describe('dashboard editing', () => {
     expect(store.getState().isDirty).toBe(true);
   });
 
-  it('restores a per-dashboard draft and edit mode; Discard restores baseline and clears draft/history', () => {
+  it('restores a per-dashboard draft; Discard restores baseline and clears draft/history', () => {
     const first = createDashboardStore(testDashboard());
     first.getState().actions.editWidget('a', { title: 'Draft' });
     const reloaded = createDashboardStore(testDashboard());
-    expect(reloaded.getState().mode).toBe('edit');
+    expect(hasDraft('test')).toBe(true);
     expect(reloaded.getState().doc.widgets.a?.title).toBe('Draft');
     reloaded.getState().actions.editWidget('b', { description: 'Another change' });
     reloaded.getState().actions.discard();
@@ -98,13 +98,12 @@ describe('dashboard editing', () => {
     expect(localStorage.getItem(draftKey('test'))).toBe('broken');
   });
 
-  it('isolates providers and excludes selection, mode and time from undo', () => {
-    const one = createDashboardStore(testDashboard(), { mode: 'edit', shouldPersist: false });
+  it('isolates providers and excludes selection and time from undo', () => {
+    const one = createDashboardStore(testDashboard(), { shouldPersist: false });
     const two = createDashboardStore({ ...testDashboard(), id: 'other' }, { shouldPersist: false });
     const actions = one.getState().actions;
     actions.setRange({ from: 'now-7d', to: 'now' });
     actions.openTool({ kind: 'palette' });
-    actions.setMode('view');
     expect(one.temporal.getState().pastStates).toHaveLength(0);
     actions.editWidget('a', { title: 'One only' });
     actions.undo();
@@ -114,7 +113,7 @@ describe('dashboard editing', () => {
   });
 
   it('adds and duplicates at the bottom, removes with one step, and exports/imports identical documents', () => {
-    const store = createDashboardStore(testDashboard(), { mode: 'edit', shouldPersist: false });
+    const store = createDashboardStore(testDashboard(), { shouldPersist: false });
     const actions = store.getState().actions;
     const copy = actions.duplicate('a');
     expect(store.getState().doc.layouts.lg.at(-1)?.i).toBe(copy);

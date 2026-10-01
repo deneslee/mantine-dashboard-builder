@@ -16,6 +16,7 @@ export function WidgetHeader({
   widget,
   titleId,
   range,
+  isEditing,
   isFetching,
   hasFailed,
 }: {
@@ -23,10 +24,10 @@ export function WidgetHeader({
   widget: Widget;
   titleId: string;
   range: TimeRange;
+  isEditing: boolean;
   isFetching: boolean;
   hasFailed: boolean;
 }) {
-  const mode = useDashboard((state) => state.mode);
   const dashboardId = useDashboard((state) => state.doc.id);
   const actions = useDashboardActions();
   const plugins = usePlugins();
@@ -63,7 +64,7 @@ export function WidgetHeader({
       justify="space-between"
       wrap="nowrap"
       data-widget-drag
-      data-editing={mode === 'edit'}
+      data-editing={isEditing}
     >
       <Text id={titleId} size="sm" fw={fontWeight.medium} truncate title={widget.title}>
         {widget.title}
@@ -116,7 +117,7 @@ export function WidgetHeader({
               </Menu.Item>
             ) : null}
             <Menu.Item onClick={() => void handleCopyLink()}>Copy link</Menu.Item>
-            {mode === 'edit' ? (
+            {isEditing ? (
               <>
                 <Menu.Divider />
                 <Menu.Item

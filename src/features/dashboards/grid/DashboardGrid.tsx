@@ -24,10 +24,9 @@ const resize = { enabled: true, handles: ['se'] as ['se'] };
 const disabled = { enabled: false };
 const constraints = [gridBounds, minMaxSize];
 
-export function DashboardGrid({ range }: { range: TimeRange }) {
+export function DashboardGrid({ range, isEditing }: { range: TimeRange; isEditing: boolean }) {
   const { width, containerRef, mounted: isMounted } = useContainerWidth({ measureBeforeMount: true });
   const authored = useDashboard((state) => state.doc.layouts);
-  const mode = useDashboard((state) => state.mode);
   const types = useDashboard(
     useShallow((s) =>
       Object.fromEntries(Object.entries(s.doc.widgets).map(([id, widget]) => [id, widget.type])),
@@ -58,19 +57,20 @@ export function DashboardGrid({ range }: { range: TimeRange }) {
     () =>
       ids.map((id) => (
         <div key={id}>
-          <WidgetTile id={id} range={range} />
+          <WidgetTile id={id} range={range} isEditing={isEditing} />
         </div>
       )),
-    [ids, range],
+    [ids, range, isEditing],
   );
-  const isEditing = mode === 'edit' && width >= grid.breakpoints.md;
+  // Below md the grid is a single reading-order column: no dragging, even in edit mode.
+  const canEditLayout = isEditing && width >= grid.breakpoints.md;
   const commit =
     (action: 'Moved' | 'Resized'): EventCallback =>
     (layout, _old, item) => {
-      if (isEditing && item) actions.commitLayout(breakpoint.current, layout, item.i, action);
+      if (canEditLayout && item) actions.commitLayout(breakpoint.current, layout, item.i, action);
     };
   return (
-    <div ref={containerRef} className={classes.root} data-editing={isEditing || undefined}>
+    <div ref={containerRef} className={classes.root} data-editing={canEditLayout || undefined}>
       {isMounted ? (
         <ResponsiveGridLayout<Breakpoint>
           width={width}
@@ -80,8 +80,8 @@ export function DashboardGrid({ range }: { range: TimeRange }) {
           rowHeight={grid.rowHeight}
           margin={margin}
           containerPadding={noPadding}
-          dragConfig={isEditing ? drag : disabled}
-          resizeConfig={isEditing ? resize : disabled}
+          dragConfig={canEditLayout ? drag : disabled}
+          resizeConfig={canEditLayout ? resize : disabled}
           constraints={constraints}
           compactor={ids.length > 100 ? fastVerticalCompactor : undefined}
           onBreakpointChange={(next) => {

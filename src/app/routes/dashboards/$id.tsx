@@ -1,8 +1,9 @@
-import { createFileRoute, notFound, stripSearchParams } from '@tanstack/react-router';
+import { createFileRoute, notFound, redirect, stripSearchParams } from '@tanstack/react-router';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { DashboardProvider } from '@/features/dashboards/state/DashboardProvider';
 import { DashboardPage } from '@/features/dashboards/DashboardPage';
 import { dashboardQuery } from '@/features/dashboards/data/dashboardQueries';
+import { hasDraft } from '@/features/dashboards/data/drafts';
 import { dashboardSearch } from '@/core/time/timeRange';
 import { dashboardTabs } from '@/features/dashboards/dashboardTabs';
 import { GridSkeleton } from '@/ui/components/Skeletons';
@@ -16,6 +17,12 @@ export const Route = createFileRoute('/dashboards/$id')({
   // Time range and refresh; the loader doesn't depend on them, so changing them never reloads the document.
   validateSearch: dashboardSearch,
   search: { middlewares: [stripSearchParams({ mode: 'view' })] },
+  // Opening a dashboard with unsaved edits lands in edit mode, where they can be saved or discarded.
+  // Only on entry: leaving edit mode with a draft must stay in view mode.
+  beforeLoad: ({ params, search, cause }) => {
+    if (cause === 'enter' && search.mode !== 'edit' && hasDraft(params.id))
+      throw redirect({ to: '/dashboards/$id', params, search: { ...search, mode: 'edit' }, replace: true });
+  },
   loader: async ({ context, params }) => {
     try {
       return await context.queryClient.ensureQueryData(dashboardQuery(params.id));
@@ -30,10 +37,9 @@ export const Route = createFileRoute('/dashboards/$id')({
 
 function DashboardRoute() {
   const { id } = Route.useParams();
-  const { mode } = Route.useSearch();
   const { data } = useSuspenseQuery(dashboardQuery(id));
   return (
-    <DashboardProvider key={id} dashboard={data} mode={mode}>
+    <DashboardProvider key={id} dashboard={data}>
       <DashboardPage />
     </DashboardProvider>
   );

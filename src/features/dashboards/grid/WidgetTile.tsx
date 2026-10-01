@@ -21,10 +21,12 @@ const unknownSkeleton = <TextSkeleton lines={3} />;
 export function WidgetTile({
   id,
   range,
+  isEditing = false,
   previewQueries,
 }: {
   id: string;
   range: TimeRange;
+  isEditing?: boolean;
   previewQueries?: Query[];
 }) {
   const widget = useWidget(id);
@@ -33,6 +35,7 @@ export function WidgetTile({
       id={id}
       widget={previewQueries ? { ...widget, queries: previewQueries } : widget}
       range={range}
+      isEditing={isEditing}
       isPreview={previewQueries !== undefined}
     />
   ) : null;
@@ -42,11 +45,13 @@ function Tile({
   id,
   widget,
   range,
+  isEditing,
   isPreview,
 }: {
   id: string;
   widget: Widget;
   range: TimeRange;
+  isEditing: boolean;
   isPreview: boolean;
 }) {
   const titleId = useId();
@@ -78,6 +83,7 @@ function Tile({
           widget={widget}
           titleId={titleId}
           range={range}
+          isEditing={isEditing}
           isFetching={result.isFetching}
           hasFailed={result.isError}
         />

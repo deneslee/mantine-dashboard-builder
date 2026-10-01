@@ -45,11 +45,12 @@ Each top-level folder is shaped like a package, so it can move to `packages/` wh
 
 ```text
 URL /dashboards/$id?mode&from&to&refresh ── validateSearch (zod)
+  beforeLoad: on entry, a stored draft and no ?mode=edit → redirect to ?mode=edit
   loader: ensureQueryData(dashboardQuery(id))
     dashboardApi: saved copy (localStorage) ?? fetch public/data/dashboards/<id>.json
       → storedDashboardSchema (migrateDashboard → dashboardSchema) → Dashboard → Query cache ['dashboards', id]
 DashboardProvider key=id → createDashboardStore(dashboard)      restores a draft if there is one
-DashboardPage → range = edit mode ? store range : URL ?? document range
+DashboardPage → isEditing = ?mode=edit; range = isEditing ? store range : URL ?? document range
   DashboardGrid → layouts per breakpoint; drag or resize stop → commitLayout (one undo step)
     WidgetTile(id) → widget from the store, plugin from usePlugins()
       useQuery(widgetDataQuery(queries, range)) once the tile is near the viewport

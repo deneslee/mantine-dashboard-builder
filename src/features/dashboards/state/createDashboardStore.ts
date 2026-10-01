@@ -17,12 +17,10 @@ export interface DashboardState {
   baseline: Dashboard;
   isDirty: boolean;
   draftError: string | null;
-  mode: 'view' | 'edit';
   breakpoint: Breakpoint;
   tool: EditorTool;
   announcement: string;
   actions: {
-    setMode(this: void, mode: 'view' | 'edit'): void;
     setBreakpoint(this: void, breakpoint: Breakpoint): void;
     openTool(this: void, tool: EditorTool): void;
     setRange(this: void, range: TimeRange): void;
@@ -64,7 +62,6 @@ const cleanLayout = (items: readonly LayoutItem[]): LayoutItem[] =>
   items.map(({ i, x, y, w, h }) => ({ i, x, y, w, h }));
 
 export interface DashboardStoreOptions {
-  mode?: 'view' | 'edit';
   /** Off in stories and tests that must not read or write a draft. */
   shouldPersist?: boolean;
   /** Where Save goes; tests pass a fake. */
@@ -73,7 +70,7 @@ export interface DashboardStoreOptions {
 
 export function createDashboardStore(
   baseline: Dashboard,
-  { mode = 'view', shouldPersist = true, save = saveDashboard }: DashboardStoreOptions = {},
+  { shouldPersist = true, save = saveDashboard }: DashboardStoreOptions = {},
 ) {
   let restored: ReturnType<typeof readDraft> = undefined;
   let draftError: string | null = null;
@@ -93,12 +90,10 @@ export function createDashboardStore(
         baseline: saved,
         isDirty: serialized(initial) !== serialized(saved),
         draftError,
-        mode: restored ? 'edit' : mode,
         breakpoint: 'lg',
         tool: null,
         announcement: '',
         actions: {
-          setMode: (next) => set({ mode: next }),
           setBreakpoint: (breakpoint) => set({ breakpoint }),
           openTool: (tool) => set({ tool }),
           setRange: (timeRange) => set({ timeRange }),
