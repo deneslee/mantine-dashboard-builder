@@ -281,7 +281,7 @@ Every step leaves `pnpm lint && pnpm format:check && pnpm build && pnpm test` gr
 
 ### 6. Lint
 
-- [ ] **Layer rules.** Write the per-folder rules above in `oxlint.config.ts`, plus fixtures under `lint/fixtures/src/**`. Done when each violation fixture fails, the allowed contract import passes, and `pnpm lint` is green on the tree.
+- [x] **Layer rules.** Write the per-folder rules above in `oxlint.config.ts`, plus fixtures under `lint/fixtures/src/**`. Done when each violation fixture fails, the allowed contract import passes, and `pnpm lint` is green on the tree. Oct 1: done. Each `layer()` override covers `src/<dir>/**` and its fixture mirror; the test counts one error per banned import (20 in all) and none in `features/allowed.ts`. The tree needed no changes.
 
 ### 7. Docs
 

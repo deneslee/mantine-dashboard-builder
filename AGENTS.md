@@ -89,7 +89,7 @@ Package-shaped folders, so each can move to `packages/` when the repo becomes a 
       utils/        tiny helpers (wait)
       testing/      render, TestRouter, AppStory, setup: tests and stories only
 
-- **Imports go down the tree above, never up** (`testing/` aside): `app` on top, `utils` at the bottom. `plugins/` imports only `core`, `ui` and `utils`; `shell/` never imports `plugins/`. oxlint enforces the direction and `import/no-cycle`; plan [08](.agents/planning/plans/08-structure-cleanup.md) step 6 adds the per-folder rules.
+- **Imports go down the tree above, never up** (`testing/` aside): `app` on top, `utils` at the bottom. `plugins/` imports only `core`, `ui` and `utils`; `shell/` never imports `plugins/`. oxlint enforces it with one rule per folder (`oxlint.config.ts`), plus `import/no-cycle`; `lint/rules.test.ts` proves each rule fires on the fixtures in `lint/fixtures/src/`. `core/` also may not use React, Mantine, TanStack, zustand or other UI and state libraries, and `ui/` may not use the router.
 - **Features never import each other, `app/`, or a built-in widget or datasource.** Combine them in `app/`:
   - A route may import several features and wrap parts in its own Suspense or error boundary.
   - A feature that needs something from another asks for it (props, context); `app/` passes it in, e.g. `ShellProvider nav` and `globalTabs`, `PluginsContext`.

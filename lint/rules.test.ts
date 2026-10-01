@@ -2,6 +2,30 @@ import { execFileSync } from 'node:child_process';
 import stylelint from 'stylelint';
 import { describe, expect, it } from 'vitest';
 
+interface Diagnostic {
+  code: string;
+  severity: string;
+  message: string;
+  filename: string;
+}
+
+/** Runs oxlint on a fixture path. It exits non-zero on errors, which is what these tests expect. */
+function oxlint(path: string): Diagnostic[] {
+  let json = '';
+  try {
+    json = execFileSync(
+      process.execPath,
+      ['node_modules/oxlint/bin/oxlint', '--no-ignore', '-f', 'json', path],
+      {
+        encoding: 'utf8',
+      },
+    );
+  } catch (e) {
+    json = (e as { stdout: string }).stdout;
+  }
+  return (JSON.parse(json) as { diagnostics: Diagnostic[] }).diagnostics;
+}
+
 /** The token rules must fire, or `pnpm lint` passing proves nothing (docs/design-system.md). */
 describe('token lint rules', () => {
   it('Stylelint reports raw colors, palette shades and raw values as errors', async () => {
@@ -21,25 +45,36 @@ describe('token lint rules', () => {
   });
 
   it('oxlint reports raw style props and primitives imports as errors', () => {
-    let json = '';
-    try {
-      execFileSync(
-        process.execPath,
-        ['node_modules/oxlint/bin/oxlint', '--no-ignore', '-f', 'json', 'lint/fixtures/raw-style-props.tsx'],
-        { encoding: 'utf8' },
-      );
-    } catch (e) {
-      // oxlint exits non-zero when it finds errors, which is what this test expects.
-      json = (e as { stdout: string }).stdout;
-    }
-    const { diagnostics } = JSON.parse(json) as {
-      diagnostics: { code: string; severity: string; message: string }[];
-    };
+    const diagnostics = oxlint('lint/fixtures/raw-style-props.tsx');
     const raw = diagnostics.filter((d) => d.code === 'app(no-raw-style-props)');
     expect(raw.every((d) => d.severity === 'error')).toBe(true);
     expect(raw.map((d) => d.message.match(/for `(\w+)`/)?.[1])).toEqual(['gap', 'c', 'fw', 'size', 'stroke']);
     expect(
       diagnostics.some((d) => d.code === 'eslint(no-restricted-imports)' && d.severity === 'error'),
     ).toBe(true);
+  });
+});
+
+/** Folder imports must follow the layers (AGENTS.md › Structure), or package-shaped folders are a wish. */
+describe('layer lint rules', () => {
+  it('reports every import that crosses a layer, and none of the allowed ones', () => {
+    const counts: Record<string, number> = {};
+    for (const d of oxlint('lint/fixtures/src')) {
+      if (d.code !== 'eslint(no-restricted-imports)') continue;
+      expect(d.severity).toBe('error');
+      const file = d.filename.replaceAll('\\', '/').replace('lint/fixtures/src/', '');
+      counts[file] = (counts[file] ?? 0) + 1;
+    }
+    // One per import line in each fixture; features/allowed.ts must not appear.
+    expect(counts).toEqual({
+      'utils/imports.ts': 1,
+      'core/imports.ts': 5,
+      'ui/imports.ts': 3,
+      'lib/imports.ts': 2,
+      'plugins/imports.ts': 2,
+      'shell/imports.ts': 2,
+      'features/imports.ts': 4,
+      'app/imports.ts': 1,
+    });
   });
 });

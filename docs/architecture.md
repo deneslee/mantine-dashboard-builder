@@ -39,7 +39,7 @@ utils/      wait
 testing/    render, TestRouter, AppStory: for tests and stories only
 ```
 
-Each top-level folder is shaped like a package, so it can move to `packages/` when a monorepo (pnpm + Turborepo) arrives: a second app, a backend in the repo, or publishable packages. Plan [08](../.agents/planning/plans/08-structure-cleanup.md) finishes the job: today's lint keeps features and shared code away from `app/` and each other, and its step 6 adds a rule per folder.
+Each top-level folder is shaped like a package, so it can move to `packages/` when a monorepo (pnpm + Turborepo) arrives: a second app, a backend in the repo, or publishable packages. oxlint holds each folder to the layers below it (`oxlint.config.ts`), and `lint/rules.test.ts` proves every rule fires.
 
 ## Dashboard data flow
 

@@ -1,8 +1,5 @@
 import { defineConfig } from 'oxlint';
 
-/** The shared layer: everything features may build on (see AGENTS.md › Structure). */
-const shared = ['core', 'shell', 'plugins', 'lib', 'utils', 'testing'];
-
 /** Alias patterns for the given top-level folders. */
 const above = (...dirs: string[]) => dirs.flatMap((dir) => [`@/${dir}`, `@/${dir}/**`]);
 
@@ -33,12 +30,40 @@ const primitives = {
   message: 'Only ui/ may import the primitives: use @/ui/tokens/semantic.',
 };
 
-/** Layer rule for one layer's files; it replaces the global rule there, so it repeats the shared bans. */
-const layerRule = (group: string[], message: string, shared = [barrels, primitives]) =>
-  ['error', { patterns: [{ group, message }, ...shared] }] as [
-    'error',
-    { patterns: { group: string[]; message: string }[] },
-  ];
+/** Packages core/ may not use, type imports included: it runs anywhere and knows no UI or state. */
+const uiAndStatePackages = [
+  'react',
+  'react/**',
+  'react-dom',
+  'react-dom/**',
+  '@mantine/**',
+  '@tanstack/**',
+  '@tabler/**',
+  'zustand',
+  'zustand/**',
+  'zundo',
+  'immer',
+  'dayjs',
+  'dayjs/**',
+  'recharts',
+  'react-grid-layout',
+  'react-grid-layout/**',
+  '@sentry/**',
+];
+
+/**
+ * One layer's import rule, for its folder and its fixture mirror under lint/fixtures/src/. It replaces
+ * the global rule there, so it repeats the shared bans.
+ */
+const layer = (dir: string, group: string[], message: string, shared = [barrels, primitives]) => ({
+  files: [`src/${dir}/**`, `lint/fixtures/src/${dir}/**`],
+  rules: {
+    'no-restricted-imports': ['error', { patterns: [{ group, message }, ...shared] }] as [
+      'error',
+      { patterns: { group: string[]; message: string }[] },
+    ],
+  },
+});
 
 export default defineConfig({
   plugins: ['typescript', 'react', 'unicorn', 'oxc', 'import'],
@@ -131,36 +156,51 @@ export default defineConfig({
       env: { node: true, browser: false },
     },
 
-    // Layers (AGENTS.md › Structure): ui ← shared ← features ← app. A layer imports only from itself
-    // and the layers below; features never import each other (app/ combines them).
-    {
-      files: ['src/ui/**'],
-      rules: {
-        'no-restricted-imports': layerRule(
-          above('app', 'features', 'shell', 'plugins', 'lib', 'testing'),
-          'ui/ is the design system: it imports only core/ and utils/.',
-          [barrels],
-        ),
-      },
-    },
-    {
-      files: shared.map((dir) => `src/${dir}/**`),
-      rules: {
-        'no-restricted-imports': layerRule(
-          above('app', 'features'),
-          'Shared code (core, shell, plugins, lib, utils) must not import features or the app layer.',
-        ),
-      },
-    },
-    {
-      files: ['src/features/**'],
-      rules: {
-        'no-restricted-imports': layerRule(
-          [...above('app', 'features'), '**/features/**'],
-          'Features never import other features or the app layer; combine them in app/. Inside a feature, use relative imports.',
-        ),
-      },
-    },
+    // Layers (AGENTS.md › Structure, docs/architecture.md › Layers). Each folder imports only the
+    // folders below it; tests, stories and testing/ are exempt (last override). Every rule also covers
+    // its mirror under lint/fixtures/src/, where lint/rules.test.ts proves it fires.
+    layer(
+      'utils',
+      [...above('core', 'ui', 'lib', 'shell', 'plugins', 'features', 'app', 'testing')],
+      'utils/ imports nothing from src/.',
+    ),
+    layer(
+      'core',
+      [...above('ui', 'lib', 'shell', 'plugins', 'features', 'app', 'testing'), ...uiAndStatePackages],
+      'core/ is plain TypeScript: it imports only utils/ and libraries without UI or state (zod).',
+    ),
+    layer(
+      'ui',
+      [...above('lib', 'shell', 'plugins', 'features', 'app', 'testing'), '@tanstack/react-router'],
+      'ui/ is the design system: it imports only core/ and utils/, and knows no routes.',
+      [barrels],
+    ),
+    layer(
+      'lib',
+      above('shell', 'plugins', 'features', 'app', 'testing'),
+      'lib/ imports only core/, ui/ and utils/.',
+    ),
+    layer(
+      'plugins',
+      above('lib', 'shell', 'features', 'app', 'testing'),
+      'plugins/ imports only core/, ui/ and utils/: a plugin needs nothing from the app.',
+    ),
+    layer(
+      'shell',
+      above('plugins', 'features', 'app', 'testing'),
+      'shell/ imports only core/, ui/, utils/ and lib/.',
+    ),
+    layer(
+      'features',
+      [
+        ...above('app', 'features', 'testing'),
+        '**/features/**',
+        '@/plugins/widgets/**',
+        '@/plugins/datasources/**',
+      ],
+      'Features never import app/, another feature, or a built-in widget or datasource (they come from usePlugins); app/ combines them. Inside a feature, use relative imports.',
+    ),
+    layer('app', above('testing'), 'testing/ is for tests and stories only.'),
     // Tests, stories and their helpers assemble things, like app/: no layer rule.
     {
       files: ['**/*.test.{ts,tsx}', '**/*.stories.tsx', 'src/testing/**'],
