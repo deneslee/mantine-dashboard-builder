@@ -2,8 +2,6 @@
 
 How the app is put together today: the stack, the layers, how a dashboard's data flows, and where each kind of state lives. The coding rules are in [AGENTS.md](../AGENTS.md); what comes next is in [.agents/planning/](../.agents/planning/roadmap.md).
 
-Plan [08](../.agents/planning/plans/08-structure-cleanup.md) is moving the code into package-shaped folders (`app`, `features`, `plugins`, `shell`, `core`, `ui`, `lib`). This page describes the layout until that lands, and is rewritten when it does.
-
 ## Stack
 
 Mantine 9 needs React 19.2+, so all React 19 APIs (`ref` as prop, `use()`, `Activity`, `useEffectEvent`) are fair game. The React Compiler is on.
@@ -25,38 +23,42 @@ Mantine 9 needs React 19.2+, so all React 19 APIs (`ref` as prop, `use()`, `Acti
 
 ## Layers
 
-Imports go one way, from the bottom up; oxlint enforces it ([AGENTS.md › Structure](../AGENTS.md#structure-bulletproof-react-lightly-adapted)).
+Imports go one way, from the bottom up; oxlint enforces it ([AGENTS.md › Structure](../AGENTS.md#structure)).
 
 ```text
-app/            routes, providers, router, query client, registry.ts (widget and datasource plugins)
-  │             the only place features meet
-features/       dashboards  widgets  datasources  settings  integrations  notifications  debug
-  │             never import each other
-shared          components/ (errors, feedback, shell)  hooks/  lib/ (notify, AppError, sentry, user)
-  │             stores/ (inbox)  config/  types/ (DataFrame, plugin contracts)  utils/  testing/
-design-system/  tokens, Mantine theme, Page
+app/        routes  Providers  router  queryClient  plugins.ts
+  │         the only place features and the built-in plugins meet
+features/   dashboards  settings  notifications  integrations  debug
+  │         never import each other; widgets and datasources come from usePlugins()
+shell/      the app frame: Shell, ShellProvider, useShell, navbar, sidebar, context bar
+plugins/    WidgetPlugin and DatasourcePlugin contracts, usePlugins; widgets/*, datasources/*
+lib/        notify (toasts and the inbox), sentry, useMotion, useCurrentUser
+ui/         tokens, the Mantine theme, generic components (Page, ErrorState, QueryBoundary, Skeletons)
+core/       plain TypeScript: dashboard schema and layout, time ranges, DataFrame, AppError
+utils/      wait
+testing/    render, TestRouter, AppStory: for tests and stories only
 ```
 
-Nothing below `app/` imports from above it, which keeps the lower folders movable to `packages/` when a monorepo (pnpm + Turborepo) arrives: a second app, a backend in the repo, or publishable packages.
+Each top-level folder is shaped like a package, so it can move to `packages/` when a monorepo (pnpm + Turborepo) arrives: a second app, a backend in the repo, or publishable packages. Plan [08](../.agents/planning/plans/08-structure-cleanup.md) finishes the job: today's lint keeps features and shared code away from `app/` and each other, and its step 6 adds a rule per folder.
 
 ## Dashboard data flow
 
 ```text
 URL /dashboards/$id?mode&from&to&refresh ── validateSearch (zod)
   loader: ensureQueryData(dashboardQuery(id))
-    getDashboard(id): local saved copy ?? fetch public/data/dashboards/<id>.json
-      → zod parse (api/dto.ts) → toDashboard (api/mapper.ts) → Query cache ['dashboards', id]
+    dashboardApi: saved copy (localStorage) ?? fetch public/data/dashboards/<id>.json
+      → dashboardDoc.parse → toDashboard (data/mapper.ts) → Query cache ['dashboards', id]
 DashboardProvider key=id → createDashboardStore(dashboard)      restores a draft if there is one
-DashboardView → range = edit mode ? store range : URL ?? document range
+DashboardPage → range = edit mode ? store range : URL ?? document range
   DashboardGrid → layouts per breakpoint; drag or resize stop → commitLayout (one undo step)
-    WidgetTile(id) → widget from the store, plugin from DashboardRegistryContext
+    WidgetTile(id) → widget from the store, plugin from usePlugins()
       useQuery(widgetDataQuery(queries, range)) once the tile is near the viewport
-        → resolveRange → datasource.query(spec, ctx) → DataFrame[]
-      WidgetBoundary → <widget.component frames options />
+        → resolveRange → DatasourcePlugin.query(spec, ctx) → DataFrame[]
+      QueryBoundary → <plugin.component frames options />
 
 Save    store.save → repository.save → localStorage saved copy → new baseline, draft cleared
         → setQueryData(['dashboards', id]) and the list invalidated
-Draft   every document change: dirty ? write draft : clear draft
+Draft   every document change: isDirty ? write draft : clear draft
 Export  current document → <id>.json;  Import  JSON → zod → plugin checks → importDocument
 ```
 
@@ -64,16 +66,18 @@ Widget data is cached per widget (`['ds', queries, range]`); auto-refresh and th
 
 ## Where state lives
 
-| State                                                            | Owner                                                         | Mounted                              |
-| ---------------------------------------------------------------- | ------------------------------------------------------------- | ------------------------------------ |
-| Dashboard list, documents, widget data                           | TanStack Query                                                | `app/Providers`                      |
-| Time range, refresh, `mode`, `widget`, `editor`, settings tab    | URL search params, validated with zod                         | routes                               |
-| Document being edited, saved baseline, undo history, editor tool | per-dashboard zustand store (`DashboardProvider`)             | `routes/dashboards/$id`, keyed by id |
-| Sidebar and context bar layout                                   | shell zustand store (`ShellProvider`)                         | `routes/__root`                      |
-| Widget and datasource plugins                                    | `DashboardRegistryContext`, filled from `app/registry.ts`     | `routes/dashboards/$id`              |
-| Inbox                                                            | global zustand store (`stores/inbox.ts`), written by `notify` | module                               |
-| Color scheme, motion                                             | Mantine color-scheme manager, `useMotion`                     | `app/Providers`                      |
-| Everything else                                                  | component state                                               | –                                    |
+| State                                                            | Owner                                                                | Mounted                              |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------ |
+| Dashboard list, documents, widget data                           | TanStack Query                                                       | `app/Providers`                      |
+| Time range, refresh, `mode`, `widget`, `editor`, settings tab    | URL search params, validated with zod                                | routes                               |
+| Document being edited, saved baseline, undo history, editor tool | per-dashboard zustand store (`DashboardProvider`)                    | `routes/dashboards/$id`, keyed by id |
+| Sidebar and context bar layout                                   | shell zustand store (`ShellProvider`)                                | `routes/__root`                      |
+| Widget and datasource plugins                                    | `PluginsContext`, filled from `app/plugins.ts`                       | `app/Providers`                      |
+| Inbox                                                            | global zustand store (`lib/notify/useInbox.ts`), written by `notify` | module                               |
+| Color scheme, motion                                             | Mantine color-scheme manager, `useMotion`                            | `app/Providers`                      |
+| Everything else                                                  | component state                                                      | –                                    |
+
+`app/Providers` is the only provider stack: the app, `testing/render` and the Storybook preview all use it.
 
 ## Browser storage
 
@@ -87,4 +91,4 @@ Widget data is cached per widget (`['ds', queries, range]`); auto-refresh and th
 | `dashboard.draft.v1:<id>` | Unsaved edits and the baseline they started from                       |
 | `sentry.config.v1`        | Sentry prototype settings                                              |
 
-Plan [08](../.agents/planning/plans/08-structure-cleanup.md) renames these to `dashboard-builder:<name>` with the version inside the value.
+The zustand stores already keep their version inside the value (persist `version` 2, with a `migrate` from 1). Plan [08](../.agents/planning/plans/08-structure-cleanup.md) renames the keys to `dashboard-builder:<name>` and drops the `.v1` suffixes.

@@ -1,6 +1,6 @@
 # Dashboard grid and charts
 
-Performance rules for the dashboard canvas: react-grid-layout v2 (RGL) tiles holding charts (`@mantine/charts`, Recharts 3). The read-only grid is built (`features/dashboards/components/grid`); dragging and resizing tiles come with editing in phase 3. Model and registries are in [dashboard.md](dashboard.md); the shell side is in [shell.md](../ui/shell.md). The "Grid performance" dashboard (`/dashboards/perf`, 20 charts) is the test bed.
+Performance rules for the dashboard canvas: react-grid-layout v2 (RGL) tiles holding charts (`@mantine/charts`, Recharts 3). The grid is built (`features/dashboards/grid/`), with dragging and resizing in edit mode. The model and the plugins are in [dashboard.md](dashboard.md); the shell side is in [shell.md](../ui/shell.md). The "Grid performance" dashboard (`/dashboards/perf`, 20 charts) is the test bed.
 
 ## The cost to avoid
 
@@ -39,7 +39,7 @@ Measured: during one sidebar collapse the unpinned navbar resized 22 times, the 
 
 ## Widgets
 
-- Each widget type is a `lazy()` chunk from the registry; each tile gets its own `Suspense` and `WidgetBoundary`.
+- Each widget type is a `lazy()` chunk from its plugin; each tile gets its own `Suspense` and `QueryBoundary`.
 - Mount a tile's content the first time it comes within 200px of the viewport (Mantine `useIntersection` with `rootMargin`) and keep it mounted afterwards. The widget's chunk and query start then.
 - Refetches keep old data (`placeholderData: keepPreviousData`); no skeleton on refetch.
 - `select` functions live outside components so `data` keeps its reference until it changes (Query's structural sharing does the rest).

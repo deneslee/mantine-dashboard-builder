@@ -36,7 +36,7 @@ Each kind of failure is reported in one place:
 | Failure                  | Where it's handled                                          | Reported from               | Tags                                        |
 | ------------------------ | ----------------------------------------------------------- | --------------------------- | ------------------------------------------- |
 | Render error in a route  | `RouteError`                                                | `RouteError`                | `boundary: 'route'`, `route`                |
-| Render error in a widget | `WidgetBoundary`                                            | `ErrorBoundary`'s `onError` | `boundary: 'widget'`, `widget`              |
+| Render error in a widget | `QueryBoundary`                                             | `ErrorBoundary`'s `onError` | `boundary: 'widget'`, `widget`              |
 | Any other render error   | The app-root boundary                                       | The app root (exists)       | `boundary: 'app_root'`                      |
 | Failed query             | Inline in its widget or editor; it never reaches a boundary | `QueryCache.onError`        | `boundary: 'query'`, `datasource`, `source` |
 | Failed mutation          | `MutationCache.onError`, which already toasts               | `MutationCache.onError`     | `boundary: 'mutation'`, `source`            |
@@ -66,7 +66,7 @@ Add `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` and `SENTRY_PROJECT` as repository secrets
 
 ### 3. Sentry as the first telemetry integration
 
-Needs the Integrations foundation: the manifests in `app/registry.ts`, the `IntegrationConfigRepository` port reading `integrations.json`, and the rebuilt catalog.
+Needs the Integrations foundation: the manifests in `app/plugins.ts`, the `IntegrationConfigRepository` port reading `integrations.json`, and the rebuilt catalog.
 
 - **Manifest:**
 
@@ -123,7 +123,7 @@ The integration registry, config port and catalog (the Integrations foundation),
 - [x] **Decision 3: Integrations is a product feature (Sep 27).** 04 migrates both integrations pages.
 - [x] **Decision 2: the DSN comes from the integration config (Sep 29).** See [Decisions](#decisions).
 - [ ] **Report errors ([§1](#1-report-errors-through-reporterror)).**
-  - Render errors: `RouteError` and `WidgetBoundary` (`onError`) report.
+  - Render errors: `RouteError` and `QueryBoundary` (`onError`) report.
   - Data errors: `QueryCache.onError` and `MutationCache.onError` report, once per failed request.
   - `AppError` gets `expected` and `reportable`; queries and mutations get `meta.telemetry`.
   - Fingerprint by datasource and code; context attached; breadcrumb before capture.

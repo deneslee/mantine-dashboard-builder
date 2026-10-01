@@ -5,7 +5,7 @@ A dashboard builder on Mantine 9 and React 19. An app frame (top navbar, docking
 **Status:**
 
 - Phase 3. Reading dashboards is done. The edit MVP (edit mode, undo and redo, drag and resize, add, duplicate and remove widgets, a local save and draft, JSON export and import) is built.
-- [08 Structure cleanup](.agents/planning/plans/08-structure-cleanup.md) is in progress. It adds real-browser tests and package-shaped folders before the viewing tools.
+- [08 Structure cleanup](.agents/planning/plans/08-structure-cleanup.md) is in progress: browser tests, package-shaped folders and the renames are done; the flat dashboard JSON, the data module and the storage keys are next.
 - The order of work is in [tasks.md](.agents/planning/tasks.md).
 
 ## Run
@@ -14,7 +14,8 @@ A dashboard builder on Mantine 9 and React 19. An app frame (top navbar, docking
 pnpm install
 pnpm dev          # http://localhost:5173/mantine-dashboard-builder/
 pnpm storybook    # http://localhost:6006
-pnpm test
+pnpm test         # node + jsdom tests and every story in Chromium
+pnpm test:unit    # node + jsdom only
 pnpm lint
 pnpm build
 ```
@@ -42,13 +43,13 @@ Saves and drafts stay in this browser's `localStorage`; the files in `public/dat
 
 | Where               | What                                                                                                                                                                                                                                                                  |
 | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/`              | The app. Layers, data flow and state are in [docs/architecture.md](docs/architecture.md)                                                                                                                                                                              |
+| `src/`              | The app: `app/` (routes, providers), `features/`, `shell/`, `plugins/`, `lib/`, `ui/`, `core/`, `utils/`, `testing/`. Layers, data flow and state are in [docs/architecture.md](docs/architecture.md)                                                                 |
 | `public/data/`      | Seed dashboards (`dashboards/*.json`) and data frames read by the `local-json` datasource                                                                                                                                                                             |
 | `docs/`             | How the built parts work: [architecture](docs/architecture.md), [shell](docs/ui/shell.md), [design system](docs/ui/design-system.md), [feedback](docs/ui/feedback.md), [dashboard](docs/dashboard/dashboard.md), [grid and charts](docs/dashboard/grid-and-charts.md) |
 | `.agents/planning/` | [Roadmap](.agents/planning/roadmap.md), [tasks](.agents/planning/tasks.md), one plan per piece of work in `plans/`, and `research/`                                                                                                                                   |
 | `AGENTS.md`         | Rules for anyone writing code here, people or agents                                                                                                                                                                                                                  |
 | `lint/`             | The local oxlint plugin for the token and style rules, and the tests proving each rule fires                                                                                                                                                                          |
-| `.storybook/`       | Storybook config; every chrome and dashboard state has a story                                                                                                                                                                                                        |
+| `.storybook/`       | Storybook config; every chrome and dashboard state has a story, and `pnpm test` runs each one in Chromium                                                                                                                                                             |
 
 ## Frame behaviour
 

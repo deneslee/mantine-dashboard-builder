@@ -60,47 +60,54 @@ Versions are in `package.json`; the stack, the layers, the data flow and where s
 
 How the tiers work and where a new value goes: [design-system.md](docs/ui/design-system.md).
 
-- **Outside `design-system/`, use semantic tokens only.**
+- **Outside `ui/tokens` and `ui/theme`, use semantic tokens only.**
   - CSS: `var(--app-*)`, or Mantine variables that aren't palette shades (`--mantine-spacing-*`, `--mantine-radius-*`, `--mantine-primary-color-filled`).
   - TSX: token keys and the constants in `semantic.ts`: `gap="xs"`, `fw={fontWeight.medium}`, `size={iconSize.sm} stroke={iconStroke}`, `h={chart.height.md}`.
-  - `tokens.ts` holds only the layout numbers TS needs (`shell`, `zIndex`, `grid`).
-- **No inline `style`.** Component defaults and variants go in `design-system/theme/components/<Name>.ts` and `theme/styles/*.module.css`; everything else in a CSS module.
+  - `dimensions.ts` holds only the layout numbers TS needs (`shell`, `zIndex`, `grid`).
+- **No inline `style`.** Component defaults and variants go in `ui/theme/components/<Name>Theme.ts` (plus `<Name>Theme.module.css` when they need CSS); everything else in a CSS module.
 - **Status colors are aliases:** `color="danger"`, never `color="red"`. The aliases are `brand`, `neutral`, `danger`, `warning`, `success` and `info`; `dimmed` and `bright` are fine too.
 - **Radius and shadow come from the theme.** Don't pass `radius=` or `shadow=` in feature code.
 - **Focus and press:** `className="mantine-focus-auto"` for the focus ring on custom focusable elements (no custom `:focus-visible` CSS); `mantine-active` for press feedback.
 - **Viewport classes** (`visibleFrom` / `hiddenFrom`) only in the shell. Inside a page, use `@container` queries: `<main>`'s width depends on the panels, not the screen.
-- **Scheme-dependent CSS** (`light-dark()`, `@mixin light/dark`) only in `design-system/`.
-- **Lint enforces these rules**, and `lint/rules.test.ts` proves each one fires. Exempt: `design-system/**`, stories, tests, and `features/integrations/**` until [06](.agents/planning/plans/06-sentry.md) rebuilds it. The `ui/tokens/Tokens` story shows every semantic variable in both schemes.
+- **Scheme-dependent CSS** (`light-dark()`, `@mixin light/dark`) only in `ui/tokens` and `ui/theme`.
+- **Lint enforces these rules**, and `lint/rules.test.ts` proves each one fires. Exempt: `ui/tokens/**`, `ui/theme/**`, `ui/components/Page`, stories, tests, and `features/integrations/**` until [06](.agents/planning/plans/06-sentry.md) rebuilds it. The `ui/tokens/Tokens` story shows every semantic variable in both schemes.
 
-## Structure (bulletproof-react, lightly adapted)
+## Structure
+
+Package-shaped folders, so each can move to `packages/` when the repo becomes a monorepo. The layers, data flow and state owners are drawn in [architecture.md](docs/architecture.md).
 
     src/
-      app/                  APP LAYER: the only place features meet
-        routes/             TanStack file routes, thin; `-name.tsx` files are ignored by the router
-        App.tsx  Providers.tsx  router.ts  queryClient.ts  routeTree.gen.ts (generated)
-      features/<name>/      FEATURE LAYER: never imports another feature or app/
-        components/         UI
-        hooks/
-        model/              types, zod schemas
-        api/                client.ts (transport) · dto.ts (wire shape) · mapper.ts (dto → domain) · queries.ts
-        store.ts            only when the feature owns state
-      components/           SHARED UI: errors/, feedback/ (skeletons), layouts/shell/ (app frame, own store)
-      hooks/  lib/  stores/  config/  types/  utils/  testing/     SHARED (lib: notify, AppError, user, sentry)
-      design-system/        LOWEST LAYER: tokens, theme, Mantine extensions, Page
+      app/          the only place features and built-in plugins meet: routes/ (thin TanStack file routes;
+                    `-name.tsx` files are ignored), Providers, router, queryClient, plugins.ts, error pages
+      features/     dashboards, settings, notifications, integrations, debug; grouped by area inside
+                    (dashboards: data/ state/ grid/ header/ editor/), small features flat
+      shell/        the app frame: Shell, ShellProvider, useShell, navbar/, sidebar/, contextBar/, breadcrumbs/
+      plugins/      WidgetPlugin and DatasourcePlugin contracts, usePlugins; widgets/*, datasources/*
+      lib/          services: notify/ (toasts, inbox), sentry/, useMotion, useCurrentUser
+      ui/           look only: tokens/, theme/, components/ (Page, ErrorState, QueryBoundary, Skeletons)
+      core/         plain TypeScript, no React: dashboard/, time/, data/ (DataFrame), errors/ (AppError)
+      utils/        tiny helpers (wait)
+      testing/      render, TestRouter, AppStory, setup: tests and stories only
 
-- **Imports go one way:** `design-system` ← shared (`components`, `hooks`, `lib`, `stores`, `config`, `types`, `utils`, `testing`) ← `features` ← `app`. oxlint enforces the direction and `import/no-cycle`.
-- **Features never import each other.** Combine them in `app/`:
+- **Imports go down the tree above, never up** (`testing/` aside): `app` on top, `utils` at the bottom. `plugins/` imports only `core`, `ui` and `utils`; `shell/` never imports `plugins/`. oxlint enforces the direction and `import/no-cycle`; plan [08](.agents/planning/plans/08-structure-cleanup.md) step 6 adds the per-folder rules.
+- **Features never import each other, `app/`, or a built-in widget or datasource.** Combine them in `app/`:
   - A route may import several features and wrap parts in its own Suspense or error boundary.
-  - A feature that needs something from another asks for it (props, context, a registry); `app/` passes it in, e.g. `ShellProvider globalTabs`.
-  - Code both need moves down to the shared layer.
-- **No barrel files (`index.ts`).** Import the file that defines the name: `@/components/errors/ErrorState`, `@/lib/notify/notify`. Barrels defeat tree-shaking.
-- **Relative imports** inside a feature or shared module; `@/…` across modules.
-- **UI never sees DTOs.** Switching from local JSON to an HTTP API changes `client.ts`, `dto.ts` and `mapper.ts` only.
-- **Where does it go?** Look only → `design-system/`. Reusable UI with states → `components/`. Knows about data or the domain → `features/`. Places things on a page → `app/routes/`.
+  - A feature that needs something from another asks for it (props, context); `app/` passes it in, e.g. `ShellProvider globalTabs`, `PluginsContext`.
+  - Code both need moves down a layer.
+- **No barrel files (`index.ts`).** Import the file that defines the name: `@/ui/components/ErrorState`, `@/lib/notify/notify`. Barrels defeat tree-shaking.
+- **Relative imports** inside a feature or folder; `@/…` across folders.
+- **Where does it go?** Look only → `ui/`. Pure logic → `core/`. A service with side effects → `lib/`. The frame → `shell/`. Knows the domain or fetches data → `features/`. Places things on a page → `app/routes/`.
 
 ## Naming
 
-Short and plain. `Shell`, `Sidebar`, `ContextBar`, `notify`, `useSidebar`. No `AppShellSidebarPanelContainer`. A file is named after what it exports.
+Short and plain: `Shell`, `Sidebar`, `ContextBar`, `notify`, `useSidebar`. No `AppShellSidebarPanelContainer`.
+
+- **Files** are named after their main export. PascalCase for components and types (`DataFrame.ts`), camelCase for functions and modules (`dashboardApi.ts`, `formatRange.ts`), camelCase folders (`contextBar/`). No generic `types.ts`, `context.ts`, `utils.ts` or `index.ts` in new code.
+- **Suffixes:** `*Page` for a routed screen, `*Panel` for context-bar content, `*Dialog`, `*Form`, `*Menu`; `*Provider` puts a context into React, `use*` is a hook, `create*Store` a store factory, `*Schema` a zod schema, `*Plugin` a plugin contract.
+- **Booleans** start with `is`, `has`, `should` or `can`: `isDirty`, `isEditing`, `hasFailed`, `canUndo`. Options passed to a library keep the library's names.
+- **Handlers** are `handle*` (`handleRemove`); props that take them are `on*` (`onClose`).
+- **Constants** are UPPER_SNAKE: `GRID_COLUMNS`, `ERROR_TITLES`, `MAX_ITEMS`.
+- **Functions** are descriptive verbs: `formatRange`, `getFieldLabel`, `frameToRows`, `resolveLayouts`.
 
 ## React and state
 
@@ -108,10 +115,11 @@ The skills below cover the general rules; these are this project's choices.
 
 - **Composition:** no boolean mode props; pick parts or variants (`ErrorState.Full | Inline | Banner`, `ChartSkeleton | TableSkeleton`). Compound components share context (`Panel.*`, `ErrorState.*`, `Page.*`) and export each part by name as well, for Fast Refresh. Children over render props.
 - **React 19:** `ref` as a prop and `use(Context)`; no `forwardRef`.
-- **State:** providers own state and expose hooks. Only `ShellProvider` knows the shell uses Zustand; consumers call `useSidebar`, `useContextBar`, `useShellActions`. Zustand selectors return primitives or use `useShallow`; callbacks read state with `getState()`.
+- **One owner per kind of state:** server data in TanStack Query; shareable or back-button state in the URL; the dashboard being edited in its store; the frame in the shell store; static values (plugins, user) in a context set once in `app/Providers`; the rest in components ([architecture.md › Where state lives](docs/architecture.md#where-state-lives)).
+- **Stores:** a `create*Store` factory, one `*Provider`, read only through `use*` hooks. Only `ShellProvider` knows the shell uses Zustand; consumers call `useSidebar`, `useContextBar`, `useShellActions`. Selectors return primitives or use `useShallow`; callbacks read state with `getState()`. Derived values (`isDirty`, `canUndo`) are computed, never stored.
 - **Performance:** lazy-load anything heavy or conditional (routes through the router's `autoCodeSplitting`, context-bar tabs, widgets, datasource adapters). One Suspense boundary per tile or tab, not per page. Drag and resize values stay out of React state and commit on release. The canvas has its own rules in [grid-and-charts.md](docs/dashboard/grid-and-charts.md).
 - **react-grid-layout:** the v2 API only, never `react-grid-layout/legacy`.
-- **localStorage:** versioned keys (`shell.v1`, `notifications.v1`); never persist transient UI such as open drawers.
+- **localStorage:** the version lives in the value, not the key: zustand persist's `version`, with a `migrate` when a persisted field changes; dashboards carry `schemaVersion`. Never persist transient UI such as open drawers.
 
 ## Notifications, errors, loading
 
@@ -119,8 +127,22 @@ Levels, timings and the full tables are in [feedback.md](docs/ui/feedback.md).
 
 - **Toasts** go through `notify.*` from `@/lib/notify/notify`, never `notifications.show`. The title says the outcome first, in under 60 characters.
 - **Mutations:** errors toast automatically; `meta.successMessage` opts into a success toast.
-- **Errors:** throw or map to `AppError` (`@/lib/errors/AppError`). Routes use `RouteError` / `NotFound`; widgets sit in `WidgetBoundary`. First-load errors render inline, never as a toast.
-- **Loading:** a skeleton shaped like the content, from `components/feedback/skeletons`. Refetches keep the old data and show no skeleton.
+- **Errors:** throw or map to `AppError` (`@/core/errors/AppError`). Routes use `RouteError` / `NotFound`; widgets sit in `QueryBoundary`. First-load errors render inline, never as a toast.
+- **Loading:** a skeleton shaped like the content, from `@/ui/components/Skeletons`. Refetches keep the old data and show no skeleton.
+
+## Testing
+
+| Code                                           | Tested with                                                                                                                          | Vitest project      |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------- |
+| `core/`, `utils/`, datasource plugins, `lint/` | a unit test for every function with branching logic                                                                                  | `node`              |
+| stores (`create*Store`)                        | action semantics: undo steps, save, discard, draft, persisted migrations                                                             | `dom`               |
+| hooks with timers or DOM                       | `renderHook` from `@/testing/render`                                                                                                 | `dom`               |
+| components                                     | a story per visual state (render and a11y in Chromium), play functions for user flows, an RTL test only for logic a story can't show | `storybook` / `dom` |
+| thin routes, layout wrappers, generated code   | not tested                                                                                                                           | –                   |
+
+- **Tests sit next to their code** (`DataFrame.test.ts` beside `DataFrame.ts`). A test that imports no product code is deleted.
+- **One provider stack:** `render` and `renderHook` from `@/testing/render`, and every story, run inside `app/Providers`. Routers come from `createTestRouter` / `TestRouter`; page stories render the real app with `<AppStory url="…" />`. Don't build a `QueryClient` or a router by hand.
+- **Stories** have no `title:` (the sidebar mirrors `src/`), are named after states (`Default`, `Empty`, `Error`, `Editing`), and fail on any a11y violation; `color-contrast` is off until the light-scheme tokens pass.
 
 ## Skills
 

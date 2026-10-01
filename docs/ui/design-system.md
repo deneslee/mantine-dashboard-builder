@@ -17,7 +17,7 @@ theme/components   Paper.extend + Paper.module.css  what Mantine components appl
 **1. Primitives** ([primitives.ts](../../src/ui/tokens/primitives.ts))
 
 - The only file with raw values: palette tuples (`palette.dark[7] = '#242424'`), alpha steps, and the spacing, radius, type, weight, shadow, motion, z-index, icon and shell scales.
-- Nothing outside `design-system/` may import it; oxlint blocks the import.
+- Nothing outside `ui/` may import it; oxlint blocks the import.
 
 **2. Semantic tokens** ([semantic.ts](../../src/ui/tokens/semantic.ts)) name what a value is _for_.
 

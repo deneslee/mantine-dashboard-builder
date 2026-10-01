@@ -91,7 +91,7 @@ Single-letter keys work only while a tile is hovered or focused, and never while
 **Registry and document additions.** Datasource additions are in §6.
 
 ```ts
-WidgetDefinition { …, capabilities: { time: boolean; inspect: boolean; export: ('csv' | 'json')[]; hoverSync: boolean } }
+WidgetPlugin { …, capabilities: { time: boolean; inspect: boolean; export: ('csv' | 'json')[]; hoverSync: boolean } }
 Widget (document) { type, title, description?, options, queries, time?: TimeOverride, syncGroup? }
 TimeOverride = { mode: 'range'; from; to } | { mode: 'shift'; by }      absent = inherit
 ```
@@ -215,7 +215,7 @@ QueryContext {
   variables: ResolvedVariables
   resolution: { maxDataPoints: number; intervalMs: number; minIntervalMs?: number }
 }
-DatasourceDefinition { …,
+DatasourcePlugin { …,
   query(spec, ctx: QueryContext, signal): Promise<DataFrame[]>
   getVariableRefs(spec): VariableRef[]
   timeAware: boolean; usesResolution: boolean; identifierParams: boolean
@@ -276,7 +276,7 @@ Checkpoint Sep 30: completed implementation parts are ticked below. Parent tasks
   - [x] Per-dashboard provider/store, saved baseline, dirty comparison and isolated document selectors implemented; store isolation covered by a passing test.
   - [x] Zod search validation, default view-mode stripping and removal of global previous-data placeholders implemented.
   - [ ] Complete the browser check for dashboard switching during loading.
-- [ ] **Widget header and menu.** Title, info icon, status, and the menu's visibility rules (hover, focus inside, edit mode, touch); `capabilities` on `WidgetDefinition`, and the menu built from them. Done when a keyboard-only user reaches every header control and each widget type's story shows the right items.
+- [ ] **Widget header and menu.** Title, info icon, status, and the menu's visibility rules (hover, focus inside, edit mode, touch); `capabilities` on `WidgetPlugin` (08 removed the unused ones), and the menu built from them. Done when a keyboard-only user reaches every header control and each widget type's story shows the right items.
   - [x] Header, description tooltip, fetching/error status, visibility rules and registry capabilities implemented; grid stories include all three built-in widget types and edit mode.
   - [ ] Finish keyboard/focus acceptance for every header control.
 

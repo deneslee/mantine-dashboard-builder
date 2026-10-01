@@ -1,10 +1,12 @@
 import { Group, Text } from '@mantine/core';
-import { APP_NAME } from '@/config/config';
 import { fontWeight } from '@/ui/tokens/semantic';
 import classes from './Brand.module.css';
 
+/** Product name shown in the sidebar. */
+const APP_NAME = 'Dashboard Builder';
+
 /**
- * Product mark: a small grid of tiles, the thing the product makes. Name comes from config.
+ * Product mark: a small grid of tiles, the thing the product makes.
  * The name fades out on the compact sidebar rail; the mark stays where it is.
  */
 export function Brand() {

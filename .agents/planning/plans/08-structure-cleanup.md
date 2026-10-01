@@ -284,10 +284,10 @@ Every step leaves `pnpm lint && pnpm format:check && pnpm build && pnpm test` gr
 
 ### 7. Docs
 
-- [ ] **Architecture.** `docs/architecture.md` switches to the new layers, data flow, state owners and storage keys.
-- [ ] **AGENTS.md.** Rewrite Structure, Naming, State and Testing from this plan.
-- [ ] **README.** Update the repo map to the new paths.
-- [ ] **Other docs.** Fix paths in `docs/*` and 07.
+- [ ] **Architecture.** `docs/architecture.md` switches to the new layers, data flow, state owners and storage keys. Oct 1: layers and state owners match the code; each step 5 edit updates the data flow and storage lines it changes, and this task is the final check.
+- [x] **AGENTS.md.** Rewrite Structure, Naming, State and Testing from this plan. Oct 1: done; step 6 adds the per-folder lint rules it mentions.
+- [x] **README.** Update the repo map to the new paths. Oct 1: done, with the test scripts.
+- [ ] **Other docs.** Fix paths in `docs/*` and 07. Oct 1: `docs/*`, 06, 07 and the roadmap use the new paths and names; check again after step 5.
 - [ ] **Close.** Move this plan to `done/` and tick it in tasks.md.
 
 ## Decisions
@@ -302,6 +302,8 @@ Every step leaves `pnpm lint && pnpm format:check && pnpm build && pnpm test` gr
 - **Sep 30: Storybook 10.6.1** for Vitest 5 support (10.6.0's Vitest addon only allows Vitest 3–4). Installed once it cleared the repo's 24-hour `minimumReleaseAge`; the policy was not bypassed.
 - **Sep 30: `color-contrast` off in the story a11y tests**, not every failing story marked `todo`. The light-scheme tokens fail AA everywhere, so `todo` on each story would also hide new a11y regressions. Every other rule stays an error, and the token fix is tracked in tasks.md.
 - **Sep 30: planning moves to `.agents/planning/`.** `docs/` is for people, with `architecture.md` holding the stack and structure.
+- **Oct 1: docs follow each step**, not only step 7. Agents read AGENTS.md and the architecture page before coding, so stale paths there cost more than a second edit.
+- **Oct 1: `config/config.ts` folded into `sidebar/Brand.tsx`**, the only user of `APP_NAME`; `config/` is gone.
 - **Oct 1: renamed persisted fields migrate through zustand's `version`/`migrate`**, not a reset. A reset would silently drop users' panel layout and unread inbox. Each migration is marked `ponytail: delete after 2027-01`.
 
 ## Out of scope

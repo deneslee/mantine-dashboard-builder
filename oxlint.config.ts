@@ -1,7 +1,7 @@
 import { defineConfig } from 'oxlint';
 
 /** The shared layer: everything features may build on (see AGENTS.md › Structure). */
-const shared = ['core', 'shell', 'plugins', 'lib', 'utils', 'config', 'testing'];
+const shared = ['core', 'shell', 'plugins', 'lib', 'utils', 'testing'];
 
 /** Alias patterns for the given top-level folders. */
 const above = (...dirs: string[]) => dirs.flatMap((dir) => [`@/${dir}`, `@/${dir}/**`]);
@@ -138,7 +138,7 @@ export default defineConfig({
       files: ['src/ui/**'],
       rules: {
         'no-restricted-imports': layerRule(
-          above('app', 'features', 'shell', 'plugins', 'lib', 'config', 'testing'),
+          above('app', 'features', 'shell', 'plugins', 'lib', 'testing'),
           'ui/ is the design system: it imports only core/ and utils/.',
           [barrels],
         ),
@@ -149,7 +149,7 @@ export default defineConfig({
       rules: {
         'no-restricted-imports': layerRule(
           above('app', 'features'),
-          'Shared code (components, hooks, lib, …) must not import features or the app layer.',
+          'Shared code (core, shell, plugins, lib, utils) must not import features or the app layer.',
         ),
       },
     },
