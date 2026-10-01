@@ -2,12 +2,10 @@ import { ActionIcon, Burger, Group, Indicator, Select, Tooltip } from '@mantine/
 import { IconHelp } from '@tabler/icons-react';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { iconSize, iconStroke } from '@/ui/tokens/semantic';
-import { useContextBar, useShellActions, useSidebar } from '../useShell';
+import { useContextBar, useNav, useShellActions, useSidebar } from '../useShell';
 import { useTotalBadgeCount } from '../contextBar/useBadgeCount';
 import { useContextTabs } from '../contextBar/useContextTabs';
-import { areas } from '../Nav';
-import type { SidebarMode } from '../types';
-import { nextSidebarMode } from '../createShellStore';
+import { nextSidebarMode, type SidebarMode } from '../createShellStore';
 import { ColorSchemeToggle } from './ColorSchemeToggle';
 import { Search } from './Search';
 import { UserMenu } from './UserMenu';
@@ -64,6 +62,7 @@ export function TopNavbar() {
 function AreaSelect() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { areas } = useNav();
   const current = areas.find((a) => pathname.startsWith(a.to))?.value ?? null;
 
   return (

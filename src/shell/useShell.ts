@@ -1,15 +1,32 @@
-import { use } from 'react';
+import { createContext, use } from 'react';
 import { useStore } from 'zustand';
 import { useShallow } from 'zustand/shallow';
-import { ShellContext } from './context';
-import { contextDocked, sidebarDocked } from './createShellStore';
-import type { ShellStore } from './types';
+import type { ContextTab } from './ContextTab';
+import { contextDocked, sidebarDocked, type ShellStore, type ShellStoreApi } from './createShellStore';
+import type { Nav } from './Nav';
+
+/** The frame's store plus the static values the app hands the shell. Set by `ShellProvider`. */
+export const ShellContext = createContext<{
+  store: ShellStoreApi;
+  nav: Nav;
+  globalTabs: ContextTab[];
+} | null>(null);
+
+function useShellContext() {
+  const shell = use(ShellContext);
+  if (!shell) throw new Error('Shell hooks must be used inside <ShellProvider>');
+  return shell;
+}
 
 function useShellStore<T>(selector: (s: ShellStore) => T): T {
-  const store = use(ShellContext);
-  if (!store) throw new Error('Shell hooks must be used inside <ShellProvider>');
-  return useStore(store, selector);
+  return useStore(useShellContext().store, selector);
 }
+
+/** The app's navigation (`app/nav.ts`). */
+export const useNav = () => useShellContext().nav;
+
+/** Context-bar tabs shown on every route, after the route's own. */
+export const useGlobalTabs = () => useShellContext().globalTabs;
 
 export function useShellActions() {
   return useShellStore((s) => s.actions);

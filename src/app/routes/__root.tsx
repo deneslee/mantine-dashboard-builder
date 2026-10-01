@@ -1,5 +1,6 @@
 import type { QueryClient } from '@tanstack/react-query';
 import { Outlet, createRootRouteWithContext } from '@tanstack/react-router';
+import { nav } from '@/app/nav';
 import { NotFound } from '@/app/NotFound';
 import { OfflineBanner } from '@/shell/OfflineBanner';
 import { RouteProgress } from '@/shell/RouteProgress';
@@ -17,7 +18,7 @@ const globalTabs = [notificationsTab];
 
 function Root() {
   return (
-    <ShellProvider globalTabs={globalTabs}>
+    <ShellProvider nav={nav} globalTabs={globalTabs}>
       <RouteProgress />
       <Shell>
         <OfflineBanner />

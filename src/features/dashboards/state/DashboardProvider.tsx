@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import type { Dashboard } from '@/core/dashboard/dashboardSchema';
-import { DashboardContext } from './context';
+import { DashboardContext } from './useDashboard';
 import { createDashboardStore, type DashboardStore } from './createDashboardStore';
 
 /** Key this provider by dashboard id. Stories/tests can supply an isolated store. */

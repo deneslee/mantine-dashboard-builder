@@ -1,8 +1,10 @@
-import { use } from 'react';
+import { createContext, use } from 'react';
 import { useStore } from 'zustand';
 import { useShallow } from 'zustand/shallow';
-import { DashboardContext } from './context';
-import { selectDashboard, type DashboardState } from './createDashboardStore';
+import { selectDashboard, type DashboardState, type DashboardStore } from './createDashboardStore';
+
+/** Set by `DashboardProvider`; read only through the hooks below. */
+export const DashboardContext = createContext<DashboardStore | null>(null);
 
 function useDashboardStore() {
   const store = use(DashboardContext);

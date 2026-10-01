@@ -2,6 +2,7 @@ import { Paper, SimpleGrid, Text } from '@mantine/core';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { IconInfoCircle } from '@tabler/icons-react';
 import { useState } from 'react';
+import { nav } from '@/app/nav';
 import { Page } from '@/ui/components/Page';
 import { notificationsTab } from '@/features/notifications/notificationsTab';
 import { TestRouter } from '@/testing/TestRouter';
@@ -54,7 +55,7 @@ function ShellStory({ state, path }: { state: ShellInit; path?: string }) {
       contextTabs={[detailsTab]}
       page={<Content />}
       wrap={(outlet) => (
-        <ShellProvider store={store} globalTabs={globalTabs}>
+        <ShellProvider store={store} nav={nav} globalTabs={globalTabs}>
           <Shell>{outlet}</Shell>
         </ShellProvider>
       )}

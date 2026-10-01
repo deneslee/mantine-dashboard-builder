@@ -2,7 +2,7 @@
 
 How the chrome around every page works: panes, state, navbar, sidebar, context bar. Colors come from the always-dark `chrome` tokens ([design-system.md](design-system.md)).
 
-Code: `src/shell/`. Used from outside: `Shell`, `ShellProvider` (takes `globalTabs`), `useSidebar`, `useContextBar`, `useShellActions` (`useShell.ts`), `createShellStore`. No barrel; import the file.
+Code: `src/shell/`. Used from outside: `Shell`, `ShellProvider` (takes `nav` and `globalTabs` from the app), `useSidebar`, `useContextBar`, `useShellActions`, `useNav` (`useShell.ts`), `createShellStore`. The shell knows no routes: `app/nav.ts` lists them. No barrel; import the file.
 
 ## Layout
 
@@ -99,7 +99,7 @@ While pinned, the root has `data-moving`: the main pane clips sideways instead o
 | -------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Burger         | `Burger` with a tooltip                           | Moves a docked sidebar between modes (above); opens and closes the drawer when undocked                                                           |
 | Search         | `Input` rendered as a button, opening `Spotlight` | `Ctrl+K` or `/`; the actions are the `nav` entries                                                                                                |
-| Area           | `Select` over `areas` in `Nav.ts`                 | Switches the top-level area (Dashboards, Data sources, Integrations, Settings) and navigates; it may become a workspace or tenant switcher        |
+| Area           | `Select` over `nav.areas` (`app/nav.ts`)          | Switches the top-level area (Dashboards, Data sources, Integrations, Settings) and navigates; it may become a workspace or tenant switcher        |
 | Context button | `ActionIcon` with an `Indicator`                  | Opens and closes the context bar; the dot sums the tab badges                                                                                     |
 | Theme          | `ColorSchemeToggle`                               | Cycles light → dark → auto through `useMantineColorScheme`; Mantine stores it, and an inline script in `index.html` applies it before first paint |
 | User           | `UserMenu`                                        | Placeholder `CurrentUser`                                                                                                                         |
@@ -112,7 +112,7 @@ The icon buttons on the right share one `Tooltip.Group`, so once one tooltip is 
 
 ### Navigation data
 
-`Nav.ts` holds `nav = { main: NavGroup[], bottom: NavGroup[] }` (plan [08](../../.agents/planning/plans/08-structure-cleanup.md) moves the app's routes to `app/nav.ts`). A group has an optional `label`; a titled group is a named `role="group"`. An item with `children` becomes a section.
+`app/nav.ts` holds the app's `nav: Nav = { main: NavGroup[], bottom: NavGroup[], areas: NavArea[] }` (types in `shell/Nav.ts`), and `routes/__root` passes it to `ShellProvider`. A group has an optional `label`; a titled group is a named `role="group"`. An item with `children` becomes a section.
 
 To add an entry, add it to `nav.main` or `nav.bottom`. It shows up in the sidebar, the compact rail and Spotlight search.
 

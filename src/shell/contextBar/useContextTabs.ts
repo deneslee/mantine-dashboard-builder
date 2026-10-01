@@ -1,11 +1,11 @@
 import { useMatches } from '@tanstack/react-router';
-import { use, useMemo } from 'react';
-import { GlobalTabsContext } from '../context';
+import { useMemo } from 'react';
+import { useGlobalTabs } from '../useShell';
 import type { ContextTab } from '../ContextTab';
 
 /** Merges `staticData.contextTabs` from root to leaf, then the global tabs from `ShellProvider`. */
 export function useContextTabs(): ContextTab[] {
-  const globalTabs = use(GlobalTabsContext);
+  const globalTabs = useGlobalTabs();
   const routeTabs = useMatches({
     select: (matches) => matches.flatMap((m) => m.staticData.contextTabs ?? []),
   });

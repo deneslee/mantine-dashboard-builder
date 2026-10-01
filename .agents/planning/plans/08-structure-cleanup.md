@@ -60,7 +60,7 @@ src/
               components/ (Page, ErrorState, QueryBoundary, Skeletons)  global.css
   lib/        notify/ (notify, ActionMessage, useInbox)  sentry/  storage  useMotion  useCurrentUser
   utils/      wait
-  testing/    setup  render  TestRouter  AppStory  fixtures/ (dashboards, nav)
+  testing/    setup  render  TestRouter  AppStory  fixtures/dashboards
 ```
 
 Gone: `components/`, `design-system/`, `hooks/`, `stores/`, `types/`, `config/`, `features/widgets/`, `features/datasources/`, `scripts/`.
@@ -271,7 +271,7 @@ Every step leaves `pnpm lint && pnpm format:check && pnpm build && pnpm test` gr
   - Add `WidgetForm`, `AddWidgetForm`, `PlacementDialog` and `QueryEditor`.
   - Done when the compiler test script shows no bailouts in these files. Oct 1: done; no file under `features/dashboards` bails out. `WidgetForm` and `AddWidgetForm` keep only the parse inside `try`. The page keeps layout and an `Announcer` leaf; `EditToolbar` owns the dirty, undo and save state, and `RefreshButton` the fetch state. `EditTools` is now `EditDrawer`, the focus-return logic lives in `grid/focusWidgetMenu.ts`, and the route search schema moved from `core/time` to `dashboardSearch.ts` (+ test) as `dashboardSearchSchema`. `rangePresets` and `refreshOptions` are `RANGE_PRESETS` and `REFRESH_OPTIONS`.
 - [x] **Mode in the URL.** Remove `mode` from the store. The route's `beforeLoad` redirects to `?mode=edit` when a draft exists, and `isEditing` is passed as props. Done when the RestoresDraft story passes and the sync effect is gone. Oct 1: done before **Split the page and the editor**, so the split starts from simpler code. The redirect runs only when `cause === 'enter'`; checked in the dev server that "Leave dashboard" into view mode with a draft stays in view mode.
-- [ ] **Shell.** Nav comes from `app/nav.ts` through `ShellProvider`; the context and hooks live in `useShell.ts`. Done when `shell/` has no app route data.
+- [x] **Shell.** Nav comes from `app/nav.ts` through `ShellProvider`; the context and hooks live in `useShell.ts`. Done when `shell/` has no app route data. Oct 1: `shell/Nav.ts` holds only the types (`Nav` gains `areas`); one `ShellContext` carries the store, `nav` and `globalTabs`, read through `useNav` and `useGlobalTabs`. `types.ts` merged into `createShellStore.ts`, and the dashboards' `state/context.ts` into `useDashboard.ts`. Tests and stories that show the sidebar pass the real `app/nav`; no nav fixture.
 - [ ] **Storage.**
   - Add `lib/storage.ts` (+ test): round trip, corrupt value kept, legacy move, the index.html key.
   - Switch every key over, and add `migrateLegacyKeys` in `main.tsx`.

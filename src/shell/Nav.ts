@@ -1,12 +1,4 @@
 import type { Icon } from '@tabler/icons-react';
-import {
-  IconChartDots3,
-  IconDatabase,
-  IconLayoutDashboard,
-  IconPlugConnected,
-  IconSettings,
-  IconTemplate,
-} from '@tabler/icons-react';
 
 export interface NavItem {
   id: string;
@@ -23,47 +15,20 @@ export interface NavGroup {
   items: NavItem[];
 }
 
+/** An entry in the navbar's area switcher. */
+export interface NavArea {
+  value: string;
+  label: string;
+  to: string;
+}
+
 /**
- * Sidebar navigation. `main` scrolls; `bottom` stays pinned above the sidebar footer.
- * Nested entries render as children of a NavLink, or as a flyout menu in the compact rail.
+ * The app's navigation, handed to `ShellProvider` by the app (`app/nav.ts`), so the shell knows no
+ * routes. `main` scrolls; `bottom` stays pinned above the sidebar footer. Nested entries render as
+ * children of a NavLink, or as a flyout menu in the compact rail.
  */
-export const nav: Record<'main' | 'bottom', NavGroup[]> = {
-  main: [
-    {
-      id: 'main',
-      items: [
-        {
-          id: 'dashboards',
-          label: 'Dashboards',
-          icon: IconLayoutDashboard,
-          to: '/dashboards',
-          children: [
-            { id: 'all', label: 'All dashboards', to: '/dashboards' },
-            { id: 'sales', label: 'Sales overview', to: '/dashboards/sales' },
-            { id: 'ops', label: 'Operations', to: '/dashboards/ops' },
-          ],
-        },
-        { id: 'templates', label: 'Templates', icon: IconTemplate, to: '/templates' },
-        { id: 'datasources', label: 'Data sources', icon: IconDatabase, to: '/datasources' },
-        { id: 'explore', label: 'Explore', icon: IconChartDots3, to: '/explore' },
-        { id: 'integrations', label: 'Integrations', icon: IconPlugConnected, to: '/integrations' },
-      ],
-    },
-  ],
-  bottom: [
-    {
-      id: 'system',
-      items: [{ id: 'settings', label: 'Settings', icon: IconSettings, to: '/settings' }],
-    },
-  ],
-};
-
-/** Top navbar area switcher. */
-export const areas = [
-  { value: 'dashboards', label: 'Dashboards', to: '/dashboards' },
-  { value: 'datasources', label: 'Data sources', to: '/datasources' },
-  { value: 'integrations', label: 'Integrations', to: '/integrations' },
-  { value: 'settings', label: 'Settings', to: '/settings' },
-] as const;
-
-export type AreaValue = (typeof areas)[number]['value'];
+export interface Nav {
+  main: NavGroup[];
+  bottom: NavGroup[];
+  areas: NavArea[];
+}

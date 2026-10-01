@@ -26,7 +26,7 @@ Mantine 9 needs React 19.2+, so all React 19 APIs (`ref` as prop, `use()`, `Acti
 Imports go one way, from the bottom up; oxlint enforces it ([AGENTS.md › Structure](../AGENTS.md#structure)).
 
 ```text
-app/        routes  Providers  router  queryClient  plugins.ts
+app/        routes  Providers  router  queryClient  plugins.ts  nav.ts
   │         the only place features and the built-in plugins meet
 features/   dashboards  settings  notifications  integrations  debug
   │         never import each other; widgets and datasources come from usePlugins()
@@ -72,7 +72,7 @@ Widget data is cached per widget (`['ds', queries, range]`); auto-refresh and th
 | Dashboard list, documents, widget data                           | TanStack Query                                                       | `app/Providers`                      |
 | Time range, refresh, `mode`, `widget`, `editor`, settings tab    | URL search params, validated with zod                                | routes                               |
 | Document being edited, saved baseline, undo history, editor tool | per-dashboard zustand store (`DashboardProvider`)                    | `routes/dashboards/$id`, keyed by id |
-| Sidebar and context bar layout                                   | shell zustand store (`ShellProvider`)                                | `routes/__root`                      |
+| Sidebar and context bar layout; the app's nav and global tabs    | shell zustand store and static values (`ShellProvider`)              | `routes/__root`                      |
 | Widget and datasource plugins                                    | `PluginsContext`, filled from `app/plugins.ts`                       | `app/Providers`                      |
 | Inbox                                                            | global zustand store (`lib/notify/useInbox.ts`), written by `notify` | module                               |
 | Color scheme, motion                                             | Mantine color-scheme manager, `useMotion`                            | `app/Providers`                      |

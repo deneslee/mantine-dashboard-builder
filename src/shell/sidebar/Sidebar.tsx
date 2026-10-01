@@ -1,6 +1,5 @@
 import { Tooltip } from '@mantine/core';
-import { useShellActions, useSidebar } from '../useShell';
-import { nav } from '../Nav';
+import { useNav, useShellActions, useSidebar } from '../useShell';
 import { Panel } from '../Panel';
 import { Brand } from './Brand';
 import { SidebarMenu } from './SidebarMenu';
@@ -13,6 +12,7 @@ import classes from './Sidebar.module.css';
  * applies when docked.
  */
 export function Sidebar() {
+  const nav = useNav();
   const { isCompact, isDockPreferred, isNarrow } = useSidebar();
   const { setSidebarDocked } = useShellActions();
 

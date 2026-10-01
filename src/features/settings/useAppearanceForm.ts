@@ -2,7 +2,7 @@ import { useMantineColorScheme, type MantineColorScheme } from '@mantine/core';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useShellActions, useSidebar } from '@/shell/useShell';
-import type { BurgerBehavior } from '@/shell/types';
+import type { BurgerBehavior } from '@/shell/createShellStore';
 import { useMotionPreference, type MotionPreference } from '@/lib/useMotion';
 import { wait } from '@/utils/wait';
 

@@ -2,6 +2,7 @@ import { IconSettings, IconTemplate } from '@tabler/icons-react';
 import { RouterProvider } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
 import { describe, expect, it } from 'vitest';
+import { nav } from '@/app/nav';
 import { act, fireEvent, render, screen } from '@/testing/render';
 import { createTestRouter } from '@/testing/TestRouter';
 import type { NavGroup } from '../Nav';
@@ -15,7 +16,14 @@ function renderAt(path: string, compact = false, init: ShellInit = {}, ui: React
     { isNarrow: false, ...init, sidebar: { mode: compact ? 'compact' : 'expanded', ...init.sidebar } },
     false,
   );
-  const router = createTestRouter({ path, wrap: () => <ShellProvider store={store}>{ui}</ShellProvider> });
+  const router = createTestRouter({
+    path,
+    wrap: () => (
+      <ShellProvider store={store} nav={nav}>
+        {ui}
+      </ShellProvider>
+    ),
+  });
   render(<RouterProvider router={router} />);
   return { router, store };
 }

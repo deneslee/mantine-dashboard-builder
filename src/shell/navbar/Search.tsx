@@ -5,7 +5,7 @@ import { IconSearch } from '@tabler/icons-react';
 import { useNavigate } from '@tanstack/react-router';
 import { useMemo } from 'react';
 import { iconSize, iconStroke } from '@/ui/tokens/semantic';
-import { nav } from '../Nav';
+import { useNav } from '../useShell';
 import classes from './Search.module.css';
 
 /**
@@ -16,29 +16,28 @@ export function Search() {
   const navigate = useNavigate();
   const os = useOs();
   const modKey = os === 'macos' ? '⌘' : 'Ctrl';
+  const nav = useNav();
 
   const actions = useMemo<SpotlightActionData[]>(
     () =>
-      Object.values(nav)
-        .flat()
-        .flatMap((g) =>
-          g.items.flatMap((item) => [
-            {
-              id: item.id,
-              label: item.label,
-              description: item.to,
-              leftSection: <item.icon size={18} stroke={1.75} />,
-              onClick: () => void navigate({ to: item.to }),
-            },
-            ...(item.children ?? []).map((c) => ({
-              id: `${item.id}.${c.id}`,
-              label: c.label,
-              description: c.to,
-              onClick: () => void navigate({ to: c.to }),
-            })),
-          ]),
-        ),
-    [navigate],
+      [...nav.main, ...nav.bottom].flatMap((g) =>
+        g.items.flatMap((item) => [
+          {
+            id: item.id,
+            label: item.label,
+            description: item.to,
+            leftSection: <item.icon size={18} stroke={1.75} />,
+            onClick: () => void navigate({ to: item.to }),
+          },
+          ...(item.children ?? []).map((c) => ({
+            id: `${item.id}.${c.id}`,
+            label: c.label,
+            description: c.to,
+            onClick: () => void navigate({ to: c.to }),
+          })),
+        ]),
+      ),
+    [nav, navigate],
   );
 
   return (
