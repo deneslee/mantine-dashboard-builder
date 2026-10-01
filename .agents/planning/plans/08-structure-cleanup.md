@@ -40,7 +40,7 @@ src/
       DetailsPanel.tsx        context-bar panel
       dashboardTabs.ts        context-bar tab list
       dashboardSearch.ts      route search schema
-      data/    dashboardApi  dashboardQueries  widgetDataQuery  drafts  useAutoRefresh
+      data/    dashboardApi  dashboardQueries (incl. widgetDataQuery)  drafts  useAutoRefresh
       state/   createDashboardStore  DashboardProvider  useDashboard
       grid/    DashboardGrid  WidgetTile  WidgetHeader  focusWidgetMenu
       header/  EditToolbar  RefreshButton  TimeRangePicker  RefreshPicker  formatRange  dashboardFile
