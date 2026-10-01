@@ -2,12 +2,12 @@
 
 How a dashboard is stored, drawn and fed with data, from phase 2 (read) to phase 6 (real datasources). Phase 2 is detailed in [05-dashboard-read](../../.agents/planning/plans/done/05-dashboard-read.md), phases 3 and 4 in [07-dashboard-model](../../.agents/planning/plans/07-dashboard-model.md); the canvas performance rules are in [grid-and-charts.md](grid-and-charts.md).
 
-The dashboard is one versioned JSON document. Widgets and datasources are plugins registered by type, and `DataFrame` is the only contract between them.
+The dashboard is one versioned JSON document, and its TypeScript type is exactly that JSON. Widgets and datasources are plugins registered by type, and `DataFrame` is the only contract between them.
 
 ## Model
 
 ```text
-DashboardDocV1 { version: 1, id, title, description, tags, updatedAt,
+Dashboard      { schemaVersion: 1, id, title, description, tags, updatedAt,
                  timeRange: { from, to },     raw strings, e.g. now-24h
                  refresh?,                    off, 30s, 1m, …
                  variables: VariableDef[],    schema reserved, UI in phase 4
@@ -19,10 +19,13 @@ DataFrame      { name?, length, fields: { name, type: 'time' | 'number' | 'strin
 ```
 
 - `lg` is required; a missing `md` or `sm` layout is reflowed from it in reading order.
-- The UI never sees the document: `api/mapper.ts` turns it into the domain types in `model/`.
+- `dashboardSchema` (zod, `core/dashboard/dashboardSchema.ts`) is the shape and `Dashboard = z.infer<typeof dashboardSchema>`: what is fetched, saved, drafted, exported and imported, with no mapper in between. A widget's id is its key in `widgets`; code that needs it passes it beside the widget.
+- Every read (static file, saved copy, draft, import) parses with `storedDashboardSchema`, which runs `migrateDashboard` first. Files saved before Oct 2026 say `version: 1` and read as `schemaVersion: 1`.
+- Saved and exported files list widgets in `lg` reading order (`orderWidgets`), so they read top to bottom.
+- The list (`index.json`) holds `DashboardSummary` entries: `id`, `title`, `description`, `updatedAt`, `widgetCount`, `tags`.
 - Datasources return `DataFrame[]`. Every field in a frame has the same length; values may be `null`; time values are epoch milliseconds; `config` holds unit, display name and labels; `meta` keeps the query id and request stats; nothing in a frame is a class instance, so frames serialize for Inspect and export ([07 §6](../../.agents/planning/plans/07-dashboard-model.md#6-data-flow)).
-- Phase 3 adds optional widget fields to v1: `description`, `time` (an own range or a shift; absent means inherit) and `syncGroup`. Old documents still parse. `version` stays the schema version; phase 5 adds a separate `revision`.
-- Phase 4 is v2: `layouts` becomes `body`, a list of blocks (`grid`, a collapsible `row`, `tabs`), and the migration wraps v1 layouts in one `grid` block. There is no `container` widget. A domain check after zod rejects layout items pointing at missing widgets, widgets placed twice or not at all, and repeated block or tab ids ([07 §4](../../.agents/planning/plans/07-dashboard-model.md#4-layout)).
+- Phase 3 adds optional widget fields to v1: `description`, `time` (an own range or a shift; absent means inherit) and `syncGroup`. Old documents still parse. `schemaVersion` stays the format version; phase 5 adds a separate `revision`.
+- Phase 4 is v2: `layouts` becomes `body`, a list of blocks (`grid`, a collapsible `row`, `tabs`), and `migrateDashboard` wraps v1 layouts in one `grid` block. There is no `container` widget. A domain check after zod rejects layout items pointing at missing widgets, widgets placed twice or not at all, and repeated block or tab ids ([07 §4](../../.agents/planning/plans/07-dashboard-model.md#4-layout)).
 
 ## How it works
 
@@ -45,7 +48,7 @@ DataFrame      { name?, length, fields: { name, type: 'time' | 'number' | 'strin
 | Variables         | Definitions in the document, values in the URL, scope by reference through `getVariableRefs`, bound parameters for values, identifiers as parameters only where the datasource supports them ([07 §5](../../.agents/planning/plans/07-dashboard-model.md#5-variables-and-filters))                                                                                                                                                                                                                                                                                                                             | 4     |
 | Hover sync        | Named `syncGroup`s over Recharts `syncId`, matched by nearest timestamp                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 4     |
 | Persistence       | JSON files are the seed; Save writes a local saved copy that overrides the file, and the unsaved draft is kept per dashboard; Export and Import JSON. Plan [08](../../.agents/planning/plans/08-structure-cleanup.md) folds the `DashboardRepository` port into one `dashboardApi` module; phase 5 points it at an API                                                                                                                                                                                                                                                                                         | 3, 5  |
-| Import / export   | Dashboard JSON (with `version`, migrations run on import), widget data as CSV or JSON from the `DataFrame`, templates as dashboard JSON with `template: true` and no datasource config                                                                                                                                                                                                                                                                                                                                                                                                                         | 3, 4  |
+| Import / export   | Dashboard JSON (with `schemaVersion`, migrated on import), widget data as CSV or JSON from the `DataFrame`, templates as dashboard JSON with `template: true` and no datasource config                                                                                                                                                                                                                                                                                                                                                                                                                         | 3, 4  |
 
 ## Performance rules for the canvas
 

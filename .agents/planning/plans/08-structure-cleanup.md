@@ -257,12 +257,12 @@ Every step leaves `pnpm lint && pnpm format:check && pnpm build && pnpm test` gr
   - Stories drop `title:`; the sidebar sorts `ui`, `shell`, `features`.
   - Test routers come from `createTestRouter` (the `TestRouter` component wraps it); `AppStory` uses the preview's QueryClient.
   - Done when no test or story builds its own `QueryClient` or router by hand. Oct 1: done, except `RouteBreadcrumbs.test`, whose subject is a route tree with loaders.
-- [ ] **Flat document.**
+- [x] **Flat document.**
   - Add `dashboardSchema`, `migrateDashboard` (+ test), `GRID_COLUMNS` and `orderWidgets`.
   - `testing/fixtures/dashboards.ts` replaces the inline dashboards in the store and grid tests and stories, and the stories stop importing `public/` JSON.
   - `public/data/dashboards/*.json` switch to `schemaVersion`.
   - Delete the mapper and DTO types.
-  - Done when every read path (static, saved, draft, import) runs `migrateDashboard` → `dashboardSchema`.
+  - Done when every read path (static, saved, draft, import) runs `migrateDashboard` → `dashboardSchema`. Oct 1: every read parses with `storedDashboardSchema = z.preprocess(migrateDashboard, dashboardSchema)`. `testDashboard()` serves the node and jsdom tests; `loadDemoDashboard(id)` fetches the real demo files for stories, which deleted the grid stories' hand-copied dashboards. Checked in the dev server: a saved copy in the old format still lists and opens.
 - [ ] **Data module.** Add `dashboardApi` (list, get, save), `dashboardQueries`, `widgetDataQuery` and `drafts`; `createDashboardStore(dashboard, { shouldPersist, save })`; delete `repository.ts`. Done when the store tests pass with a fake `save`.
 - [ ] **Split the page and the editor.**
   - `DashboardPage` becomes layout only.
@@ -302,6 +302,9 @@ Every step leaves `pnpm lint && pnpm format:check && pnpm build && pnpm test` gr
 - **Sep 30: Storybook 10.6.1** for Vitest 5 support (10.6.0's Vitest addon only allows Vitest 3–4). Installed once it cleared the repo's 24-hour `minimumReleaseAge`; the policy was not bypassed.
 - **Sep 30: `color-contrast` off in the story a11y tests**, not every failing story marked `todo`. The light-scheme tokens fail AA everywhere, so `todo` on each story would also hide new a11y regressions. Every other rule stays an error, and the token fix is tracked in tasks.md.
 - **Sep 30: planning moves to `.agents/planning/`.** `docs/` is for people, with `architecture.md` holding the stack and structure.
+- **Oct 1: a widget's id is its key only.** `Widget` has no `id` field; components take `id` beside `widget`. The alternative, storing the id inside each widget too, puts the same value twice in every file and needs a rule that they match.
+- **Oct 1: the list summary is camelCase** (`updatedAt`, `widgetCount`) and `updatedAt` stays a string, like the dashboard's own, so the summary needs no mapper either.
+- **Oct 1: `GRID_COLUMNS` lives in `core/dashboard/layout.ts`** because layouts are validated against it; `dimensions.grid.cols` points at it, so `core/` no longer imports `ui/`.
 - **Oct 1: docs follow each step**, not only step 7. Agents read AGENTS.md and the architecture page before coding, so stale paths there cost more than a second edit.
 - **Oct 1: `config/config.ts` folded into `sidebar/Brand.tsx`**, the only user of `APP_NAME`; `config/` is gone.
 - **Oct 1: renamed persisted fields migrate through zustand's `version`/`migrate`**, not a reset. A reset would silently drop users' panel layout and unread inbox. Each migration is marked `ponytail: delete after 2027-01`.

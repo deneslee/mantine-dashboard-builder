@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "schemaVersion": 1,
   "id": "ops",
   "title": "Operations",
   "description": "Building energy, HVAC alarms and occupancy",

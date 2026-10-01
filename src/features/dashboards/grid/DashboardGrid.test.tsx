@@ -5,9 +5,9 @@ import { act, render, screen, waitFor } from '@/testing/render';
 import type { DataFrame } from '@/core/data/DataFrame';
 import type { DatasourcePlugin, QueryContext } from '@/plugins/DatasourcePlugin';
 import { defineWidget, type WidgetProps } from '@/plugins/WidgetPlugin';
-import { resolveLayouts } from '@/core/dashboard/layout';
 import type { TimeRange } from '@/core/time/timeRange';
-import type { Dashboard } from '../state/types';
+import type { Dashboard } from '@/core/dashboard/dashboardSchema';
+import { testDashboard } from '@/testing/fixtures/dashboards';
 import { PluginsContext, type Plugins } from '@/plugins/usePlugins';
 import { DashboardProvider } from '../state/DashboardProvider';
 import { createDashboardStore } from '../state/createDashboardStore';
@@ -65,32 +65,13 @@ function deferredDatasource() {
   return { datasource, query, release };
 }
 
+/** The fixture with a deferred-data widget in `a` and an unknown widget type in `b`. */
 const dashboard: Dashboard = {
-  version: 1,
-  id: 'test',
-  title: 'Test',
-  description: '',
-  updatedAt: '2026-09-30',
-  tags: [],
-  variables: [],
-  timeRange: { from: 'now-24h', to: 'now' },
-  refresh: 'off',
+  ...testDashboard(),
   widgets: {
-    a: {
-      id: 'a',
-      type: 'name',
-      title: 'Revenue',
-      options: {},
-      queries: [{ datasource: 'deferred', spec: 'a' }],
-    },
-    b: { id: 'b', type: 'nope', title: 'Regions', options: {}, queries: [] },
+    a: { type: 'name', title: 'Revenue', options: {}, queries: [{ datasource: 'deferred', spec: 'a' }] },
+    b: { type: 'nope', title: 'Regions', options: {}, queries: [] },
   },
-  layouts: resolveLayouts({
-    lg: [
-      { i: 'a', x: 0, y: 0, w: 6, h: 3 },
-      { i: 'b', x: 6, y: 0, w: 6, h: 3 },
-    ],
-  }),
 };
 
 const day: TimeRange = { from: 'now-24h', to: 'now' };

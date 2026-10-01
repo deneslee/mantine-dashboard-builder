@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import type { Dashboard } from './types';
+import type { Dashboard } from '@/core/dashboard/dashboardSchema';
 import type { DashboardRepository } from '../data/repository';
 import { localRepository } from '../data/dashboardApi';
 import { DashboardContext } from './context';

@@ -19,8 +19,7 @@ import { Page } from '@/ui/components/Page';
 import { iconSize, iconStroke } from '@/ui/tokens/semantic';
 import { dimensions } from '@/ui/tokens/dimensions';
 import { notify } from '@/lib/notify/notify';
-import { dashboardDoc } from '@/core/dashboard/dashboardSchema';
-import { toDashboard, toDocument } from './data/mapper';
+import { orderWidgets, storedDashboardSchema } from '@/core/dashboard/dashboardSchema';
 import { dashboardKeys } from './data/dashboardQueries';
 import { useDashboardActions, useDashboard, useReadDashboard, useUndoState } from './state/useDashboard';
 import { useAutoRefresh } from './data/useAutoRefresh';
@@ -99,7 +98,7 @@ export function DashboardPage() {
     },
   });
   const handleExport = () => {
-    const content = JSON.stringify(dashboardDoc.parse(toDocument(read())), null, 2);
+    const content = JSON.stringify(orderWidgets(read()), null, 2);
     const url = URL.createObjectURL(new Blob([content], { type: 'application/json' }));
     const anchor = document.createElement('a');
     anchor.href = url;
@@ -110,7 +109,7 @@ export function DashboardPage() {
   const handleImport = async (file: File | null) => {
     if (!file) return;
     try {
-      const doc = toDashboard(dashboardDoc.parse(JSON.parse(await file.text())));
+      const doc = storedDashboardSchema.parse(JSON.parse(await file.text()));
       for (const widget of Object.values(doc.widgets)) {
         const definition = plugins.widgets[widget.type];
         if (!definition) throw new Error(`Unknown widget type "${widget.type}".`);

@@ -1,40 +1,23 @@
 import { describe, expect, it, vi } from 'vitest';
-import { dashboardDoc } from '@/core/dashboard/dashboardSchema';
-import { toDashboard, toDocument } from '../data/mapper';
+import { dashboardSchema, orderWidgets } from '@/core/dashboard/dashboardSchema';
+import { testDashboard } from '@/testing/fixtures/dashboards';
 import type { DashboardRepository } from '../data/repository';
 import { draftKey, readSaved, writeSaved } from '../data/drafts';
-import { createDashboardStore, selectDashboard, readingOrder } from './createDashboardStore';
+import { createDashboardStore, selectDashboard } from './createDashboardStore';
 
-const document = () =>
-  toDashboard(
-    dashboardDoc.parse({
-      version: 1,
-      id: 'test',
-      title: 'Test',
-      updatedAt: '2026-09-30T10:00:00Z',
-      timeRange: { from: 'now-24h', to: 'now' },
-      widgets: {
-        a: { type: 'chart', title: 'First', queries: [] },
-        b: { type: 'kpi', title: 'Second', queries: [] },
-      },
-      layouts: {
-        lg: [
-          { i: 'a', x: 0, y: 0, w: 6, h: 3 },
-          { i: 'b', x: 6, y: 0, w: 6, h: 3 },
-        ],
-      },
-    }),
-  );
+const readingOrder = (store: ReturnType<typeof createDashboardStore>) =>
+  Object.keys(orderWidgets(selectDashboard(store.getState())).widgets);
+
 const repository = (): DashboardRepository => ({
   list: vi.fn(async () => []),
-  load: vi.fn(async () => document()),
+  load: vi.fn(async () => testDashboard()),
   save: vi.fn(async (doc) => writeSaved(doc)),
   remove: vi.fn(async () => {}),
 });
 
 describe('dashboard editing', () => {
   it('keeps one step per drag/resize or field blur and ignores identical updates', () => {
-    const store = createDashboardStore(document(), repository(), 'edit', false);
+    const store = createDashboardStore(testDashboard(), repository(), 'edit', false);
     const actions = store.getState().actions;
     actions.commitLayout(
       'lg',
@@ -45,7 +28,7 @@ describe('dashboard editing', () => {
       'a',
       'Moved',
     );
-    expect(readingOrder(store.getState().doc)).toEqual(['b', 'a']);
+    expect(readingOrder(store)).toEqual(['b', 'a']);
     expect(store.temporal.getState().pastStates).toHaveLength(1);
     actions.placeWidget('a', { x: 6, w: 5, h: 4 });
     expect(store.temporal.getState().pastStates).toHaveLength(2);
@@ -60,7 +43,7 @@ describe('dashboard editing', () => {
 
   it('saves a new baseline, keeps undo, and makes the dashboard dirty again on undo after Save', async () => {
     const repo = repository();
-    const store = createDashboardStore(document(), repo);
+    const store = createDashboardStore(testDashboard(), repo);
     const actions = store.getState().actions;
     actions.editWidget('a', { title: 'Saved title' });
     await actions.save();
@@ -84,7 +67,7 @@ describe('dashboard editing', () => {
           finish = resolve;
         }),
     );
-    const store = createDashboardStore(document(), repo);
+    const store = createDashboardStore(testDashboard(), repo);
     const actions = store.getState().actions;
     actions.editWidget('a', { title: 'Snapshot' });
     const saving = actions.save();
@@ -97,14 +80,14 @@ describe('dashboard editing', () => {
   });
 
   it('restores a per-dashboard draft and edit mode; Discard restores baseline and clears draft/history', () => {
-    const first = createDashboardStore(document(), repository());
+    const first = createDashboardStore(testDashboard(), repository());
     first.getState().actions.editWidget('a', { title: 'Draft' });
-    const reloaded = createDashboardStore(document(), repository(), 'view');
+    const reloaded = createDashboardStore(testDashboard(), repository(), 'view');
     expect(reloaded.getState().mode).toBe('edit');
     expect(reloaded.getState().doc.widgets.a?.title).toBe('Draft');
     reloaded.getState().actions.editWidget('b', { description: 'Another change' });
     reloaded.getState().actions.discard();
-    expect(selectDashboard(reloaded.getState())).toEqual(document());
+    expect(selectDashboard(reloaded.getState())).toEqual(testDashboard());
     expect(reloaded.getState().isDirty).toBe(false);
     expect(reloaded.temporal.getState().pastStates).toHaveLength(0);
     expect(reloaded.temporal.getState().futureStates).toHaveLength(0);
@@ -116,20 +99,20 @@ describe('dashboard editing', () => {
     repo.save = vi.fn(async () => {
       throw new Error('Disk full');
     });
-    const store = createDashboardStore(document(), repo);
+    const store = createDashboardStore(testDashboard(), repo);
     store.getState().actions.editWidget('a', { title: 'Keep me' });
     await expect(store.getState().actions.save()).rejects.toThrow('Disk full');
     expect(store.getState().isDirty).toBe(true);
     expect(localStorage.getItem(draftKey('test'))).toContain('Keep me');
     localStorage.setItem(draftKey('test'), 'broken');
-    const recovered = createDashboardStore(document(), repo);
+    const recovered = createDashboardStore(testDashboard(), repo);
     expect(recovered.getState().draftError).toContain('kept');
     expect(localStorage.getItem(draftKey('test'))).toBe('broken');
   });
 
   it('isolates providers and excludes selection, mode and time from undo', () => {
-    const one = createDashboardStore(document(), repository(), 'edit', false);
-    const two = createDashboardStore({ ...document(), id: 'other' }, repository(), 'view', false);
+    const one = createDashboardStore(testDashboard(), repository(), 'edit', false);
+    const two = createDashboardStore({ ...testDashboard(), id: 'other' }, repository(), 'view', false);
     const actions = one.getState().actions;
     actions.setRange({ from: 'now-7d', to: 'now' });
     actions.openTool({ kind: 'palette' });
@@ -143,7 +126,7 @@ describe('dashboard editing', () => {
   });
 
   it('adds and duplicates at the bottom, removes with one step, and exports/imports identical documents', () => {
-    const store = createDashboardStore(document(), repository(), 'edit', false);
+    const store = createDashboardStore(testDashboard(), repository(), 'edit', false);
     const actions = store.getState().actions;
     const copy = actions.duplicate('a');
     expect(store.getState().doc.layouts.lg.at(-1)?.i).toBe(copy);
@@ -151,22 +134,27 @@ describe('dashboard editing', () => {
     actions.remove('b');
     expect(store.temporal.getState().pastStates).toHaveLength(2);
     actions.undo();
-    const exported = toDocument(selectDashboard(store.getState()));
-    expect(Object.keys(exported.widgets)).toEqual(readingOrder(store.getState().doc));
+    const exported = orderWidgets(selectDashboard(store.getState()));
+    expect(Object.keys(exported.widgets)).toEqual(['a', 'b', copy]);
     actions.editWidget('a', { description: 'Temporary' });
-    actions.importDocument(toDashboard(dashboardDoc.parse(JSON.parse(JSON.stringify(exported)))));
-    expect(toDocument(selectDashboard(store.getState()))).toEqual(exported);
-    expect(() => actions.importDocument({ ...document(), id: 'wrong' })).toThrow('same dashboard id');
+    actions.importDocument(dashboardSchema.parse(JSON.parse(JSON.stringify(exported))));
+    expect(orderWidgets(selectDashboard(store.getState()))).toEqual(exported);
+    expect(() => actions.importDocument({ ...testDashboard(), id: 'wrong' })).toThrow('same dashboard id');
   });
 
   it('rejects duplicate placement and out-of-bounds imports', () => {
-    const dto = toDocument(document());
+    const dashboard = testDashboard();
     expect(
-      dashboardDoc.safeParse({ ...dto, layouts: { lg: [...dto.layouts.lg, dto.layouts.lg[0]] } }).success,
+      dashboardSchema.safeParse({
+        ...dashboard,
+        layouts: { lg: [...dashboard.layouts.lg, dashboard.layouts.lg[0]] },
+      }).success,
     ).toBe(false);
     expect(
-      dashboardDoc.safeParse({ ...dto, layouts: { lg: dto.layouts.lg.map((item) => ({ ...item, w: 13 })) } })
-        .success,
+      dashboardSchema.safeParse({
+        ...dashboard,
+        layouts: { lg: dashboard.layouts.lg.map((item) => ({ ...item, w: 13 })) },
+      }).success,
     ).toBe(false);
   });
 });

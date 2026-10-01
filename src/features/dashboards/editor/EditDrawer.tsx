@@ -19,7 +19,7 @@ import type { Query } from '@/plugins/DatasourcePlugin';
 import { useDashboardActions, useDashboard, useWidget } from '../state/useDashboard';
 import { resolveLayouts } from '@/core/dashboard/layout';
 import type { TimeRange } from '@/core/time/timeRange';
-import type { Widget } from '../state/types';
+import type { Widget } from '@/core/dashboard/dashboardSchema';
 import { usePlugins, type Plugins } from '@/plugins/usePlugins';
 import { WidgetTile } from '../grid/WidgetTile';
 import classes from './EditDrawer.module.css';
@@ -44,7 +44,8 @@ export function EditTools({ range }: { range: TimeRange }) {
   const navigate = useNavigate({ from: '/dashboards/$id' });
   const tool = useDashboard((s) => s.tool);
   const actions = useDashboardActions();
-  const widget = useWidget(search.widget ?? '');
+  const widgetId = search.widget ?? '';
+  const widget = useWidget(widgetId);
   const handleCloseWidget = () => {
     void navigate({
       search: (prev) => ({ ...prev, widget: undefined, editor: undefined }),
@@ -53,7 +54,9 @@ export function EditTools({ range }: { range: TimeRange }) {
     focusMenu(search.widget);
   };
   if (widget && search.editor === 'queries')
-    return <QueryEditor key={widget.id} widget={widget} range={range} onClose={handleCloseWidget} />;
+    return (
+      <QueryEditor key={widgetId} id={widgetId} widget={widget} range={range} onClose={handleCloseWidget} />
+    );
   return (
     <>
       <div className={classes.tools}>
@@ -91,7 +94,7 @@ export function EditTools({ range }: { range: TimeRange }) {
               {tool?.kind === 'palette' ? (
                 <Palette />
               ) : widget ? (
-                <WidgetEditor key={widget.id} widget={widget} />
+                <WidgetEditor key={widgetId} id={widgetId} widget={widget} />
               ) : null}
             </Drawer.Body>
           </Drawer.Content>
@@ -104,7 +107,7 @@ export function EditTools({ range }: { range: TimeRange }) {
   );
 }
 
-function WidgetEditor({ widget }: { widget: Widget }) {
+function WidgetEditor({ id, widget }: { id: string; widget: Widget }) {
   const actions = useDashboardActions();
   const navigate = useNavigate({ from: '/dashboards/$id' });
   const definition = usePlugins().widgets[widget.type];
@@ -130,14 +133,14 @@ function WidgetEditor({ widget }: { widget: Widget }) {
         onChange={(e) => setTitle(e.currentTarget.value)}
         error={!title.trim() ? 'A title is required.' : undefined}
         onBlur={() => {
-          if (title.trim()) actions.editWidget(widget.id, { title: title.trim() });
+          if (title.trim()) actions.editWidget(id, { title: title.trim() });
         }}
       />
       <Textarea
         label="Description"
         value={description}
         onChange={(e) => setDescription(e.currentTarget.value)}
-        onBlur={() => actions.editWidget(widget.id, { description: description || undefined })}
+        onBlur={() => actions.editWidget(id, { description: description || undefined })}
       />
       <JsonInput
         label="Display options"
@@ -150,7 +153,7 @@ function WidgetEditor({ widget }: { widget: Widget }) {
         onBlur={() => {
           try {
             const parsed = definition?.optionsSchema.parse(JSON.parse(options));
-            if (parsed) actions.editWidget(widget.id, { options: parsed as Record<string, unknown> });
+            if (parsed) actions.editWidget(id, { options: parsed as Record<string, unknown> });
             setError(undefined);
           } catch (err) {
             setError(message(err));
@@ -205,8 +208,8 @@ function Palette() {
             const options = definition.optionsSchema.parse({});
             const id = crypto.randomUUID();
             actions.addWidget(
+              id,
               {
-                id,
                 type,
                 title: title.trim() || definition.name,
                 options: options as Record<string, unknown>,
@@ -296,7 +299,17 @@ function Placement({ id, kind }: { id: string; kind: 'move' | 'resize' }) {
   );
 }
 
-function QueryEditor({ widget, range, onClose }: { widget: Widget; range: TimeRange; onClose: () => void }) {
+function QueryEditor({
+  id,
+  widget,
+  range,
+  onClose,
+}: {
+  id: string;
+  widget: Widget;
+  range: TimeRange;
+  onClose: () => void;
+}) {
   const plugins = usePlugins();
   const actions = useDashboardActions();
   const [value, setValue] = useState(JSON.stringify(widget.queries, null, 2));
@@ -317,7 +330,7 @@ function QueryEditor({ widget, range, onClose }: { widget: Widget; range: TimeRa
         </Button>
       </Group>
       <div className={classes.preview}>
-        <WidgetTile id={widget.id} range={range} previewQueries={preview} />
+        <WidgetTile id={id} range={range} previewQueries={preview} />
       </div>
       <JsonInput
         label="Queries"
@@ -342,7 +355,7 @@ function QueryEditor({ widget, range, onClose }: { widget: Widget; range: TimeRa
           onClick={() => {
             try {
               const queries = parseQueries(value, plugins);
-              actions.editWidget(widget.id, { queries });
+              actions.editWidget(id, { queries });
               setValue(JSON.stringify(queries, null, 2));
               setError(undefined);
             } catch (err) {

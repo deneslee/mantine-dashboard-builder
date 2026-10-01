@@ -2,18 +2,10 @@ import { verticalCompactor } from 'react-grid-layout/core';
 import { createStore } from 'zustand/vanilla';
 import { immer } from 'zustand/middleware/immer';
 import { temporal } from 'zundo';
-import { dimensions } from '@/ui/tokens/dimensions';
 import { clearDraft, readDraft, writeDraft } from '../data/drafts';
-import { toDocument } from '../data/mapper';
-import { dashboardDoc } from '@/core/dashboard/dashboardSchema';
+import { dashboardSchema, orderWidgets, type Dashboard, type Widget } from '@/core/dashboard/dashboardSchema';
 import type { DashboardRepository } from '../data/repository';
-import {
-  compareReadingOrder,
-  resolveLayouts,
-  type Breakpoint,
-  type LayoutItem,
-} from '@/core/dashboard/layout';
-import type { Dashboard, Widget } from './types';
+import { GRID_COLUMNS, resolveLayouts, type Breakpoint, type LayoutItem } from '@/core/dashboard/layout';
 import type { TimeRange } from '@/core/time/timeRange';
 
 type Content = Omit<Dashboard, 'timeRange' | 'refresh'>;
@@ -48,7 +40,7 @@ export interface DashboardState {
       action: 'Moved' | 'Resized',
     ): void;
     placeWidget(this: void, id: string, patch: Partial<Pick<LayoutItem, 'x' | 'y' | 'w' | 'h'>>): void;
-    addWidget(this: void, widget: Widget, size: { w: number; h: number }): void;
+    addWidget(this: void, id: string, widget: Widget, size: { w: number; h: number }): void;
     duplicate(this: void, id: string): string;
     remove(this: void, id: string): void;
     importDocument(this: void, document: Dashboard): void;
@@ -65,7 +57,8 @@ export const selectDashboard = (state: Pick<DashboardState, 'doc' | 'timeRange' 
   timeRange: state.timeRange,
   refresh: state.refresh,
 });
-const serialized = (dashboard: Dashboard) => JSON.stringify(dashboardDoc.parse(toDocument(dashboard)));
+/** For comparing with the baseline: parsing fixes the key order, `orderWidgets` the widget order. */
+const serialized = (dashboard: Dashboard) => JSON.stringify(orderWidgets(dashboardSchema.parse(dashboard)));
 const bottom = (items: readonly LayoutItem[]) => Math.max(0, ...items.map((item) => item.y + item.h));
 const cleanLayout = (items: readonly LayoutItem[]): LayoutItem[] =>
   items.map(({ i, x, y, w, h }) => ({ i, x, y, w, h }));
@@ -119,8 +112,8 @@ export function createDashboardStore(
           },
           commitLayout: (breakpoint, layout, id, action) => {
             const cleaned = cleanLayout(layout);
-            dashboardDoc.parse({
-              ...toDocument(selectDashboard(get())),
+            dashboardSchema.parse({
+              ...selectDashboard(get()),
               layouts: { ...get().doc.layouts, [breakpoint]: cleaned },
             });
             const previous = resolveLayouts(get().doc.layouts)[breakpoint];
@@ -140,22 +133,22 @@ export function createDashboardStore(
             Object.assign(item, patch);
             get().actions.commitLayout(
               breakpoint,
-              verticalCompactor.compact(items, dimensions.grid.cols[breakpoint]),
+              verticalCompactor.compact(items, GRID_COLUMNS[breakpoint]),
               id,
               patch.w !== undefined || patch.h !== undefined ? 'Resized' : 'Moved',
             );
           },
-          addWidget: (widget, size) =>
+          addWidget: (id, widget, size) =>
             set((s) => {
-              s.doc.widgets[widget.id] = widget;
+              s.doc.widgets[id] = widget;
               for (const breakpoint of ['lg', 'md', 'sm'] as const) {
                 const items = s.doc.layouts[breakpoint];
                 if (items)
                   items.push({
-                    i: widget.id,
+                    i: id,
                     x: 0,
                     y: bottom(items),
-                    w: Math.min(size.w, dimensions.grid.cols[breakpoint]),
+                    w: Math.min(size.w, GRID_COLUMNS[breakpoint]),
                     h: size.h,
                   });
               }
@@ -167,7 +160,8 @@ export function createDashboardStore(
             if (!widget || !item) return id;
             const copyId = crypto.randomUUID();
             get().actions.addWidget(
-              { ...structuredClone(widget), id: copyId, title: `${widget.title} copy` },
+              copyId,
+              { ...structuredClone(widget), title: `${widget.title} copy` },
               item,
             );
             set({ announcement: `Duplicated ${widget.title} at the end of the grid.` });
@@ -247,5 +241,3 @@ export function createDashboardStore(
 }
 
 export type DashboardStore = ReturnType<typeof createDashboardStore>;
-export const readingOrder = (doc: Content) =>
-  doc.layouts.lg.toSorted(compareReadingOrder).map((item) => item.i);

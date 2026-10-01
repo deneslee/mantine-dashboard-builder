@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "schemaVersion": 1,
   "id": "perf",
   "title": "Grid performance",
   "description": "20 charts, for checking that the grid and shell stay fast",

@@ -1,8 +1,11 @@
 import { AppError } from '@/core/errors/AppError';
 import { wait } from '@/utils/wait';
-import { dashboardDoc, dashboardListDto } from '@/core/dashboard/dashboardSchema';
-import { toDashboard, toDashboardSummary } from './mapper';
-import type { Dashboard, DashboardSummary } from '../state/types';
+import {
+  dashboardListSchema,
+  storedDashboardSchema,
+  type Dashboard,
+  type DashboardSummary,
+} from '@/core/dashboard/dashboardSchema';
 import type { DashboardRepository } from './repository';
 import { readSaved, savedKey, writeSaved } from './drafts';
 
@@ -28,7 +31,7 @@ async function getJson(url: string, notFound: string, signal?: AbortSignal): Pro
 
 export async function listDashboards(signal?: AbortSignal): Promise<DashboardSummary[]> {
   await wait(LATENCY, signal);
-  const parsed = dashboardListDto.safeParse(
+  const parsed = dashboardListSchema.safeParse(
     await getJson(`${BASE}/index.json`, 'Dashboard list not found.', signal),
   );
   if (!parsed.success)
@@ -48,10 +51,10 @@ export async function listDashboards(signal?: AbortSignal): Promise<DashboardSum
           title: saved.title,
           description: saved.description,
           tags: saved.tags,
-          updatedAt: new Date(saved.updatedAt),
+          updatedAt: saved.updatedAt,
           widgetCount: Object.keys(saved.widgets).length,
         }
-      : toDashboardSummary(item);
+      : item;
   });
 }
 
@@ -64,12 +67,12 @@ export async function getDashboard(id: string, signal?: AbortSignal): Promise<Da
     `No dashboard with id "${id}".`,
     signal,
   );
-  const parsed = dashboardDoc.safeParse(json);
+  const parsed = storedDashboardSchema.safeParse(json);
   if (!parsed.success)
     throw new AppError('validation', 'This dashboard has an unexpected format.', {
       details: parsed.error.issues,
     });
-  return toDashboard(parsed.data);
+  return parsed.data;
 }
 
 /** Static files are the seed; saves are durable browser-local overrides until an HTTP backend exists. */

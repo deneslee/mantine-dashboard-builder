@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "schemaVersion": 1,
   "id": "infra",
   "title": "Infrastructure health",
   "description": "Datadog monitors, error budgets and latency",

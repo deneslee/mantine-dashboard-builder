@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "schemaVersion": 1,
   "id": "sales",
   "title": "Sales overview",
   "description": "Revenue, pipeline and win rate by region",

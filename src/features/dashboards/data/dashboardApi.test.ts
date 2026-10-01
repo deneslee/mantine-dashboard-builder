@@ -5,8 +5,8 @@ import { savedKey } from './drafts';
 
 const index = {
   items: [
-    { id: 'sales', title: 'Sales', updated_at: '2026-09-21T14:12:00Z', widget_count: 5 },
-    { id: 'ops', title: 'Operations', updated_at: '2026-09-21T14:12:00Z', widget_count: 5 },
+    { id: 'sales', title: 'Sales', updatedAt: '2026-09-21T14:12:00Z', widgetCount: 5 },
+    { id: 'ops', title: 'Operations', updatedAt: '2026-09-21T14:12:00Z', widgetCount: 5 },
   ],
 };
 

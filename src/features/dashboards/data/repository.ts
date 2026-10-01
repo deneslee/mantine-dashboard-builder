@@ -1,4 +1,4 @@
-import type { Dashboard, DashboardSummary } from '../state/types';
+import type { Dashboard, DashboardSummary } from '@/core/dashboard/dashboardSchema';
 
 export interface DashboardRepository {
   list(signal?: AbortSignal): Promise<DashboardSummary[]>;

@@ -10,7 +10,7 @@ import type { Query } from '@/plugins/DatasourcePlugin';
 import { widgetDataQuery } from '../data/dashboardQueries';
 import { useWidget } from '../state/useDashboard';
 import type { TimeRange } from '@/core/time/timeRange';
-import type { Widget } from '../state/types';
+import type { Widget } from '@/core/dashboard/dashboardSchema';
 import { usePlugins } from '@/plugins/usePlugins';
 import { WidgetHeader } from './WidgetHeader';
 import classes from './WidgetTile.module.css';
@@ -30,6 +30,7 @@ export function WidgetTile({
   const widget = useWidget(id);
   return widget ? (
     <Tile
+      id={id}
       widget={previewQueries ? { ...widget, queries: previewQueries } : widget}
       range={range}
       isPreview={previewQueries !== undefined}
@@ -37,7 +38,17 @@ export function WidgetTile({
   ) : null;
 }
 
-function Tile({ widget, range, isPreview }: { widget: Widget; range: TimeRange; isPreview: boolean }) {
+function Tile({
+  id,
+  widget,
+  range,
+  isPreview,
+}: {
+  id: string;
+  widget: Widget;
+  range: TimeRange;
+  isPreview: boolean;
+}) {
   const titleId = useId();
   const { ref, entry } = useIntersection<HTMLDivElement>(nearViewport);
   const [hasBeenSeen, setSeen] = useState(false);
@@ -51,7 +62,7 @@ function Tile({ widget, range, isPreview }: { widget: Widget; range: TimeRange; 
   const skeleton = widgets[widget.type]?.skeleton ?? unknownSkeleton;
   return (
     <Paper
-      id={isPreview ? undefined : 'widget-' + widget.id}
+      id={isPreview ? undefined : 'widget-' + id}
       variant="widget"
       component="section"
       aria-labelledby={titleId}
@@ -63,6 +74,7 @@ function Tile({ widget, range, isPreview }: { widget: Widget; range: TimeRange; 
         </Box>
       ) : (
         <WidgetHeader
+          id={id}
           widget={widget}
           titleId={titleId}
           range={range}

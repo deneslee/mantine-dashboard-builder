@@ -1,21 +1,20 @@
 import { z } from 'zod';
 import { isValidTime } from '../time/timeRange';
-import { dimensions } from '@/ui/tokens/dimensions';
-import type { Breakpoint } from './layout';
+import { compareReadingOrder, GRID_COLUMNS, type Breakpoint } from './layout';
 
-/** Wire shapes. Today local JSON files, later the HTTP API; only this file and the mapper change. */
-export const dashboardSummaryDto = z.object({
+/** An entry in `data/dashboards/index.json`, the dashboard list. */
+export const dashboardSummarySchema = z.object({
   id: z.string(),
   title: z.string(),
   description: z.string().default(''),
-  updated_at: z.string(),
-  widget_count: z.number().int().nonnegative(),
+  updatedAt: z.string(),
+  widgetCount: z.number().int().nonnegative(),
   tags: z.array(z.string()).default([]),
 });
 
-export const dashboardListDto = z.object({ items: z.array(dashboardSummaryDto) });
+export const dashboardListSchema = z.object({ items: z.array(dashboardSummarySchema) });
 
-export type DashboardSummaryDto = z.infer<typeof dashboardSummaryDto>;
+export type DashboardSummary = z.infer<typeof dashboardSummarySchema>;
 
 const time = z.string().refine(isValidTime, 'Expected now, now-<n><s|m|h|d|w> or an ISO date.');
 
@@ -29,6 +28,7 @@ const layout = z.array(
   }),
 );
 
+/** A tile: which widget plugin draws it, its options (the plugin checks them) and its queries. */
 const widget = z.object({
   type: z.string(),
   title: z.string().trim().min(1),
@@ -38,18 +38,19 @@ const widget = z.object({
 });
 
 /**
- * A stored dashboard, version 1. Widgets are keyed by id and the layouts place them by id, so
- * what a widget shows and where it sits are separate (as in Perses). `lg` is required; `md` and
- * `sm` only where the reading-order reflow gets it wrong.
+ * A dashboard exactly as it is saved, exported and fetched. Widgets are keyed by id and the
+ * layouts place them by id, so what a widget shows and where it sits are separate (as in Perses).
+ * `lg` is required; `md` and `sm` only where the reading-order reflow gets it wrong.
  */
-export const dashboardDocV1 = z
+export const dashboardSchema = z
   .object({
-    version: z.literal(1),
+    schemaVersion: z.literal(1),
     id: z.string(),
     title: z.string(),
     description: z.string().default(''),
     tags: z.array(z.string()).default([]),
     updatedAt: z.string(),
+    /** Defaults; the URL overrides them. */
     timeRange: z.object({ from: time, to: time }),
     refresh: z.string().default('off'),
     /** Reserved for template variables (phase 4). */
@@ -61,7 +62,7 @@ export const dashboardDocV1 = z
     for (const [breakpoint, items] of Object.entries(doc.layouts)) {
       if (!items) continue;
       for (const item of items) {
-        if (item.x + item.w > dimensions.grid.cols[breakpoint as Breakpoint])
+        if (item.x + item.w > GRID_COLUMNS[breakpoint as Breakpoint])
           ctx.addIssue({
             code: 'custom',
             path: ['layouts', breakpoint],
@@ -94,7 +95,28 @@ export const dashboardDocV1 = z
     }
   });
 
-/** Every stored version. A v2 adds its schema here and a migration in the mapper. */
-export const dashboardDoc = z.discriminatedUnion('version', [dashboardDocV1]);
+export type Dashboard = z.infer<typeof dashboardSchema>;
+export type Widget = Dashboard['widgets'][string];
 
-export type DashboardDocDto = z.infer<typeof dashboardDoc>;
+/**
+ * Brings stored JSON of any earlier `schemaVersion` to the current one. Unknown input passes
+ * through, so `dashboardSchema` reports what is wrong with it.
+ */
+export function migrateDashboard(json: unknown): unknown {
+  if (typeof json !== 'object' || json === null || 'schemaVersion' in json) return json;
+  // ponytail: files saved before Oct 2026 call it `version`; delete after 2027-01.
+  if ('version' in json && json.version === 1) {
+    const { version: _version, ...rest } = json;
+    return { schemaVersion: 1, ...rest };
+  }
+  return json;
+}
+
+/** Reads a dashboard from any source (file, saved copy, draft, import): migrate, then validate. */
+export const storedDashboardSchema = z.preprocess(migrateDashboard, dashboardSchema);
+
+/** Widgets in `lg` reading order, so a saved or exported file reads top to bottom. */
+export function orderWidgets(dashboard: Dashboard): Dashboard {
+  const ids = dashboard.layouts.lg.toSorted(compareReadingOrder).map((item) => item.i);
+  return { ...dashboard, widgets: Object.fromEntries(ids.map((id) => [id, dashboard.widgets[id]!])) };
+}

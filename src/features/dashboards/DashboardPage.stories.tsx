@@ -1,9 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, spyOn, userEvent, waitFor, within } from 'storybook/test';
-import sales from '../../../public/data/dashboards/sales.json';
 import { AppStory } from '@/testing/AppStory';
-import { dashboardDoc } from '@/core/dashboard/dashboardSchema';
-import { toDashboard } from './data/mapper';
+import { loadDemoDashboard } from '@/testing/fixtures/dashboards';
 import { writeDraft, writeSaved } from './data/drafts';
 
 /**
@@ -21,7 +19,6 @@ type Story = StoryObj<typeof meta>;
 const page = within(document.body);
 const WAIT = { timeout: 5000 };
 const controls = () => within(page.getByRole('group', { name: 'Dashboard controls' }));
-const salesDashboard = () => toDashboard(dashboardDoc.parse(sales));
 
 async function chooseFromMenu(widget: string, item: string) {
   await userEvent.click(await page.findByRole('button', { name: `Actions for ${widget}` }, WAIT));
@@ -47,7 +44,8 @@ export const QueryEditor: Story = { args: { url: `${EDIT}&widget=revenue&editor=
 
 export const Empty: Story = {
   args: { url: EDIT },
-  beforeEach: () => writeSaved({ ...salesDashboard(), widgets: {}, layouts: { lg: [] } }),
+  beforeEach: async () =>
+    writeSaved({ ...(await loadDemoDashboard('sales')), widgets: {}, layouts: { lg: [] } }),
   play: async () => {
     await expect(await page.findByText('No widgets yet.', {}, WAIT)).toBeVisible();
   },
@@ -70,8 +68,8 @@ export const StorageError: Story = {
 
 export const RestoresDraft: Story = {
   args: { url: '/dashboards/sales' },
-  beforeEach: () => {
-    const saved = salesDashboard();
+  beforeEach: async () => {
+    const saved = await loadDemoDashboard('sales');
     const draft = structuredClone(saved);
     draft.widgets.revenue!.title = 'Draft revenue';
     writeDraft(saved, draft);

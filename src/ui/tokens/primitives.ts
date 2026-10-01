@@ -263,7 +263,6 @@ export const shell = {
 // 14. Grid settings (dashboard canvas)
 export const grid = {
   breakpoints: { lg: 1100, md: 640, sm: 0 },
-  cols: { lg: 12, md: 8, sm: 4 },
   rowHeight: 40,
   gap: 16,
 } as const;

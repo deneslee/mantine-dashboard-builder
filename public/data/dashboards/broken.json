@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "schemaVersion": 1,
   "id": "broken",
   "title": "Broken example",
   "description": "Fails to load on purpose, to show the route error screen",

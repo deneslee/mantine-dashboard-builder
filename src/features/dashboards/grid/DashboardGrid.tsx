@@ -30,7 +30,7 @@ export function DashboardGrid({ range }: { range: TimeRange }) {
   const mode = useDashboard((state) => state.mode);
   const types = useDashboard(
     useShallow((s) =>
-      Object.fromEntries(Object.values(s.doc.widgets).map((widget) => [widget.id, widget.type])),
+      Object.fromEntries(Object.entries(s.doc.widgets).map(([id, widget]) => [id, widget.type])),
     ),
   );
   const plugins = usePlugins();

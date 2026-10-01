@@ -47,7 +47,7 @@ Each top-level folder is shaped like a package, so it can move to `packages/` wh
 URL /dashboards/$id?mode&from&to&refresh ── validateSearch (zod)
   loader: ensureQueryData(dashboardQuery(id))
     dashboardApi: saved copy (localStorage) ?? fetch public/data/dashboards/<id>.json
-      → dashboardDoc.parse → toDashboard (data/mapper.ts) → Query cache ['dashboards', id]
+      → storedDashboardSchema (migrateDashboard → dashboardSchema) → Dashboard → Query cache ['dashboards', id]
 DashboardProvider key=id → createDashboardStore(dashboard)      restores a draft if there is one
 DashboardPage → range = edit mode ? store range : URL ?? document range
   DashboardGrid → layouts per breakpoint; drag or resize stop → commitLayout (one undo step)
@@ -59,7 +59,7 @@ DashboardPage → range = edit mode ? store range : URL ?? document range
 Save    store.save → repository.save → localStorage saved copy → new baseline, draft cleared
         → setQueryData(['dashboards', id]) and the list invalidated
 Draft   every document change: isDirty ? write draft : clear draft
-Export  current document → <id>.json;  Import  JSON → zod → plugin checks → importDocument
+Export  orderWidgets(dashboard) → <id>.json;  Import  JSON → storedDashboardSchema → plugin checks → importDocument
 ```
 
 Widget data is cached per widget (`['ds', queries, range]`); auto-refresh and the Refresh button invalidate `['ds']`. How the canvas stays fast is in [grid-and-charts.md](dashboard/grid-and-charts.md); the document model is in [dashboard.md](dashboard/dashboard.md).

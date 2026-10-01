@@ -1,8 +1,7 @@
-import { dimensions } from '@/ui/tokens/dimensions';
+/** Grid columns per breakpoint. Part of the document format: layouts are validated against it. */
+export const GRID_COLUMNS = { lg: 12, md: 8, sm: 4 } as const;
 
-const { cols } = dimensions.grid;
-
-export type Breakpoint = keyof typeof cols;
+export type Breakpoint = keyof typeof GRID_COLUMNS;
 
 export interface LayoutItem {
   i: string;
@@ -48,10 +47,14 @@ export interface Layouts {
  */
 export function resolveLayouts({ lg, md, sm }: Layouts): Record<Breakpoint, LayoutItem[]> {
   const readingOrder = lg.toSorted(compareReadingOrder);
-  const half = cols.md / 2;
+  const half = GRID_COLUMNS.md / 2;
   return {
     lg,
-    md: md ?? reflow(readingOrder, cols.md, (w) => ((w * cols.md) / cols.lg <= half ? half : cols.md)),
-    sm: sm ?? reflow(readingOrder, cols.sm, () => cols.sm),
+    md:
+      md ??
+      reflow(readingOrder, GRID_COLUMNS.md, (w) =>
+        (w * GRID_COLUMNS.md) / GRID_COLUMNS.lg <= half ? half : GRID_COLUMNS.md,
+      ),
+    sm: sm ?? reflow(readingOrder, GRID_COLUMNS.sm, () => GRID_COLUMNS.sm),
   };
 }

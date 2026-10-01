@@ -4,40 +4,40 @@
       "id": "sales",
       "title": "Sales overview",
       "description": "Revenue, pipeline and win rate by region",
-      "updated_at": "2026-09-21T14:12:00Z",
-      "widget_count": 5,
+      "updatedAt": "2026-09-21T14:12:00Z",
+      "widgetCount": 5,
       "tags": ["sales", "weekly"]
     },
     {
       "id": "ops",
       "title": "Operations",
       "description": "Building energy, HVAC alarms and occupancy",
-      "updated_at": "2026-09-19T08:40:00Z",
-      "widget_count": 5,
+      "updatedAt": "2026-09-19T08:40:00Z",
+      "widgetCount": 5,
       "tags": ["haystack", "live"]
     },
     {
       "id": "infra",
       "title": "Infrastructure health",
       "description": "Datadog monitors, error budgets and latency",
-      "updated_at": "2026-09-15T17:05:00Z",
-      "widget_count": 6,
+      "updatedAt": "2026-09-15T17:05:00Z",
+      "widgetCount": 6,
       "tags": ["datadog"]
     },
     {
       "id": "perf",
       "title": "Grid performance",
       "description": "20 charts, for checking that the grid and shell stay fast",
-      "updated_at": "2026-09-23T12:00:00Z",
-      "widget_count": 20,
+      "updatedAt": "2026-09-23T12:00:00Z",
+      "widgetCount": 20,
       "tags": ["demo"]
     },
     {
       "id": "broken",
       "title": "Broken example",
       "description": "Fails to load on purpose, to show the route error screen",
-      "updated_at": "2026-09-10T09:00:00Z",
-      "widget_count": 0,
+      "updatedAt": "2026-09-10T09:00:00Z",
+      "widgetCount": 0,
       "tags": ["demo"]
     }
   ]

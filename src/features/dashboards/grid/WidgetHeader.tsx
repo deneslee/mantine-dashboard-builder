@@ -7,17 +7,19 @@ import { notify } from '@/lib/notify/notify';
 import { widgetDataQuery } from '../data/dashboardQueries';
 import { useDashboardActions, useDashboard } from '../state/useDashboard';
 import type { TimeRange } from '@/core/time/timeRange';
-import type { Widget } from '../state/types';
+import type { Widget } from '@/core/dashboard/dashboardSchema';
 import { usePlugins } from '@/plugins/usePlugins';
 import classes from './WidgetTile.module.css';
 
 export function WidgetHeader({
+  id,
   widget,
   titleId,
   range,
   isFetching,
   hasFailed,
 }: {
+  id: string;
   widget: Widget;
   titleId: string;
   range: TimeRange;
@@ -29,11 +31,11 @@ export function WidgetHeader({
   const actions = useDashboardActions();
   const plugins = usePlugins();
   const client = useQueryClient();
-  const focusMenu = () => document.getElementById('widget-menu-' + widget.id)?.focus();
+  const focusMenu = () => document.getElementById('widget-menu-' + id)?.focus();
   const handleCopyLink = async () => {
     const url = new URL(window.location.href);
     for (const key of ['mode', 'widget', 'editor']) url.searchParams.delete(key);
-    url.hash = 'widget-' + widget.id;
+    url.hash = 'widget-' + id;
     try {
       await navigator.clipboard.writeText(url.href);
       notify.success({ title: 'Widget link copied' });
@@ -42,7 +44,7 @@ export function WidgetHeader({
     }
   };
   const handleRemove = () => {
-    actions.remove(widget.id);
+    actions.remove(id);
     requestAnimationFrame(() =>
       (
         document.querySelector<HTMLButtonElement>('[data-widget-menu]') ??
@@ -89,7 +91,7 @@ export function WidgetHeader({
           <Menu.Target>
             <Tooltip label={'Actions for ' + widget.title}>
               <ActionIcon
-                id={'widget-menu-' + widget.id}
+                id={'widget-menu-' + id}
                 data-widget-menu
                 className={classes.menu}
                 variant="subtle"
@@ -122,7 +124,7 @@ export function WidgetHeader({
                     <Link
                       to="/dashboards/$id"
                       params={{ id: dashboardId }}
-                      search={(prev) => ({ ...prev, mode: 'edit', widget: widget.id, editor: undefined })}
+                      search={(prev) => ({ ...prev, mode: 'edit', widget: id, editor: undefined })}
                       resetScroll={false}
                       {...props}
                     />
@@ -130,15 +132,11 @@ export function WidgetHeader({
                 >
                   Edit
                 </Menu.Item>
-                <Menu.Item onClick={() => actions.openTool({ kind: 'move', id: widget.id })}>
-                  Move to…
-                </Menu.Item>
-                <Menu.Item onClick={() => actions.openTool({ kind: 'resize', id: widget.id })}>
-                  Resize…
-                </Menu.Item>
+                <Menu.Item onClick={() => actions.openTool({ kind: 'move', id: id })}>Move to…</Menu.Item>
+                <Menu.Item onClick={() => actions.openTool({ kind: 'resize', id: id })}>Resize…</Menu.Item>
                 <Menu.Item
                   onClick={() => {
-                    actions.duplicate(widget.id);
+                    actions.duplicate(id);
                     requestAnimationFrame(focusMenu);
                   }}
                 >
