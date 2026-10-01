@@ -19,7 +19,3 @@
   pointer-events: auto;
   border-inline-start: 1px solid var(--app-color-border-default);
 }
-
-.preview {
-  height: var(--app-chart-height-default);
-}

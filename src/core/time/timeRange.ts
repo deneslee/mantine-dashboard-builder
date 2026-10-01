@@ -1,5 +1,3 @@
-import { z } from 'zod';
-
 /** A range as written in the document and the URL: `now`, `now-24h`, or an ISO date. */
 export interface TimeRange {
   from: string;
@@ -50,36 +48,17 @@ export function parseRefreshInterval(value: string): number | undefined {
   return ms > 0 ? ms : undefined;
 }
 
-export const rangePresets = [
+export const RANGE_PRESETS = [
   { from: 'now-15m', label: 'Last 15 minutes' },
   { from: 'now-1h', label: 'Last hour' },
   { from: 'now-24h', label: 'Last 24 hours' },
   { from: 'now-7d', label: 'Last 7 days' },
 ] as const;
 
-export const refreshOptions = [
+export const REFRESH_OPTIONS = [
   { value: 'off', label: 'Off' },
   { value: '30s', label: 'Every 30s' },
   { value: '1m', label: 'Every minute' },
   { value: '5m', label: 'Every 5 minutes' },
   { value: '15m', label: 'Every 15 minutes' },
 ];
-
-/**
- * A dashboard route's search params: `?from=now-24h&to=now&refresh=1m`. Invalid values are
- * dropped, so the document's defaults apply instead.
- */
-export const dashboardSearch = z.object({
-  mode: z.enum(['view', 'edit']).default('view').catch('view'),
-  widget: z.string().min(1).optional().catch(undefined),
-  editor: z.literal('queries').optional().catch(undefined),
-  from: z.string().refine(isValidTime).optional().catch(undefined),
-  to: z.string().refine(isValidTime).optional().catch(undefined),
-  refresh: z
-    .string()
-    .refine((value) => value === 'off' || parseRefreshInterval(value) !== undefined)
-    .optional()
-    .catch(undefined),
-});
-
-export type DashboardSearch = Partial<z.output<typeof dashboardSearch>>;

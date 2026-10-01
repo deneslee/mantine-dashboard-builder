@@ -4,7 +4,7 @@ import { DashboardProvider } from '@/features/dashboards/state/DashboardProvider
 import { DashboardPage } from '@/features/dashboards/DashboardPage';
 import { dashboardQuery } from '@/features/dashboards/data/dashboardQueries';
 import { hasDraft } from '@/features/dashboards/data/drafts';
-import { dashboardSearch } from '@/core/time/timeRange';
+import { dashboardSearchSchema } from '@/features/dashboards/dashboardSearch';
 import { dashboardTabs } from '@/features/dashboards/dashboardTabs';
 import { GridSkeleton } from '@/ui/components/Skeletons';
 import { isAppError } from '@/core/errors/AppError';
@@ -15,7 +15,7 @@ export const Route = createFileRoute('/dashboards/$id')({
     crumb: (data) => (data as { title?: string } | undefined)?.title,
   },
   // Time range and refresh; the loader doesn't depend on them, so changing them never reloads the document.
-  validateSearch: dashboardSearch,
+  validateSearch: dashboardSearchSchema,
   search: { middlewares: [stripSearchParams({ mode: 'view' })] },
   // Opening a dashboard with unsaved edits lands in edit mode, where they can be saved or discarded.
   // Only on entry: leaving edit mode with a draft must stay in view mode.

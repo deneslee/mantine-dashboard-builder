@@ -4,7 +4,7 @@ import { IconClock } from '@tabler/icons-react';
 import dayjs from 'dayjs';
 import { useState } from 'react';
 import { iconSize, iconStroke } from '@/ui/tokens/semantic';
-import { rangePresets, type TimeRange } from '@/core/time/timeRange';
+import { RANGE_PRESETS, type TimeRange } from '@/core/time/timeRange';
 import { formatRange } from './formatRange';
 
 const CUSTOM = 'custom';
@@ -69,7 +69,7 @@ export function TimeRangePicker({ value, onChange }: Props) {
           <DatePicker type="range" value={days} onChange={handlePickDays} />
         ) : (
           <Combobox.Options>
-            {rangePresets.map((preset) => (
+            {RANGE_PRESETS.map((preset) => (
               <Combobox.Option
                 key={preset.from}
                 value={preset.from}

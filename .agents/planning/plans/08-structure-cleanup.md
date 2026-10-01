@@ -44,7 +44,8 @@ src/
       state/   createDashboardStore  DashboardProvider  useDashboard
       grid/    DashboardGrid  WidgetTile  WidgetHeader  focusWidgetMenu
       header/  EditToolbar  RefreshButton  TimeRangePicker  RefreshPicker  formatRange  dashboardFile
-      editor/  EditDrawer  WidgetForm  AddWidgetForm  PlacementDialog  QueryEditor  LeaveDialog   (lazy chunk)
+      editor/  EditDrawer  WidgetForm  AddWidgetForm  PlacementDialog  QueryEditor   (lazy chunk)
+               LeaveDialog   (loaded with the page: it guards view mode too)
     settings/       SettingsPage  AppearanceForm  SettingsSection  useAppearanceForm  settingsTabs
     notifications/  InboxPanel  notificationsTab
     integrations/   IntegrationsPage  SentryPage  sentry/*  getIntegrations   (mechanical; 06 rebuilds it)
@@ -264,11 +265,11 @@ Every step leaves `pnpm lint && pnpm format:check && pnpm build && pnpm test` gr
   - Delete the mapper and DTO types.
   - Done when every read path (static, saved, draft, import) runs `migrateDashboard` → `dashboardSchema`. Oct 1: every read parses with `storedDashboardSchema = z.preprocess(migrateDashboard, dashboardSchema)`. `testDashboard()` serves the node and jsdom tests; `loadDemoDashboard(id)` fetches the real demo files for stories, which deleted the grid stories' hand-copied dashboards. Checked in the dev server: a saved copy in the old format still lists and opens.
 - [x] **Data module.** Add `dashboardApi` (list, get, save), `dashboardQueries`, `widgetDataQuery` and `drafts`; `createDashboardStore(dashboard, { shouldPersist, save })`; delete `repository.ts`. Done when the store tests pass with a fake `save`. Oct 1: `dashboardApi` owns the saved copies (`saveDashboard`), `drafts.ts` only drafts, and `save` defaults to `saveDashboard`. `widgetDataQuery` stays in `dashboardQueries.ts`.
-- [ ] **Split the page and the editor.**
+- [x] **Split the page and the editor.**
   - `DashboardPage` becomes layout only.
   - Add `EditToolbar`, `RefreshButton`, `dashboardFile.ts` (+ test: export in reading order, import round-trip, unknown types rejected) and `LeaveDialog`.
   - Add `WidgetForm`, `AddWidgetForm`, `PlacementDialog` and `QueryEditor`.
-  - Done when the compiler test script shows no bailouts in these files.
+  - Done when the compiler test script shows no bailouts in these files. Oct 1: done; no file under `features/dashboards` bails out. `WidgetForm` and `AddWidgetForm` keep only the parse inside `try`. The page keeps layout and an `Announcer` leaf; `EditToolbar` owns the dirty, undo and save state, and `RefreshButton` the fetch state. `EditTools` is now `EditDrawer`, the focus-return logic lives in `grid/focusWidgetMenu.ts`, and the route search schema moved from `core/time` to `dashboardSearch.ts` (+ test) as `dashboardSearchSchema`. `rangePresets` and `refreshOptions` are `RANGE_PRESETS` and `REFRESH_OPTIONS`.
 - [x] **Mode in the URL.** Remove `mode` from the store. The route's `beforeLoad` redirects to `?mode=edit` when a draft exists, and `isEditing` is passed as props. Done when the RestoresDraft story passes and the sync effect is gone. Oct 1: done before **Split the page and the editor**, so the split starts from simpler code. The redirect runs only when `cause === 'enter'`; checked in the dev server that "Leave dashboard" into view mode with a draft stays in view mode.
 - [ ] **Shell.** Nav comes from `app/nav.ts` through `ShellProvider`; the context and hooks live in `useShell.ts`. Done when `shell/` has no app route data.
 - [ ] **Storage.**

@@ -9,6 +9,7 @@ import { useDashboardActions, useDashboard } from '../state/useDashboard';
 import type { TimeRange } from '@/core/time/timeRange';
 import type { Widget } from '@/core/dashboard/dashboardSchema';
 import { usePlugins } from '@/plugins/usePlugins';
+import { focusWidgetMenu } from './focusWidgetMenu';
 import classes from './WidgetTile.module.css';
 
 export function WidgetHeader({
@@ -32,7 +33,6 @@ export function WidgetHeader({
   const actions = useDashboardActions();
   const plugins = usePlugins();
   const client = useQueryClient();
-  const focusMenu = () => document.getElementById('widget-menu-' + id)?.focus();
   const handleCopyLink = async () => {
     const url = new URL(window.location.href);
     for (const key of ['mode', 'widget', 'editor']) url.searchParams.delete(key);
@@ -138,7 +138,7 @@ export function WidgetHeader({
                 <Menu.Item
                   onClick={() => {
                     actions.duplicate(id);
-                    requestAnimationFrame(focusMenu);
+                    focusWidgetMenu(id);
                   }}
                 >
                   Duplicate
