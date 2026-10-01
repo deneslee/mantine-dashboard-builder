@@ -4,11 +4,9 @@ import { DashboardProvider } from '@/features/dashboards/state/DashboardProvider
 import { DashboardPage } from '@/features/dashboards/DashboardPage';
 import { dashboardQuery } from '@/features/dashboards/data/dashboardQueries';
 import { dashboardSearch } from '@/core/time/timeRange';
-import { PluginsContext } from '@/plugins/usePlugins';
 import { dashboardTabs } from '@/features/dashboards/dashboardTabs';
 import { GridSkeleton } from '@/ui/components/Skeletons';
 import { isAppError } from '@/core/errors/AppError';
-import { plugins } from '../../plugins';
 
 export const Route = createFileRoute('/dashboards/$id')({
   staticData: {
@@ -30,16 +28,13 @@ export const Route = createFileRoute('/dashboards/$id')({
   component: DashboardRoute,
 });
 
-/** The app layer hands the widget and datasource plugins to the dashboard. */
 function DashboardRoute() {
   const { id } = Route.useParams();
   const { mode } = Route.useSearch();
   const { data } = useSuspenseQuery(dashboardQuery(id));
   return (
-    <PluginsContext value={plugins}>
-      <DashboardProvider key={id} dashboard={data} mode={mode}>
-        <DashboardPage />
-      </DashboardProvider>
-    </PluginsContext>
+    <DashboardProvider key={id} dashboard={data} mode={mode}>
+      <DashboardPage />
+    </DashboardProvider>
   );
 }

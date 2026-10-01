@@ -11,7 +11,6 @@ import { writeDraft, writeSaved } from './data/drafts';
  * edit flows users rely on; they run in Chromium through Storybook's Vitest addon.
  */
 const meta = {
-  title: 'Dashboards/Editing',
   component: AppStory,
   beforeEach: () => localStorage.clear(),
 } satisfies Meta<typeof AppStory>;

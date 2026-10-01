@@ -1,4 +1,3 @@
-import { Notifications } from '@mantine/notifications';
 import { act } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { render, screen } from '@/testing/render';
@@ -12,7 +11,7 @@ describe('notify', () => {
   });
 
   it('shows errors as alerts and records them in the inbox', async () => {
-    render(<Notifications />);
+    render(<></>);
     act(() => {
       notify.error({ title: 'Import failed', message: 'Invalid JSON at line 12.', source: 'Import' });
     });
@@ -41,7 +40,7 @@ describe('notify', () => {
   });
 
   it('dedupes repeats into one toast and one inbox entry with a count', async () => {
-    render(<Notifications />);
+    render(<></>);
     act(() => {
       notify.error({ title: 'Widget failed to load' });
       notify.error({ title: 'Widget failed to load' });

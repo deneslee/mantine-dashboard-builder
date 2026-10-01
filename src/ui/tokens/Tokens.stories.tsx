@@ -25,7 +25,7 @@ import { dimensions } from './dimensions';
  * and the Mantine theme binds components to them. The semantic table shows light and dark side by
  * side, whatever the toolbar scheme is.
  */
-const meta = { title: 'Design system/Tokens' } satisfies Meta;
+const meta = {} satisfies Meta;
 export default meta;
 type Story = StoryObj;
 

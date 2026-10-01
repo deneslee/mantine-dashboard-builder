@@ -9,8 +9,8 @@ const byType = <T extends { type: string }>(plugins: T[]) =>
   Object.fromEntries(plugins.map((plugin) => [plugin.type, plugin]));
 
 /**
- * Every widget and datasource the app ships, keyed by type. Features meet here: dashboards get
- * the maps through `PluginsContext` and never import a plugin. Adding a plugin is one
+ * Every widget and datasource the app ships, keyed by type. Features meet here: `Providers` puts
+ * the maps in `PluginsContext`, so no feature imports a plugin. Adding a plugin is one
  * entry in a list. Static, no `registerWidget()` side effects, so unused plugins tree-shake.
  */
 export const plugins: Plugins = {

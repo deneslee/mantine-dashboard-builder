@@ -59,7 +59,6 @@ function NavStory({ compact }: { compact: boolean }) {
 }
 
 const meta = {
-  title: 'Shell/Sidebar nav',
   component: NavStory,
 } satisfies Meta<typeof NavStory>;
 

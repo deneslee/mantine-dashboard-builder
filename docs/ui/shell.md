@@ -163,10 +163,10 @@ Landmarks: `navigation` "Primary" (sidebar pane), `main`, `complementary` "Conte
 
 ## Tests and stories
 
-| What                                                   | Where                                                                                        |
-| ------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
-| Store transitions                                      | `store.test.ts`                                                                              |
-| Keyboard save, double-click reset                      | `Shell.test.tsx`                                                                             |
-| Main lock                                              | `hooks/useMainLock.test.ts`                                                                  |
-| Active states, rail flyout, bottom items, group titles | `sidebar/Sidebar.test.tsx`                                                                   |
-| Every chrome state                                     | `Shell.stories.tsx` (Shell/App chrome), `sidebar/SidebarNav.stories.tsx` (Shell/Sidebar nav) |
+| What                                                   | Where                                                 |
+| ------------------------------------------------------ | ----------------------------------------------------- |
+| Store transitions                                      | `store.test.ts`                                       |
+| Keyboard save, double-click reset                      | `Shell.test.tsx`                                      |
+| Main lock                                              | `hooks/useMainLock.test.ts`                           |
+| Active states, rail flyout, bottom items, group titles | `sidebar/Sidebar.test.tsx`                            |
+| Every chrome state                                     | `Shell.stories.tsx`, `sidebar/SidebarNav.stories.tsx` |

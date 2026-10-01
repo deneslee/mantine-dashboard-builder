@@ -28,7 +28,6 @@ export function WidgetHeader({
   const dashboardId = useDashboard((state) => state.doc.id);
   const actions = useDashboardActions();
   const plugins = usePlugins();
-  const definition = plugins.widgets[widget.type];
   const client = useQueryClient();
   const focusMenu = () => document.getElementById('widget-menu-' + widget.id)?.focus();
   const handleCopyLink = async () => {
@@ -101,7 +100,7 @@ export function WidgetHeader({
             </Tooltip>
           </Menu.Target>
           <Menu.Dropdown>
-            {definition?.capabilities.inspect && widget.queries.length ? (
+            {widget.queries.length ? (
               <Menu.Item
                 onClick={() =>
                   void client.invalidateQueries({

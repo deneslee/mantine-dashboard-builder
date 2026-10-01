@@ -1,4 +1,3 @@
-import type { Icon } from '@tabler/icons-react';
 import type { ComponentType, LazyExoticComponent, ReactNode } from 'react';
 import type { z } from 'zod';
 import type { DataFrame } from '@/core/data/DataFrame';
@@ -13,11 +12,9 @@ export interface WidgetProps<Options> {
 export interface WidgetPlugin<Options = unknown> {
   type: string;
   name: string;
-  icon: Icon;
   /** Size in `lg` grid cells when added from the palette (phase 3). */
   defaultSize: { w: number; h: number };
   minSize?: { w: number; h: number };
-  capabilities: { time: boolean; inspect: boolean; export: ('csv' | 'json')[]; hoverSync: boolean };
   optionsSchema: z.ZodType<Options>;
   /** A lazy chunk: a dashboard loads only the widget code it shows. */
   component: LazyExoticComponent<ComponentType<WidgetProps<Options>>>;

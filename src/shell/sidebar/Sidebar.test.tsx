@@ -1,8 +1,9 @@
 import { IconSettings, IconTemplate } from '@tabler/icons-react';
-import { createMemoryHistory, createRootRoute, createRouter, RouterProvider } from '@tanstack/react-router';
+import { RouterProvider } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
 import { describe, expect, it } from 'vitest';
 import { act, fireEvent, render, screen } from '@/testing/render';
+import { createTestRouter } from '@/testing/TestRouter';
 import type { NavGroup } from '../Nav';
 import { ShellProvider } from '../ShellProvider';
 import { createShellStore, type ShellInit } from '../createShellStore';
@@ -14,13 +15,7 @@ function renderAt(path: string, compact = false, init: ShellInit = {}, ui: React
     { isNarrow: false, ...init, sidebar: { mode: compact ? 'compact' : 'expanded', ...init.sidebar } },
     false,
   );
-  const rootRoute = createRootRoute({
-    component: () => <ShellProvider store={store}>{ui}</ShellProvider>,
-  });
-  const router = createRouter({
-    routeTree: rootRoute,
-    history: createMemoryHistory({ initialEntries: [path] }),
-  });
+  const router = createTestRouter({ path, wrap: () => <ShellProvider store={store}>{ui}</ShellProvider> });
   render(<RouterProvider router={router} />);
   return { router, store };
 }

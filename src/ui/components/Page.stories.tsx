@@ -4,7 +4,7 @@ import { IconRefresh } from '@tabler/icons-react';
 import type { ReactNode } from 'react';
 import { Page } from './Page';
 
-const meta = { title: 'Design system/Page' } satisfies Meta;
+const meta = {} satisfies Meta;
 export default meta;
 type Story = StoryObj;
 

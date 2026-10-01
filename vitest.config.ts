@@ -38,7 +38,6 @@ export default defineConfig({
         plugins: [storybookTest({ configDir: '.storybook', storybookScript: 'pnpm storybook --no-open' })],
         test: {
           name: 'storybook',
-          setupFiles: ['./.storybook/vitest.setup.ts'],
           browser: {
             enabled: true,
             headless: true,

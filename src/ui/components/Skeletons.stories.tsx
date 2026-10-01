@@ -9,7 +9,7 @@ import {
   TextSkeleton,
 } from './Skeletons';
 
-const meta = { title: 'Loading/Skeletons' } satisfies Meta;
+const meta = {} satisfies Meta;
 export default meta;
 type Story = StoryObj;
 

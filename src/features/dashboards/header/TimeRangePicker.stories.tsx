@@ -5,7 +5,7 @@ import type { TimeRange } from '@/core/time/timeRange';
 import { RefreshPicker } from './RefreshPicker';
 import { TimeRangePicker } from './TimeRangePicker';
 
-const meta = { title: 'Dashboards/Controls' } satisfies Meta;
+const meta = {} satisfies Meta;
 export default meta;
 type Story = StoryObj;
 

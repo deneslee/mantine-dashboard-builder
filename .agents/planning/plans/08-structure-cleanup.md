@@ -49,7 +49,7 @@ src/
     notifications/  InboxPanel  notificationsTab
     integrations/   IntegrationsPage  SentryPage  sentry/*  getIntegrations   (mechanical; 06 rebuilds it)
     debug/          DebugPage
-  plugins/    WidgetPlugin  DatasourcePlugin  PluginsProvider  usePlugins
+  plugins/    WidgetPlugin  DatasourcePlugin  usePlugins (PluginsContext)
               widgets/{chart,kpi,table}/  datasources/{mock,localJson}/
   shell/      Shell  ShellProvider  useShell  createShellStore  ContextTab  Nav  Panel
               RouteProgress  OfflineBanner  useMainLock  navbar/  sidebar/  contextBar/  breadcrumbs/
@@ -173,7 +173,7 @@ The patterns: shared UI goes to `ui/`, error pages to `app/`, the frame to `shel
 | `types/dataframe.ts` (+ test)                                                                                                                                                              | `core/data/DataFrame.ts` (`toRows` → `frameToRows`, `fieldLabel` → `getFieldLabel`, `unitAffix` → `getUnitAffix`)                                                                                                                                                                                                                                                           |
 | `lib/errors/AppError.ts` (+ test)                                                                                                                                                          | `core/errors/AppError.ts` (`errorTitles` → `ERROR_TITLES`)                                                                                                                                                                                                                                                                                                                  |
 | `types/widget.ts`, `types/datasource.ts`                                                                                                                                                   | `plugins/WidgetPlugin.ts`, `plugins/DatasourcePlugin.ts` (drop unused `icon`, `capabilities.time/export/hoverSync`)                                                                                                                                                                                                                                                         |
-| `features/dashboards/registry.ts`                                                                                                                                                          | `plugins/usePlugins.ts` + `PluginsProvider.tsx` (`DashboardRegistry` → `Plugins`, `useDashboardRegistry` → `usePlugins`)                                                                                                                                                                                                                                                    |
+| `features/dashboards/registry.ts`                                                                                                                                                          | `plugins/usePlugins.ts` (`DashboardRegistry` → `Plugins`, `useDashboardRegistry` → `usePlugins`)                                                                                                                                                                                                                                                                            |
 | `app/registry.ts`                                                                                                                                                                          | `app/plugins.ts` (`registry` → `plugins`)                                                                                                                                                                                                                                                                                                                                   |
 | `features/widgets/**`, `components/table/useAppTable.ts`                                                                                                                                   | `plugins/widgets/**` (`options.ts` → `chartOptions.ts`, `tableOptions.ts`)                                                                                                                                                                                                                                                                                                  |
 | `features/datasources/{mock,local-json}/**`                                                                                                                                                | `plugins/datasources/{mock,localJson}/**`                                                                                                                                                                                                                                                                                                                                   |
@@ -220,7 +220,7 @@ Every step leaves `pnpm lint && pnpm format:check && pnpm build && pnpm test` gr
 
 - [x] **Vitest projects.**
   - Split into `node`, `dom` and `storybook` projects (`@storybook/addon-vitest`, `@vitest/browser-playwright`, Chromium).
-  - Add `.storybook/vitest.setup.ts` and `staticDirs: ['../public']`.
+  - Add `.storybook/vitest.setup.ts` and `staticDirs: ['../public']`. (Oct 1: the setup file is deleted again. Storybook 10.3+ applies the preview annotations itself, and a probe story with an unlabelled button still failed a11y without it.)
   - Add the scripts `test`, `test:unit` and `test:stories`.
   - Done when `pnpm test` runs all three.
 - [ ] **CI.** Written Sep 30; it runs for the first time on the next push.
@@ -250,14 +250,16 @@ Every step leaves `pnpm lint && pnpm format:check && pnpm build && pnpm test` gr
 
 ### 5. Edits
 
-- [ ] **Plugins once.** `PluginsProvider` is mounted in `app/Providers`, not per route; `WidgetPlugin` is trimmed to its used fields.
-- [ ] **One provider stack.**
-  - `testing/render` and the Storybook preview use `app/Providers`.
-  - The fixtures in `testing/fixtures/` replace the inline copies.
-  - Stories drop `title:`.
-  - Done when no test or story builds its own `QueryClient` or router by hand.
+- [x] **Plugins once.** `PluginsProvider` is mounted in `app/Providers`, not per route; `WidgetPlugin` is trimmed to its used fields. Oct 1: no `PluginsProvider` component. `Providers` renders `<PluginsContext value={plugins}>`, like `CurrentUserContext`. `icon` and `capabilities` are gone; every widget had `inspect: true`. The main chunk grew about 5 KB raw, because the plugin definitions now load on every route.
+- [x] **One provider stack.**
+  - `testing/render` (`render`, `renderHook`, with an optional `queryClient`) and the Storybook preview use `app/Providers`. `Providers` takes Mantine's `env` for jsdom.
+  - [-] The fixtures in `testing/fixtures/` replace the inline copies. Moved to **Flat document**, which changes their shape anyway.
+  - Stories drop `title:`; the sidebar sorts `ui`, `shell`, `features`.
+  - Test routers come from `createTestRouter` (the `TestRouter` component wraps it); `AppStory` uses the preview's QueryClient.
+  - Done when no test or story builds its own `QueryClient` or router by hand. Oct 1: done, except `RouteBreadcrumbs.test`, whose subject is a route tree with loaders.
 - [ ] **Flat document.**
   - Add `dashboardSchema`, `migrateDashboard` (+ test), `GRID_COLUMNS` and `orderWidgets`.
+  - `testing/fixtures/dashboards.ts` replaces the inline dashboards in the store and grid tests and stories, and the stories stop importing `public/` JSON.
   - `public/data/dashboards/*.json` switch to `schemaVersion`.
   - Delete the mapper and DTO types.
   - Done when every read path (static, saved, draft, import) runs `migrateDashboard` → `dashboardSchema`.

@@ -1,6 +1,7 @@
-import { createMemoryHistory, createRootRoute, createRouter, RouterProvider } from '@tanstack/react-router';
+import { RouterProvider } from '@tanstack/react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@/testing/render';
+import { createTestRouter } from '@/testing/TestRouter';
 import { dimensions } from '@/ui/tokens/dimensions';
 import { Shell } from './Shell';
 import { ShellProvider } from './ShellProvider';
@@ -8,18 +9,14 @@ import { createShellStore, type ShellInit } from './createShellStore';
 
 function renderShell(init: ShellInit = {}) {
   const store = createShellStore({ isNarrow: false, ...init }, false);
-  const rootRoute = createRootRoute({
-    component: () => (
+  const router = createTestRouter({
+    path: '/',
+    page: <p>Page</p>,
+    wrap: (outlet) => (
       <ShellProvider store={store}>
-        <Shell>
-          <p>Page</p>
-        </Shell>
+        <Shell>{outlet}</Shell>
       </ShellProvider>
     ),
-  });
-  const router = createRouter({
-    routeTree: rootRoute,
-    history: createMemoryHistory({ initialEntries: ['/'] }),
   });
   render(<RouterProvider router={router} />);
   return store;

@@ -5,7 +5,7 @@ import { InboxPanel } from './InboxPanel';
 import { notify } from '@/lib/notify/notify';
 import { useInbox } from '@/lib/notify/useInbox';
 
-const meta = { title: 'Notifications/Toasts and inbox' } satisfies Meta;
+const meta = {} satisfies Meta;
 export default meta;
 type Story = StoryObj;
 

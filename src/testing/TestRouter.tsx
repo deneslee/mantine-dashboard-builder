@@ -1,4 +1,3 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   RouterProvider,
   createMemoryHistory,
@@ -7,24 +6,27 @@ import {
   createRouter,
   Outlet,
 } from '@tanstack/react-router';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { ContextTab } from '@/shell/ContextTab';
 
-/**
- * Minimal router for stories: a root that renders `wrap(<Outlet />)` and a catch-all page.
- * Lets chrome components use Link, useRouterState and staticData tabs outside the app router.
- */
-export function TestRouter({
-  path = '/dashboards/sales',
-  wrap,
-  page,
-  contextTabs,
-}: {
+interface TestRouterOptions {
   path?: string;
-  wrap: (outlet: ReactNode) => ReactNode;
+  /** Renders the root; `outlet` is where the catch-all page goes. */
+  wrap?: (outlet: ReactNode) => ReactNode;
   page?: ReactNode;
   contextTabs?: ContextTab[];
-}) {
+}
+
+/**
+ * A root that renders `wrap(<Outlet />)` and a catch-all page, on a memory history. Lets chrome
+ * components use Link, useRouterState and staticData tabs outside the app router.
+ */
+export function createTestRouter({
+  path = '/dashboards/sales',
+  wrap = (outlet) => outlet,
+  page,
+  contextTabs,
+}: TestRouterOptions = {}) {
   const root = createRootRoute({ component: () => <>{wrap(<Outlet />)}</> });
   const catchAll = createRoute({
     getParentRoute: () => root,
@@ -32,14 +34,14 @@ export function TestRouter({
     staticData: { contextTabs },
     component: () => <>{page}</>,
   });
-  const router = createRouter({
+  return createRouter({
     routeTree: root.addChildren([catchAll]),
     history: createMemoryHistory({ initialEntries: [path] }),
   });
-  const queryClient = new QueryClient();
-  return (
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
-  );
+}
+
+/** `createTestRouter` as a component, for stories and tests that don't navigate. */
+export function TestRouter(options: TestRouterOptions) {
+  const [router] = useState(() => createTestRouter(options));
+  return <RouterProvider router={router} />;
 }

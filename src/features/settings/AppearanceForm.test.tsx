@@ -1,6 +1,4 @@
-import { QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createQueryClient } from '@/app/queryClient';
 import { notify } from '@/lib/notify/notify';
 import { createShellStore } from '@/shell/createShellStore';
 import { ShellProvider } from '@/shell/ShellProvider';
@@ -10,11 +8,9 @@ import { AppearanceForm } from './AppearanceForm';
 function setup() {
   const store = createShellStore({ isNarrow: false }, false);
   render(
-    <QueryClientProvider client={createQueryClient()}>
-      <ShellProvider store={store}>
-        <AppearanceForm />
-      </ShellProvider>
-    </QueryClientProvider>,
+    <ShellProvider store={store}>
+      <AppearanceForm />
+    </ShellProvider>,
   );
   const burger = () => store.getState().sidebar.burger;
   return { burger };

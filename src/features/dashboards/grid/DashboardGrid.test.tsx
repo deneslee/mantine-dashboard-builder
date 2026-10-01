@@ -1,5 +1,3 @@
-import { IconAbc } from '@tabler/icons-react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { lazy } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
@@ -48,9 +46,7 @@ function FrameName({ frames }: WidgetProps<unknown>) {
 const nameWidget = defineWidget({
   type: 'name',
   name: 'Name',
-  icon: IconAbc,
   defaultSize: { w: 6, h: 3 },
-  capabilities: { time: false, inspect: true, export: [], hoverSync: false },
   optionsSchema: z.object({}),
   component: lazy(async () => ({ default: FrameName })),
   skeleton: <p>Loading</p>,
@@ -106,16 +102,13 @@ function renderGrid() {
     widgets: { name: nameWidget },
     datasources: { deferred: datasource },
   };
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const store = createDashboardStore(dashboard, localRepository, 'view', false);
   const ui = (range: TimeRange) => (
-    <QueryClientProvider client={client}>
-      <PluginsContext value={plugins}>
-        <DashboardProvider dashboard={dashboard} store={store}>
-          <DashboardGrid range={range} />
-        </DashboardProvider>
-      </PluginsContext>
-    </QueryClientProvider>
+    <PluginsContext value={plugins}>
+      <DashboardProvider dashboard={dashboard} store={store}>
+        <DashboardGrid range={range} />
+      </DashboardProvider>
+    </PluginsContext>
   );
   const { rerender } = render(ui(day));
   return { query, release, setRange: (range: TimeRange) => rerender(ui(range)) };

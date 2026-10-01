@@ -1,14 +1,24 @@
 import '../src/ui/global.css';
-import { MantineProvider, useMantineColorScheme } from '@mantine/core';
-import { Notifications } from '@mantine/notifications';
+import { useMantineColorScheme } from '@mantine/core';
 import type { Preview } from '@storybook/react-vite';
-import { useEffect, type ReactNode } from 'react';
-import { cssVariablesResolver, theme } from '../src/ui/theme/theme';
+import { useEffect, useState, type ReactNode } from 'react';
+import { Providers } from '../src/app/Providers';
+import { createQueryClient } from '../src/app/queryClient';
 
 function SchemeSync({ scheme, children }: { scheme: 'light' | 'dark'; children: ReactNode }) {
   const { setColorScheme } = useMantineColorScheme();
   useEffect(() => setColorScheme(scheme), [scheme, setColorScheme]);
   return children;
+}
+
+/** The app's providers, a fresh QueryClient per story, and the toolbar's color scheme. */
+function StoryProviders({ scheme, children }: { scheme: 'light' | 'dark'; children: ReactNode }) {
+  const [queryClient] = useState(createQueryClient);
+  return (
+    <Providers queryClient={queryClient}>
+      <SchemeSync scheme={scheme}>{children}</SchemeSync>
+    </Providers>
+  );
 }
 
 const preview: Preview = {
@@ -18,7 +28,8 @@ const preview: Preview = {
     // Every a11y rule fails a story, except color-contrast: the light-scheme tokens are below AA
     // today (.agents/planning/tasks.md › Light-scheme contrast). Re-enable it when that is fixed.
     a11y: { test: 'error', config: { rules: [{ id: 'color-contrast', enabled: false }] } },
-    options: { storySort: { order: ['Design system', 'Shell', 'Notifications', 'Errors', 'Loading'] } },
+    // Titles come from the file paths, so the sidebar mirrors src/.
+    options: { storySort: { order: ['ui', 'shell', 'features'] } },
   },
   globalTypes: {
     scheme: {
@@ -36,12 +47,9 @@ const preview: Preview = {
   initialGlobals: { scheme: 'light' },
   decorators: [
     (Story, ctx) => (
-      <MantineProvider theme={theme} cssVariablesResolver={cssVariablesResolver} defaultColorScheme="light">
-        <SchemeSync scheme={ctx.globals.scheme as 'light' | 'dark'}>
-          <Notifications limit={3} />
-          <Story />
-        </SchemeSync>
-      </MantineProvider>
+      <StoryProviders scheme={ctx.globals.scheme as 'light' | 'dark'}>
+        <Story />
+      </StoryProviders>
     ),
   ],
 };

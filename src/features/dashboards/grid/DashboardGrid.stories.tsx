@@ -1,14 +1,12 @@
 import { Box } from '@mantine/core';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
-import { plugins } from '@/app/plugins';
 import { TestRouter } from '@/testing/TestRouter';
 import type { LayoutItem } from '@/core/dashboard/layout';
 import { DashboardProvider } from '../state/DashboardProvider';
 import { createDashboardStore } from '../state/createDashboardStore';
 import { localRepository } from '../data/dashboardApi';
 import type { Dashboard, Widget } from '../state/types';
-import { PluginsContext } from '@/plugins/usePlugins';
 import { DashboardGrid } from './DashboardGrid';
 
 // Built inline with mock queries: Storybook doesn't serve public/data.
@@ -120,20 +118,17 @@ function GridStory({ id, mode = 'view' }: { id: keyof typeof dashboards; mode?: 
     <TestRouter
       wrap={(outlet) => outlet}
       page={
-        <PluginsContext value={plugins}>
-          <Box p="lg">
-            <DashboardProvider dashboard={dashboards[id]} store={store}>
-              <DashboardGrid range={{ from: 'now-24h', to: 'now' }} />
-            </DashboardProvider>
-          </Box>
-        </PluginsContext>
+        <Box p="lg">
+          <DashboardProvider dashboard={dashboards[id]} store={store}>
+            <DashboardGrid range={{ from: 'now-24h', to: 'now' }} />
+          </DashboardProvider>
+        </Box>
       }
     />
   );
 }
 
 const meta = {
-  title: 'Dashboards/Grid',
   component: GridStory,
 } satisfies Meta<typeof GridStory>;
 

@@ -1,4 +1,4 @@
-import { MantineProvider, localStorageColorSchemeManager } from '@mantine/core';
+import { MantineProvider, localStorageColorSchemeManager, type MantineProviderProps } from '@mantine/core';
 import { ModalsProvider } from '@mantine/modals';
 import { Notifications } from '@mantine/notifications';
 import { QueryClientProvider, type QueryClient } from '@tanstack/react-query';
@@ -7,15 +7,27 @@ import { cssVariablesResolver, reducedMotionTheme, theme } from '@/ui/theme/them
 import { dimensions } from '@/ui/tokens/dimensions';
 import { useMotion } from '@/lib/useMotion';
 import { CurrentUserContext, placeholderUser } from '@/lib/useCurrentUser';
+import { PluginsContext } from '@/plugins/usePlugins';
+import { plugins } from './plugins';
 
 const colorSchemeManager = localStorageColorSchemeManager({ key: 'color-scheme' });
 
 /**
- * App-wide providers. The color scheme is applied before paint by the inline script in index.html.
+ * App-wide providers, the only provider stack: the app, `testing/render` and the Storybook preview
+ * all use it. The color scheme is applied before paint by the inline script in index.html.
  * Reduced motion (user setting or OS) sets `data-motion="reduce"` on <html> for CSS transitions and
  * swaps in a theme with Mantine's transitions at 0ms.
  */
-export function Providers({ children, queryClient }: { children: ReactNode; queryClient: QueryClient }) {
+export function Providers({
+  children,
+  queryClient,
+  env,
+}: {
+  children: ReactNode;
+  queryClient: QueryClient;
+  /** `test` in jsdom tests: no transitions. */
+  env?: MantineProviderProps['env'];
+}) {
   const { isReduced } = useMotion();
 
   useEffect(() => {
@@ -30,19 +42,22 @@ export function Providers({ children, queryClient }: { children: ReactNode; quer
       cssVariablesResolver={cssVariablesResolver}
       defaultColorScheme="auto"
       colorSchemeManager={colorSchemeManager}
+      env={env}
     >
       <QueryClientProvider client={queryClient}>
         <CurrentUserContext value={placeholderUser}>
-          <ModalsProvider>
-            <Notifications
-              limit={3}
-              position="bottom-right"
-              zIndex={dimensions.zIndex.notification}
-              containerWidth={380}
-              transitionDuration={isReduced ? 0 : undefined}
-            />
-            {children}
-          </ModalsProvider>
+          <PluginsContext value={plugins}>
+            <ModalsProvider>
+              <Notifications
+                limit={3}
+                position="bottom-right"
+                zIndex={dimensions.zIndex.notification}
+                containerWidth={380}
+                transitionDuration={isReduced ? 0 : undefined}
+              />
+              {children}
+            </ModalsProvider>
+          </PluginsContext>
         </CurrentUserContext>
       </QueryClientProvider>
     </MantineProvider>

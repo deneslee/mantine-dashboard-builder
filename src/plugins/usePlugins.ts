@@ -8,14 +8,11 @@ export interface Plugins {
   datasources: Record<string, DatasourcePlugin>;
 }
 
-/**
- * Filled in by the app layer (`app/plugins.ts`), so this feature never imports a widget or a
- * datasource: `<PluginsContext value={plugins}>`.
- */
+/** Set once in `app/Providers` from `app/plugins.ts`, so no feature imports a widget or a datasource. */
 export const PluginsContext = createContext<Plugins | null>(null);
 
 export function usePlugins(): Plugins {
   const plugins = use(PluginsContext);
-  if (!plugins) throw new Error('Dashboards need a PluginsContext with the widget and datasource maps.');
+  if (!plugins) throw new Error('usePlugins must be used inside app/Providers (PluginsContext).');
   return plugins;
 }

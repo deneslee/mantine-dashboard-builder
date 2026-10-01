@@ -4,7 +4,7 @@ import { IconRefresh } from '@tabler/icons-react';
 import { AppError } from '@/core/errors/AppError';
 import { ErrorState } from './ErrorState';
 
-const meta = { title: 'Errors/ErrorState' } satisfies Meta;
+const meta = {} satisfies Meta;
 export default meta;
 type Story = StoryObj;
 

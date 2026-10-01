@@ -1,6 +1,5 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act, renderHook } from '@testing-library/react';
-import type { ReactNode } from 'react';
+import { createQueryClient } from '@/app/queryClient';
+import { act, renderHook } from '@/testing/render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useAutoRefresh } from './useAutoRefresh';
 
@@ -10,13 +9,10 @@ function setVisibility(state: DocumentVisibilityState) {
 }
 
 function setup(refresh: string) {
-  const client = new QueryClient();
-  const invalidate = vi.spyOn(client, 'invalidateQueries').mockResolvedValue();
-  const wrapper = ({ children }: { children: ReactNode }) => (
-    <QueryClientProvider client={client}>{children}</QueryClientProvider>
-  );
+  const queryClient = createQueryClient();
+  const invalidate = vi.spyOn(queryClient, 'invalidateQueries').mockResolvedValue();
   const hook = renderHook((props: { refresh: string }) => useAutoRefresh(props.refresh), {
-    wrapper,
+    queryClient,
     initialProps: { refresh },
   });
   return { invalidate, hook };

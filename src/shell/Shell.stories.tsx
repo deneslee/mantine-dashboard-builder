@@ -63,7 +63,6 @@ function ShellStory({ state, path }: { state: ShellInit; path?: string }) {
 }
 
 const meta = {
-  title: 'Shell/App chrome',
   component: ShellStory,
   parameters: { a11y: { test: 'todo' } },
 } satisfies Meta<typeof ShellStory>;
