@@ -1,14 +1,14 @@
 import { createFileRoute, notFound, stripSearchParams } from '@tanstack/react-router';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { DashboardProvider } from '@/features/dashboards/state/DashboardProvider';
-import { DashboardView } from '@/features/dashboards/DashboardPage';
+import { DashboardPage } from '@/features/dashboards/DashboardPage';
 import { dashboardQuery } from '@/features/dashboards/data/dashboardQueries';
 import { dashboardSearch } from '@/core/time/timeRange';
-import { DashboardRegistryContext } from '@/plugins/usePlugins';
+import { PluginsContext } from '@/plugins/usePlugins';
 import { dashboardTabs } from '@/features/dashboards/dashboardTabs';
-import { DashboardSkeleton } from '@/ui/components/Skeletons';
+import { GridSkeleton } from '@/ui/components/Skeletons';
 import { isAppError } from '@/core/errors/AppError';
-import { registry } from '../../plugins';
+import { plugins } from '../../plugins';
 
 export const Route = createFileRoute('/dashboards/$id')({
   staticData: {
@@ -26,7 +26,7 @@ export const Route = createFileRoute('/dashboards/$id')({
       throw e;
     }
   },
-  pendingComponent: DashboardSkeleton,
+  pendingComponent: GridSkeleton,
   component: DashboardRoute,
 });
 
@@ -36,10 +36,10 @@ function DashboardRoute() {
   const { mode } = Route.useSearch();
   const { data } = useSuspenseQuery(dashboardQuery(id));
   return (
-    <DashboardRegistryContext value={registry}>
+    <PluginsContext value={plugins}>
       <DashboardProvider key={id} dashboard={data} mode={mode}>
-        <DashboardView />
+        <DashboardPage />
       </DashboardProvider>
-    </DashboardRegistryContext>
+    </PluginsContext>
   );
 }

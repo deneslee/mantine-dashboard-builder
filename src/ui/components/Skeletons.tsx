@@ -100,7 +100,7 @@ export function PanelSkeleton({ label = 'Loading panel' }: { label?: string }) {
 }
 
 /** Route-level: page header plus a grid of tiles, matching the dashboard view. */
-export function DashboardSkeleton({ label = 'Loading dashboard' }: { label?: string }) {
+export function GridSkeleton({ label = 'Loading dashboard' }: { label?: string }) {
   return (
     <Region label={label}>
       <Stack gap="lg" p="lg">

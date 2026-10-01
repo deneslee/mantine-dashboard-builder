@@ -4,7 +4,7 @@ import { IconInfoCircle } from '@tabler/icons-react';
 import { useState } from 'react';
 import { Page } from '@/ui/components/Page';
 import { notificationsTab } from '@/features/notifications/notificationsTab';
-import { StoryRouter } from '@/testing/TestRouter';
+import { TestRouter } from '@/testing/TestRouter';
 import { Shell } from './Shell';
 import { ShellProvider } from './ShellProvider';
 import { createShellStore } from './createShellStore';
@@ -49,7 +49,7 @@ function Content() {
 function ShellStory({ state, path }: { state: ShellInit; path?: string }) {
   const [store] = useState(() => createShellStore(state, false));
   return (
-    <StoryRouter
+    <TestRouter
       path={path}
       contextTabs={[detailsTab]}
       page={<Content />}
@@ -73,8 +73,8 @@ type Story = StoryObj<typeof meta>;
 
 type SidebarInit = NonNullable<ShellInit['sidebar']>;
 type ContextInit = NonNullable<ShellInit['contextBar']>;
-const sidebar = (s: SidebarInit): SidebarInit => ({ mode: 'expanded', docked: true, ...s });
-const ctx = (s: ContextInit): ContextInit => ({ open: false, docked: true, activeTab: 'details', ...s });
+const sidebar = (s: SidebarInit): SidebarInit => ({ mode: 'expanded', isDocked: true, ...s });
+const ctx = (s: ContextInit): ContextInit => ({ isOpen: false, isDocked: true, activeTab: 'details', ...s });
 
 export const Expanded: Story = { args: { state: { sidebar: sidebar({}), contextBar: ctx({}) } } };
 export const Compact: Story = {
@@ -84,19 +84,19 @@ export const SidebarClosed: Story = {
   args: { state: { sidebar: sidebar({ mode: 'closed' }), contextBar: ctx({}) } },
 };
 export const SidebarUndocked: Story = {
-  args: { state: { sidebar: sidebar({ docked: false, drawerOpen: true }), contextBar: ctx({}) } },
+  args: { state: { sidebar: sidebar({ isDocked: false, isDrawerOpen: true }), contextBar: ctx({}) } },
 };
 export const ContextDocked: Story = {
-  args: { state: { sidebar: sidebar({}), contextBar: ctx({ open: true }) } },
+  args: { state: { sidebar: sidebar({}), contextBar: ctx({ isOpen: true }) } },
 };
 export const ContextUndocked: Story = {
-  args: { state: { sidebar: sidebar({}), contextBar: ctx({ docked: false, drawerOpen: true }) } },
+  args: { state: { sidebar: sidebar({}), contextBar: ctx({ isDocked: false, isDrawerOpen: true }) } },
 };
 export const BothCompactAndContext: Story = {
   args: {
     state: {
       sidebar: sidebar({ mode: 'compact' }),
-      contextBar: ctx({ open: true, activeTab: 'notifications' }),
+      contextBar: ctx({ isOpen: true, activeTab: 'notifications' }),
     },
   },
 };

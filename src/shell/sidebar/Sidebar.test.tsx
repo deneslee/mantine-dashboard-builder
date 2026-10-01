@@ -11,7 +11,7 @@ import { SidebarNav } from './SidebarNav';
 
 function renderAt(path: string, compact = false, init: ShellInit = {}, ui: ReactNode = <Sidebar />) {
   const store = createShellStore(
-    { narrow: false, ...init, sidebar: { mode: compact ? 'compact' : 'expanded', ...init.sidebar } },
+    { isNarrow: false, ...init, sidebar: { mode: compact ? 'compact' : 'expanded', ...init.sidebar } },
     false,
   );
   const rootRoute = createRootRoute({
@@ -153,7 +153,7 @@ describe('Sidebar footer', () => {
   });
 
   it('keeps only the menu button on narrow viewports', async () => {
-    renderAt('/', false, { narrow: true });
+    renderAt('/', false, { isNarrow: true });
     expect(await screen.findByRole('button', { name: 'Sidebar menu' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /dock panel/i })).not.toBeInTheDocument();
   });

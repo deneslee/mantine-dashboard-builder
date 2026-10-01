@@ -2,7 +2,7 @@ import { use } from 'react';
 import { useStore } from 'zustand';
 import { useShallow } from 'zustand/shallow';
 import { DashboardContext } from './context';
-import { currentDocument, type DashboardState } from './createDashboardStore';
+import { selectDashboard, type DashboardState } from './createDashboardStore';
 
 function useDashboardStore() {
   const store = use(DashboardContext);
@@ -10,19 +10,19 @@ function useDashboardStore() {
   return store;
 }
 
-export function useDashboardState<T>(selector: (state: DashboardState) => T): T {
+export function useDashboard<T>(selector: (state: DashboardState) => T): T {
   return useStore(useDashboardStore(), selector);
 }
-export const useDashboardActions = () => useDashboardState((state) => state.actions);
-export const useWidget = (id: string) => useDashboardState((state) => state.doc.widgets[id]);
-export function useHistory() {
+export const useDashboardActions = () => useDashboard((state) => state.actions);
+export const useWidget = (id: string) => useDashboard((state) => state.doc.widgets[id]);
+export function useUndoState() {
   return useStore(
     useDashboardStore().temporal,
     useShallow((state) => ({ canUndo: state.pastStates.length > 0, canRedo: state.futureStates.length > 0 })),
   );
 }
 /** Event callbacks read the latest document without subscribing the whole page. */
-export function useDocumentReader() {
+export function useReadDashboard() {
   const store = useDashboardStore();
-  return () => currentDocument(store.getState());
+  return () => selectDashboard(store.getState());
 }

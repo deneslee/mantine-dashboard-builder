@@ -38,14 +38,15 @@ flowchart LR
   Hooks --> Consumers["Shell · TopNavbar · Sidebar<br/>ContextBar · settings feature"]
 ```
 
-| Derived value | Rule                                                                      |
-| ------------- | ------------------------------------------------------------------------- |
-| `docked`      | `sidebar.docked && !narrow`: the stored preference survives small screens |
-| `isColumn`    | Docked and not closed: rendered as a pane                                 |
-| `isCompact`   | Docked and `mode === 'compact'`                                           |
-| `isOverlay`   | Not docked and `drawerOpen`                                               |
+| Derived value     | Rule                                                                          |
+| ----------------- | ----------------------------------------------------------------------------- |
+| `isDocked`        | `sidebar.isDocked && !isNarrow`: the stored preference survives small screens |
+| `isDockPreferred` | The stored preference, `sidebar.isDocked`, for the dock toggle                |
+| `isColumn`        | Docked and not closed: rendered as a pane                                     |
+| `isCompact`       | Docked and `mode === 'compact'`                                               |
+| `isOverlay`       | Not docked and `isDrawerOpen`                                                 |
 
-`drawerOpen` and `narrow` are transient and never persisted, so no drawer opens on load.
+`isDrawerOpen` and `isNarrow` are transient and never persisted, so no drawer opens on load. The persisted shape has a `version`; a renamed field gets a `migrate` step (v2 renamed `docked` and `open` to `isDocked` and `isOpen`).
 
 ### Sidebar modes
 

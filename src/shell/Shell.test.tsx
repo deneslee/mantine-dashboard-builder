@@ -1,13 +1,13 @@
 import { createMemoryHistory, createRootRoute, createRouter, RouterProvider } from '@tanstack/react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@/testing/render';
-import { tokens } from '@/ui/tokens/tokens';
+import { dimensions } from '@/ui/tokens/dimensions';
 import { Shell } from './Shell';
 import { ShellProvider } from './ShellProvider';
 import { createShellStore, type ShellInit } from './createShellStore';
 
 function renderShell(init: ShellInit = {}) {
-  const store = createShellStore({ narrow: false, ...init }, false);
+  const store = createShellStore({ isNarrow: false, ...init }, false);
   const rootRoute = createRootRoute({
     component: () => (
       <ShellProvider store={store}>
@@ -55,15 +55,15 @@ describe('Shell pane widths', () => {
   it('resets a panel to its default width on double-click', async () => {
     const store = renderShell({
       sidebar: { width: 320 },
-      contextBar: { open: true, width: 480 },
+      contextBar: { isOpen: true, width: 480 },
     });
     const { sidebar, context } = await handles();
 
     fireEvent.doubleClick(sidebar);
-    expect(store.getState().sidebar.width).toBe(tokens.shell.sidebar.expanded);
+    expect(store.getState().sidebar.width).toBe(dimensions.shell.sidebar.expanded);
 
     fireEvent.doubleClick(context);
-    expect(store.getState().contextBar.width).toBe(tokens.shell.contextBar.default);
+    expect(store.getState().contextBar.width).toBe(dimensions.shell.contextBar.default);
   });
 
   it('leaves the stored width alone when the sidebar is the compact rail', async () => {
@@ -77,14 +77,14 @@ describe('Shell pane widths', () => {
 
 describe('Context button', () => {
   it('looks selected while the context bar is docked open', async () => {
-    renderShell({ contextBar: { open: true } });
+    renderShell({ contextBar: { isOpen: true } });
     // `pressed` tells the navbar toggle apart from the panel's own close button.
     const button = await screen.findByRole('button', { name: 'Close context panel', pressed: true });
     expect(button).toHaveAttribute('data-active');
   });
 
   it('does not look selected while the context bar is an open drawer', async () => {
-    renderShell({ contextBar: { docked: false, drawerOpen: true } });
+    renderShell({ contextBar: { isDocked: false, isDrawerOpen: true } });
     const button = await screen.findByRole('button', {
       name: 'Close context panel',
       pressed: true,

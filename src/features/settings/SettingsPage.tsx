@@ -5,7 +5,7 @@ import { RouteBreadcrumbs } from '@/shell/breadcrumbs/RouteBreadcrumbs';
 import { Page } from '@/ui/components/Page';
 import { iconSize, iconStroke } from '@/ui/tokens/semantic';
 import { settingsTabs, type SettingsTab } from './settingsTabs';
-import { AppearanceSettings } from './AppearanceForm';
+import { AppearanceForm } from './AppearanceForm';
 
 /** Settings page. The active tab lives in the URL (`?tab=`), so tabs are real, shareable links. */
 export function SettingsPage({ tab }: { tab: SettingsTab }) {
@@ -41,7 +41,7 @@ export function SettingsPage({ tab }: { tab: SettingsTab }) {
           </Tabs.Panel>
 
           <Tabs.Panel value="appearance">
-            <AppearanceSettings />
+            <AppearanceForm />
           </Tabs.Panel>
         </Tabs>
       </Page.Body>

@@ -2,7 +2,7 @@ import { useDocumentVisibility } from '@mantine/hooks';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { dashboardKeys } from './dashboardQueries';
-import { refreshMs } from '@/core/time/timeRange';
+import { parseRefreshInterval } from '@/core/time/timeRange';
 
 /**
  * One timer for the whole dashboard: every `refresh` it invalidates the widget queries, and React
@@ -15,7 +15,7 @@ import { refreshMs } from '@/core/time/timeRange';
 export function useAutoRefresh(refresh: string) {
   const queryClient = useQueryClient();
   const visibility = useDocumentVisibility();
-  const ms = refreshMs(refresh);
+  const ms = parseRefreshInterval(refresh);
 
   useEffect(() => {
     if (!ms || visibility !== 'visible') return;

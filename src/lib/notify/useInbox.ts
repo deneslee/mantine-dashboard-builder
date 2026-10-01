@@ -6,7 +6,7 @@ const MAX_ITEMS = 50;
 
 interface InboxStore {
   items: InboxItem[];
-  add: (item: Omit<InboxItem, 'id' | 'at' | 'read' | 'count'> & { dedupeKey?: string }) => void;
+  add: (item: Omit<InboxItem, 'id' | 'at' | 'isRead' | 'count'> & { dedupeKey?: string }) => void;
   markRead: (id: string) => void;
   markAllRead: () => void;
   dismiss: (id: string) => void;
@@ -21,7 +21,7 @@ export const useInbox = create<InboxStore>()(
       add: ({ dedupeKey, ...item }) =>
         set((s) => {
           const key = dedupeKey ?? `${item.level}:${item.title}`;
-          const existing = s.items.find((i) => `${i.level}:${i.title}` === key && !i.read);
+          const existing = s.items.find((i) => `${i.level}:${i.title}` === key && !i.isRead);
           if (existing) {
             return {
               items: s.items.map((i) =>
@@ -31,17 +31,33 @@ export const useInbox = create<InboxStore>()(
               ),
             };
           }
-          const next: InboxItem = { ...item, id: crypto.randomUUID(), at: Date.now(), read: false, count: 1 };
+          const next: InboxItem = {
+            ...item,
+            id: crypto.randomUUID(),
+            at: Date.now(),
+            isRead: false,
+            count: 1,
+          };
           return { items: [next, ...s.items].slice(0, MAX_ITEMS) };
         }),
-      markRead: (id) => set((s) => ({ items: s.items.map((i) => (i.id === id ? { ...i, read: true } : i)) })),
-      markAllRead: () => set((s) => ({ items: s.items.map((i) => ({ ...i, read: true })) })),
+      markRead: (id) =>
+        set((s) => ({ items: s.items.map((i) => (i.id === id ? { ...i, isRead: true } : i)) })),
+      markAllRead: () => set((s) => ({ items: s.items.map((i) => ({ ...i, isRead: true })) })),
       dismiss: (id) => set((s) => ({ items: s.items.filter((i) => i.id !== id) })),
       clear: () => set({ items: [] }),
     }),
-    { name: 'notifications.v1', version: 1, partialize: (s) => ({ items: s.items }) },
+    {
+      name: 'notifications.v1',
+      version: 2,
+      partialize: (s) => ({ items: s.items }),
+      // ponytail: v1 (`read`) migration; delete after 2027-01.
+      migrate: (old, version) => {
+        const { items = [] } = old as { items?: (InboxItem & { read?: boolean })[] };
+        return { items: version >= 2 ? items : items.map(({ read, ...i }) => ({ ...i, isRead: !!read })) };
+      },
+    },
   ),
 );
 
-export const selectUnread = (s: InboxStore) => s.items.filter((i) => !i.read).length;
+export const selectUnread = (s: InboxStore) => s.items.filter((i) => !i.isRead).length;
 export const inboxLevels: NotifyLevel[] = ['warning', 'error'];

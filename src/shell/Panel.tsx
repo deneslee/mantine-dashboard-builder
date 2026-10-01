@@ -59,21 +59,21 @@ export function PanelFooter({ children, className, ...rest }: PartProps) {
 }
 
 interface DockToggleProps {
-  docked: boolean;
-  onChange: (docked: boolean) => void;
+  isDocked: boolean;
+  onChange: (isDocked: boolean) => void;
   variant?: 'chrome' | 'subtle';
 }
 
-export function PanelDockToggle({ docked, onChange, variant = 'subtle' }: DockToggleProps) {
-  const label = docked ? 'Undock panel' : 'Dock panel';
-  const Icon = docked ? IconPinnedOff : IconPinned;
+export function PanelDockToggle({ isDocked, onChange, variant = 'subtle' }: DockToggleProps) {
+  const label = isDocked ? 'Undock panel' : 'Dock panel';
+  const Icon = isDocked ? IconPinnedOff : IconPinned;
   return (
     <Tooltip label={label}>
       <ActionIcon
         variant={variant}
         aria-label={label}
-        aria-pressed={docked}
-        onClick={() => onChange(!docked)}
+        aria-pressed={isDocked}
+        onClick={() => onChange(!isDocked)}
       >
         <Icon size={iconSize.md} stroke={iconStroke} />
       </ActionIcon>

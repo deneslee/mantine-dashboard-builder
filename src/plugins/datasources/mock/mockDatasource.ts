@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { AppError } from '@/core/errors/AppError';
 import type { DataFrame, Field } from '@/core/data/DataFrame';
-import type { DatasourceDefinition, QueryContext } from '@/plugins/DatasourcePlugin';
+import type { DatasourcePlugin, QueryContext } from '@/plugins/DatasourcePlugin';
 import { wait } from '@/utils/wait';
 
 const seriesSpec = z.object({
@@ -102,7 +102,7 @@ function table(s: z.infer<typeof tableSpec>, ctx: QueryContext): DataFrame {
 }
 
 /** Generated data for demos and tests, with a random delay so loading states show. */
-export const mockDatasource: DatasourceDefinition = {
+export const mockDatasource: DatasourcePlugin = {
   type: 'mock',
   name: 'Mock data',
   querySchema: spec,

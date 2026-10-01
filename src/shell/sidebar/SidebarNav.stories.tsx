@@ -2,8 +2,8 @@ import { Box } from '@mantine/core';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { IconChartDots3, IconDatabase, IconHelp, IconSettings, IconTemplate } from '@tabler/icons-react';
 import { useState } from 'react';
-import { tokens } from '@/ui/tokens/tokens';
-import { StoryRouter } from '@/testing/TestRouter';
+import { dimensions } from '@/ui/tokens/dimensions';
+import { TestRouter } from '@/testing/TestRouter';
 import type { NavGroup } from '../Nav';
 import { ShellProvider } from '../ShellProvider';
 import { createShellStore } from '../createShellStore';
@@ -36,11 +36,11 @@ const groups: NavGroup[] = [
 
 function NavStory({ compact }: { compact: boolean }) {
   const [store] = useState(() =>
-    createShellStore({ narrow: false, sidebar: { mode: compact ? 'compact' : 'expanded' } }, false),
+    createShellStore({ isNarrow: false, sidebar: { mode: compact ? 'compact' : 'expanded' } }, false),
   );
-  const { sidebar } = tokens.shell;
+  const { sidebar } = dimensions.shell;
   return (
-    <StoryRouter
+    <TestRouter
       path="/datasources"
       wrap={() => (
         <ShellProvider store={store}>

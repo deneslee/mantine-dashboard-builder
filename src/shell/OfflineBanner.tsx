@@ -4,8 +4,8 @@ import { ErrorState } from '@/ui/components/ErrorState';
 
 /** Shown above the content while the browser reports no connection. Queries pause meanwhile. */
 export function OfflineBanner() {
-  const { online } = useNetwork();
-  if (online) return null;
+  const { online: isOnline } = useNetwork();
+  if (isOnline) return null;
   return (
     <ErrorState.Banner
       icon={IconWifiOff}

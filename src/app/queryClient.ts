@@ -1,11 +1,11 @@
 import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query';
 import { notify } from '@/lib/notify/notify';
-import { errorTitles, toAppError } from '@/core/errors/AppError';
+import { ERROR_TITLES, toAppError } from '@/core/errors/AppError';
 
 declare module '@tanstack/react-query' {
   interface Register {
     queryMeta: { source?: string };
-    mutationMeta: { successMessage?: string; errorTitle?: string; source?: string; silent?: boolean };
+    mutationMeta: { successMessage?: string; errorTitle?: string; source?: string };
   }
 }
 
@@ -31,10 +31,9 @@ export function createQueryClient() {
     }),
     mutationCache: new MutationCache({
       onError: (error, _vars, _ctx, mutation) => {
-        if (mutation.meta?.silent) return;
         const e = toAppError(error);
         notify.error({
-          title: mutation.meta?.errorTitle ?? errorTitles[e.code],
+          title: mutation.meta?.errorTitle ?? ERROR_TITLES[e.code],
           message: e.message,
           source: mutation.meta?.source,
         });
@@ -49,7 +48,7 @@ export function createQueryClient() {
         gcTime: 5 * 60_000,
         refetchOnWindowFocus: false,
         networkMode: 'offlineFirst',
-        retry: (count, error) => count < 1 && toAppError(error).retryable,
+        retry: (count, error) => count < 1 && toAppError(error).isRetryable,
       },
       mutations: { networkMode: 'offlineFirst' },
     },

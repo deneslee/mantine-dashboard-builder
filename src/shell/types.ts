@@ -9,28 +9,28 @@ export interface SidebarState {
   /** User preference, set on the settings page. */
   burger: BurgerBehavior;
   /** User preference. Below `md` the sidebar is an overlay regardless. */
-  docked: boolean;
+  isDocked: boolean;
   /** Width in px when docked and expanded. */
   width: number;
   /** Overlay drawer visibility. Transient: never persisted, so a drawer never opens on load. */
-  drawerOpen: boolean;
+  isDrawerOpen: boolean;
 }
 
 export interface ContextBarState {
   /** Docked column visibility (persisted). */
-  open: boolean;
-  docked: boolean;
+  isOpen: boolean;
+  isDocked: boolean;
   width: number;
   activeTab: string | null;
   /** Overlay drawer visibility. Transient. */
-  drawerOpen: boolean;
+  isDrawerOpen: boolean;
 }
 
 export interface ShellState {
   sidebar: SidebarState;
   contextBar: ContextBarState;
   /** Viewport below `md`: panels become overlays. Kept in sync by the Shell. */
-  narrow: boolean;
+  isNarrow: boolean;
 }
 
 export interface ShellActions {
@@ -41,23 +41,23 @@ export interface ShellActions {
   setSidebarMode: (mode: SidebarMode) => void;
   setBurgerBehavior: (burger: BurgerBehavior) => void;
   setSidebarWidth: (width: number) => void;
-  setSidebarDocked: (docked: boolean) => void;
+  setSidebarDocked: (isDocked: boolean) => void;
 
   /** Question button. Docked: show/hide the column. Overlay: open/close the drawer. */
   toggleContextBar: () => void;
   openContextBar: (tab?: string) => void;
   closeContextBar: () => void;
   setContextBarWidth: (width: number) => void;
-  setContextBarDocked: (docked: boolean) => void;
+  setContextBarDocked: (isDocked: boolean) => void;
   setActiveTab: (tab: string | null) => void;
 
-  setNarrow: (narrow: boolean) => void;
+  setNarrow: (isNarrow: boolean) => void;
 }
 
 export type ShellStore = ShellState & { actions: ShellActions };
 
 /** What the persisted snapshot contains (no transient fields, no actions). */
 export interface PersistedShell {
-  sidebar: Omit<SidebarState, 'drawerOpen'>;
-  contextBar: Omit<ContextBarState, 'drawerOpen'>;
+  sidebar: Omit<SidebarState, 'isDrawerOpen'>;
+  contextBar: Omit<ContextBarState, 'isDrawerOpen'>;
 }

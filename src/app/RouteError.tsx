@@ -3,7 +3,7 @@ import { IconRefresh } from '@tabler/icons-react';
 import { useQueryErrorResetBoundary } from '@tanstack/react-query';
 import { useRouter, type ErrorComponentProps } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-import { errorTitles, toAppError } from '@/core/errors/AppError';
+import { ERROR_TITLES, toAppError } from '@/core/errors/AppError';
 import { iconSize } from '@/ui/tokens/semantic';
 import { ErrorState } from '@/ui/components/ErrorState';
 
@@ -11,7 +11,7 @@ import { ErrorState } from '@/ui/components/ErrorState';
 export function RouteError({ error, reset }: ErrorComponentProps) {
   const router = useRouter();
   const queryReset = useQueryErrorResetBoundary();
-  const [retrying, setRetrying] = useState(false);
+  const [isRetrying, setRetrying] = useState(false);
   const appError = toAppError(error);
 
   // Let TanStack Query refetch on the next attempt instead of replaying the cached error.
@@ -19,7 +19,7 @@ export function RouteError({ error, reset }: ErrorComponentProps) {
     queryReset.reset();
   }, [queryReset]);
 
-  const retry = async () => {
+  const handleRetry = async () => {
     setRetrying(true);
     try {
       await router.invalidate();
@@ -31,15 +31,15 @@ export function RouteError({ error, reset }: ErrorComponentProps) {
 
   return (
     <ErrorState.Full
-      title={errorTitles[appError.code]}
+      title={ERROR_TITLES[appError.code]}
       description={appError.message}
       details={error}
       actions={
         <Button
           size="sm"
           leftSection={<IconRefresh size={iconSize.sm} />}
-          onClick={() => void retry()}
-          loading={retrying}
+          onClick={() => void handleRetry()}
+          loading={isRetrying}
         >
           Try again
         </Button>

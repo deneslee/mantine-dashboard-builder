@@ -11,7 +11,7 @@ import {
   type appTableFeatures,
 } from '@/plugins/widgets/table/useAppTable';
 import { iconSize, iconStroke } from '@/ui/tokens/semantic';
-import { fieldLabel, unitAffix, type DataFrame, type Field } from '@/core/data/DataFrame';
+import { getFieldLabel, getUnitAffix, type DataFrame, type Field } from '@/core/data/DataFrame';
 import type { WidgetProps } from '@/plugins/WidgetPlugin';
 import type { ColumnOptions, TableOptions } from './tableOptions';
 import classes from './FrameTable.module.css';
@@ -32,7 +32,7 @@ function cell(field: Field, value: unknown, options: ColumnOptions | undefined):
   if (field.type === 'number' && typeof value === 'number') {
     if (options?.format === 'percent')
       return <NumberFormatter value={value * 100} decimalScale={1} fixedDecimalScale suffix="%" />;
-    return <NumberFormatter value={value} thousandSeparator=" " {...unitAffix(field.config?.unit)} />;
+    return <NumberFormatter value={value} thousandSeparator=" " {...getUnitAffix(field.config?.unit)} />;
   }
   return typeof value === 'object' ? JSON.stringify(value) : String(value as string | number | boolean);
 }
@@ -53,7 +53,7 @@ export function FrameTable({ frames, options }: WidgetProps<TableOptions>) {
   const columns = frame.fields.map((field) =>
     column.accessor((row) => field.values[row.i], {
       id: field.name,
-      header: options.columns[field.name]?.label ?? fieldLabel(field),
+      header: options.columns[field.name]?.label ?? getFieldLabel(field),
       sortFn: field.type === 'string' ? 'text' : 'basic',
     }),
   );

@@ -4,19 +4,19 @@ import { IconClock } from '@tabler/icons-react';
 import dayjs from 'dayjs';
 import { useState } from 'react';
 import { iconSize, iconStroke } from '@/ui/tokens/semantic';
-import { rangePresets, type RawRange } from '@/core/time/timeRange';
-import { rangeLabel } from './formatRange';
+import { rangePresets, type TimeRange } from '@/core/time/timeRange';
+import { formatRange } from './formatRange';
 
 const CUSTOM = 'custom';
 
 interface Props {
-  value: RawRange;
-  onChange: (range: RawRange) => void;
+  value: TimeRange;
+  onChange: (range: TimeRange) => void;
 }
 
 /** Relative presets, or whole days from a calendar ("Custom range…"). Controlled: the URL holds the value. */
 export function TimeRangePicker({ value, onChange }: Props) {
-  const [custom, setCustom] = useState(false);
+  const [isCustom, setCustom] = useState(false);
   const [days, setDays] = useState<DatesRangeValue>([null, null]);
   const combobox = useCombobox({
     onDropdownClose: () => {
@@ -25,16 +25,19 @@ export function TimeRangePicker({ value, onChange }: Props) {
     },
   });
 
-  const pick = (range: RawRange) => {
+  const handlePick = (range: TimeRange) => {
     onChange(range);
     combobox.closeDropdown();
   };
 
-  const pickDays = (next: DatesRangeValue) => {
+  const handlePickDays = (next: DatesRangeValue) => {
     setDays(next);
     const [start, end] = next;
     if (start && end)
-      pick({ from: dayjs(start).startOf('day').toISOString(), to: dayjs(end).endOf('day').toISOString() });
+      handlePick({
+        from: dayjs(start).startOf('day').toISOString(),
+        to: dayjs(end).endOf('day').toISOString(),
+      });
   };
 
   return (
@@ -42,7 +45,9 @@ export function TimeRangePicker({ value, onChange }: Props) {
       store={combobox}
       width="max-content"
       position="bottom-start"
-      onOptionSubmit={(option) => (option === CUSTOM ? setCustom(true) : pick({ from: option, to: 'now' }))}
+      onOptionSubmit={(option) =>
+        option === CUSTOM ? setCustom(true) : handlePick({ from: option, to: 'now' })
+      }
     >
       <Combobox.Target targetType="button">
         <InputBase
@@ -56,12 +61,12 @@ export function TimeRangePicker({ value, onChange }: Props) {
           rightSectionPointerEvents="none"
           onClick={() => combobox.toggleDropdown()}
         >
-          {rangeLabel(value)}
+          {formatRange(value)}
         </InputBase>
       </Combobox.Target>
       <Combobox.Dropdown>
-        {custom ? (
-          <DatePicker type="range" value={days} onChange={pickDays} />
+        {isCustom ? (
+          <DatePicker type="range" value={days} onChange={handlePickDays} />
         ) : (
           <Combobox.Options>
             {rangePresets.map((preset) => (

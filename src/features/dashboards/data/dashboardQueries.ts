@@ -1,7 +1,7 @@
 import { keepPreviousData, queryOptions } from '@tanstack/react-query';
 import { AppError } from '@/core/errors/AppError';
-import type { DatasourceDefinition, Query } from '@/plugins/DatasourcePlugin';
-import { resolveRange, type RawRange } from '@/core/time/timeRange';
+import type { DatasourcePlugin, Query } from '@/plugins/DatasourcePlugin';
+import { resolveRange, type TimeRange } from '@/core/time/timeRange';
 import { getDashboard, listDashboards } from './dashboardApi';
 
 export const dashboardKeys = {
@@ -11,7 +11,7 @@ export const dashboardKeys = {
   data: ['ds'] as const,
 };
 
-export const dashboardsQuery = () =>
+export const dashboardListQuery = () =>
   queryOptions({
     queryKey: dashboardKeys.all,
     queryFn: ({ signal }) => listDashboards(signal),
@@ -35,8 +35,8 @@ export const dashboardQuery = (id: string) =>
  */
 export const widgetDataQuery = (
   queries: Query[],
-  range: RawRange,
-  datasources: Record<string, DatasourceDefinition>,
+  range: TimeRange,
+  datasources: Record<string, DatasourcePlugin>,
   source: string,
 ) =>
   queryOptions({
@@ -49,7 +49,7 @@ export const widgetDataQuery = (
           const datasource = datasources[query.datasource];
           if (!datasource)
             throw new AppError('validation', `No datasource of type "${query.datasource}".`, {
-              retryable: false,
+              isRetryable: false,
             });
           return datasource.query(query.spec, { range: resolved, raw: range }, signal);
         }),

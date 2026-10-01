@@ -5,12 +5,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 import { act, render, screen, waitFor } from '@/testing/render';
 import type { DataFrame } from '@/core/data/DataFrame';
-import type { DatasourceDefinition, QueryContext } from '@/plugins/DatasourcePlugin';
+import type { DatasourcePlugin, QueryContext } from '@/plugins/DatasourcePlugin';
 import { defineWidget, type WidgetProps } from '@/plugins/WidgetPlugin';
-import { toLayouts } from '@/core/dashboard/layout';
-import type { RawRange } from '@/core/time/timeRange';
+import { resolveLayouts } from '@/core/dashboard/layout';
+import type { TimeRange } from '@/core/time/timeRange';
 import type { Dashboard } from '../state/types';
-import { DashboardRegistryContext, type DashboardRegistry } from '@/plugins/usePlugins';
+import { PluginsContext, type Plugins } from '@/plugins/usePlugins';
 import { DashboardProvider } from '../state/DashboardProvider';
 import { createDashboardStore } from '../state/createDashboardStore';
 import { localRepository } from '../data/dashboardApi';
@@ -40,7 +40,7 @@ class Observer {
 const enter = (tile: HTMLElement) =>
   act(() => Observer.all.find((o) => o.target && tile.contains(o.target))?.enter());
 
-// A fake registry: what is under test is the tile, not a chart library or a real datasource.
+// A fake plugins: what is under test is the tile, not a chart library or a real datasource.
 function FrameName({ frames }: WidgetProps<unknown>) {
   return <p>{frames[0]?.name}</p>;
 }
@@ -65,7 +65,7 @@ function deferredDatasource() {
   );
   const release = (from: string) =>
     act(async () => waiting.get(from)?.({ name: `frame ${from}`, length: 0, fields: [] }));
-  const datasource: DatasourceDefinition = { type: 'deferred', name: 'Deferred', query };
+  const datasource: DatasourcePlugin = { type: 'deferred', name: 'Deferred', query };
   return { datasource, query, release };
 }
 
@@ -89,7 +89,7 @@ const dashboard: Dashboard = {
     },
     b: { id: 'b', type: 'nope', title: 'Regions', options: {}, queries: [] },
   },
-  layouts: toLayouts({
+  layouts: resolveLayouts({
     lg: [
       { i: 'a', x: 0, y: 0, w: 6, h: 3 },
       { i: 'b', x: 6, y: 0, w: 6, h: 3 },
@@ -97,28 +97,28 @@ const dashboard: Dashboard = {
   }),
 };
 
-const day: RawRange = { from: 'now-24h', to: 'now' };
-const week: RawRange = { from: 'now-7d', to: 'now' };
+const day: TimeRange = { from: 'now-24h', to: 'now' };
+const week: TimeRange = { from: 'now-7d', to: 'now' };
 
 function renderGrid() {
   const { datasource, query, release } = deferredDatasource();
-  const registry: DashboardRegistry = {
+  const plugins: Plugins = {
     widgets: { name: nameWidget },
     datasources: { deferred: datasource },
   };
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const store = createDashboardStore(dashboard, localRepository, 'view', false);
-  const ui = (range: RawRange) => (
+  const ui = (range: TimeRange) => (
     <QueryClientProvider client={client}>
-      <DashboardRegistryContext value={registry}>
+      <PluginsContext value={plugins}>
         <DashboardProvider dashboard={dashboard} store={store}>
           <DashboardGrid range={range} />
         </DashboardProvider>
-      </DashboardRegistryContext>
+      </PluginsContext>
     </QueryClientProvider>
   );
   const { rerender } = render(ui(day));
-  return { query, release, setRange: (range: RawRange) => rerender(ui(range)) };
+  return { query, release, setRange: (range: TimeRange) => rerender(ui(range)) };
 }
 
 describe('DashboardGrid', () => {
@@ -163,7 +163,7 @@ describe('DashboardGrid', () => {
     expect(screen.getByRole('region', { name: 'Revenue' })).toBe(tile);
   });
 
-  it('shows an error in the tile for a widget type the registry does not have', async () => {
+  it('shows an error in the tile for a widget type the plugins does not have', async () => {
     renderGrid();
     const tile = await screen.findByRole('region', { name: 'Regions' });
     enter(tile);

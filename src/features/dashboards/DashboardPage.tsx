@@ -17,43 +17,43 @@ import { lazy, Suspense, useEffect, useRef } from 'react';
 import { RouteBreadcrumbs } from '@/shell/breadcrumbs/RouteBreadcrumbs';
 import { Page } from '@/ui/components/Page';
 import { iconSize, iconStroke } from '@/ui/tokens/semantic';
-import { tokens } from '@/ui/tokens/tokens';
+import { dimensions } from '@/ui/tokens/dimensions';
 import { notify } from '@/lib/notify/notify';
 import { dashboardDoc } from '@/core/dashboard/dashboardSchema';
 import { toDashboard, toDocument } from './data/mapper';
 import { dashboardKeys } from './data/dashboardQueries';
-import { useDashboardActions, useDashboardState, useDocumentReader, useHistory } from './state/useDashboard';
+import { useDashboardActions, useDashboard, useReadDashboard, useUndoState } from './state/useDashboard';
 import { useAutoRefresh } from './data/useAutoRefresh';
 import type { DashboardSearch } from '@/core/time/timeRange';
-import { useDashboardRegistry } from '@/plugins/usePlugins';
+import { usePlugins } from '@/plugins/usePlugins';
 import { RefreshPicker } from './header/RefreshPicker';
 import { TimeRangePicker } from './header/TimeRangePicker';
 import { DashboardGrid } from './grid/DashboardGrid';
 
 const EditTools = lazy(() => import('./editor/EditDrawer').then((module) => ({ default: module.EditTools })));
 
-export function DashboardView() {
+export function DashboardPage() {
   const { id } = useParams({ from: '/dashboards/$id' });
   const search = useSearch({ from: '/dashboards/$id' });
   const navigate = useNavigate({ from: '/dashboards/$id' });
   const queryClient = useQueryClient();
-  const registry = useDashboardRegistry();
+  const plugins = usePlugins();
   const actions = useDashboardActions();
-  const read = useDocumentReader();
-  const title = useDashboardState((s) => s.doc.title);
-  const description = useDashboardState((s) => s.doc.description);
-  const defaultRange = useDashboardState((s) => s.timeRange);
-  const defaultRefresh = useDashboardState((s) => s.refresh);
-  const dirty = useDashboardState((s) => s.dirty);
-  const draftError = useDashboardState((s) => s.draftError);
-  const mode = useDashboardState((s) => s.mode);
-  const announcement = useDashboardState((s) => s.announcement);
-  const empty = useDashboardState((s) => s.doc.layouts.lg.length === 0);
-  const queryEditor = useDashboardState(
+  const read = useReadDashboard();
+  const title = useDashboard((s) => s.doc.title);
+  const description = useDashboard((s) => s.doc.description);
+  const defaultRange = useDashboard((s) => s.timeRange);
+  const defaultRefresh = useDashboard((s) => s.refresh);
+  const isDirty = useDashboard((s) => s.isDirty);
+  const draftError = useDashboard((s) => s.draftError);
+  const mode = useDashboard((s) => s.mode);
+  const announcement = useDashboard((s) => s.announcement);
+  const isEmpty = useDashboard((s) => s.doc.layouts.lg.length === 0);
+  const isQueryEditorOpen = useDashboard(
     (s) => search.editor === 'queries' && !!s.doc.widgets[search.widget ?? ''],
   );
-  const { canUndo, canRedo } = useHistory();
-  const wide = useMediaQuery(`(min-width: ${tokens.grid.breakpoints.md}px)`, true);
+  const { canUndo, canRedo } = useUndoState();
+  const isWide = useMediaQuery(`(min-width: ${dimensions.grid.breakpoints.md}px)`, true);
   const first = useRef(true);
   useEffect(() => {
     if (first.current) {
@@ -65,13 +65,13 @@ export function DashboardView() {
     }
     actions.setMode(search.mode ?? 'view');
   }, [search.mode, actions, mode, navigate]);
-  const editing = mode === 'edit';
-  const range = editing
+  const isEditing = mode === 'edit';
+  const range = isEditing
     ? defaultRange
     : { from: search.from ?? defaultRange.from, to: search.to ?? defaultRange.to };
-  const refresh = editing ? defaultRefresh : (search.refresh ?? defaultRefresh);
+  const refresh = isEditing ? defaultRefresh : (search.refresh ?? defaultRefresh);
   useAutoRefresh(refresh);
-  const fetching = useIsFetching({ queryKey: dashboardKeys.data }) > 0;
+  const isFetching = useIsFetching({ queryKey: dashboardKeys.data }) > 0;
   const setSearch = (next: DashboardSearch) =>
     void navigate({
       search: (prev) => ({
@@ -86,8 +86,8 @@ export function DashboardView() {
     });
   const blocker = useBlocker({
     shouldBlockFn: ({ current, next }) =>
-      dirty && (current.pathname !== next.pathname || (next.search as DashboardSearch).mode !== 'edit'),
-    enableBeforeUnload: dirty,
+      isDirty && (current.pathname !== next.pathname || (next.search as DashboardSearch).mode !== 'edit'),
+    enableBeforeUnload: isDirty,
     withResolver: true,
   });
   const save = useMutation({
@@ -98,7 +98,7 @@ export function DashboardView() {
       void queryClient.invalidateQueries({ queryKey: dashboardKeys.all, exact: true });
     },
   });
-  const exportJson = () => {
+  const handleExport = () => {
     const content = JSON.stringify(dashboardDoc.parse(toDocument(read())), null, 2);
     const url = URL.createObjectURL(new Blob([content], { type: 'application/json' }));
     const anchor = document.createElement('a');
@@ -107,16 +107,16 @@ export function DashboardView() {
     anchor.click();
     setTimeout(() => URL.revokeObjectURL(url), 0);
   };
-  const importJson = async (file: File | null) => {
+  const handleImport = async (file: File | null) => {
     if (!file) return;
     try {
       const doc = toDashboard(dashboardDoc.parse(JSON.parse(await file.text())));
       for (const widget of Object.values(doc.widgets)) {
-        const definition = registry.widgets[widget.type];
+        const definition = plugins.widgets[widget.type];
         if (!definition) throw new Error(`Unknown widget type "${widget.type}".`);
         definition.optionsSchema.parse(widget.options);
         for (const query of widget.queries) {
-          const datasource = registry.datasources[query.datasource];
+          const datasource = plugins.datasources[query.datasource];
           if (!datasource) throw new Error(`Unknown datasource "${query.datasource}".`);
           datasource.querySchema?.parse(query.spec);
         }
@@ -139,10 +139,10 @@ export function DashboardView() {
         <Page.Title>{title}</Page.Title>
         <Page.Description>{description}</Page.Description>
         <Page.Actions>
-          <Button variant="default" onClick={exportJson}>
+          <Button variant="default" onClick={handleExport}>
             Export JSON
           </Button>
-          {!editing && wide && (
+          {!isEditing && isWide && (
             <Button
               renderRoot={(props) => (
                 <Link
@@ -161,7 +161,7 @@ export function DashboardView() {
               variant="default"
               size="lg"
               aria-label="Refresh all widgets"
-              loading={fetching}
+              loading={isFetching}
               onClick={() => void queryClient.invalidateQueries({ queryKey: dashboardKeys.data })}
             >
               <IconRefresh size={iconSize.md} stroke={iconStroke} />
@@ -169,15 +169,15 @@ export function DashboardView() {
           </Tooltip>
         </Page.Actions>
         <Page.ControlBar aria-label="Dashboard controls">
-          <TimeRangePicker value={range} onChange={editing ? actions.setRange : setSearch} />
+          <TimeRangePicker value={range} onChange={isEditing ? actions.setRange : setSearch} />
           <RefreshPicker
             value={refresh}
-            onChange={editing ? actions.setRefresh : (next) => setSearch({ refresh: next })}
+            onChange={isEditing ? actions.setRefresh : (next) => setSearch({ refresh: next })}
           />
-          {editing && (
+          {isEditing && (
             <>
               <Text size="sm" c="dimmed">
-                {dirty ? 'Unsaved changes' : 'Saved locally'}
+                {isDirty ? 'Unsaved changes' : 'Saved locally'}
               </Text>
               <Button onClick={() => save.mutate()} loading={save.isPending}>
                 Save
@@ -191,7 +191,7 @@ export function DashboardView() {
               <Button variant="default" onClick={actions.redo} disabled={!canRedo}>
                 Redo
               </Button>
-              {wide && (
+              {isWide && (
                 <Button
                   id="add-widget"
                   variant="default"
@@ -200,7 +200,7 @@ export function DashboardView() {
                   Add widget
                 </Button>
               )}
-              <FileButton accept="application/json,.json" onChange={(file) => void importJson(file)}>
+              <FileButton accept="application/json,.json" onChange={(file) => void handleImport(file)}>
                 {(props) => (
                   <Button variant="default" {...props}>
                     Import JSON
@@ -230,20 +230,20 @@ export function DashboardView() {
             {draftError}
           </Alert>
         )}
-        {editing && !wide && (
+        {isEditing && !isWide && (
           <Alert color="info" title="Use a wider screen to edit">
             Your draft is kept. Widen the window to edit the layout.
           </Alert>
         )}
-        {editing && wide && (
+        {isEditing && isWide && (
           <Suspense fallback={<Text c="dimmed">Opening editor…</Text>}>
             <EditTools range={range} />
           </Suspense>
         )}
-        {empty ? (
+        {isEmpty ? (
           <Group>
             <Text>No widgets yet.</Text>
-            {!editing && wide && (
+            {!isEditing && isWide && (
               <Button
                 renderRoot={(props) => (
                   <Link to="/dashboards/$id" params={{ id }} search={{ mode: 'edit' }} {...props} />
@@ -257,7 +257,7 @@ export function DashboardView() {
             </Button>
           </Group>
         ) : (
-          !(editing && wide && queryEditor) && <DashboardGrid range={range} />
+          !(isEditing && isWide && isQueryEditorOpen) && <DashboardGrid range={range} />
         )}
       </Page.Body>
       <Modal

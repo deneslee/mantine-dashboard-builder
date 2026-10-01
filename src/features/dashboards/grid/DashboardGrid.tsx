@@ -4,15 +4,15 @@ import { ResponsiveGridLayout, useContainerWidth, type EventCallback } from 'rea
 import { gridBounds, minMaxSize } from 'react-grid-layout/core';
 import { fastVerticalCompactor } from 'react-grid-layout/extras';
 import 'react-grid-layout/css/styles.css';
-import { tokens } from '@/ui/tokens/tokens';
-import { useDashboardActions, useDashboardState } from '../state/useDashboard';
-import { byReadingOrder, toLayouts, type Breakpoint } from '@/core/dashboard/layout';
-import type { RawRange } from '@/core/time/timeRange';
-import { useDashboardRegistry } from '@/plugins/usePlugins';
+import { dimensions } from '@/ui/tokens/dimensions';
+import { useDashboardActions, useDashboard } from '../state/useDashboard';
+import { compareReadingOrder, resolveLayouts, type Breakpoint } from '@/core/dashboard/layout';
+import type { TimeRange } from '@/core/time/timeRange';
+import { usePlugins } from '@/plugins/usePlugins';
 import { WidgetTile } from './WidgetTile';
 import classes from './DashboardGrid.module.css';
 
-const { grid } = tokens;
+const { grid } = dimensions;
 const margin = [grid.gap, grid.gap] as const;
 const noPadding = [0, 0] as const;
 const drag = {
@@ -24,36 +24,36 @@ const resize = { enabled: true, handles: ['se'] as ['se'] };
 const disabled = { enabled: false };
 const constraints = [gridBounds, minMaxSize];
 
-export function DashboardGrid({ range }: { range: RawRange }) {
-  const { width, containerRef, mounted } = useContainerWidth({ measureBeforeMount: true });
-  const authored = useDashboardState((state) => state.doc.layouts);
-  const mode = useDashboardState((state) => state.mode);
-  const types = useDashboardState(
+export function DashboardGrid({ range }: { range: TimeRange }) {
+  const { width, containerRef, mounted: isMounted } = useContainerWidth({ measureBeforeMount: true });
+  const authored = useDashboard((state) => state.doc.layouts);
+  const mode = useDashboard((state) => state.mode);
+  const types = useDashboard(
     useShallow((s) =>
       Object.fromEntries(Object.values(s.doc.widgets).map((widget) => [widget.id, widget.type])),
     ),
   );
-  const registry = useDashboardRegistry();
+  const plugins = usePlugins();
   const actions = useDashboardActions();
   const breakpoint = useRef<Breakpoint>('lg');
   const layouts = useMemo(
     () =>
       Object.fromEntries(
-        Object.entries(toLayouts(authored)).map(([key, items]) => [
+        Object.entries(resolveLayouts(authored)).map(([key, items]) => [
           key,
           items.map((item) => ({
             ...item,
             minW: Math.min(
-              registry.widgets[types[item.i] ?? '']?.minSize?.w ?? 1,
+              plugins.widgets[types[item.i] ?? '']?.minSize?.w ?? 1,
               grid.cols[key as Breakpoint],
             ),
-            minH: registry.widgets[types[item.i] ?? '']?.minSize?.h ?? 1,
+            minH: plugins.widgets[types[item.i] ?? '']?.minSize?.h ?? 1,
           })),
         ]),
       ),
-    [authored, types, registry],
+    [authored, types, plugins],
   );
-  const ids = useMemo(() => authored.lg.toSorted(byReadingOrder).map((item) => item.i), [authored.lg]);
+  const ids = useMemo(() => authored.lg.toSorted(compareReadingOrder).map((item) => item.i), [authored.lg]);
   const children = useMemo(
     () =>
       ids.map((id) => (
@@ -63,15 +63,15 @@ export function DashboardGrid({ range }: { range: RawRange }) {
       )),
     [ids, range],
   );
-  const editing = mode === 'edit' && width >= grid.breakpoints.md;
+  const isEditing = mode === 'edit' && width >= grid.breakpoints.md;
   const commit =
     (action: 'Moved' | 'Resized'): EventCallback =>
     (layout, _old, item) => {
-      if (editing && item) actions.commitLayout(breakpoint.current, layout, item.i, action);
+      if (isEditing && item) actions.commitLayout(breakpoint.current, layout, item.i, action);
     };
   return (
-    <div ref={containerRef} className={classes.root} data-editing={editing || undefined}>
-      {mounted ? (
+    <div ref={containerRef} className={classes.root} data-editing={isEditing || undefined}>
+      {isMounted ? (
         <ResponsiveGridLayout<Breakpoint>
           width={width}
           breakpoints={grid.breakpoints}
@@ -80,8 +80,8 @@ export function DashboardGrid({ range }: { range: RawRange }) {
           rowHeight={grid.rowHeight}
           margin={margin}
           containerPadding={noPadding}
-          dragConfig={editing ? drag : disabled}
-          resizeConfig={editing ? resize : disabled}
+          dragConfig={isEditing ? drag : disabled}
+          resizeConfig={isEditing ? resize : disabled}
           constraints={constraints}
           compactor={ids.length > 100 ? fastVerticalCompactor : undefined}
           onBreakpointChange={(next) => {

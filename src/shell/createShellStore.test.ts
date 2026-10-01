@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { tokens } from '@/ui/tokens/tokens';
+import { dimensions } from '@/ui/tokens/dimensions';
 import { createShellStore, type ShellInit } from './createShellStore';
 
-const make = (init?: ShellInit) => createShellStore({ narrow: false, ...init }, false);
+const make = (init?: ShellInit) => createShellStore({ isNarrow: false, ...init }, false);
 
 function burgerModes(init?: ShellInit) {
   const store = make(init);
@@ -55,38 +55,38 @@ describe('shell store: sidebar', () => {
   });
 
   it('burger opens and closes the drawer when undocked, without touching the docked mode', () => {
-    const store = make({ sidebar: { docked: false, mode: 'compact' } });
+    const store = make({ sidebar: { isDocked: false, mode: 'compact' } });
     store.getState().actions.toggleSidebar();
-    expect(store.getState().sidebar).toMatchObject({ drawerOpen: true, mode: 'compact' });
+    expect(store.getState().sidebar).toMatchObject({ isDrawerOpen: true, mode: 'compact' });
     store.getState().actions.closeSidebar();
-    expect(store.getState().sidebar.drawerOpen).toBe(false);
+    expect(store.getState().sidebar.isDrawerOpen).toBe(false);
   });
 
   it('treats narrow viewports as undocked but keeps the preference', () => {
-    const store = make({ narrow: true });
+    const store = make({ isNarrow: true });
     store.getState().actions.toggleSidebar();
-    expect(store.getState().sidebar).toMatchObject({ docked: true, drawerOpen: true, mode: 'expanded' });
+    expect(store.getState().sidebar).toMatchObject({ isDocked: true, isDrawerOpen: true, mode: 'expanded' });
     store.getState().actions.setNarrow(false);
-    expect(store.getState().sidebar.drawerOpen).toBe(false);
+    expect(store.getState().sidebar.isDrawerOpen).toBe(false);
   });
 
   it('docking from the drawer shows the column; undocking keeps it visible as a drawer', () => {
-    const store = make({ sidebar: { docked: false, mode: 'closed', drawerOpen: true } });
+    const store = make({ sidebar: { isDocked: false, mode: 'closed', isDrawerOpen: true } });
     store.getState().actions.setSidebarDocked(true);
-    expect(store.getState().sidebar).toMatchObject({ docked: true, drawerOpen: false, mode: 'expanded' });
+    expect(store.getState().sidebar).toMatchObject({ isDocked: true, isDrawerOpen: false, mode: 'expanded' });
     store.getState().actions.setSidebarDocked(false);
-    expect(store.getState().sidebar).toMatchObject({ docked: false, drawerOpen: true });
+    expect(store.getState().sidebar).toMatchObject({ isDocked: false, isDrawerOpen: true });
   });
 
   it('clamps widths to token limits', () => {
     const store = make();
     const { setSidebarWidth, setContextBarWidth } = store.getState().actions;
     setSidebarWidth(9999);
-    expect(store.getState().sidebar.width).toBe(tokens.shell.sidebar.max);
+    expect(store.getState().sidebar.width).toBe(dimensions.shell.sidebar.max);
     setSidebarWidth(10);
-    expect(store.getState().sidebar.width).toBe(tokens.shell.sidebar.min);
+    expect(store.getState().sidebar.width).toBe(dimensions.shell.sidebar.min);
     setContextBarWidth(10);
-    expect(store.getState().contextBar.width).toBe(tokens.shell.contextBar.min);
+    expect(store.getState().contextBar.width).toBe(dimensions.shell.contextBar.min);
   });
 });
 
@@ -95,36 +95,51 @@ describe('shell store: context bar', () => {
     const store = make();
     const { openContextBar, toggleContextBar } = store.getState().actions;
     openContextBar('notifications');
-    expect(store.getState().contextBar).toMatchObject({ open: true, activeTab: 'notifications' });
+    expect(store.getState().contextBar).toMatchObject({ isOpen: true, activeTab: 'notifications' });
     toggleContextBar();
-    expect(store.getState().contextBar.open).toBe(false);
+    expect(store.getState().contextBar.isOpen).toBe(false);
     toggleContextBar();
-    expect(store.getState().contextBar).toMatchObject({ open: true, activeTab: 'notifications' });
+    expect(store.getState().contextBar).toMatchObject({ isOpen: true, activeTab: 'notifications' });
   });
 
   it('uses the drawer when undocked and closes the drawer, not the column', () => {
-    const store = make({ contextBar: { docked: false, open: true } });
+    const store = make({ contextBar: { isDocked: false, isOpen: true } });
     store.getState().actions.toggleContextBar();
-    expect(store.getState().contextBar.drawerOpen).toBe(true);
+    expect(store.getState().contextBar.isDrawerOpen).toBe(true);
     store.getState().actions.closeContextBar();
-    expect(store.getState().contextBar).toMatchObject({ drawerOpen: false, open: true });
+    expect(store.getState().contextBar).toMatchObject({ isDrawerOpen: false, isOpen: true });
   });
 });
 
 describe('shell store: persistence', () => {
   it('saves layout preferences under a versioned key and never the drawer state', () => {
-    const store = createShellStore({ narrow: true });
+    const store = createShellStore({ isNarrow: true });
     store.getState().actions.setSidebarMode('compact');
     store.getState().actions.toggleSidebar();
     const saved = JSON.parse(localStorage.getItem('shell.v1') ?? '{}');
-    expect(saved.version).toBe(1);
+    expect(saved.version).toBe(2);
     expect(saved.state.sidebar).toEqual({
       mode: 'compact',
       burger: 'compact',
-      docked: true,
-      width: tokens.shell.sidebar.expanded,
+      isDocked: true,
+      width: dimensions.shell.sidebar.expanded,
     });
     expect(saved.state.actions).toBeUndefined();
-    expect(saved.state.narrow).toBeUndefined();
+    expect(saved.state.isNarrow).toBeUndefined();
+  });
+
+  it('loads v1 preferences saved before the boolean rename', () => {
+    const sidebar = { mode: 'compact', burger: 'hide', docked: false, width: 300 };
+    const contextBar = { open: true, docked: false, width: 400, activeTab: 'notifications' };
+    localStorage.setItem('shell.v1', JSON.stringify({ version: 1, state: { sidebar, contextBar } }));
+    const { sidebar: s, contextBar: c } = createShellStore({ isNarrow: false }).getState();
+    expect(s).toEqual({ mode: 'compact', burger: 'hide', isDocked: false, width: 300, isDrawerOpen: false });
+    expect(c).toEqual({
+      isOpen: true,
+      isDocked: false,
+      width: 400,
+      activeTab: 'notifications',
+      isDrawerOpen: false,
+    });
   });
 });

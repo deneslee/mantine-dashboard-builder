@@ -10,7 +10,7 @@ import classes from './Search.module.css';
 
 /**
  * Navbar search. The trigger is Mantine `Input` rendered as a button; Spotlight is the search UI.
- * Actions today: navigation targets. Phase 3 adds dashboards and widgets through a registry.
+ * Actions today: navigation targets. Phase 3 adds dashboards and widgets through a plugins.
  */
 export function Search() {
   const navigate = useNavigate();

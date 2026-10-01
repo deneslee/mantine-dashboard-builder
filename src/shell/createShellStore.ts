@@ -1,10 +1,10 @@
 import { clamp } from '@mantine/hooks';
 import { persist } from 'zustand/middleware';
 import { createStore, type StateCreator } from 'zustand/vanilla';
-import { tokens } from '@/ui/tokens/tokens';
+import { dimensions } from '@/ui/tokens/dimensions';
 import type { BurgerBehavior, PersistedShell, ShellState, ShellStore, SidebarMode } from './types';
 
-const { sidebar: sb, contextBar: cb } = tokens.shell;
+const { sidebar: sb, contextBar: cb } = dimensions.shell;
 
 export const STORAGE_KEY = 'shell.v1';
 /** Mantine's default `md` breakpoint; below it both panels are overlays. */
@@ -13,9 +13,9 @@ export const NARROW_QUERY = '(max-width: 61.99em)';
 const initialNarrow = () => typeof window !== 'undefined' && !!window.matchMedia?.(NARROW_QUERY).matches;
 
 export const initialShellState = (): ShellState => ({
-  sidebar: { mode: 'expanded', burger: 'compact', docked: true, width: sb.expanded, drawerOpen: false },
-  contextBar: { open: false, docked: true, width: cb.default, activeTab: null, drawerOpen: false },
-  narrow: initialNarrow(),
+  sidebar: { mode: 'expanded', burger: 'compact', isDocked: true, width: sb.expanded, isDrawerOpen: false },
+  contextBar: { isOpen: false, isDocked: true, width: cb.default, activeTab: null, isDrawerOpen: false },
+  isNarrow: initialNarrow(),
 });
 
 const cycle: Record<SidebarMode, SidebarMode> = {
@@ -38,25 +38,25 @@ export function nextSidebarMode(mode: SidebarMode, burger: BurgerBehavior): Side
 }
 
 /** Effective docking: the preference, unless the viewport forces overlays. */
-export const sidebarDocked = (s: ShellState) => s.sidebar.docked && !s.narrow;
-export const contextDocked = (s: ShellState) => s.contextBar.docked && !s.narrow;
+export const sidebarDocked = (s: ShellState) => s.sidebar.isDocked && !s.isNarrow;
+export const contextDocked = (s: ShellState) => s.contextBar.isDocked && !s.isNarrow;
 
 export type ShellInit = {
   sidebar?: Partial<ShellState['sidebar']>;
   contextBar?: Partial<ShellState['contextBar']>;
-  narrow?: boolean;
+  isNarrow?: boolean;
 };
 
 /**
  * Factory so tests and stories get an isolated store; the app creates one in ShellProvider.
- * `persisted: false` skips localStorage (stories, tests).
+ * `shouldPersist: false` skips localStorage (stories, tests).
  */
-export function createShellStore(init?: ShellInit, persisted = true) {
+export function createShellStore(init?: ShellInit, shouldPersist = true) {
   const base = initialShellState();
   const start: ShellState = {
     sidebar: { ...base.sidebar, ...init?.sidebar },
     contextBar: { ...base.contextBar, ...init?.contextBar },
-    narrow: init?.narrow ?? base.narrow,
+    isNarrow: init?.isNarrow ?? base.isNarrow,
   };
 
   const creator: StateCreator<ShellStore> = (set, get) => {
@@ -71,69 +71,81 @@ export function createShellStore(init?: ShellInit, persisted = true) {
         toggleSidebar: () => {
           const s = get();
           if (sidebarDocked(s)) setSidebar({ mode: nextSidebarMode(s.sidebar.mode, s.sidebar.burger) });
-          else setSidebar({ drawerOpen: !s.sidebar.drawerOpen });
+          else setSidebar({ isDrawerOpen: !s.sidebar.isDrawerOpen });
         },
         closeSidebar: () =>
-          sidebarDocked(get()) ? setSidebar({ mode: 'closed' }) : setSidebar({ drawerOpen: false }),
+          sidebarDocked(get()) ? setSidebar({ mode: 'closed' }) : setSidebar({ isDrawerOpen: false }),
         setSidebarMode: (mode) => setSidebar({ mode }),
         setBurgerBehavior: (burger) => setSidebar({ burger }),
         setSidebarWidth: (width) => setSidebar({ width: clamp(Math.round(width), sb.min, sb.max) }),
-        setSidebarDocked: (docked) => {
+        setSidebarDocked: (isDocked) => {
           const { mode } = get().sidebar;
           // Docking shows the column; undocking keeps the sidebar visible as a drawer.
-          if (docked) setSidebar({ docked, drawerOpen: false, mode: mode === 'closed' ? 'expanded' : mode });
-          else setSidebar({ docked, drawerOpen: true });
+          if (isDocked)
+            setSidebar({ isDocked, isDrawerOpen: false, mode: mode === 'closed' ? 'expanded' : mode });
+          else setSidebar({ isDocked, isDrawerOpen: true });
         },
 
         toggleContextBar: () => {
           const s = get();
-          if (contextDocked(s)) setContext({ open: !s.contextBar.open });
-          else setContext({ drawerOpen: !s.contextBar.drawerOpen });
+          if (contextDocked(s)) setContext({ isOpen: !s.contextBar.isOpen });
+          else setContext({ isDrawerOpen: !s.contextBar.isDrawerOpen });
         },
         openContextBar: (tab) => {
           const s = get();
           const activeTab = tab ?? s.contextBar.activeTab;
-          if (contextDocked(s)) setContext({ open: true, activeTab });
-          else setContext({ drawerOpen: true, activeTab });
+          if (contextDocked(s)) setContext({ isOpen: true, activeTab });
+          else setContext({ isDrawerOpen: true, activeTab });
         },
         closeContextBar: () =>
-          contextDocked(get()) ? setContext({ open: false }) : setContext({ drawerOpen: false }),
+          contextDocked(get()) ? setContext({ isOpen: false }) : setContext({ isDrawerOpen: false }),
         setContextBarWidth: (width) => setContext({ width: clamp(Math.round(width), cb.min, cb.max) }),
-        setContextBarDocked: (docked) =>
-          docked
-            ? setContext({ docked, open: true, drawerOpen: false })
-            : setContext({ docked, drawerOpen: true }),
+        setContextBarDocked: (isDocked) =>
+          isDocked
+            ? setContext({ isDocked, isOpen: true, isDrawerOpen: false })
+            : setContext({ isDocked, isDrawerOpen: true }),
         setActiveTab: (activeTab) => setContext({ activeTab }),
 
-        setNarrow: (narrow) => {
-          if (get().narrow === narrow) return;
+        setNarrow: (isNarrow) => {
+          if (get().isNarrow === isNarrow) return;
           // Crossing the breakpoint closes drawers; docked columns follow the stored preference.
           set((s) => ({
-            narrow,
-            sidebar: { ...s.sidebar, drawerOpen: false },
-            contextBar: { ...s.contextBar, drawerOpen: false },
+            isNarrow,
+            sidebar: { ...s.sidebar, isDrawerOpen: false },
+            contextBar: { ...s.contextBar, isDrawerOpen: false },
           }));
         },
       },
     };
   };
 
-  if (!persisted) return createStore<ShellStore>()(creator);
+  if (!shouldPersist) return createStore<ShellStore>()(creator);
 
   return createStore<ShellStore>()(
     persist(creator, {
       name: STORAGE_KEY,
-      version: 1,
+      version: 2,
+      migrate: (old, version) => {
+        if (version >= 2) return old as PersistedShell;
+        // ponytail: v1 (`docked`, `open`) migration; delete after 2027-01.
+        const { sidebar, contextBar } = old as Partial<
+          Record<'sidebar' | 'contextBar', Record<string, unknown>>
+        >;
+        return {
+          sidebar: renameKeys(sidebar, { docked: 'isDocked' }),
+          contextBar: renameKeys(contextBar, { docked: 'isDocked', open: 'isOpen' }),
+        } as PersistedShell;
+      },
       partialize: (s): PersistedShell => ({
         sidebar: {
           mode: s.sidebar.mode,
           burger: s.sidebar.burger,
-          docked: s.sidebar.docked,
+          isDocked: s.sidebar.isDocked,
           width: s.sidebar.width,
         },
         contextBar: {
-          open: s.contextBar.open,
-          docked: s.contextBar.docked,
+          isOpen: s.contextBar.isOpen,
+          isDocked: s.contextBar.isDocked,
           width: s.contextBar.width,
           activeTab: s.contextBar.activeTab,
         },
@@ -142,13 +154,16 @@ export function createShellStore(init?: ShellInit, persisted = true) {
         const p = (persisted ?? {}) as Partial<PersistedShell>;
         return {
           ...current,
-          sidebar: { ...current.sidebar, ...p.sidebar, drawerOpen: false },
-          contextBar: { ...current.contextBar, ...p.contextBar, drawerOpen: false },
+          sidebar: { ...current.sidebar, ...p.sidebar, isDrawerOpen: false },
+          contextBar: { ...current.contextBar, ...p.contextBar, isDrawerOpen: false },
         };
       },
     }),
   );
 }
+
+const renameKeys = (o: Record<string, unknown> = {}, names: Record<string, string>) =>
+  Object.fromEntries(Object.entries(o).map(([k, v]) => [names[k] ?? k, v]));
 
 export type ShellStoreApi = ReturnType<typeof createShellStore>;
 

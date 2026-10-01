@@ -1,7 +1,7 @@
 import { IconBell, IconInfoCircle } from '@tabler/icons-react';
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@/testing/render';
-import { StoryRouter } from '@/testing/TestRouter';
+import { TestRouter } from '@/testing/TestRouter';
 import { ShellProvider } from '../ShellProvider';
 import type { ContextTab } from '../ContextTab';
 import { useContextTabs } from './useContextTabs';
@@ -27,7 +27,7 @@ function TabIds() {
 
 function renderTabs(routeTabs: ContextTab[], globalTabs?: ContextTab[]) {
   render(
-    <StoryRouter
+    <TestRouter
       contextTabs={routeTabs}
       wrap={(outlet) => (
         <ShellProvider globalTabs={globalTabs}>

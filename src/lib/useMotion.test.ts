@@ -20,15 +20,15 @@ afterEach(() => {
 
 describe('useMotion', () => {
   it('follows the operating system by default', () => {
-    expect(renderHook(() => useMotion()).result.current).toEqual({ reduced: false, preference: 'system' });
+    expect(renderHook(() => useMotion()).result.current).toEqual({ isReduced: false, preference: 'system' });
 
     osReducesMotion(true);
-    expect(renderHook(() => useMotion()).result.current.reduced).toBe(true);
+    expect(renderHook(() => useMotion()).result.current.isReduced).toBe(true);
   });
 
   it('reduces motion when the user chose "reduce", whatever the operating system says', () => {
     localStorage.setItem(MOTION_STORAGE_KEY, 'reduce');
-    expect(renderHook(() => useMotion()).result.current).toEqual({ reduced: true, preference: 'reduce' });
+    expect(renderHook(() => useMotion()).result.current).toEqual({ isReduced: true, preference: 'reduce' });
   });
 
   it('reads an unknown stored value as "system"', () => {
@@ -41,7 +41,7 @@ describe('useMotion', () => {
     const writer = renderHook(() => useMotionPreference());
 
     act(() => writer.result.current[1]('reduce'));
-    expect(reader.result.current.reduced).toBe(true);
+    expect(reader.result.current.isReduced).toBe(true);
     expect(localStorage.getItem(MOTION_STORAGE_KEY)).toBe('reduce');
   });
 });

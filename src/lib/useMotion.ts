@@ -25,6 +25,6 @@ export function useMotionPreference() {
  */
 export function useMotion() {
   const [preference] = useMotionPreference();
-  const system = useReducedMotion(false, { getInitialValueInEffect: false });
-  return { reduced: preference === 'reduce' || system, preference };
+  const isSystemReduced = useReducedMotion(false, { getInitialValueInEffect: false });
+  return { isReduced: preference === 'reduce' || isSystemReduced, preference };
 }

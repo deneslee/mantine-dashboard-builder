@@ -2,7 +2,7 @@ import { Menu, NavLink, Stack, Text, Tooltip } from '@mantine/core';
 import { Link, useRouterState } from '@tanstack/react-router';
 import { clsx } from 'clsx';
 import { useId, useState } from 'react';
-import { tokens } from '@/ui/tokens/tokens';
+import { dimensions } from '@/ui/tokens/dimensions';
 import { fontWeight, iconStroke } from '@/ui/tokens/semantic';
 import { useShellActions, useSidebar } from '../useShell';
 import type { NavGroup, NavItem } from '../Nav';
@@ -55,22 +55,22 @@ const usePathname = () => useRouterState({ select: (s) => s.location.pathname })
 
 /** An overlay sidebar closes after navigating. */
 function useAfterNavigate() {
-  const { docked } = useSidebar();
+  const { isDocked } = useSidebar();
   const { closeSidebar } = useShellActions();
   return () => {
-    if (!docked) closeSidebar();
+    if (!isDocked) closeSidebar();
   };
 }
 
 function NavIcon({ icon: Icon }: { icon: NavItem['icon'] }) {
-  return <Icon size={tokens.shell.sidebar.iconSize} stroke={iconStroke} />;
+  return <Icon size={dimensions.shell.sidebar.iconSize} stroke={iconStroke} />;
 }
 
 /** Leaf entry. Active on its own route and nested paths; the tooltip only shows on the compact rail. */
 function SidebarLink({ item }: { item: NavItem }) {
   const pathname = usePathname();
   const { isCompact } = useSidebar();
-  const afterNavigate = useAfterNavigate();
+  const handleNavigate = useAfterNavigate();
 
   return (
     <Tooltip label={item.label} position="right" disabled={!isCompact}>
@@ -80,7 +80,7 @@ function SidebarLink({ item }: { item: NavItem }) {
         leftSection={<NavIcon icon={item.icon} />}
         active={pathname === item.to || pathname.startsWith(`${item.to}/`)}
         data-compact={isCompact || undefined}
-        onClick={afterNavigate}
+        onClick={handleNavigate}
       />
     </Tooltip>
   );
@@ -97,23 +97,23 @@ function SidebarLink({ item }: { item: NavItem }) {
 function SidebarParent({ item, items }: { item: NavItem; items: NavChild[] }) {
   const pathname = usePathname();
   const { isCompact } = useSidebar();
-  const afterNavigate = useAfterNavigate();
-  const childActive = items.some((c) => isExact(pathname, c.to)) || pathname.startsWith(`${item.to}/`);
-  const [opened, setOpened] = useState(childActive);
-  const [menuOpened, setMenuOpened] = useState(false);
+  const handleNavigate = useAfterNavigate();
+  const isChildActive = items.some((c) => isExact(pathname, c.to)) || pathname.startsWith(`${item.to}/`);
+  const [isOpen, setOpened] = useState(isChildActive);
+  const [isMenuOpen, setMenuOpened] = useState(false);
 
   // Navigating into the section (e.g. from the flyout) opens it, so the current page is visible.
-  const [wasChildActive, setWasChildActive] = useState(childActive);
-  if (childActive !== wasChildActive) {
-    setWasChildActive(childActive);
-    if (childActive) setOpened(true);
+  const [wasChildActive, setWasChildActive] = useState(isChildActive);
+  if (isChildActive !== wasChildActive) {
+    setWasChildActive(isChildActive);
+    if (isChildActive) setOpened(true);
   }
   // The flyout only exists on the rail; drop it when the sidebar expands so it can't reopen on collapse.
-  if (!isCompact && menuOpened) setMenuOpened(false);
+  if (!isCompact && isMenuOpen) setMenuOpened(false);
 
   return (
     <Menu
-      opened={menuOpened}
+      opened={isMenuOpen}
       onChange={(next) => setMenuOpened(isCompact && next)}
       // No openDelay: entering the dropdown schedules a delayed open, which would reopen the
       // menu right after an item click closes it.
@@ -129,7 +129,7 @@ function SidebarParent({ item, items }: { item: NavItem; items: NavChild[] }) {
           component="button"
           label={item.label}
           leftSection={<NavIcon icon={item.icon} />}
-          opened={opened && !isCompact}
+          opened={isOpen && !isCompact}
           onChange={(next) => {
             if (!isCompact) setOpened(next);
           }}
@@ -140,11 +140,11 @@ function SidebarParent({ item, items }: { item: NavItem; items: NavChild[] }) {
             // Mantine only handles Escape inside the dropdown; a hover-opened flyout leaves focus here.
             if (event.key === 'Escape') setMenuOpened(false);
           }}
-          active={isCompact && childActive}
-          data-child-active={childActive || undefined}
+          active={isCompact && isChildActive}
+          data-child-active={isChildActive || undefined}
           data-compact={isCompact || undefined}
           aria-haspopup={isCompact ? 'menu' : undefined}
-          aria-expanded={isCompact ? menuOpened : opened}
+          aria-expanded={isCompact ? isMenuOpen : isOpen}
         >
           {items.map((child) => (
             <NavLink
@@ -152,7 +152,7 @@ function SidebarParent({ item, items }: { item: NavItem; items: NavChild[] }) {
               renderRoot={(props) => <Link to={child.to} activeOptions={{ exact: true }} {...props} />}
               label={child.label}
               active={isExact(pathname, child.to)}
-              onClick={afterNavigate}
+              onClick={handleNavigate}
             />
           ))}
         </NavLink>

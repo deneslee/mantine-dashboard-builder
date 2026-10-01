@@ -26,7 +26,7 @@ import { Page } from '@/ui/components/Page';
 import { getIntegrations } from './getIntegrations';
 import classes from './IntegrationsPage.module.css';
 
-export function IntegrationsCatalog() {
+export function IntegrationsPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'row'>('grid');
   const [query, setQuery] = useState('');
 

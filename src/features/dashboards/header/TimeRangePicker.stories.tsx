@@ -1,7 +1,7 @@
 import { Code, Group, Stack } from '@mantine/core';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
-import type { RawRange } from '@/core/time/timeRange';
+import type { TimeRange } from '@/core/time/timeRange';
 import { RefreshPicker } from './RefreshPicker';
 import { TimeRangePicker } from './TimeRangePicker';
 
@@ -10,7 +10,7 @@ export default meta;
 type Story = StoryObj;
 
 /** Both pickers as the control bar shows them; the value they would write to the URL is below. */
-function Controls({ initial }: { initial: RawRange }) {
+function Controls({ initial }: { initial: TimeRange }) {
   const [range, setRange] = useState(initial);
   const [refresh, setRefresh] = useState('off');
   return (

@@ -28,20 +28,20 @@ export interface DataFrame {
 export type Row = Record<string, unknown>;
 
 /** Row objects keyed by field name, the shape Mantine charts take. */
-export function toRows(frame: DataFrame): Row[] {
+export function frameToRows(frame: DataFrame): Row[] {
   return Array.from({ length: frame.length }, (_, i) =>
     Object.fromEntries(frame.fields.map((field) => [field.name, field.values[i]])),
   );
 }
 
 /** A field's display name. */
-export const fieldLabel = (field: Field) => field.config?.label ?? field.name;
+export const getFieldLabel = (field: Field) => field.config?.label ?? field.name;
 
-const leadingUnits = new Set(['€', '$', '£']);
+const LEADING_UNITS = new Set(['€', '$', '£']);
 
 /** Where a unit goes around a number: currencies before (`€ 1 200`), anything else after (`320 ms`, `55%`). */
-export function unitAffix(unit?: string): { prefix?: string; suffix?: string } {
+export function getUnitAffix(unit?: string): { prefix?: string; suffix?: string } {
   if (!unit) return {};
-  if (leadingUnits.has(unit)) return { prefix: `${unit} ` };
+  if (LEADING_UNITS.has(unit)) return { prefix: `${unit} ` };
   return { suffix: unit === '%' ? '%' : ` ${unit}` };
 }

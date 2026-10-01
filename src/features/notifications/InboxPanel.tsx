@@ -12,7 +12,7 @@ import classes from './InboxPanel.module.css';
 dayjs.extend(relativeTime);
 
 /** Context-bar tab: persisted warnings and errors, newest first. */
-export function Inbox() {
+export function InboxPanel() {
   const { items, markAllRead, dismiss, clear } = useInbox(
     useShallow((s) => ({
       items: s.items,
@@ -22,7 +22,7 @@ export function Inbox() {
     })),
   );
 
-  const unread = items.filter((i) => !i.read).length;
+  const unread = items.filter((i) => !i.isRead).length;
 
   // The tab is hidden with React Activity, so this runs each time it becomes visible.
   const { start: startReadTimer, clear: clearReadTimer } = useTimeout(markAllRead, 1500);
@@ -69,7 +69,7 @@ export function Inbox() {
           <li
             key={item.id}
             className={classes.item}
-            data-unread={!item.read || undefined}
+            data-unread={!item.isRead || undefined}
             data-level={item.level}
           >
             <Group gap="sm" wrap="nowrap" align="flex-start">
@@ -89,7 +89,7 @@ export function Inbox() {
 
               <Stack gap="3xs" className={classes.body}>
                 <Group gap="xs" wrap="nowrap">
-                  <Text size="sm" fw={item.read ? 400 : 600} lineClamp={1}>
+                  <Text size="sm" fw={item.isRead ? 400 : 600} lineClamp={1}>
                     {item.title}
                   </Text>
                   {item.count > 1 ? (

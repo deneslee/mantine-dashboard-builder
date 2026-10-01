@@ -3,7 +3,7 @@ import { dashboardDoc } from '@/core/dashboard/dashboardSchema';
 import { toDashboard, toDocument } from '../data/mapper';
 import type { DashboardRepository } from '../data/repository';
 import { draftKey, readSaved, writeSaved } from '../data/drafts';
-import { createDashboardStore, currentDocument, readingOrder } from './createDashboardStore';
+import { createDashboardStore, selectDashboard, readingOrder } from './createDashboardStore';
 
 const document = () =>
   toDashboard(
@@ -58,21 +58,21 @@ describe('dashboard editing', () => {
     expect(store.getState().doc.widgets.a?.title).toBe('First');
   });
 
-  it('saves a new baseline, keeps undo, and makes undo after Save dirty', async () => {
+  it('saves a new baseline, keeps undo, and makes the dashboard dirty again on undo after Save', async () => {
     const repo = repository();
     const store = createDashboardStore(document(), repo);
     const actions = store.getState().actions;
     actions.editWidget('a', { title: 'Saved title' });
     await actions.save();
-    expect(store.getState().dirty).toBe(false);
+    expect(store.getState().isDirty).toBe(false);
     expect(readSaved('test')?.widgets.a?.title).toBe('Saved title');
     expect(localStorage.getItem(draftKey('test'))).toBeNull();
     expect(store.temporal.getState().pastStates).toHaveLength(1);
     actions.undo();
-    expect(store.getState().dirty).toBe(true);
+    expect(store.getState().isDirty).toBe(true);
     expect(store.getState().doc.widgets.a?.title).toBe('First');
     actions.redo();
-    expect(store.getState().dirty).toBe(false);
+    expect(store.getState().isDirty).toBe(false);
   });
 
   it('preserves edits made while Save is pending', async () => {
@@ -93,7 +93,7 @@ describe('dashboard editing', () => {
     await saving;
     expect(store.getState().baseline.widgets.a?.title).toBe('Snapshot');
     expect(store.getState().doc.widgets.a?.title).toBe('Newer edit');
-    expect(store.getState().dirty).toBe(true);
+    expect(store.getState().isDirty).toBe(true);
   });
 
   it('restores a per-dashboard draft and edit mode; Discard restores baseline and clears draft/history', () => {
@@ -104,14 +104,14 @@ describe('dashboard editing', () => {
     expect(reloaded.getState().doc.widgets.a?.title).toBe('Draft');
     reloaded.getState().actions.editWidget('b', { description: 'Another change' });
     reloaded.getState().actions.discard();
-    expect(currentDocument(reloaded.getState())).toEqual(document());
-    expect(reloaded.getState().dirty).toBe(false);
+    expect(selectDashboard(reloaded.getState())).toEqual(document());
+    expect(reloaded.getState().isDirty).toBe(false);
     expect(reloaded.temporal.getState().pastStates).toHaveLength(0);
     expect(reloaded.temporal.getState().futureStates).toHaveLength(0);
     expect(localStorage.getItem(draftKey('test'))).toBeNull();
   });
 
-  it('leaves a failed Save dirty and preserves an unreadable draft', async () => {
+  it('leaves the dashboard dirty after a failed Save and preserves an unreadable draft', async () => {
     const repo = repository();
     repo.save = vi.fn(async () => {
       throw new Error('Disk full');
@@ -119,7 +119,7 @@ describe('dashboard editing', () => {
     const store = createDashboardStore(document(), repo);
     store.getState().actions.editWidget('a', { title: 'Keep me' });
     await expect(store.getState().actions.save()).rejects.toThrow('Disk full');
-    expect(store.getState().dirty).toBe(true);
+    expect(store.getState().isDirty).toBe(true);
     expect(localStorage.getItem(draftKey('test'))).toContain('Keep me');
     localStorage.setItem(draftKey('test'), 'broken');
     const recovered = createDashboardStore(document(), repo);
@@ -151,11 +151,11 @@ describe('dashboard editing', () => {
     actions.remove('b');
     expect(store.temporal.getState().pastStates).toHaveLength(2);
     actions.undo();
-    const exported = toDocument(currentDocument(store.getState()));
+    const exported = toDocument(selectDashboard(store.getState()));
     expect(Object.keys(exported.widgets)).toEqual(readingOrder(store.getState().doc));
     actions.editWidget('a', { description: 'Temporary' });
     actions.importDocument(toDashboard(dashboardDoc.parse(JSON.parse(JSON.stringify(exported)))));
-    expect(toDocument(currentDocument(store.getState()))).toEqual(exported);
+    expect(toDocument(selectDashboard(store.getState()))).toEqual(exported);
     expect(() => actions.importDocument({ ...document(), id: 'wrong' })).toThrow('same dashboard id');
   });
 

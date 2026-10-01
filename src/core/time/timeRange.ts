@@ -1,10 +1,15 @@
 import { z } from 'zod';
-import type { TimeRange } from '@/plugins/DatasourcePlugin';
 
 /** A range as written in the document and the URL: `now`, `now-24h`, or an ISO date. */
-export interface RawRange {
+export interface TimeRange {
   from: string;
   to: string;
+}
+
+/** A range resolved to absolute times, when a query runs. */
+export interface ResolvedRange {
+  from: Date;
+  to: Date;
 }
 
 const unitMs = { s: 1000, m: 60_000, h: 3_600_000, d: 86_400_000, w: 604_800_000 } as const;
@@ -28,7 +33,7 @@ export function resolveTime(value: string, now = Date.now()): Date | undefined {
 export const isValidTime = (value: string) => resolveTime(value) !== undefined;
 
 /** Absolute times for a raw range, resolved at `now`. Undefined when either end is invalid. */
-export function resolveRange({ from, to }: RawRange, now = Date.now()): TimeRange | undefined {
+export function resolveRange({ from, to }: TimeRange, now = Date.now()): ResolvedRange | undefined {
   const start = resolveTime(from, now);
   const end = resolveTime(to, now);
   return start && end ? { from: start, to: end } : undefined;
@@ -37,7 +42,7 @@ export function resolveRange({ from, to }: RawRange, now = Date.now()): TimeRang
 const interval = /^(\d+)([smh])$/;
 
 /** Auto-refresh interval: `30s`, `1m`, `5m`, … in milliseconds; undefined for `off` or anything else. */
-export function refreshMs(value: string): number | undefined {
+export function parseRefreshInterval(value: string): number | undefined {
   const match = interval.exec(value);
   if (!match) return undefined;
   const [, amount, unit] = match;
@@ -72,7 +77,7 @@ export const dashboardSearch = z.object({
   to: z.string().refine(isValidTime).optional().catch(undefined),
   refresh: z
     .string()
-    .refine((value) => value === 'off' || refreshMs(value) !== undefined)
+    .refine((value) => value === 'off' || parseRefreshInterval(value) !== undefined)
     .optional()
     .catch(undefined),
 });

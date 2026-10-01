@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { AppError } from '@/core/errors/AppError';
 import type { DataFrame } from '@/core/data/DataFrame';
-import type { DatasourceDefinition } from '@/plugins/DatasourcePlugin';
+import type { DatasourcePlugin } from '@/plugins/DatasourcePlugin';
 import { wait } from '@/utils/wait';
 
 /** A path under `public/data/`, e.g. `frames/regions.json`. */
@@ -38,7 +38,7 @@ const BASE = `${import.meta.env.BASE_URL}data/`;
 const LATENCY = import.meta.env.DEV ? 400 : 0;
 
 /** Reads a DataFrame from a static JSON file. The time range doesn't apply. */
-export const localJsonDatasource: DatasourceDefinition = {
+export const localJsonDatasource: DatasourcePlugin = {
   type: 'local-json',
   name: 'Local JSON',
   querySchema: spec,
@@ -60,7 +60,7 @@ export const localJsonDatasource: DatasourceDefinition = {
     }
     // The dev server answers unknown paths with index.html, so anything that isn't JSON is missing.
     if (!res.ok || !res.headers.get('content-type')?.includes('json'))
-      throw new AppError('datasource', `No data file at data/${path}.`, { retryable: false });
+      throw new AppError('datasource', `No data file at data/${path}.`, { isRetryable: false });
 
     const frame = frameDto.safeParse(await res.json());
     if (!frame.success)

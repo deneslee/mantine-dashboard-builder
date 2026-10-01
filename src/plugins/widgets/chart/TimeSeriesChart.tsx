@@ -1,6 +1,6 @@
 import { AreaChart, BarChart, LineChart } from '@mantine/charts';
 import dayjs from 'dayjs';
-import { fieldLabel, toRows, unitAffix, type DataFrame } from '@/core/data/DataFrame';
+import { getFieldLabel, frameToRows, getUnitAffix, type DataFrame } from '@/core/data/DataFrame';
 import type { WidgetProps } from '@/plugins/WidgetPlugin';
 import type { ChartOptions } from './chartOptions';
 
@@ -21,17 +21,17 @@ export function TimeSeriesChart({ frames, options }: WidgetProps<ChartOptions>) 
   const times = (time?.values ?? []) as number[];
   const span = (times.at(-1) ?? 0) - (times[0] ?? 0);
   const format = span > 2 * DAY ? 'D MMM' : span > DAY ? 'D MMM HH:mm' : 'HH:mm';
-  const data = toRows(frame).map((row) => ({
+  const data = frameToRows(frame).map((row) => ({
     ...row,
     [X]: time ? dayjs(row[time.name] as number).format(format) : '',
   }));
 
   const series = numbers.map((field, i) => ({
     name: field.name,
-    label: fieldLabel(field),
+    label: getFieldLabel(field),
     color: colors[i % colors.length] ?? 'brand.5',
   }));
-  const { prefix = '', suffix = '' } = unitAffix(numbers[0]?.config?.unit);
+  const { prefix = '', suffix = '' } = getUnitAffix(numbers[0]?.config?.unit);
   const valueFormatter = (value: number) => `${prefix}${value.toLocaleString()}${suffix}`;
   const common = { h: '100%', data, dataKey: X, series, gridAxis: 'y', valueFormatter } as const;
 

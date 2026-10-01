@@ -8,6 +8,6 @@ export const dashboardTabs: ContextTab[] = [
     id: 'details',
     label: 'Details',
     icon: IconInfoCircle,
-    component: lazy(() => import('./DetailsPanel').then((m) => ({ default: m.DetailsTab }))),
+    component: lazy(() => import('./DetailsPanel').then((m) => ({ default: m.DetailsPanel }))),
   },
 ];

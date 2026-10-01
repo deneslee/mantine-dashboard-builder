@@ -22,7 +22,7 @@ const MIN_SAVING_MS = 500;
  * Appearance settings as a draft that only takes effect on `save`.
  * The draft holds just the fields the user touched; everything else reads through to the live
  * value, so a theme switched from the navbar meanwhile is not overwritten by a stale copy.
- * Saving is a mutation: `saving` drives the button, the success toast comes from
+ * Saving is a mutation: `isSaving` drives the button, the success toast comes from
  * `meta.successMessage` and errors toast from the global MutationCache.
  */
 export function useAppearanceForm() {
@@ -34,7 +34,9 @@ export function useAppearanceForm() {
 
   const saved: AppearanceValues = { burger, colorScheme, motion };
   const values: AppearanceValues = { ...saved, ...draft };
-  const dirty = (Object.keys(saved) as (keyof AppearanceValues)[]).some((key) => values[key] !== saved[key]);
+  const isDirty = (Object.keys(saved) as (keyof AppearanceValues)[]).some(
+    (key) => values[key] !== saved[key],
+  );
 
   const mutation = useMutation({
     mutationFn: async (next: AppearanceValues) => {
@@ -53,8 +55,8 @@ export function useAppearanceForm() {
 
   return {
     values,
-    dirty,
-    saving: mutation.isPending,
+    isDirty,
+    isSaving: mutation.isPending,
     setField,
     save: () => mutation.mutate(values),
     reset: () => setDraft({}),

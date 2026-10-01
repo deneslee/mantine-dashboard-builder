@@ -1,5 +1,5 @@
 import { Group, Text } from '@mantine/core';
-import { appName } from '@/config/config';
+import { APP_NAME } from '@/config/config';
 import { fontWeight } from '@/ui/tokens/semantic';
 import classes from './Brand.module.css';
 
@@ -9,7 +9,7 @@ import classes from './Brand.module.css';
  */
 export function Brand() {
   return (
-    <Group gap="sm" wrap="nowrap" className={classes.root} aria-label={appName}>
+    <Group gap="sm" wrap="nowrap" className={classes.root} aria-label={APP_NAME}>
       <span className={classes.mark} aria-hidden="true">
         <i />
         <i />
@@ -17,7 +17,7 @@ export function Brand() {
         <i />
       </span>
       <Text component="span" fw={fontWeight.medium} size="sm" className={classes.name}>
-        {appName}
+        {APP_NAME}
       </Text>
     </Group>
   );

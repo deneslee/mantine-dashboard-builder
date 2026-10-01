@@ -8,7 +8,7 @@ export const notificationsTab: ContextTab = {
   id: 'notifications',
   label: 'Notifications',
   icon: IconBell,
-  component: lazy(() => import('./InboxPanel').then((m) => ({ default: m.Inbox }))),
+  component: lazy(() => import('./InboxPanel').then((m) => ({ default: m.InboxPanel }))),
   badge: {
     subscribe: (onChange) => useInbox.subscribe(onChange),
     getSnapshot: () => selectUnread(useInbox.getState()),

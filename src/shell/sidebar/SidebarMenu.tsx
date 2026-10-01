@@ -20,12 +20,12 @@ const iconProps = { size: 16, stroke: 1.75 };
  * and the dock toggle lives here only when the compact rail has no room for it.
  */
 export function SidebarMenu() {
-  const { docked, isCompact } = useSidebar();
+  const { isDocked, isCompact } = useSidebar();
   const { setSidebarMode, closeSidebar, setSidebarDocked } = useShellActions();
 
   // An overlay sidebar closes after navigating, like the nav links.
-  const afterNavigate = () => {
-    if (!docked) closeSidebar();
+  const handleNavigate = () => {
+    if (!isDocked) closeSidebar();
   };
 
   return (
@@ -43,14 +43,14 @@ export function SidebarMenu() {
         <Menu.Item
           renderRoot={(props) => <Link to="/settings" {...props} />}
           leftSection={<IconSettings {...iconProps} />}
-          onClick={afterNavigate}
+          onClick={handleNavigate}
         >
           Settings
         </Menu.Item>
 
         <Menu.Divider />
         <Menu.Label>Appearance</Menu.Label>
-        {docked && isCompact ? (
+        {isDocked && isCompact ? (
           <Menu.Item
             leftSection={<IconLayoutSidebarLeftExpand {...iconProps} />}
             onClick={() => setSidebarMode('expanded')}
@@ -58,7 +58,7 @@ export function SidebarMenu() {
             Expand sidebar
           </Menu.Item>
         ) : null}
-        {docked && !isCompact ? (
+        {isDocked && !isCompact ? (
           <Menu.Item
             leftSection={<IconLayoutSidebarLeftCollapse {...iconProps} />}
             onClick={() => setSidebarMode('compact')}
@@ -67,7 +67,7 @@ export function SidebarMenu() {
           </Menu.Item>
         ) : null}
         <Menu.Item leftSection={<IconEyeOff {...iconProps} />} onClick={closeSidebar}>
-          {docked ? 'Hide sidebar' : 'Close sidebar'}
+          {isDocked ? 'Hide sidebar' : 'Close sidebar'}
         </Menu.Item>
         {isCompact ? (
           <Menu.Item leftSection={<IconPinnedOff {...iconProps} />} onClick={() => setSidebarDocked(false)}>
@@ -77,7 +77,7 @@ export function SidebarMenu() {
         <Menu.Item
           renderRoot={(props) => <Link to="/settings" search={{ tab: 'appearance' }} {...props} />}
           leftSection={<IconAdjustmentsHorizontal {...iconProps} />}
-          onClick={afterNavigate}
+          onClick={handleNavigate}
         >
           Sidebar behavior…
         </Menu.Item>

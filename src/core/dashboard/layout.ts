@@ -1,10 +1,10 @@
-import { tokens } from '@/ui/tokens/tokens';
+import { dimensions } from '@/ui/tokens/dimensions';
 
-const { cols } = tokens.grid;
+const { cols } = dimensions.grid;
 
 export type Breakpoint = keyof typeof cols;
 
-export interface GridItem {
+export interface LayoutItem {
   i: string;
   x: number;
   y: number;
@@ -13,7 +13,7 @@ export interface GridItem {
 }
 
 /** Packs items left to right, starting a new row when the next one does not fit. */
-function reflow(items: GridItem[], columns: number, width: (lgWidth: number) => number): GridItem[] {
+function reflow(items: LayoutItem[], columns: number, width: (lgWidth: number) => number): LayoutItem[] {
   let x = 0;
   let y = 0;
   let rowHeight = 0;
@@ -32,13 +32,13 @@ function reflow(items: GridItem[], columns: number, width: (lgWidth: number) => 
 }
 
 /** Row by row, left to right: the order a reader meets the tiles. */
-export const byReadingOrder = (a: GridItem, b: GridItem) => a.y - b.y || a.x - b.x;
+export const compareReadingOrder = (a: LayoutItem, b: LayoutItem) => a.y - b.y || a.x - b.x;
 
 /** Layouts as a document stores them: `lg` always, `md` / `sm` only where the author wrote one. */
-export interface AuthoredLayouts {
-  lg: GridItem[];
-  md?: GridItem[];
-  sm?: GridItem[];
+export interface Layouts {
+  lg: LayoutItem[];
+  md?: LayoutItem[];
+  sm?: LayoutItem[];
 }
 
 /**
@@ -46,8 +46,8 @@ export interface AuthoredLayouts {
  * from `lg` in reading order: on `md` a tile is half or full width, on `sm` full width. Authors
  * only write a smaller layout where the reflow gets it wrong.
  */
-export function toLayouts({ lg, md, sm }: AuthoredLayouts): Record<Breakpoint, GridItem[]> {
-  const readingOrder = lg.toSorted(byReadingOrder);
+export function resolveLayouts({ lg, md, sm }: Layouts): Record<Breakpoint, LayoutItem[]> {
+  const readingOrder = lg.toSorted(compareReadingOrder);
   const half = cols.md / 2;
   return {
     lg,

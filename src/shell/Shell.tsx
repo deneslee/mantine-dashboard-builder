@@ -7,7 +7,7 @@ import {
 } from '@mantine/hooks';
 import { spotlight } from '@mantine/spotlight';
 import { useEffect, useLayoutEffect, useRef, type MouseEvent, type ReactNode } from 'react';
-import { tokens } from '@/ui/tokens/tokens';
+import { dimensions } from '@/ui/tokens/dimensions';
 import { useMainLock } from './useMainLock';
 import { useContextBar, useShellActions, useSidebar } from './useShell';
 import { NARROW_QUERY } from './createShellStore';
@@ -30,7 +30,7 @@ const toPx = (size: SplitterPaneSize | undefined) => parseFloat(String(size ?? 0
  *   change, not per frame (see useMainLock).
  */
 export function Shell({ children }: { children: ReactNode }) {
-  const { shell, zIndex } = tokens;
+  const { shell, zIndex } = dimensions;
   const sidebar = useSidebar();
   const contextBar = useContextBar();
   const actions = useShellActions();
@@ -52,8 +52,8 @@ export function Shell({ children }: { children: ReactNode }) {
   const dragging = useRef(false);
 
   // Keep the store's viewport flag in sync; below `md` both panels become drawers.
-  const narrow = useMediaQuery(NARROW_QUERY, sidebar.narrow, { getInitialValueInEffect: false });
-  useEffect(() => actions.setNarrow(narrow), [narrow, actions]);
+  const isNarrow = useMediaQuery(NARROW_QUERY, sidebar.isNarrow, { getInitialValueInEffect: false });
+  useEffect(() => actions.setNarrow(isNarrow), [isNarrow, actions]);
 
   useHotkeys([
     ['mod+B', actions.toggleSidebar],
@@ -76,20 +76,20 @@ export function Shell({ children }: { children: ReactNode }) {
     syncing.current = false;
   }, [sidebarSize, contextSize]);
 
-  const sidebarResizable = sidebar.isColumn && !sidebar.isCompact;
+  const isSidebarResizable = sidebar.isColumn && !sidebar.isCompact;
 
   /** Splitter → store, for widths the user set: drag end and keyboard steps. */
   const commitWidths = (sizes: SplitterPaneSize[]) => {
-    if (sidebarResizable) actions.setSidebarWidth(toPx(sizes[0]));
+    if (isSidebarResizable) actions.setSidebarWidth(toPx(sizes[0]));
     if (contextBar.isColumn) actions.setContextBarWidth(toPx(sizes[2]));
   };
 
   // Mantine's own reset splits the two neighbouring panes by their default sizes, which does not
   // fit a px panel next to a flexible main pane. Reset to the token defaults instead.
-  const resetWidth = (event: MouseEvent) => {
+  const handleResetWidth = (event: MouseEvent) => {
     const handle = event.target instanceof Element ? event.target.closest('[role="separator"]') : null;
     if (!handle) return;
-    if (sidebarResizable && handle.previousElementSibling === sidebarPaneRef.current) {
+    if (isSidebarResizable && handle.previousElementSibling === sidebarPaneRef.current) {
       actions.setSidebarWidth(shell.sidebar.expanded);
     }
     if (contextBar.isColumn && handle.nextElementSibling === contextPaneRef.current) {
@@ -109,7 +109,7 @@ export function Shell({ children }: { children: ReactNode }) {
         lineSize={1}
         withHandle={false}
         resetOnDoubleClick={false}
-        onDoubleClick={resetWidth}
+        onDoubleClick={handleResetWidth}
         step="8px"
         shiftStep="40px"
         classNames={{ root: classes.splitter, pane: classes.pane, handle: classes.handle }}
@@ -138,9 +138,9 @@ export function Shell({ children }: { children: ReactNode }) {
           aria-label="Primary"
           className={classes.sidebarPane}
           defaultSize={sidebarSize}
-          min={sidebarResizable ? px(shell.sidebar.min) : sidebarSize}
-          max={sidebarResizable ? px(shell.sidebar.max) : sidebarSize}
-          mod={{ fixed: !sidebarResizable }}
+          min={isSidebarResizable ? px(shell.sidebar.min) : sidebarSize}
+          max={isSidebarResizable ? px(shell.sidebar.max) : sidebarSize}
+          mod={{ fixed: !isSidebarResizable }}
         >
           {sidebar.isColumn ? <Sidebar /> : null}
         </Splitter.Pane>

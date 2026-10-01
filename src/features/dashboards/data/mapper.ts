@@ -1,4 +1,4 @@
-import { byReadingOrder } from '@/core/dashboard/layout';
+import { compareReadingOrder } from '@/core/dashboard/layout';
 import type { Dashboard, DashboardSummary } from '../state/types';
 import type { DashboardDocDto, DashboardSummaryDto } from '@/core/dashboard/dashboardSchema';
 
@@ -32,7 +32,7 @@ export function toDashboard(doc: DashboardDocDto): Dashboard {
 /** The stored shape, ordered by lg; grid metadata never leaves the canvas. */
 export function toDocument(dashboard: Dashboard): DashboardDocDto {
   const widgets = Object.fromEntries(
-    dashboard.layouts.lg.toSorted(byReadingOrder).map(({ i }) => {
+    dashboard.layouts.lg.toSorted(compareReadingOrder).map(({ i }) => {
       const { id: _id, ...widget } = dashboard.widgets[i]!;
       return [i, widget];
     }),

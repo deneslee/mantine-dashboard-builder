@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { isValidTime } from '../time/timeRange';
-import { tokens } from '@/ui/tokens/tokens';
+import { dimensions } from '@/ui/tokens/dimensions';
 import type { Breakpoint } from './layout';
 
 /** Wire shapes. Today local JSON files, later the HTTP API; only this file and the mapper change. */
@@ -61,7 +61,7 @@ export const dashboardDocV1 = z
     for (const [breakpoint, items] of Object.entries(doc.layouts)) {
       if (!items) continue;
       for (const item of items) {
-        if (item.x + item.w > tokens.grid.cols[breakpoint as Breakpoint])
+        if (item.x + item.w > dimensions.grid.cols[breakpoint as Breakpoint])
           ctx.addIssue({
             code: 'custom',
             path: ['layouts', breakpoint],

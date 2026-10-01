@@ -21,13 +21,13 @@ const burgerLabels: Record<SidebarMode, string> = {
 };
 
 export function TopNavbar() {
-  const { isOverlay: drawerOpen, docked: sidebarDocked, mode, burger } = useSidebar();
-  const { open: contextOpen, isColumn: contextDocked } = useContextBar();
+  const { isOverlay: isDrawerOpen, isDocked: isSidebarDocked, mode, burger } = useSidebar();
+  const { isOpen: isContextOpen, isColumn: isContextDocked } = useContextBar();
   const { toggleSidebar, toggleContextBar } = useShellActions();
 
-  const burgerLabel = sidebarDocked
+  const burgerLabel = isSidebarDocked
     ? burgerLabels[nextSidebarMode(mode, burger)]
-    : drawerOpen
+    : isDrawerOpen
       ? 'Close menu'
       : 'Open menu';
 
@@ -36,10 +36,10 @@ export function TopNavbar() {
       <Tooltip label={burgerLabel}>
         <Burger
           size="sm"
-          opened={drawerOpen}
+          opened={isDrawerOpen}
           onClick={toggleSidebar}
           aria-label={burgerLabel}
-          aria-expanded={sidebarDocked ? undefined : drawerOpen}
+          aria-expanded={isSidebarDocked ? undefined : isDrawerOpen}
           color="var(--app-navbar-text)"
           className={classes.burger}
         />
@@ -52,7 +52,7 @@ export function TopNavbar() {
       <Group gap="2xs" wrap="nowrap" className={classes.right} justify="flex-end">
         <Tooltip.Group>
           <AreaSelect />
-          <ContextButton open={contextOpen} active={contextDocked} onClick={toggleContextBar} />
+          <ContextButton isOpen={isContextOpen} isActive={isContextDocked} onClick={toggleContextBar} />
           <ColorSchemeToggle />
           <UserMenu />
         </Tooltip.Group>
@@ -85,18 +85,26 @@ function AreaSelect() {
   );
 }
 
-/** `active` (selected look) only while the panel is docked open; an open drawer covers the navbar anyway. */
-function ContextButton({ open, active, onClick }: { open: boolean; active: boolean; onClick: () => void }) {
+/** `isActive` (selected look) only while the panel is docked open; an open drawer covers the navbar anyway. */
+function ContextButton({
+  isOpen,
+  isActive,
+  onClick,
+}: {
+  isOpen: boolean;
+  isActive: boolean;
+  onClick: () => void;
+}) {
   const count = useTotalBadgeCount(useContextTabs());
 
   return (
-    <Tooltip label={open ? 'Close context panel' : 'Open context panel'}>
+    <Tooltip label={isOpen ? 'Close context panel' : 'Open context panel'}>
       <Indicator label={count > 9 ? '9+' : count} size={16} offset={6} disabled={count === 0} color="danger">
         <ActionIcon
           variant="chrome"
-          aria-label={open ? 'Close context panel' : 'Open context panel'}
-          aria-pressed={open}
-          data-active={active || undefined}
+          aria-label={isOpen ? 'Close context panel' : 'Open context panel'}
+          aria-pressed={isOpen}
+          data-active={isActive || undefined}
           onClick={onClick}
         >
           <IconHelp size={iconSize.md} stroke={iconStroke} />

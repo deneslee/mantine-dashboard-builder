@@ -5,7 +5,7 @@ import { Page } from '@/ui/components/Page';
 import { iconSize, iconStroke } from '@/ui/tokens/semantic';
 
 /** Temporary page for areas not built yet. Files prefixed with `-` are ignored by the router. */
-export function Placeholder({ title, description }: { title: string; description: string }) {
+export function PlaceholderPage({ title, description }: { title: string; description: string }) {
   return (
     <Page.Root>
       <Page.Header>

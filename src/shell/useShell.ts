@@ -19,19 +19,19 @@ export function useShellActions() {
 export function useSidebar() {
   return useShellStore(
     useShallow((s) => {
-      const docked = sidebarDocked(s);
+      const isDocked = sidebarDocked(s);
       return {
         mode: s.sidebar.mode,
         burger: s.sidebar.burger,
         width: s.sidebar.width,
-        docked,
-        prefersDocked: s.sidebar.docked,
-        isCompact: docked && s.sidebar.mode === 'compact',
+        isDocked,
+        isDockPreferred: s.sidebar.isDocked,
+        isCompact: isDocked && s.sidebar.mode === 'compact',
         /** Rendered as a docked pane. */
-        isColumn: docked && s.sidebar.mode !== 'closed',
+        isColumn: isDocked && s.sidebar.mode !== 'closed',
         /** Rendered as a Drawer over the content. */
-        isOverlay: !docked && s.sidebar.drawerOpen,
-        narrow: s.narrow,
+        isOverlay: !isDocked && s.sidebar.isDrawerOpen,
+        isNarrow: s.isNarrow,
       };
     }),
   );
@@ -40,16 +40,16 @@ export function useSidebar() {
 export function useContextBar() {
   return useShellStore(
     useShallow((s) => {
-      const docked = contextDocked(s);
+      const isDocked = contextDocked(s);
       return {
         width: s.contextBar.width,
         activeTab: s.contextBar.activeTab,
-        docked,
-        prefersDocked: s.contextBar.docked,
-        isColumn: docked && s.contextBar.open,
-        isOverlay: !docked && s.contextBar.drawerOpen,
+        isDocked,
+        isDockPreferred: s.contextBar.isDocked,
+        isColumn: isDocked && s.contextBar.isOpen,
+        isOverlay: !isDocked && s.contextBar.isDrawerOpen,
         /** Visible in either form. */
-        open: docked ? s.contextBar.open : s.contextBar.drawerOpen,
+        isOpen: isDocked ? s.contextBar.isOpen : s.contextBar.isDrawerOpen,
       };
     }),
   );

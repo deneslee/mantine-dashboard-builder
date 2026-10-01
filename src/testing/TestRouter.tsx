@@ -14,7 +14,7 @@ import type { ContextTab } from '@/shell/ContextTab';
  * Minimal router for stories: a root that renders `wrap(<Outlet />)` and a catch-all page.
  * Lets chrome components use Link, useRouterState and staticData tabs outside the app router.
  */
-export function StoryRouter({
+export function TestRouter({
   path = '/dashboards/sales',
   wrap,
   page,

@@ -2,33 +2,38 @@ import { verticalCompactor } from 'react-grid-layout/core';
 import { createStore } from 'zustand/vanilla';
 import { immer } from 'zustand/middleware/immer';
 import { temporal } from 'zundo';
-import { tokens } from '@/ui/tokens/tokens';
+import { dimensions } from '@/ui/tokens/dimensions';
 import { clearDraft, readDraft, writeDraft } from '../data/drafts';
 import { toDocument } from '../data/mapper';
 import { dashboardDoc } from '@/core/dashboard/dashboardSchema';
 import type { DashboardRepository } from '../data/repository';
-import { byReadingOrder, toLayouts, type Breakpoint, type GridItem } from '@/core/dashboard/layout';
+import {
+  compareReadingOrder,
+  resolveLayouts,
+  type Breakpoint,
+  type LayoutItem,
+} from '@/core/dashboard/layout';
 import type { Dashboard, Widget } from './types';
-import type { RawRange } from '@/core/time/timeRange';
+import type { TimeRange } from '@/core/time/timeRange';
 
 type Content = Omit<Dashboard, 'timeRange' | 'refresh'>;
-export type Tool = { kind: 'palette' } | { kind: 'move' | 'resize'; id: string } | null;
+export type EditorTool = { kind: 'palette' } | { kind: 'move' | 'resize'; id: string } | null;
 export interface DashboardState {
   doc: Content;
-  timeRange: RawRange;
+  timeRange: TimeRange;
   refresh: string;
   baseline: Dashboard;
-  dirty: boolean;
+  isDirty: boolean;
   draftError: string | null;
   mode: 'view' | 'edit';
   breakpoint: Breakpoint;
-  tool: Tool;
+  tool: EditorTool;
   announcement: string;
   actions: {
     setMode(this: void, mode: 'view' | 'edit'): void;
     setBreakpoint(this: void, breakpoint: Breakpoint): void;
-    openTool(this: void, tool: Tool): void;
-    setRange(this: void, range: RawRange): void;
+    openTool(this: void, tool: EditorTool): void;
+    setRange(this: void, range: TimeRange): void;
     setRefresh(this: void, refresh: string): void;
     editWidget(
       this: void,
@@ -38,11 +43,11 @@ export interface DashboardState {
     commitLayout(
       this: void,
       breakpoint: Breakpoint,
-      layout: readonly GridItem[],
+      layout: readonly LayoutItem[],
       id: string,
       action: 'Moved' | 'Resized',
     ): void;
-    placeWidget(this: void, id: string, patch: Partial<Pick<GridItem, 'x' | 'y' | 'w' | 'h'>>): void;
+    placeWidget(this: void, id: string, patch: Partial<Pick<LayoutItem, 'x' | 'y' | 'w' | 'h'>>): void;
     addWidget(this: void, widget: Widget, size: { w: number; h: number }): void;
     duplicate(this: void, id: string): string;
     remove(this: void, id: string): void;
@@ -55,25 +60,25 @@ export interface DashboardState {
 }
 
 const split = ({ timeRange, refresh, ...doc }: Dashboard) => ({ doc, timeRange, refresh });
-export const currentDocument = (state: Pick<DashboardState, 'doc' | 'timeRange' | 'refresh'>): Dashboard => ({
+export const selectDashboard = (state: Pick<DashboardState, 'doc' | 'timeRange' | 'refresh'>): Dashboard => ({
   ...state.doc,
   timeRange: state.timeRange,
   refresh: state.refresh,
 });
 const serialized = (dashboard: Dashboard) => JSON.stringify(dashboardDoc.parse(toDocument(dashboard)));
-const bottom = (items: readonly GridItem[]) => Math.max(0, ...items.map((item) => item.y + item.h));
-const cleanLayout = (items: readonly GridItem[]): GridItem[] =>
+const bottom = (items: readonly LayoutItem[]) => Math.max(0, ...items.map((item) => item.y + item.h));
+const cleanLayout = (items: readonly LayoutItem[]): LayoutItem[] =>
   items.map(({ i, x, y, w, h }) => ({ i, x, y, w, h }));
 
 export function createDashboardStore(
   baseline: Dashboard,
   repository: DashboardRepository,
   mode: 'view' | 'edit' = 'view',
-  persisted = true,
+  shouldPersist = true,
 ) {
   let restored: ReturnType<typeof readDraft> = undefined;
   let draftError: string | null = null;
-  if (persisted) {
+  if (shouldPersist) {
     try {
       restored = readDraft(baseline.id);
     } catch {
@@ -87,7 +92,7 @@ export function createDashboardStore(
       immer((set, get) => ({
         ...split(initial),
         baseline: saved,
-        dirty: serialized(initial) !== serialized(saved),
+        isDirty: serialized(initial) !== serialized(saved),
         draftError,
         mode: restored ? 'edit' : mode,
         breakpoint: 'lg',
@@ -115,10 +120,10 @@ export function createDashboardStore(
           commitLayout: (breakpoint, layout, id, action) => {
             const cleaned = cleanLayout(layout);
             dashboardDoc.parse({
-              ...toDocument(currentDocument(get())),
+              ...toDocument(selectDashboard(get())),
               layouts: { ...get().doc.layouts, [breakpoint]: cleaned },
             });
-            const previous = toLayouts(get().doc.layouts)[breakpoint];
+            const previous = resolveLayouts(get().doc.layouts)[breakpoint];
             if (JSON.stringify(cleaned) === JSON.stringify(previous)) return;
             const before = previous.find((item) => item.i === id);
             const after = cleaned.find((item) => item.i === id);
@@ -129,13 +134,13 @@ export function createDashboardStore(
           },
           placeWidget: (id, patch) => {
             const { breakpoint, doc } = get();
-            const items = cleanLayout(toLayouts(doc.layouts)[breakpoint]);
+            const items = cleanLayout(resolveLayouts(doc.layouts)[breakpoint]);
             const item = items.find((entry) => entry.i === id);
             if (!item) return;
             Object.assign(item, patch);
             get().actions.commitLayout(
               breakpoint,
-              verticalCompactor.compact(items, tokens.grid.cols[breakpoint]),
+              verticalCompactor.compact(items, dimensions.grid.cols[breakpoint]),
               id,
               patch.w !== undefined || patch.h !== undefined ? 'Resized' : 'Moved',
             );
@@ -150,7 +155,7 @@ export function createDashboardStore(
                     i: widget.id,
                     x: 0,
                     y: bottom(items),
-                    w: Math.min(size.w, tokens.grid.cols[breakpoint]),
+                    w: Math.min(size.w, dimensions.grid.cols[breakpoint]),
                     h: size.h,
                   });
               }
@@ -185,14 +190,14 @@ export function createDashboardStore(
           },
           save: async () => {
             const state = get();
-            const document = { ...currentDocument(state), updatedAt: new Date().toISOString() };
+            const document = { ...selectDashboard(state), updatedAt: new Date().toISOString() };
             await repository.save(document);
-            const unchanged = get().doc === state.doc;
+            const isUnchanged = get().doc === state.doc;
             const history = store.temporal.getState();
             history.pause();
             set((s) => {
               s.baseline = document;
-              if (unchanged) s.doc.updatedAt = document.updatedAt;
+              if (isUnchanged) s.doc.updatedAt = document.updatedAt;
               s.announcement = 'Dashboard saved locally.';
             });
             history.resume();
@@ -203,7 +208,7 @@ export function createDashboardStore(
             set({ ...split(get().baseline), tool: null, announcement: 'Discarded changes.' });
             history.clear();
             history.resume();
-            if (persisted) clearDraft(get().doc.id);
+            if (shouldPersist) clearDraft(get().doc.id);
           },
           undo: () => {
             store.temporal.getState().undo();
@@ -226,12 +231,12 @@ export function createDashboardStore(
       state.baseline === previous.baseline
     )
       return;
-    const document = currentDocument(state);
-    const dirty = serialized(document) !== serialized(state.baseline);
-    if (dirty !== state.dirty) store.setState({ dirty });
-    if (!persisted) return;
+    const document = selectDashboard(state);
+    const isDirty = serialized(document) !== serialized(state.baseline);
+    if (isDirty !== state.isDirty) store.setState({ isDirty });
+    if (!shouldPersist) return;
     try {
-      if (dirty) writeDraft(state.baseline, document);
+      if (isDirty) writeDraft(state.baseline, document);
       else clearDraft(document.id);
       if (state.draftError) store.setState({ draftError: null });
     } catch {
@@ -242,4 +247,5 @@ export function createDashboardStore(
 }
 
 export type DashboardStore = ReturnType<typeof createDashboardStore>;
-export const readingOrder = (doc: Content) => doc.layouts.lg.toSorted(byReadingOrder).map((item) => item.i);
+export const readingOrder = (doc: Content) =>
+  doc.layouts.lg.toSorted(compareReadingOrder).map((item) => item.i);

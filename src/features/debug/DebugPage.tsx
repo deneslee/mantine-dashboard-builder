@@ -5,10 +5,10 @@ import { useState, type ReactNode } from 'react';
 import { Page } from '@/ui/components/Page';
 import { RouteBreadcrumbs } from '@/shell/breadcrumbs/RouteBreadcrumbs';
 import { ErrorState } from '@/ui/components/ErrorState';
-import { WidgetBoundary } from '@/ui/components/QueryBoundary';
+import { QueryBoundary } from '@/ui/components/QueryBoundary';
 import {
   ChartSkeleton,
-  DashboardSkeleton,
+  GridSkeleton,
   PanelSkeleton,
   TableSkeleton,
   TextSkeleton,
@@ -167,7 +167,7 @@ export function DebugPage() {
               </Paper>
             </SimpleGrid>
             <Paper variant="panel" mt="md">
-              <DashboardSkeleton />
+              <GridSkeleton />
             </Paper>
           </Section>
         </Stack>
@@ -201,23 +201,23 @@ function MutationErrorButton() {
 }
 
 function ThrowingWidget() {
-  const [broken, setBroken] = useState(false);
+  const [isBroken, setBroken] = useState(false);
   return (
     <Stack h="100%" p="md" gap="xs">
       <Switch
         label="Break this widget"
-        checked={broken}
+        checked={isBroken}
         onChange={(e) => setBroken(e.currentTarget.checked)}
       />
-      <WidgetBoundary name="Demo widget" key={String(broken)}>
-        {broken ? (
+      <QueryBoundary name="Demo widget" key={String(isBroken)}>
+        {isBroken ? (
           <Boom />
         ) : (
           <Text size="sm" c="dimmed">
             Working. Toggle to throw during render.
           </Text>
         )}
-      </WidgetBoundary>
+      </QueryBoundary>
     </Stack>
   );
 }

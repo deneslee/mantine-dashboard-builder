@@ -5,14 +5,14 @@ import { notify } from '@/lib/notify/notify';
 import { createShellStore } from '@/shell/createShellStore';
 import { ShellProvider } from '@/shell/ShellProvider';
 import { fireEvent, render, screen, waitFor } from '@/testing/render';
-import { AppearanceSettings } from './AppearanceForm';
+import { AppearanceForm } from './AppearanceForm';
 
 function setup() {
-  const store = createShellStore({ narrow: false }, false);
+  const store = createShellStore({ isNarrow: false }, false);
   render(
     <QueryClientProvider client={createQueryClient()}>
       <ShellProvider store={store}>
-        <AppearanceSettings />
+        <AppearanceForm />
       </ShellProvider>
     </QueryClientProvider>,
   );
@@ -22,7 +22,7 @@ function setup() {
 
 afterEach(() => vi.restoreAllMocks());
 
-describe('AppearanceSettings', () => {
+describe('AppearanceForm', () => {
   it('keeps a changed option as a draft until "Save changes"', () => {
     const { burger } = setup();
     expect(screen.getByRole('button', { name: 'Save changes' })).toBeDisabled();
@@ -32,7 +32,7 @@ describe('AppearanceSettings', () => {
     expect(screen.getByText('You have unsaved changes.')).toBeInTheDocument();
   });
 
-  it('shows a loading state while saving, then stores the setting and notifies', async () => {
+  it('shows a loading state while isSaving, then stores the setting and notifies', async () => {
     const success = vi.spyOn(notify, 'success');
     const { burger } = setup();
 

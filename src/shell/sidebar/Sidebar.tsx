@@ -13,7 +13,7 @@ import classes from './Sidebar.module.css';
  * applies when docked.
  */
 export function Sidebar() {
-  const { isCompact, prefersDocked, narrow } = useSidebar();
+  const { isCompact, isDockPreferred, isNarrow } = useSidebar();
   const { setSidebarDocked } = useShellActions();
 
   return (
@@ -31,8 +31,8 @@ export function Sidebar() {
 
         <Panel.Footer className={classes.footer}>
           {/* The compact rail only fits one button: docking moves into the menu there. */}
-          {narrow || isCompact ? null : (
-            <Panel.DockToggle variant="chrome" docked={prefersDocked} onChange={setSidebarDocked} />
+          {isNarrow || isCompact ? null : (
+            <Panel.DockToggle variant="chrome" isDocked={isDockPreferred} onChange={setSidebarDocked} />
           )}
           <SidebarMenu />
         </Panel.Footer>

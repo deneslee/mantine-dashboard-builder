@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isValidTime, refreshMs, resolveRange, resolveTime } from './timeRange';
+import { isValidTime, parseRefreshInterval, resolveRange, resolveTime } from './timeRange';
 
 const now = Date.UTC(2026, 8, 27, 12, 0);
 
@@ -34,13 +34,13 @@ describe('resolveRange', () => {
   });
 });
 
-describe('refreshMs', () => {
+describe('parseRefreshInterval', () => {
   it('reads intervals and treats off or junk as no refresh', () => {
-    expect(refreshMs('30s')).toBe(30_000);
-    expect(refreshMs('1m')).toBe(60_000);
-    expect(refreshMs('1h')).toBe(3_600_000);
-    expect(refreshMs('off')).toBeUndefined();
-    expect(refreshMs('0s')).toBeUndefined();
-    expect(refreshMs('fast')).toBeUndefined();
+    expect(parseRefreshInterval('30s')).toBe(30_000);
+    expect(parseRefreshInterval('1m')).toBe(60_000);
+    expect(parseRefreshInterval('1h')).toBe(3_600_000);
+    expect(parseRefreshInterval('off')).toBeUndefined();
+    expect(parseRefreshInterval('0s')).toBeUndefined();
+    expect(parseRefreshInterval('fast')).toBeUndefined();
   });
 });

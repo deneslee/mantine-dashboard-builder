@@ -14,22 +14,22 @@ import {
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useState } from 'react';
 import { z } from 'zod';
-import { tokens } from '@/ui/tokens/tokens';
+import { dimensions } from '@/ui/tokens/dimensions';
 import type { Query } from '@/plugins/DatasourcePlugin';
-import { useDashboardActions, useDashboardState, useWidget } from '../state/useDashboard';
-import { toLayouts } from '@/core/dashboard/layout';
-import type { RawRange } from '@/core/time/timeRange';
+import { useDashboardActions, useDashboard, useWidget } from '../state/useDashboard';
+import { resolveLayouts } from '@/core/dashboard/layout';
+import type { TimeRange } from '@/core/time/timeRange';
 import type { Widget } from '../state/types';
-import { useDashboardRegistry, type DashboardRegistry } from '@/plugins/usePlugins';
+import { usePlugins, type Plugins } from '@/plugins/usePlugins';
 import { WidgetTile } from '../grid/WidgetTile';
 import classes from './EditDrawer.module.css';
 
 const queriesSchema = z.array(z.object({ datasource: z.string(), spec: z.unknown() }));
 
-function parseQueries(value: string, registry: DashboardRegistry): Query[] {
+function parseQueries(value: string, plugins: Plugins): Query[] {
   const queries = queriesSchema.parse(JSON.parse(value));
   for (const query of queries) {
-    const datasource = registry.datasources[query.datasource];
+    const datasource = plugins.datasources[query.datasource];
     if (!datasource) throw new Error(`Unknown datasource "${query.datasource}".`);
     if (datasource.querySchema) query.spec = datasource.querySchema.parse(query.spec);
   }
@@ -39,13 +39,13 @@ const message = (error: unknown) => (error instanceof Error ? error.message : 'I
 const focusMenu = (id?: string) =>
   requestAnimationFrame(() => document.getElementById(id ? `widget-menu-${id}` : 'add-widget')?.focus());
 
-export function EditTools({ range }: { range: RawRange }) {
+export function EditTools({ range }: { range: TimeRange }) {
   const search = useSearch({ from: '/dashboards/$id' });
   const navigate = useNavigate({ from: '/dashboards/$id' });
-  const tool = useDashboardState((s) => s.tool);
+  const tool = useDashboard((s) => s.tool);
   const actions = useDashboardActions();
   const widget = useWidget(search.widget ?? '');
-  const closeWidget = () => {
+  const handleCloseWidget = () => {
     void navigate({
       search: (prev) => ({ ...prev, widget: undefined, editor: undefined }),
       resetScroll: false,
@@ -53,7 +53,7 @@ export function EditTools({ range }: { range: RawRange }) {
     focusMenu(search.widget);
   };
   if (widget && search.editor === 'queries')
-    return <QueryEditor key={widget.id} widget={widget} range={range} close={closeWidget} />;
+    return <QueryEditor key={widget.id} widget={widget} range={range} onClose={handleCloseWidget} />;
   return (
     <>
       <div className={classes.tools}>
@@ -61,10 +61,10 @@ export function EditTools({ range }: { range: RawRange }) {
           opened={tool?.kind === 'palette' || !!widget}
           onClose={() => {
             actions.openTool(null);
-            closeWidget();
+            handleCloseWidget();
           }}
           position="right"
-          size={tokens.shell.contextBar.default}
+          size={dimensions.shell.contextBar.default}
           withinPortal={false}
           trapFocus={false}
           lockScroll={false}
@@ -107,7 +107,7 @@ export function EditTools({ range }: { range: RawRange }) {
 function WidgetEditor({ widget }: { widget: Widget }) {
   const actions = useDashboardActions();
   const navigate = useNavigate({ from: '/dashboards/$id' });
-  const definition = useDashboardRegistry().widgets[widget.type];
+  const definition = usePlugins().widgets[widget.type];
   const [title, setTitle] = useState(widget.title);
   const [description, setDescription] = useState(widget.description ?? '');
   const [options, setOptions] = useState(JSON.stringify(widget.options, null, 2));
@@ -170,11 +170,11 @@ function WidgetEditor({ widget }: { widget: Widget }) {
 }
 
 function Palette() {
-  const registry = useDashboardRegistry();
+  const plugins = usePlugins();
   const actions = useDashboardActions();
   const navigate = useNavigate({ from: '/dashboards/$id' });
-  const [type, setType] = useState(Object.keys(registry.widgets)[0] ?? '');
-  const definition = registry.widgets[type];
+  const [type, setType] = useState(Object.keys(plugins.widgets)[0] ?? '');
+  const definition = plugins.widgets[type];
   const [title, setTitle] = useState('');
   const [error, setError] = useState<string>();
   return (
@@ -184,7 +184,7 @@ function Palette() {
         label="Widget type"
         value={type}
         onChange={(value) => setType(value ?? '')}
-        data={Object.values(registry.widgets).map((widget) => ({ value: widget.type, label: widget.name }))}
+        data={Object.values(plugins.widgets).map((widget) => ({ value: widget.type, label: widget.name }))}
         allowDeselect={false}
       />
       <TextInput
@@ -230,19 +230,19 @@ function Palette() {
 function Placement({ id, kind }: { id: string; kind: 'move' | 'resize' }) {
   const actions = useDashboardActions();
   const widget = useWidget(id);
-  const breakpoint = useDashboardState((s) => s.breakpoint);
-  const item = useDashboardState((s) =>
-    toLayouts(s.doc.layouts)[s.breakpoint].find((entry) => entry.i === id),
+  const breakpoint = useDashboard((s) => s.breakpoint);
+  const item = useDashboard((s) =>
+    resolveLayouts(s.doc.layouts)[s.breakpoint].find((entry) => entry.i === id),
   );
-  const definition = useDashboardRegistry().widgets[widget?.type ?? ''];
-  const cols = tokens.grid.cols[breakpoint];
+  const definition = usePlugins().widgets[widget?.type ?? ''];
+  const cols = dimensions.grid.cols[breakpoint];
   const [first, setFirst] = useState(kind === 'move' ? (item?.x ?? 0) + 1 : (item?.w ?? 2));
   const [second, setSecond] = useState(kind === 'move' ? (item?.y ?? 0) + 1 : (item?.h ?? 2));
-  const close = () => {
+  const handleClose = () => {
     actions.openTool(null);
     focusMenu(id);
   };
-  const valid =
+  const isValid =
     Number.isInteger(first) &&
     Number.isInteger(second) &&
     (kind === 'move'
@@ -253,7 +253,7 @@ function Placement({ id, kind }: { id: string; kind: 'move' | 'resize' }) {
   return (
     <Modal
       opened
-      onClose={close}
+      onClose={handleClose}
       title={`${kind === 'move' ? 'Move' : 'Resize'} ${widget?.title ?? 'widget'}`}
       centered
     >
@@ -278,7 +278,7 @@ function Placement({ id, kind }: { id: string; kind: 'move' | 'resize' }) {
           Positions start at 1. Tiles compact upward into available space.
         </Text>
         <Button
-          disabled={!valid}
+          disabled={!isValid}
           onClick={() => {
             actions.placeWidget(
               id,
@@ -286,7 +286,7 @@ function Placement({ id, kind }: { id: string; kind: 'move' | 'resize' }) {
                 ? { x: first - 1, y: second - 1 }
                 : { w: first, h: second, x: Math.min(item?.x ?? 0, cols - first) },
             );
-            close();
+            handleClose();
           }}
         >
           Apply
@@ -296,13 +296,13 @@ function Placement({ id, kind }: { id: string; kind: 'move' | 'resize' }) {
   );
 }
 
-function QueryEditor({ widget, range, close }: { widget: Widget; range: RawRange; close: () => void }) {
-  const registry = useDashboardRegistry();
+function QueryEditor({ widget, range, onClose }: { widget: Widget; range: TimeRange; onClose: () => void }) {
+  const plugins = usePlugins();
   const actions = useDashboardActions();
   const [value, setValue] = useState(JSON.stringify(widget.queries, null, 2));
   const [preview, setPreview] = useState(widget.queries);
   const [error, setError] = useState<string>();
-  const changed = value !== JSON.stringify(widget.queries, null, 2);
+  const hasChanged = value !== JSON.stringify(widget.queries, null, 2);
   return (
     <Stack>
       <Group justify="space-between">
@@ -310,7 +310,7 @@ function QueryEditor({ widget, range, close }: { widget: Widget; range: RawRange
         <Button
           variant="default"
           onClick={() => {
-            if (!changed || window.confirm('Discard unapplied query changes?')) close();
+            if (!hasChanged || window.confirm('Discard unapplied query changes?')) onClose();
           }}
         >
           Back to dashboard
@@ -321,7 +321,7 @@ function QueryEditor({ widget, range, close }: { widget: Widget; range: RawRange
       </div>
       <JsonInput
         label="Queries"
-        description={`Each query has datasource and spec. Available datasources: ${Object.keys(registry.datasources).join(', ')}.`}
+        description={`Each query has datasource and spec. Available datasources: ${Object.keys(plugins.datasources).join(', ')}.`}
         autosize
         minRows={10}
         value={value}
@@ -329,7 +329,7 @@ function QueryEditor({ widget, range, close }: { widget: Widget; range: RawRange
         onChange={(next) => {
           setValue(next);
           try {
-            setPreview(parseQueries(next, registry));
+            setPreview(parseQueries(next, plugins));
             setError(undefined);
           } catch (err) {
             setError(message(err));
@@ -338,10 +338,10 @@ function QueryEditor({ widget, range, close }: { widget: Widget; range: RawRange
       />
       <Group>
         <Button
-          disabled={!!error || !changed}
+          disabled={!!error || !hasChanged}
           onClick={() => {
             try {
-              const queries = parseQueries(value, registry);
+              const queries = parseQueries(value, plugins);
               actions.editWidget(widget.id, { queries });
               setValue(JSON.stringify(queries, null, 2));
               setError(undefined);

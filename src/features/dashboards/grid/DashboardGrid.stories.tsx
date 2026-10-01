@@ -1,14 +1,14 @@
 import { Box } from '@mantine/core';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
-import { registry } from '@/app/plugins';
-import { StoryRouter } from '@/testing/TestRouter';
-import type { GridItem } from '@/core/dashboard/layout';
+import { plugins } from '@/app/plugins';
+import { TestRouter } from '@/testing/TestRouter';
+import type { LayoutItem } from '@/core/dashboard/layout';
 import { DashboardProvider } from '../state/DashboardProvider';
 import { createDashboardStore } from '../state/createDashboardStore';
 import { localRepository } from '../data/dashboardApi';
 import type { Dashboard, Widget } from '../state/types';
-import { DashboardRegistryContext } from '@/plugins/usePlugins';
+import { PluginsContext } from '@/plugins/usePlugins';
 import { DashboardGrid } from './DashboardGrid';
 
 // Built inline with mock queries: Storybook doesn't serve public/data.
@@ -16,7 +16,7 @@ const series = (seed: string, name: string, base: number) => [
   { datasource: 'mock', spec: { kind: 'series', seed, fields: [{ name, base, spread: base / 10 }] } },
 ];
 
-function dashboard(tiles: [Widget, GridItem][]): Dashboard {
+function dashboard(tiles: [Widget, LayoutItem][]): Dashboard {
   return {
     version: 1,
     id: 'story',
@@ -100,7 +100,7 @@ const sales = dashboard([
 
 const forms = ['area', 'line', 'bar'];
 const perf = dashboard(
-  Array.from({ length: 20 }, (_, n): [Widget, GridItem] => [
+  Array.from({ length: 20 }, (_, n): [Widget, LayoutItem] => [
     {
       id: `chart-${n + 1}`,
       type: 'chart',
@@ -117,16 +117,16 @@ const dashboards = { sales, perf };
 function GridStory({ id, mode = 'view' }: { id: keyof typeof dashboards; mode?: 'view' | 'edit' }) {
   const [store] = useState(() => createDashboardStore(dashboards[id], localRepository, mode, false));
   return (
-    <StoryRouter
+    <TestRouter
       wrap={(outlet) => outlet}
       page={
-        <DashboardRegistryContext value={registry}>
+        <PluginsContext value={plugins}>
           <Box p="lg">
             <DashboardProvider dashboard={dashboards[id]} store={store}>
               <DashboardGrid range={{ from: 'now-24h', to: 'now' }} />
             </DashboardProvider>
           </Box>
-        </DashboardRegistryContext>
+        </PluginsContext>
       }
     />
   );

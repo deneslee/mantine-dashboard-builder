@@ -1,6 +1,6 @@
 import type { Query } from '@/plugins/DatasourcePlugin';
-import type { AuthoredLayouts } from '@/core/dashboard/layout';
-import type { RawRange } from '@/core/time/timeRange';
+import type { Layouts } from '@/core/dashboard/layout';
+import type { TimeRange } from '@/core/time/timeRange';
 
 /** A tile: which widget draws it, the widget's options (the widget checks them) and its queries. */
 export interface Widget {
@@ -21,12 +21,12 @@ export interface Dashboard {
   tags: string[];
   updatedAt: string;
   /** Defaults; the URL overrides them. */
-  timeRange: RawRange;
+  timeRange: TimeRange;
   refresh: string;
   variables: unknown[];
   widgets: Record<string, Widget>;
   /** Only authored layouts are saved; missing breakpoints are projected by the canvas. */
-  layouts: AuthoredLayouts;
+  layouts: Layouts;
 }
 
 /** An entry in the dashboard list. */

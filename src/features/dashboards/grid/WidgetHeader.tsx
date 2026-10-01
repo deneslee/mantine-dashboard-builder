@@ -5,33 +5,33 @@ import { useQueryClient } from '@tanstack/react-query';
 import { fontWeight, iconSize, iconStroke } from '@/ui/tokens/semantic';
 import { notify } from '@/lib/notify/notify';
 import { widgetDataQuery } from '../data/dashboardQueries';
-import { useDashboardActions, useDashboardState } from '../state/useDashboard';
-import type { RawRange } from '@/core/time/timeRange';
+import { useDashboardActions, useDashboard } from '../state/useDashboard';
+import type { TimeRange } from '@/core/time/timeRange';
 import type { Widget } from '../state/types';
-import { useDashboardRegistry } from '@/plugins/usePlugins';
+import { usePlugins } from '@/plugins/usePlugins';
 import classes from './WidgetTile.module.css';
 
 export function WidgetHeader({
   widget,
   titleId,
   range,
-  fetching,
-  failed,
+  isFetching,
+  hasFailed,
 }: {
   widget: Widget;
   titleId: string;
-  range: RawRange;
-  fetching: boolean;
-  failed: boolean;
+  range: TimeRange;
+  isFetching: boolean;
+  hasFailed: boolean;
 }) {
-  const mode = useDashboardState((state) => state.mode);
-  const dashboardId = useDashboardState((state) => state.doc.id);
+  const mode = useDashboard((state) => state.mode);
+  const dashboardId = useDashboard((state) => state.doc.id);
   const actions = useDashboardActions();
-  const registry = useDashboardRegistry();
-  const definition = registry.widgets[widget.type];
+  const plugins = usePlugins();
+  const definition = plugins.widgets[widget.type];
   const client = useQueryClient();
   const focusMenu = () => document.getElementById('widget-menu-' + widget.id)?.focus();
-  const copyLink = async () => {
+  const handleCopyLink = async () => {
     const url = new URL(window.location.href);
     for (const key of ['mode', 'widget', 'editor']) url.searchParams.delete(key);
     url.hash = 'widget-' + widget.id;
@@ -42,7 +42,7 @@ export function WidgetHeader({
       notify.error({ title: 'Could not copy link', message: 'Copy the dashboard URL from the address bar.' });
     }
   };
-  const remove = () => {
+  const handleRemove = () => {
     actions.remove(widget.id);
     requestAnimationFrame(() =>
       (
@@ -75,7 +75,7 @@ export function WidgetHeader({
             </ActionIcon>
           </Tooltip>
         ) : null}
-        {failed ? (
+        {hasFailed ? (
           <Tooltip
             label="Widget data could not be refreshed"
             interactive
@@ -105,7 +105,7 @@ export function WidgetHeader({
               <Menu.Item
                 onClick={() =>
                   void client.invalidateQueries({
-                    queryKey: widgetDataQuery(widget.queries, range, registry.datasources, widget.title)
+                    queryKey: widgetDataQuery(widget.queries, range, plugins.datasources, widget.title)
                       .queryKey,
                     exact: true,
                   })
@@ -114,7 +114,7 @@ export function WidgetHeader({
                 Refresh
               </Menu.Item>
             ) : null}
-            <Menu.Item onClick={() => void copyLink()}>Copy link</Menu.Item>
+            <Menu.Item onClick={() => void handleCopyLink()}>Copy link</Menu.Item>
             {mode === 'edit' ? (
               <>
                 <Menu.Divider />
@@ -145,7 +145,7 @@ export function WidgetHeader({
                 >
                   Duplicate
                 </Menu.Item>
-                <Menu.Item color="danger" onClick={remove}>
+                <Menu.Item color="danger" onClick={handleRemove}>
                   Remove
                 </Menu.Item>
               </>
@@ -155,8 +155,8 @@ export function WidgetHeader({
       </Group>
       <span
         className={classes.status}
-        data-fetching={fetching || undefined}
-        data-failed={failed || undefined}
+        data-fetching={isFetching || undefined}
+        data-failed={hasFailed || undefined}
         aria-hidden
       />
     </Group>

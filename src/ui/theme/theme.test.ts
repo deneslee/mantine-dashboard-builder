@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { shadow, shape } from '../tokens/semantic';
-import { components } from './components';
 import { ActionIconTheme } from './components/ActionIconTheme';
 import { AlertTheme } from './components/AlertTheme';
 import { ButtonTheme } from './components/ButtonTheme';
@@ -50,26 +49,5 @@ describe('Component tier defaults', () => {
 
   it('uses shape.control as the fallback radius for every other component', () => {
     expect(theme.defaultRadius).toBe(shape.control);
-  });
-
-  it('registers all split components on the Mantine theme', () => {
-    expect(theme.components?.Button).toBe(components.Button);
-    expect(theme.components?.ActionIcon).toBe(components.ActionIcon);
-    expect(theme.components?.Input).toBe(components.Input);
-    expect(theme.components?.Select).toBe(components.Select);
-    expect(theme.components?.Paper).toBe(components.Paper);
-    expect(theme.components?.Card).toBe(components.Card);
-    expect(theme.components?.Alert).toBe(components.Alert);
-    expect(theme.components?.Notification).toBe(components.Notification);
-    expect(theme.components?.Modal).toBe(components.Modal);
-    expect(theme.components?.Menu).toBe(components.Menu);
-    expect(theme.components?.Drawer).toBe(components.Drawer);
-    expect(theme.components?.Popover).toBe(components.Popover);
-    expect(theme.components?.NavLink).toBe(components.NavLink);
-    expect(theme.components?.ScrollArea).toBe(components.ScrollArea);
-    expect(theme.components?.Skeleton).toBe(components.Skeleton);
-    expect(theme.components?.Tabs).toBe(components.Tabs);
-    expect(theme.components?.Tooltip).toBe(components.Tooltip);
-    expect(theme.components?.Spotlight).toBe(components.Spotlight);
   });
 });

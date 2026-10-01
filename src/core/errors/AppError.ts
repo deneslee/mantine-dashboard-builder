@@ -7,18 +7,19 @@ export type AppErrorCode =
  */
 export class AppError extends Error {
   readonly code: AppErrorCode;
-  readonly retryable: boolean;
+  readonly isRetryable: boolean;
   readonly details?: unknown;
 
   constructor(
     code: AppErrorCode,
     message: string,
-    opts: { cause?: unknown; retryable?: boolean; details?: unknown } = {},
+    opts: { cause?: unknown; isRetryable?: boolean; details?: unknown } = {},
   ) {
     super(message, { cause: opts.cause });
     this.name = 'AppError';
     this.code = code;
-    this.retryable = opts.retryable ?? (code === 'network' || code === 'timeout' || code === 'datasource');
+    this.isRetryable =
+      opts.isRetryable ?? (code === 'network' || code === 'timeout' || code === 'datasource');
     this.details = opts.details;
   }
 }
@@ -39,7 +40,7 @@ export function toAppError(e: unknown): AppError {
 }
 
 /** Title per code: what happened, in plain words. */
-export const errorTitles: Record<AppErrorCode, string> = {
+export const ERROR_TITLES: Record<AppErrorCode, string> = {
   not_found: 'Not found',
   network: 'Connection problem',
   timeout: 'Request timed out',

@@ -245,8 +245,8 @@ Every step leaves `pnpm lint && pnpm format:check && pnpm build && pnpm test` gr
 
 ### 4. Renames
 
-- [ ] **Exports.** Rename per the table above. Done when `grep` finds none of the old names (`dashboardDoc`, `DashboardRegistry`, `WidgetDefinition`, `RawRange`, `useDashboardState`, `DetailsTab`, …).
-- [ ] **Booleans and handlers.** `is`/`has`/`should`/`can` booleans and `handle*` handlers across `src/`.
+- [x] **Exports.** Rename per the table above. Done when `grep` finds none of the old names (`dashboardDoc`, `DashboardRegistry`, `WidgetDefinition`, `RawRange`, `useDashboardState`, `DetailsTab`, …). Oct 1: all gone except `dashboardDoc`, `DashboardDocDto`, `toDashboard` and `toDocument`, which **Flat document** deletes.
+- [x] **Booleans and handlers.** `is`/`has`/`should`/`can` booleans and `handle*` handlers across `src/`. Oct 1: renamed with the TypeScript language service, so every reference moved. The shell and inbox stores persist at version 2 with a `migrate` from v1 (`docked`/`open`/`read`), each with a test. Callback props are `on*` (QueryEditor `close` → `onClose`). The unused `meta.silent` was deleted rather than renamed. Left as is: options passed to libraries (`centered`, `autoClose`, …), the integrations code that 06 rebuilds, and the `WidgetPlugin` capability flags that **Plugins once** deletes.
 
 ### 5. Edits
 
@@ -300,6 +300,7 @@ Every step leaves `pnpm lint && pnpm format:check && pnpm build && pnpm test` gr
 - **Sep 30: Storybook 10.6.1** for Vitest 5 support (10.6.0's Vitest addon only allows Vitest 3–4). Installed once it cleared the repo's 24-hour `minimumReleaseAge`; the policy was not bypassed.
 - **Sep 30: `color-contrast` off in the story a11y tests**, not every failing story marked `todo`. The light-scheme tokens fail AA everywhere, so `todo` on each story would also hide new a11y regressions. Every other rule stays an error, and the token fix is tracked in tasks.md.
 - **Sep 30: planning moves to `.agents/planning/`.** `docs/` is for people, with `architecture.md` holding the stack and structure.
+- **Oct 1: renamed persisted fields migrate through zustand's `version`/`migrate`**, not a reset. A reset would silently drop users' panel layout and unread inbox. Each migration is marked `ponytail: delete after 2027-01`.
 
 ## Out of scope
 

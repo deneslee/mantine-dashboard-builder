@@ -21,8 +21,17 @@ describe('notify', () => {
     expect(useInbox.getState().items[0]).toMatchObject({
       level: 'error',
       title: 'Import failed',
-      read: false,
+      isRead: false,
     });
+  });
+
+  it('loads v1 inbox items saved before the boolean rename', async () => {
+    const item = { id: 'a', level: 'error', title: 'Old', at: 1, count: 1, read: true };
+    localStorage.setItem('notifications.v1', JSON.stringify({ version: 1, state: { items: [item] } }));
+    await useInbox.persist.rehydrate();
+    expect(useInbox.getState().items).toEqual([
+      { id: 'a', level: 'error', title: 'Old', at: 1, count: 1, isRead: true },
+    ]);
   });
 
   it('does not record success or info in the inbox', () => {

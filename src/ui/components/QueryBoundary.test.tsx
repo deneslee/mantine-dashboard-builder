@@ -2,7 +2,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@/testing/render';
 import { AppError } from '@/core/errors/AppError';
-import { WidgetBoundary } from './QueryBoundary';
+import { QueryBoundary } from './QueryBoundary';
 
 let shouldThrow = true;
 function Flaky() {
@@ -10,14 +10,14 @@ function Flaky() {
   return <p>Loaded</p>;
 }
 
-describe('WidgetBoundary', () => {
+describe('QueryBoundary', () => {
   it('contains the error in the tile and recovers on retry', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
     render(
       <>
-        <WidgetBoundary name="Alarms">
+        <QueryBoundary name="Alarms">
           <Flaky />
-        </WidgetBoundary>
+        </QueryBoundary>
         <p>Sibling still renders</p>
       </>,
     );
@@ -37,9 +37,9 @@ describe('WidgetBoundary', () => {
       throw new AppError('validation', 'Unexpected shape.');
     }
     render(
-      <WidgetBoundary>
+      <QueryBoundary>
         <Invalid />
-      </WidgetBoundary>,
+      </QueryBoundary>,
     );
     expect(screen.getByRole('alert')).toHaveTextContent('Invalid data');
     expect(screen.queryByRole('button', { name: 'Retry' })).not.toBeInTheDocument();

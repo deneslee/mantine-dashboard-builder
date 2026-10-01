@@ -17,8 +17,8 @@ import classes from './ContextBar.module.css';
  */
 export function ContextBar() {
   const tabs = useContextTabs();
-  const { activeTab, prefersDocked } = useContextBar();
-  const { narrow } = useSidebar();
+  const { activeTab, isDockPreferred } = useContextBar();
+  const { isNarrow } = useSidebar();
   const { setActiveTab, closeContextBar, setContextBarDocked } = useShellActions();
 
   const active = tabs.find((t) => t.id === activeTab) ?? tabs[0];
@@ -56,7 +56,7 @@ export function ContextBar() {
           })}
         </Tabs.List>
         <Group gap="3xs" wrap="nowrap" className={classes.actions}>
-          {narrow ? null : <Panel.DockToggle docked={prefersDocked} onChange={setContextBarDocked} />}
+          {isNarrow ? null : <Panel.DockToggle isDocked={isDockPreferred} onChange={setContextBarDocked} />}
           <Tooltip label="Close">
             <ActionIcon aria-label="Close context panel" onClick={closeContextBar}>
               <IconX size={iconSize.md} stroke={iconStroke} />

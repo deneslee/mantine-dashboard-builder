@@ -10,7 +10,7 @@ describe('toAppError', () => {
   it('maps fetch failures to retryable network errors', () => {
     const e = toAppError(new TypeError('Failed to fetch'));
     expect(e.code).toBe('network');
-    expect(e.retryable).toBe(true);
+    expect(e.isRetryable).toBe(true);
   });
 
   it('maps aborts to timeout', () => {
@@ -21,6 +21,6 @@ describe('toAppError', () => {
     const e = toAppError('boom');
     expect(e.code).toBe('unknown');
     expect(e.cause).toBe('boom');
-    expect(e.retryable).toBe(false);
+    expect(e.isRetryable).toBe(false);
   });
 });

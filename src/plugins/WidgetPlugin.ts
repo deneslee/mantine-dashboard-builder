@@ -9,8 +9,8 @@ export interface WidgetProps<Options> {
   options: Options;
 }
 
-/** A widget plugin. Features define them; `app/registry.ts` collects them. */
-export interface WidgetDefinition<Options = unknown> {
+/** A widget plugin. Features define them; `app/plugins.ts` collects them. */
+export interface WidgetPlugin<Options = unknown> {
   type: string;
   name: string;
   icon: Icon;
@@ -27,9 +27,9 @@ export interface WidgetDefinition<Options = unknown> {
 
 /**
  * Checks that a component and its options schema agree, then drops the options type so
- * definitions fit in one registry map. The tile parses options with the same schema before
+ * definitions fit in one plugins map. The tile parses options with the same schema before
  * rendering, so the pairing holds at runtime.
  */
-export function defineWidget<Options>(definition: WidgetDefinition<Options>): WidgetDefinition {
-  return definition as unknown as WidgetDefinition;
+export function defineWidget<Options>(definition: WidgetPlugin<Options>): WidgetPlugin {
+  return definition as unknown as WidgetPlugin;
 }

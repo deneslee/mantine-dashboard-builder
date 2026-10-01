@@ -7,13 +7,13 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import { RouteBreadcrumbs } from '@/shell/breadcrumbs/RouteBreadcrumbs';
 import { Page } from '@/ui/components/Page';
 import { fontWeight, iconSize, iconStroke } from '@/ui/tokens/semantic';
-import { dashboardsQuery } from './data/dashboardQueries';
+import { dashboardListQuery } from './data/dashboardQueries';
 import classes from './DashboardListPage.module.css';
 
 dayjs.extend(relativeTime);
 
-export function DashboardList() {
-  const { data } = useSuspenseQuery(dashboardsQuery());
+export function DashboardListPage() {
+  const { data } = useSuspenseQuery(dashboardListQuery());
 
   return (
     <Page.Root>

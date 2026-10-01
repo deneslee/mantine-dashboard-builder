@@ -25,6 +25,6 @@ export interface InboxItem {
   message?: string;
   source?: string;
   at: number;
-  read: boolean;
+  isRead: boolean;
   count: number;
 }

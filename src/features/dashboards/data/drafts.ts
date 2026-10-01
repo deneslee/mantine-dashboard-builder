@@ -18,7 +18,7 @@ export function readSaved(id: string): Dashboard | undefined {
     throw new AppError(
       'validation',
       'The local saved dashboard is invalid. Keep a copy before clearing it.',
-      { cause, retryable: false },
+      { cause, isRetryable: false },
     );
   }
 }

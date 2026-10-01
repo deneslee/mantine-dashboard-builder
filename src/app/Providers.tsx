@@ -4,7 +4,7 @@ import { Notifications } from '@mantine/notifications';
 import { QueryClientProvider, type QueryClient } from '@tanstack/react-query';
 import { useEffect, type ReactNode } from 'react';
 import { cssVariablesResolver, reducedMotionTheme, theme } from '@/ui/theme/theme';
-import { tokens } from '@/ui/tokens/tokens';
+import { dimensions } from '@/ui/tokens/dimensions';
 import { useMotion } from '@/lib/useMotion';
 import { CurrentUserContext, placeholderUser } from '@/lib/useCurrentUser';
 
@@ -16,17 +16,17 @@ const colorSchemeManager = localStorageColorSchemeManager({ key: 'color-scheme' 
  * swaps in a theme with Mantine's transitions at 0ms.
  */
 export function Providers({ children, queryClient }: { children: ReactNode; queryClient: QueryClient }) {
-  const { reduced } = useMotion();
+  const { isReduced } = useMotion();
 
   useEffect(() => {
     const html = document.documentElement;
-    if (reduced) html.setAttribute('data-motion', 'reduce');
+    if (isReduced) html.setAttribute('data-motion', 'reduce');
     else html.removeAttribute('data-motion');
-  }, [reduced]);
+  }, [isReduced]);
 
   return (
     <MantineProvider
-      theme={reduced ? reducedMotionTheme : theme}
+      theme={isReduced ? reducedMotionTheme : theme}
       cssVariablesResolver={cssVariablesResolver}
       defaultColorScheme="auto"
       colorSchemeManager={colorSchemeManager}
@@ -37,9 +37,9 @@ export function Providers({ children, queryClient }: { children: ReactNode; quer
             <Notifications
               limit={3}
               position="bottom-right"
-              zIndex={tokens.zIndex.notification}
+              zIndex={dimensions.zIndex.notification}
               containerWidth={380}
-              transitionDuration={reduced ? 0 : undefined}
+              transitionDuration={isReduced ? 0 : undefined}
             />
             {children}
           </ModalsProvider>

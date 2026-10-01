@@ -81,9 +81,9 @@ export function useMainLock({ root, main, mainPane, sidebarPane, contextPane }: 
     const contextEl = contextPane.current;
     if (!mainPane.current || !sidebarEl || !contextEl) return;
 
-    const moves =
+    const hasMoved =
       Math.abs(widthOf(sidebarEl) - sidebar) >= 0.5 || Math.abs(widthOf(contextEl) - context) >= 0.5;
-    if (!moves) return;
+    if (!hasMoved) return;
 
     const ms = transitionMs(mainPane.current);
     if (ms < 1) return release();

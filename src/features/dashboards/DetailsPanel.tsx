@@ -6,7 +6,7 @@ import { fontWeight } from '@/ui/tokens/semantic';
 import { dashboardQuery } from './data/dashboardQueries';
 
 /** Context-bar tab on a dashboard route: what this dashboard is. */
-export function DetailsTab() {
+export function DetailsPanel() {
   const { id } = useParams({ from: '/dashboards/$id' });
   const { data } = useSuspenseQuery(dashboardQuery(id));
   return (

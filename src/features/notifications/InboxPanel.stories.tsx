@@ -1,7 +1,7 @@
 import { Button, Group, Paper } from '@mantine/core';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useEffect } from 'react';
-import { Inbox } from './InboxPanel';
+import { InboxPanel } from './InboxPanel';
 import { notify } from '@/lib/notify/notify';
 import { useInbox } from '@/lib/notify/useInbox';
 
@@ -58,7 +58,7 @@ function SeededInbox() {
           message: 'Haystack returned 502.',
           source: 'Operations',
           at: Date.now() - 60_000,
-          read: false,
+          isRead: false,
           count: 3,
         },
         {
@@ -68,7 +68,7 @@ function SeededInbox() {
           message: 'Showing cached data.',
           source: 'Datadog',
           at: Date.now() - 3_600_000,
-          read: true,
+          isRead: true,
           count: 1,
         },
       ],
@@ -76,7 +76,7 @@ function SeededInbox() {
   }, []);
   return (
     <Paper variant="panel" w={360} m="lg">
-      <Inbox />
+      <InboxPanel />
     </Paper>
   );
 }
@@ -88,7 +88,7 @@ function EmptyInbox() {
   }, []);
   return (
     <Paper variant="panel" w={360} m="lg">
-      <Inbox />
+      <InboxPanel />
     </Paper>
   );
 }

@@ -35,20 +35,20 @@ const motionOptions = [
 ] as const;
 
 /** Appearance tab. Changes are a draft until "Save changes". */
-export function AppearanceSettings() {
-  const { values, dirty, saving, setField, save, reset } = useAppearanceForm();
+export function AppearanceForm() {
+  const { values, isDirty, isSaving, setField, save, reset } = useAppearanceForm();
 
   return (
     <form
       className={classes.form}
-      aria-busy={saving}
+      aria-busy={isSaving}
       onSubmit={(event) => {
         event.preventDefault();
         save();
       }}
     >
-      {/* Locked while saving so an edit can't land between submit and the draft being cleared. */}
-      <fieldset disabled={saving} className={classes.fields}>
+      {/* Locked while isSaving so an edit can't land between submit and the draft being cleared. */}
+      <fieldset disabled={isSaving} className={classes.fields}>
         <SettingsSection title="Sidebar" description="How the navigation sidebar behaves on wide screens.">
           <SettingsRow
             label="Menu button"
@@ -126,11 +126,11 @@ export function AppearanceSettings() {
       </fieldset>
 
       <div className={classes.actions}>
-        {dirty && !saving ? <Text className={classes.status}>You have unsaved changes.</Text> : null}
-        <Button variant="default" disabled={!dirty || saving} onClick={reset}>
+        {isDirty && !isSaving ? <Text className={classes.status}>You have unsaved changes.</Text> : null}
+        <Button variant="default" disabled={!isDirty || isSaving} onClick={reset}>
           Discard
         </Button>
-        <Button type="submit" disabled={!dirty} loading={saving}>
+        <Button type="submit" disabled={!isDirty} loading={isSaving}>
           Save changes
         </Button>
       </div>

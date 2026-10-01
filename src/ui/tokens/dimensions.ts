@@ -5,4 +5,4 @@
 
 import { grid, shell, zIndex } from './primitives';
 
-export const tokens = { shell, zIndex, grid } as const;
+export const dimensions = { shell, zIndex, grid } as const;

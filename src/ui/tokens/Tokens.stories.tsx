@@ -18,7 +18,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { IconSettings } from '@tabler/icons-react';
 import { primitives } from './primitives';
 import { iconSize, iconStroke, semantic, shape, toCssVars } from './semantic';
-import { tokens } from './tokens';
+import { dimensions } from './dimensions';
 
 /**
  * The token tiers (docs/design-system.md): primitives hold the raw values, semantic tokens name them per scheme,
@@ -197,25 +197,25 @@ export const Primitives: Story = {
             <Table.Tbody>
               <Table.Tr>
                 <Table.Td>Navbar height</Table.Td>
-                <Table.Td>{tokens.shell.navbarHeight}</Table.Td>
+                <Table.Td>{dimensions.shell.navbarHeight}</Table.Td>
               </Table.Tr>
               <Table.Tr>
                 <Table.Td>Sidebar expanded / compact</Table.Td>
                 <Table.Td>
-                  {tokens.shell.sidebar.expanded} / {tokens.shell.sidebar.compact}
+                  {dimensions.shell.sidebar.expanded} / {dimensions.shell.sidebar.compact}
                 </Table.Td>
               </Table.Tr>
               <Table.Tr>
                 <Table.Td>Sidebar min / max</Table.Td>
                 <Table.Td>
-                  {tokens.shell.sidebar.min} / {tokens.shell.sidebar.max}
+                  {dimensions.shell.sidebar.min} / {dimensions.shell.sidebar.max}
                 </Table.Td>
               </Table.Tr>
               <Table.Tr>
                 <Table.Td>Context bar default / min / max</Table.Td>
                 <Table.Td>
-                  {tokens.shell.contextBar.default} / {tokens.shell.contextBar.min} /{' '}
-                  {tokens.shell.contextBar.max}
+                  {dimensions.shell.contextBar.default} / {dimensions.shell.contextBar.min} /{' '}
+                  {dimensions.shell.contextBar.max}
                 </Table.Td>
               </Table.Tr>
             </Table.Tbody>
@@ -225,7 +225,7 @@ export const Primitives: Story = {
           <Title order={3}>Z-index ladder</Title>
           <Table withTableBorder w={280}>
             <Table.Tbody>
-              {Object.entries(tokens.zIndex)
+              {Object.entries(dimensions.zIndex)
                 .sort(([, a], [, b]) => b - a)
                 .map(([k, v]) => (
                   <Table.Tr key={k}>

@@ -2,7 +2,7 @@ import { Paper, SimpleGrid } from '@mantine/core';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import {
   ChartSkeleton,
-  DashboardSkeleton,
+  GridSkeleton,
   ListSkeleton,
   PanelSkeleton,
   TableSkeleton,
@@ -32,5 +32,5 @@ export const Widgets: Story = {
   ),
 };
 
-export const DashboardRoute: Story = { render: () => <DashboardSkeleton /> };
+export const DashboardRoute: Story = { render: () => <GridSkeleton /> };
 export const ListRoute: Story = { render: () => <ListSkeleton /> };
