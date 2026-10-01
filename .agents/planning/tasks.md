@@ -12,18 +12,18 @@ The big-picture checklist, by roadmap phase ([roadmap](roadmap.md#roadmap)). Eac
 - [x] **Phase 2, dashboard read** (Sep 27):
   - [x] **04 Page header:** named parts, breadcrumbs from the router, a control bar for pickers. [Plan](plans/done/04-page-header.md)
   - [x] **05 Dashboard read:** JSON documents, `DataFrame`, widget and datasource registries, time range in the URL, table widget. [Plan](plans/done/05-dashboard-read.md)
+- [x] **08 Structure cleanup** (Oct 1): planning in `.agents/planning/`; browser tests (every story in Chromium with a11y, editor flows as play functions); package-shaped folders with one lint rule per layer; naming rules; one flat `Dashboard` type with `schemaVersion`; one owner per kind of state, `mode` only in the URL; `dashboard-builder:` storage keys with the version in the value. [Plan](plans/done/08-structure-cleanup.md)
 
 ## Next, in order
 
-Order decided Sep 30: the edit MVP is built. 08 comes next, because its browser tests close the edit MVP's acceptance. Then the viewing tools, then Sentry and integrations ([roadmap](roadmap.md#roadmap)).
+Order decided Sep 30: the edit MVP, then 08 (done Oct 1, its browser tests closed most of the edit MVP's acceptance), then the viewing tools, then Sentry and integrations ([roadmap](roadmap.md#roadmap)).
 
-- [ ] **1. 08 Structure cleanup** (cross-cutting): planning moves to `.agents/planning/`; gate fixes (React Compiler setup, lint, the invisible edit drawer, a corrupt saved copy); browser tests through Storybook's Vitest addon; package-shaped folders; naming rules; one owner per kind of state; localStorage keys without `.v1`. [Plan](plans/08-structure-cleanup.md). Oct 1: steps 0–6 are done; the final docs pass (step 7) is next.
-- [ ] **2. 07 stages 1 and 2, the rest** (phase 3): the edit MVP is built. 08's play functions close its acceptance checks; the drag and resize measurement on `/dashboards/perf` remains. [Stage 1](plans/07-dashboard-model.md#stage-1-foundation-phase-3), [stage 2](plans/07-dashboard-model.md#stage-2-edit-mvp-phase-3)
-- [ ] **3. 07 stage 3, viewing** (phase 3): one cache entry per datasource query, scoped time with a time zone, per-widget time, full screen, the Inspect drawer, density, shortcuts. [Plan](plans/07-dashboard-model.md#stage-3-viewing-phase-3)
-- [ ] **4. 06 Sentry §1 and §2:** render errors from the boundaries, data errors from the query and mutation caches, a reportability policy, the startup buffer, source maps in CI. Paused until step 3. [Plan](plans/06-sentry.md)
-- [ ] **5. Integrations foundation** (not planned yet, below).
-- [ ] **6. 06 Sentry §3:** Sentry as the first telemetry integration, and its rebuilt page. [Plan](plans/06-sentry.md#3-sentry-as-the-first-telemetry-integration)
-- [ ] **7. 07 stage 4, layout, variables and data** (phase 4): document v2 with rows and then tabs (and the `metadata`/`spec` envelope), resolution from the layout, hover sync groups, variables through `getVariableRefs`, grouped datasource errors, per-datasource concurrency. [Plan](plans/07-dashboard-model.md#stage-4-layout-variables-data-phase-4)
+- [ ] **1. 07 stages 1 and 2, the rest** (phase 3): the edit MVP is built. 08's play functions close its acceptance checks; the drag and resize measurement on `/dashboards/perf` remains. [Stage 1](plans/07-dashboard-model.md#stage-1-foundation-phase-3), [stage 2](plans/07-dashboard-model.md#stage-2-edit-mvp-phase-3)
+- [ ] **2. 07 stage 3, viewing** (phase 3): one cache entry per datasource query, scoped time with a time zone, per-widget time, full screen, the Inspect drawer, density, shortcuts. [Plan](plans/07-dashboard-model.md#stage-3-viewing-phase-3)
+- [ ] **3. 06 Sentry §1 and §2:** render errors from the boundaries, data errors from the query and mutation caches, a reportability policy, the startup buffer, source maps in CI. Paused until step 2. [Plan](plans/06-sentry.md)
+- [ ] **4. Integrations foundation** (not planned yet, below).
+- [ ] **5. 06 Sentry §3:** Sentry as the first telemetry integration, and its rebuilt page. [Plan](plans/06-sentry.md#3-sentry-as-the-first-telemetry-integration)
+- [ ] **6. 07 stage 4, layout, variables and data** (phase 4): document v2 with rows and then tabs (and the `metadata`/`spec` envelope), resolution from the layout, hover sync groups, variables through `getVariableRefs`, grouped datasource errors, per-datasource concurrency. [Plan](plans/07-dashboard-model.md#stage-4-layout-variables-data-phase-4)
 
 ### Edit UI polish (not planned yet)
 
@@ -59,11 +59,11 @@ These come from the Sep 30 review of the edit MVP ([07 › Sep 30 review](plans/
   - Move and Resize announce positions counted from 0 ("column 0, row 3"), while their dialogs count from 1.
 - [ ] **Query editor preview.** Debounce the preview query instead of running one per keystroke.
 
-### Integrations foundation (step 5, not planned yet)
+### Integrations foundation (step 4, not planned yet)
 
 The model and the reasons for it are in the [integrations research](research/integrations.md).
 
-- [ ] **Manifests.** `IntegrationManifest` in `app/registry.ts` next to widgets and datasources: `id`, `name`, `icon`, `category`, `provides` (`datasource`, `telemetry`), and `loadConfig`, `loadRuntime`, `loadSetup` as separate chunks. `features/integrations` never imports an integration.
+- [ ] **Manifests.** `IntegrationManifest` in `app/plugins.ts` next to widgets and datasources: `id`, `name`, `icon`, `category`, `provides` (`datasource`, `telemetry`), and `loadConfig`, `loadRuntime`, `loadSetup` as separate chunks. `features/integrations` never imports an integration.
 - [ ] **Config port.** `IntegrationConfigRepository` reads `public/config/integrations.json`: the outer shape first, then only the enabled entries' config schemas. The default file enables nothing. An entry that fails its schema stays off and shows why on its Setup page.
 - [ ] **Gating.** Telemetry runtimes start from `main.tsx` once the config is read, only when enabled; datasource types of disabled integrations aren't offered.
 - [ ] **Catalog.** Rebuild `/integrations` (grid and row) on `Page` and tokens, grouped by category: every registered integration with its state and a Set up link. Moved here from 06.
@@ -91,10 +91,11 @@ Nested layer tokens are no longer planned: they were for widgets inside a `conta
 ### Left from 04 and 05
 
 - [ ] **Trace scrolling the 10k-row table.** Chrome Performance trace on `pnpm preview`, `/dashboards/infra`, Request log. Done when no long task is over 50 ms and the summary is in [05 Verification](plans/done/05-dashboard-read.md#verification).
-- [-] **Storybook a11y check.** `Design system/Page`, `Dashboards/Controls` and `Dashboards/Grid` in the a11y panel. Moved to [08](plans/08-structure-cleanup.md) step 2: every story then runs as an a11y test in Chromium, and a story that fails is marked `todo` with its own line here.
+- [-] **Storybook a11y check.** `Design system/Page`, `Dashboards/Controls` and `Dashboards/Grid` in the a11y panel. Moved to [08](plans/done/08-structure-cleanup.md) step 2: every story then runs as an a11y test in Chromium, and a story that fails is marked `todo` with its own line here.
 
 ### Deployment
 
+- [ ] **First CI run.** `github-pages.yaml` (written in 08, Sep 30) runs lint, the format check, Chromium and `pnpm test` on pull requests and before each deploy, and deploys only from main. Done when a pull request runs the checks without deploying.
 - [ ] **GitHub Pages deep links.** GitHub Pages has no SPA fallback, so `/dashboards/…` opened directly returns 404. The workflow already copies `index.html` to `404.html`; what's left is to check it. Done when a deep link loads on the deployed site.
 - [ ] **Bundle budget in CI.** Add `size-limit` with the first-load number, stating whether it's raw or gzipped; integration manifests count toward it. Done when a pull request that pushes first load past it fails.
 
@@ -110,4 +111,4 @@ Nested layer tokens are no longer planned: they were for widgets inside a `conta
   Fix it in the semantic tokens ([design-system.md](../../docs/ui/design-system.md)): a darker dimmed shade, and a primary shade or text color for filled buttons. Done when `color-contrast` is enabled again in `.storybook/preview.tsx` and every story passes.
 
 - [ ] **`--mantine-color-body` points at the overlay surface.** Before the overlay and raised surfaces diverge, point it at the canvas surface, bind `ModalBase` (Modal, Drawer) to overlay, and bind the parts that must match the surface behind them (Table's sticky header, the active Tabs border, Scroller's fade) to `--app-layer-surface`. Details in [design-system.md](../../docs/ui/design-system.md#where-new-things-go). Done when a story shows each of those components on canvas and inside a widget.
-- [ ] **Components the React Compiler skips.** `RouteError` and `SentryVerificationCard` use `try`/`finally` without `catch`; `FrameTable` uses an incompatible library (TanStack Table). Restructure them if it ever matters. The `throw` and `?.` inside `try` in the old `DashboardView` and editor forms, and the `@babel/core` 8 skip of components with destructured defaults, were fixed in [08](plans/08-structure-cleanup.md) (Oct 1: nothing under `features/dashboards` bails out).
+- [ ] **Components the React Compiler skips.** `RouteError` and `SentryVerificationCard` use `try`/`finally` without `catch`; `FrameTable` uses an incompatible library (TanStack Table). Restructure them if it ever matters. The `throw` and `?.` inside `try` in the old `DashboardView` and editor forms, and the `@babel/core` 8 skip of components with destructured defaults, were fixed in [08](plans/done/08-structure-cleanup.md) (Oct 1: nothing under `features/dashboards` bails out).

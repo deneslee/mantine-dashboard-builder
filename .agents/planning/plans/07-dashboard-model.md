@@ -1,6 +1,6 @@
 # 07 Dashboard model
 
-Status: open · Stages 1–2 built (Sep 30); their browser acceptance runs as [08](08-structure-cleanup.md) step 2, the drag and resize measurement after 08 · Phase 3: stages 1–3; phase 4: stage 4 · Order: stages 1 and 2 (the edit MVP), then 08, then stage 3, before 06 Sentry and the Integrations foundation · Depends on: 05 (done). Stage 4's integration datasources need the Integrations foundation. · Reference: [dashboard.md](../../../docs/dashboard/dashboard.md), [grid-and-charts.md](../../../docs/dashboard/grid-and-charts.md)
+Status: open · Stages 1–2 built (Sep 30); [08](done/08-structure-cleanup.md) is done (Oct 1) and its play functions prove most of stage 2's acceptance; the drag and resize measurement and the manual checks below remain · Phase 3: stages 1–3; phase 4: stage 4 · Order: stages 1 and 2 (the edit MVP), then 08, then stage 3, before 06 Sentry and the Integrations foundation · Depends on: 05 (done). Stage 4's integration datasources need the Integrations foundation. · Reference: [dashboard.md](../../../docs/dashboard/dashboard.md), [grid-and-charts.md](../../../docs/dashboard/grid-and-charts.md)
 
 ## Goal
 
@@ -249,7 +249,7 @@ Using Horizon's levels:
 
 ### 8. Backend, persistence, integrations
 
-- Persistence goes through one module, `dashboardApi` (list, get, save), with versioned documents (`schemaVersion`) and migrations ([08](08-structure-cleanup.md)). An interface arrives with a second implementation.
+- Persistence goes through one module, `dashboardApi` (list, get, save), with versioned documents (`schemaVersion`) and migrations ([08](done/08-structure-cleanup.md)). An interface arrives with a second implementation.
 - The backend (TanStack Start in SPA mode, or a separate API), auth (Better Auth, Clerk or WorkOS) and the phase order are open, to decide later (open decisions 2–4).
 - The Integrations foundation follows its [research](../research/integrations.md): lightweight manifests with a `category`, and config, runtime and setup code in chunks loaded only for enabled entries. `dependsOn` and `conflicts` wait until an integration needs them. The vocabulary is integration → datasource → query.
 
@@ -282,24 +282,25 @@ Checkpoint Sep 30: completed implementation parts are ticked below. Parent tasks
 
 ### Stage 2: edit MVP (phase 3)
 
-- [ ] **Edit mode** (`?mode=edit`): Save, Discard, Undo and Redo in the page header, the draft in localStorage, the leave guard, Save and Discard as in §3. Done when a reload keeps the draft, Undo after Save makes the dashboard dirty, and Discard restores the saved document with an empty history.
+- [x] **Edit mode** (`?mode=edit`): Save, Discard, Undo and Redo in the page header, the draft in localStorage, the leave guard, Save and Discard as in §3. Done when a reload keeps the draft, Undo after Save makes the dashboard dirty, and Discard restores the saved document with an empty history.
   - [x] Controls, per-dashboard draft storage/recovery, navigation blocker and native unload guard implemented.
   - [x] Save retains undo; Undo after Save becomes dirty; Discard restores the saved baseline and clears history/draft. Passing store tests cover these cases, pending-save edits and failed saves. Browser checks reached Save/Undo, draft reload and Discard successfully.
-  - [ ] Finish the complete leave-guard and back/forward browser run.
+  - [x] Leave guard: "Keep editing" is the LeaveGuard play function; "Leave dashboard" into view mode with a draft was checked by hand on Oct 1, after 08 moved `mode` into the URL. Back and forward stay on the manual list below.
+  - Oct 1: the done-when holds in Chromium: RestoresDraft (a reload keeps the draft), SaveThenUndo and Discard.
 - [ ] **Drag and resize** following grid rules 5–7: the header as handle, the `se` handle, `constraints` for minimum sizes, commit on stop and never in `onLayoutChange`; the drag placeholder and handles styled with tokens (react-grid-layout's defaults are red and black). Done when one drag and one resize each add exactly one undo step.
   - [x] RGL v2 handles, plugin minimum sizes, token styling and stop-only commits implemented; store tests cover one history step per committed layout action.
   - [ ] Verify actual pointer drag and resize each need exactly one Undo in the browser.
 - [ ] **Menu actions:** Move to…, Resize…, Duplicate and Remove, with live-region announcements and focus back on the menu button. Done when every action works without a pointer and adds one undo step.
   - [x] Actions, placement dialogs, live region and focus-return handlers implemented; duplicate/remove history covered by store tests.
-  - [ ] Finish keyboard-only action/focus verification and check announcement wording.
+  - [ ] A keyboard-only run. Focus return and the announcement wording are proven by the MoveResizeDialogs play function (Oct 1).
 - [ ] **Add widget** at the end of the chosen grid, and reading order from the `lg` layout after each commit. Done when keyboard order follows the layout after a drag, and export writes items in reading order.
   - [x] Palette adds at the bottom; tile order and JSON export derive from the `lg` reading order. Store tests cover placement and export order.
   - [ ] Verify DOM/keyboard order after an actual browser drag.
 - [ ] **Widget editor and palette** once open decision 1 is settled; text fields commit on blur, one undo step per field.
   - [x] Main-pane drawer, palette, title/description/display editing and query editor with preview/Apply implemented; editor states have stories.
   - [x] Field no-op handling and schema validation implemented. Browser investigation found and fixed disabled Save during typing and an empty-description undo step.
-  - [ ] Finish acceptance for field blur grouping, query Apply/Undo and the latest non-modal drawer focus changes.
-- [-] **Browser tests** for drag, resize, undo, and "edit, undo, export, import identical". Moved to [08](08-structure-cleanup.md) step 2 (Sep 30): Storybook's Vitest addon runs the stories in Chromium, and play functions port the flows of the Playwright CLI script, which 08 deletes. The acceptance items above that those play functions prove get ticked when they pass.
+  - [ ] Query Apply and Undo in the browser. Blur grouping (BlurCommitUndo) and the non-modal drawer's focus (DuplicateRemoveAdd) are play functions (Oct 1).
+- [-] **Browser tests** for drag, resize, undo, and "edit, undo, export, import identical". Moved to [08](done/08-structure-cleanup.md) step 2 (Sep 30): Storybook's Vitest addon runs the stories in Chromium, and play functions port the flows of the Playwright CLI script, which 08 deletes. The acceptance items above that those play functions prove get ticked when they pass.
   - Sep 30, passing in Chromium: blur commits one undo step; Save, then Undo is dirty, then Redo is clean; Discard restores the saved document with an empty history; a draft is restored on load in edit mode; Duplicate, Remove and Add each undo in one step, and Add places the widget last; Move and Resize dialogs return focus to the menu button and announce the change; export, edit, undo, export and import give identical JSON; the leave guard keeps the page on "Keep editing".
   - Still manual: pointer drag and resize (one undo each), keyboard-only runs, back and forward, switching dashboards while one loads, and query Apply and Undo.
 - [ ] **Measure** drag and resize on `/dashboards/perf` in a production build: chart resizes per interaction and long tasks. Done when the numbers are in grid-and-charts.md. Runs after 08; `scripts/dashboard-perf.browser.js` was a draft and is deleted in 08, so the measurement is a manual Performance trace or a play function.
@@ -364,7 +365,7 @@ Integration datasources in the datasource manager need the Integrations foundati
 
 ### Sep 30 review of the edit MVP
 
-Checked in the dev server at 1440, 667 and 375 px. Every item is fixed or tracked in [08](08-structure-cleanup.md) or [tasks.md › Edit UI polish](../tasks.md#edit-ui-polish-not-planned-yet).
+Checked in the dev server at 1440, 667 and 375 px. Every item is fixed or tracked in [08](done/08-structure-cleanup.md) or [tasks.md › Edit UI polish](../tasks.md#edit-ui-polish-not-planned-yet).
 
 - **The edit drawer is invisible.** Mantine's `max-height: 100%` on `Drawer.Content` resolves against the 0px-tall sticky `.tools` wrapper, so the palette and widget editor render 0px tall, and clicks land on the tiles underneath. Fixed in 08 step 1.
 - **The React Compiler skips 10 components.** `@babel/core` 8 with `babel-plugin-react-compiler` 1.0 silently skips any component with a destructured default (`DashboardProvider`, `ShellProvider`, `ErrorState`, `TimeSeriesChart`, …). Pinning `@babel/core` 7 fixes it (08 step 1). `DashboardView` and the editor forms are also skipped because of `throw` and `?.` inside `try` (08 splits them).

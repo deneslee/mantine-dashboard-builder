@@ -5,7 +5,7 @@ A dashboard builder on Mantine 9 and React 19. An app frame (top navbar, docking
 **Status:**
 
 - Phase 3. Reading dashboards is done. The edit MVP (edit mode, undo and redo, drag and resize, add, duplicate and remove widgets, a local save and draft, JSON export and import) is built.
-- [08 Structure cleanup](.agents/planning/plans/08-structure-cleanup.md) is in progress: browser tests, package-shaped folders and the renames are done; so are the flat dashboard JSON, the data module, edit mode in the URL, the page split, the shell edit, the storage keys and the lint layer rules; the final docs pass is next.
+- [08 Structure cleanup](.agents/planning/plans/done/08-structure-cleanup.md) is done (Oct 1): every story runs in Chromium with an a11y check and the edit flows are play functions; the code sits in package-shaped folders, one lint rule per layer. Next is the rest of 07 stage 2 (the drag and resize measurement), then stage 3, the viewing tools.
 - The order of work is in [tasks.md](.agents/planning/tasks.md).
 
 ## Run

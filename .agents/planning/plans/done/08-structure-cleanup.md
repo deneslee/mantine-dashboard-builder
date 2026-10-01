@@ -1,6 +1,6 @@
 # 08 Structure cleanup
 
-Status: open · Cross-cutting · Runs before the rest of [07](07-dashboard-model.md) (Sep 30) · Depends on: 02, 03 (done) · Sources: [Refine concepts](https://refine.dev/docs/guides-concepts/general-concepts/), [Perses dashboard spec](https://perses.dev/perses/docs/api/dashboard/), [schema.org CreativeWork](https://schema.org/CreativeWork), [bulletproof-react structure](https://github.com/alan2207/bulletproof-react/blob/master/docs/project-structure.md), [zustand persist](https://github.com/pmndrs/zustand/blob/main/docs/reference/middlewares/persist.md), [Storybook Vitest addon](https://storybook.js.org/docs/writing-tests/integrations/vitest-addon), [Vitest projects](https://vitest.dev/guide/projects)
+Status: done (2026-10-01) · Cross-cutting · Runs before the rest of [07](../07-dashboard-model.md) (Sep 30) · Depends on: 02, 03 (done) · Sources: [Refine concepts](https://refine.dev/docs/guides-concepts/general-concepts/), [Perses dashboard spec](https://perses.dev/perses/docs/api/dashboard/), [schema.org CreativeWork](https://schema.org/CreativeWork), [bulletproof-react structure](https://github.com/alan2207/bulletproof-react/blob/master/docs/project-structure.md), [zustand persist](https://github.com/pmndrs/zustand/blob/main/docs/reference/middlewares/persist.md), [Storybook Vitest addon](https://storybook.js.org/docs/writing-tests/integrations/vitest-addon), [Vitest projects](https://vitest.dev/guide/projects)
 
 ## Goal
 
@@ -10,7 +10,7 @@ Make the code easy to read and ready to split into packages:
 - **One home per kind of state**, with the same provider/store/hook pattern everywhere.
 - **Package-shaped folders** enforced by lint, so the planned monorepo (pnpm + Turborepo) is mostly `git mv`.
 - **A test and story policy** that says what gets tested, how and where, with real-browser tests.
-- **Current planning and docs.** Planning lives in `.agents/planning/`; `docs/` is for people, with a new [architecture.md](../../../docs/architecture.md).
+- **Current planning and docs.** Planning lives in `.agents/planning/`; `docs/` is for people, with a new [architecture.md](../../../../docs/architecture.md).
 
 The Sep 30 review of the edit MVP found:
 
@@ -224,7 +224,7 @@ Every step leaves `pnpm lint && pnpm format:check && pnpm build && pnpm test` gr
   - Add `.storybook/vitest.setup.ts` and `staticDirs: ['../public']`. (Oct 1: the setup file is deleted again. Storybook 10.3+ applies the preview annotations itself, and a probe story with an unlabelled button still failed a11y without it.)
   - Add the scripts `test`, `test:unit` and `test:stories`.
   - Done when `pnpm test` runs all three.
-- [ ] **CI.** Written Sep 30; it runs for the first time on the next push.
+- [-] **CI.** Written Sep 30; it runs for the first time on the next push. Moved to [tasks.md › Deployment](../../tasks.md#deployment) when this plan closed (Oct 1): nothing has been pushed yet.
   - `github-pages.yaml` gets a `pull_request` trigger.
   - It runs lint, format check, `playwright install chromium` and `pnpm test` before the build.
   - It deploys only from main.
@@ -234,7 +234,7 @@ Every step leaves `pnpm lint && pnpm format:check && pnpm build && pnpm test` gr
   - The states: View, Editing, WidgetOptions, QueryEditor, Empty, StorageError, RestoresDraft.
   - The flows ported from the deleted script: BlurCommitUndo, SaveThenUndo, Discard, DuplicateRemoveAdd (asserting the drawer is visible and clickable), MoveResizeDialogs (focus returns to the menu button; live-region text), ExportImportIdentity, LeaveGuard.
   - Done when they pass in Chromium. Then tick the matching 07 acceptance items.
-- [x] **A11y.** Every existing story runs as an a11y test (Sep 30: 48 stories). Fixed in the app: the route progress bar and the shell drawers had no accessible name, and the notification and modal close buttons had none either. `color-contrast` is off in the preview until the light-scheme tokens are fixed ([tasks.md › Light-scheme contrast](../tasks.md#housekeeping)); two stories switch off one landmark rule each, with the reason next to it. Done when `pnpm test:stories` passes.
+- [x] **A11y.** Every existing story runs as an a11y test (Sep 30: 48 stories). Fixed in the app: the route progress bar and the shell drawers had no accessible name, and the notification and modal close buttons had none either. `color-contrast` is off in the preview until the light-scheme tokens are fixed ([tasks.md › Light-scheme contrast](../../tasks.md#housekeeping)); two stories switch off one landmark rule each, with the reason next to it. Done when `pnpm test:stories` passes.
 
 ### 3. Moves
 
@@ -285,11 +285,11 @@ Every step leaves `pnpm lint && pnpm format:check && pnpm build && pnpm test` gr
 
 ### 7. Docs
 
-- [ ] **Architecture.** `docs/architecture.md` switches to the new layers, data flow, state owners and storage keys. Oct 1: layers and state owners match the code; each step 5 edit updates the data flow and storage lines it changes, and this task is the final check.
+- [x] **Architecture.** `docs/architecture.md` switches to the new layers, data flow, state owners and storage keys. Oct 1: re-read against the code after step 6; layers, data flow, state owners and storage keys all match.
 - [x] **AGENTS.md.** Rewrite Structure, Naming, State and Testing from this plan. Oct 1: done; step 6 adds the per-folder lint rules it mentions.
 - [x] **README.** Update the repo map to the new paths. Oct 1: done, with the test scripts.
-- [ ] **Other docs.** Fix paths in `docs/*` and 07. Oct 1: `docs/*`, 06, 07 and the roadmap use the new paths and names; check again after step 5.
-- [ ] **Close.** Move this plan to `done/` and tick it in tasks.md.
+- [x] **Other docs.** Fix paths in `docs/*` and 07. Oct 1: a final sweep for the old names and paths finds only dated history. 07's stage 2 notes say which acceptance items the play functions prove; Edit mode is ticked.
+- [x] **Close.** Move this plan to `done/` and tick it in tasks.md. Oct 1: the CI task moved to tasks.md.
 
 ## Decisions
 
@@ -315,7 +315,7 @@ Every step leaves `pnpm lint && pnpm format:check && pnpm build && pnpm test` gr
 
 ## Out of scope
 
-- **The edit UI redesign and the React pitfalls from the review.** Tracked in [tasks.md › Edit UI polish](../tasks.md#edit-ui-polish-not-planned-yet).
+- **The edit UI redesign and the React pitfalls from the review.** Tracked in [tasks.md › Edit UI polish](../../tasks.md#edit-ui-polish-not-planned-yet).
 - **The integrations rebuild and the runtime Sentry DSN.** Plan 06 covers them.
 - **`.kiro/specs`.** It stays untouched.
 
