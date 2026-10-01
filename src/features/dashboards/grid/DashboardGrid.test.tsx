@@ -11,7 +11,6 @@ import { testDashboard } from '@/testing/fixtures/dashboards';
 import { PluginsContext, type Plugins } from '@/plugins/usePlugins';
 import { DashboardProvider } from '../state/DashboardProvider';
 import { createDashboardStore } from '../state/createDashboardStore';
-import { localRepository } from '../data/dashboardApi';
 import { DashboardGrid } from './DashboardGrid';
 
 /** IntersectionObserver stub that the test drives by hand. */
@@ -83,7 +82,7 @@ function renderGrid() {
     widgets: { name: nameWidget },
     datasources: { deferred: datasource },
   };
-  const store = createDashboardStore(dashboard, localRepository, 'view', false);
+  const store = createDashboardStore(dashboard, { shouldPersist: false });
   const ui = (range: TimeRange) => (
     <PluginsContext value={plugins}>
       <DashboardProvider dashboard={dashboard} store={store}>

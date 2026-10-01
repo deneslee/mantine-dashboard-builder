@@ -56,7 +56,7 @@ DashboardPage → range = edit mode ? store range : URL ?? document range
         → resolveRange → DatasourcePlugin.query(spec, ctx) → DataFrame[]
       QueryBoundary → <plugin.component frames options />
 
-Save    store.save → repository.save → localStorage saved copy → new baseline, draft cleared
+Save    store.save → saveDashboard (data/dashboardApi.ts) → localStorage saved copy → new baseline, draft cleared
         → setQueryData(['dashboards', id]) and the list invalidated
 Draft   every document change: isDirty ? write draft : clear draft
 Export  orderWidgets(dashboard) → <id>.json;  Import  JSON → storedDashboardSchema → plugin checks → importDocument

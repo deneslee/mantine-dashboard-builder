@@ -1,23 +1,16 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { dashboardSchema, orderWidgets } from '@/core/dashboard/dashboardSchema';
 import { testDashboard } from '@/testing/fixtures/dashboards';
-import type { DashboardRepository } from '../data/repository';
-import { draftKey, readSaved, writeSaved } from '../data/drafts';
+import { getDashboard } from '../data/dashboardApi';
+import { draftKey } from '../data/drafts';
 import { createDashboardStore, selectDashboard } from './createDashboardStore';
 
 const readingOrder = (store: ReturnType<typeof createDashboardStore>) =>
   Object.keys(orderWidgets(selectDashboard(store.getState())).widgets);
 
-const repository = (): DashboardRepository => ({
-  list: vi.fn(async () => []),
-  load: vi.fn(async () => testDashboard()),
-  save: vi.fn(async (doc) => writeSaved(doc)),
-  remove: vi.fn(async () => {}),
-});
-
 describe('dashboard editing', () => {
   it('keeps one step per drag/resize or field blur and ignores identical updates', () => {
-    const store = createDashboardStore(testDashboard(), repository(), 'edit', false);
+    const store = createDashboardStore(testDashboard(), { mode: 'edit', shouldPersist: false });
     const actions = store.getState().actions;
     actions.commitLayout(
       'lg',
@@ -42,13 +35,12 @@ describe('dashboard editing', () => {
   });
 
   it('saves a new baseline, keeps undo, and makes the dashboard dirty again on undo after Save', async () => {
-    const repo = repository();
-    const store = createDashboardStore(testDashboard(), repo);
+    const store = createDashboardStore(testDashboard());
     const actions = store.getState().actions;
     actions.editWidget('a', { title: 'Saved title' });
     await actions.save();
     expect(store.getState().isDirty).toBe(false);
-    expect(readSaved('test')?.widgets.a?.title).toBe('Saved title');
+    expect((await getDashboard('test')).widgets.a?.title).toBe('Saved title');
     expect(localStorage.getItem(draftKey('test'))).toBeNull();
     expect(store.temporal.getState().pastStates).toHaveLength(1);
     actions.undo();
@@ -60,14 +52,11 @@ describe('dashboard editing', () => {
 
   it('preserves edits made while Save is pending', async () => {
     let finish!: () => void;
-    const repo = repository();
-    repo.save = vi.fn(
-      () =>
-        new Promise<void>((resolve) => {
-          finish = resolve;
-        }),
-    );
-    const store = createDashboardStore(testDashboard(), repo);
+    const save = () =>
+      new Promise<void>((resolve) => {
+        finish = resolve;
+      });
+    const store = createDashboardStore(testDashboard(), { save });
     const actions = store.getState().actions;
     actions.editWidget('a', { title: 'Snapshot' });
     const saving = actions.save();
@@ -80,9 +69,9 @@ describe('dashboard editing', () => {
   });
 
   it('restores a per-dashboard draft and edit mode; Discard restores baseline and clears draft/history', () => {
-    const first = createDashboardStore(testDashboard(), repository());
+    const first = createDashboardStore(testDashboard());
     first.getState().actions.editWidget('a', { title: 'Draft' });
-    const reloaded = createDashboardStore(testDashboard(), repository(), 'view');
+    const reloaded = createDashboardStore(testDashboard());
     expect(reloaded.getState().mode).toBe('edit');
     expect(reloaded.getState().doc.widgets.a?.title).toBe('Draft');
     reloaded.getState().actions.editWidget('b', { description: 'Another change' });
@@ -95,24 +84,23 @@ describe('dashboard editing', () => {
   });
 
   it('leaves the dashboard dirty after a failed Save and preserves an unreadable draft', async () => {
-    const repo = repository();
-    repo.save = vi.fn(async () => {
+    const save = async () => {
       throw new Error('Disk full');
-    });
-    const store = createDashboardStore(testDashboard(), repo);
+    };
+    const store = createDashboardStore(testDashboard(), { save });
     store.getState().actions.editWidget('a', { title: 'Keep me' });
     await expect(store.getState().actions.save()).rejects.toThrow('Disk full');
     expect(store.getState().isDirty).toBe(true);
     expect(localStorage.getItem(draftKey('test'))).toContain('Keep me');
     localStorage.setItem(draftKey('test'), 'broken');
-    const recovered = createDashboardStore(testDashboard(), repo);
+    const recovered = createDashboardStore(testDashboard(), { save });
     expect(recovered.getState().draftError).toContain('kept');
     expect(localStorage.getItem(draftKey('test'))).toBe('broken');
   });
 
   it('isolates providers and excludes selection, mode and time from undo', () => {
-    const one = createDashboardStore(testDashboard(), repository(), 'edit', false);
-    const two = createDashboardStore({ ...testDashboard(), id: 'other' }, repository(), 'view', false);
+    const one = createDashboardStore(testDashboard(), { mode: 'edit', shouldPersist: false });
+    const two = createDashboardStore({ ...testDashboard(), id: 'other' }, { shouldPersist: false });
     const actions = one.getState().actions;
     actions.setRange({ from: 'now-7d', to: 'now' });
     actions.openTool({ kind: 'palette' });
@@ -126,7 +114,7 @@ describe('dashboard editing', () => {
   });
 
   it('adds and duplicates at the bottom, removes with one step, and exports/imports identical documents', () => {
-    const store = createDashboardStore(testDashboard(), repository(), 'edit', false);
+    const store = createDashboardStore(testDashboard(), { mode: 'edit', shouldPersist: false });
     const actions = store.getState().actions;
     const copy = actions.duplicate('a');
     expect(store.getState().doc.layouts.lg.at(-1)?.i).toBe(copy);

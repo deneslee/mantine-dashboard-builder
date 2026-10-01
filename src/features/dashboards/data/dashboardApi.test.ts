@@ -1,7 +1,6 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { isAppError } from '@/core/errors/AppError';
-import { getDashboard, listDashboards } from './dashboardApi';
-import { savedKey } from './drafts';
+import { getDashboard, listDashboards, savedKey } from './dashboardApi';
 
 const index = {
   items: [

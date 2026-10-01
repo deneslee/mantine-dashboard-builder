@@ -2,17 +2,39 @@ import { AppError } from '@/core/errors/AppError';
 import { wait } from '@/utils/wait';
 import {
   dashboardListSchema,
+  dashboardSchema,
+  orderWidgets,
   storedDashboardSchema,
   type Dashboard,
   type DashboardSummary,
 } from '@/core/dashboard/dashboardSchema';
-import type { DashboardRepository } from './repository';
-import { readSaved, savedKey, writeSaved } from './drafts';
 
+/**
+ * The dashboards "backend". The files in `public/data/dashboards/` are the seed; a save is a
+ * browser-local copy that overrides its file. An HTTP API replaces this file and nothing else.
+ */
 const BASE = `${import.meta.env.BASE_URL}data/dashboards`;
 
 /** Simulated latency so loading states are visible in development. */
 const LATENCY = import.meta.env.DEV ? 600 : 0;
+
+export const savedKey = (id: string) => `dashboard.saved.v1:${id}`;
+
+function readSaved(id: string): Dashboard | undefined {
+  const raw = localStorage.getItem(savedKey(id));
+  if (!raw) return undefined;
+  try {
+    const dashboard = storedDashboardSchema.parse(JSON.parse(raw));
+    if (dashboard.id !== id) throw new Error('Dashboard id does not match');
+    return dashboard;
+  } catch (cause) {
+    throw new AppError(
+      'validation',
+      'The local saved dashboard is invalid. Keep a copy before clearing it.',
+      { cause, isRetryable: false },
+    );
+  }
+}
 
 async function getJson(url: string, notFound: string, signal?: AbortSignal): Promise<unknown> {
   let res: Response;
@@ -75,10 +97,13 @@ export async function getDashboard(id: string, signal?: AbortSignal): Promise<Da
   return parsed.data;
 }
 
-/** Static files are the seed; saves are durable browser-local overrides until an HTTP backend exists. */
-export const localRepository: DashboardRepository = {
-  list: listDashboards,
-  load: getDashboard,
-  save: async (dashboard) => writeSaved(dashboard),
-  remove: async (id) => localStorage.removeItem(savedKey(id)),
-};
+export async function saveDashboard(dashboard: Dashboard): Promise<void> {
+  try {
+    localStorage.setItem(
+      savedKey(dashboard.id),
+      JSON.stringify(orderWidgets(dashboardSchema.parse(dashboard))),
+    );
+  } catch (cause) {
+    throw new AppError('unknown', 'Could not save locally. Export JSON to keep your changes.', { cause });
+  }
+}

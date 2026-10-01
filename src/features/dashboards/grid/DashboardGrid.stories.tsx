@@ -6,7 +6,6 @@ import { loadDemoDashboard } from '@/testing/fixtures/dashboards';
 import type { Dashboard } from '@/core/dashboard/dashboardSchema';
 import { DashboardProvider } from '../state/DashboardProvider';
 import { createDashboardStore } from '../state/createDashboardStore';
-import { localRepository } from '../data/dashboardApi';
 import { DashboardGrid } from './DashboardGrid';
 
 interface Args {
@@ -16,7 +15,7 @@ interface Args {
 }
 
 function Grid({ dashboard, mode }: { dashboard: Dashboard; mode: 'view' | 'edit' }) {
-  const [store] = useState(() => createDashboardStore(dashboard, localRepository, mode, false));
+  const [store] = useState(() => createDashboardStore(dashboard, { mode, shouldPersist: false }));
   return (
     <TestRouter
       page={

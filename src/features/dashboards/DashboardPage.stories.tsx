@@ -2,7 +2,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, spyOn, userEvent, waitFor, within } from 'storybook/test';
 import { AppStory } from '@/testing/AppStory';
 import { loadDemoDashboard } from '@/testing/fixtures/dashboards';
-import { writeDraft, writeSaved } from './data/drafts';
+import { saveDashboard } from './data/dashboardApi';
+import { writeDraft } from './data/drafts';
 
 /**
  * The dashboard page in the real app (routes, loaders, plugins), at a URL. The play functions are the
@@ -45,7 +46,7 @@ export const QueryEditor: Story = { args: { url: `${EDIT}&widget=revenue&editor=
 export const Empty: Story = {
   args: { url: EDIT },
   beforeEach: async () =>
-    writeSaved({ ...(await loadDemoDashboard('sales')), widgets: {}, layouts: { lg: [] } }),
+    saveDashboard({ ...(await loadDemoDashboard('sales')), widgets: {}, layouts: { lg: [] } }),
   play: async () => {
     await expect(await page.findByText('No widgets yet.', {}, WAIT)).toBeVisible();
   },

@@ -4,7 +4,7 @@ import { immer } from 'zustand/middleware/immer';
 import { temporal } from 'zundo';
 import { clearDraft, readDraft, writeDraft } from '../data/drafts';
 import { dashboardSchema, orderWidgets, type Dashboard, type Widget } from '@/core/dashboard/dashboardSchema';
-import type { DashboardRepository } from '../data/repository';
+import { saveDashboard } from '../data/dashboardApi';
 import { GRID_COLUMNS, resolveLayouts, type Breakpoint, type LayoutItem } from '@/core/dashboard/layout';
 import type { TimeRange } from '@/core/time/timeRange';
 
@@ -63,11 +63,17 @@ const bottom = (items: readonly LayoutItem[]) => Math.max(0, ...items.map((item)
 const cleanLayout = (items: readonly LayoutItem[]): LayoutItem[] =>
   items.map(({ i, x, y, w, h }) => ({ i, x, y, w, h }));
 
+export interface DashboardStoreOptions {
+  mode?: 'view' | 'edit';
+  /** Off in stories and tests that must not read or write a draft. */
+  shouldPersist?: boolean;
+  /** Where Save goes; tests pass a fake. */
+  save?: (dashboard: Dashboard) => Promise<void>;
+}
+
 export function createDashboardStore(
   baseline: Dashboard,
-  repository: DashboardRepository,
-  mode: 'view' | 'edit' = 'view',
-  shouldPersist = true,
+  { mode = 'view', shouldPersist = true, save = saveDashboard }: DashboardStoreOptions = {},
 ) {
   let restored: ReturnType<typeof readDraft> = undefined;
   let draftError: string | null = null;
@@ -185,7 +191,7 @@ export function createDashboardStore(
           save: async () => {
             const state = get();
             const document = { ...selectDashboard(state), updatedAt: new Date().toISOString() };
-            await repository.save(document);
+            await save(document);
             const isUnchanged = get().doc === state.doc;
             const history = store.temporal.getState();
             history.pause();
