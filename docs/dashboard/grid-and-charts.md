@@ -73,7 +73,7 @@ The oxlint React Compiler rules keep code compatible. One component is not compi
 
 ## Checking
 
-On `/dashboards/perf`, against a production build (`pnpm build`, then `pnpm preview` or the `preview` entry in `.claude/launch.json`), record a Chrome Performance trace of: sidebar toggle, context bar toggle, handle drag (later: tile drag and resize).
+On `/dashboards/perf`, against a production build (`pnpm build`, then `pnpm preview` or the `preview` entry in `.claude/launch.json`), record a Chrome Performance trace of: sidebar toggle, context bar toggle, handle drag, tile drag and resize ([below](#tile-drag-and-resize)).
 
 | Target                            | Budget                                  | Measured                                                       |
 | --------------------------------- | --------------------------------------- | -------------------------------------------------------------- |
@@ -81,6 +81,20 @@ On `/dashboards/perf`, against a production build (`pnpm build`, then `pnpm prev
 | Long tasks during the animation   | None                                    | Skipped/not measured; overlap count and result are unavailable |
 | Chart reflow after it             | One task; shrinks with fewer charts     | 150–250ms for 12 charts                                        |
 | Breakpoint-crossing chart resizes | Informational—not pass/fail; no maximum | Skipped/not measured; resize counts are unavailable            |
+
+### Tile drag and resize
+
+Measured Oct 2, 2026 on `/dashboards/perf?mode=edit` against `pnpm build` + `pnpm preview`: a Playwright script sent trusted mouse events (20 steps, 16ms apart) to headless Chromium 153 at 1600 × 1000, device-pixel ratio 1, no throttling, with 9–11 charts mounted. A `ResizeObserver` on every mounted chart container counted resizes, and `long-animation-frame` and `longtask` observers timed the work from mousedown to one second after release.
+
+| Interaction                                      | Budget                                                | Measured (three warm runs)                                                                           |
+| ------------------------------------------------ | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Tile drag (a 4 × 6 chart, column 0 → 5)          | No chart resizes, except the dragged tile's           | The dragged tile's chart once; no other chart; no long tasks or long frames                          |
+| A second drag                                    | The same                                              | The same                                                                                             |
+| Tile resize from the `se` handle (4 × 6 → 2 × 8) | The resized chart only, once per frame while resizing | That chart 21 times (20 pointer steps and the release); no other chart; no long tasks or long frames |
+
+Each drag and each resize is one Undo step; checked with real pointer events in the dev server the same day, along with the tiles' DOM order following the new reading order.
+
+Cold start: the first two runs, right after the build and the server start, each had one long animation frame of 451–889ms after the first drop, with no script attribution (rendering, not JavaScript). None of the three later runs had one. Headless Chromium rasterizes in software, so a Performance trace on a real device is the check if a first drop ever feels slow.
 
 Recharts 3 applies size changes through `useSyncExternalStore`, which React cannot split across frames, so a reflow of many charts is one long task. Keep it out of animations and off-screen charts out of it. The accepted 150–250ms chart-reflow observation begins after the animation and is not evidence for the unmeasured animation interval. To count resizes, attach a `ResizeObserver` to the chart containers; to time the work, observe `longtask` or `long-animation-frame` entries.
 

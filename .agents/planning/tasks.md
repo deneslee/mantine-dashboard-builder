@@ -13,17 +13,17 @@ The big-picture checklist, by roadmap phase ([roadmap](roadmap.md#roadmap)). Eac
   - [x] **04 Page header:** named parts, breadcrumbs from the router, a control bar for pickers. [Plan](plans/done/04-page-header.md)
   - [x] **05 Dashboard read:** JSON documents, `DataFrame`, widget and datasource registries, time range in the URL, table widget. [Plan](plans/done/05-dashboard-read.md)
 - [x] **08 Structure cleanup** (Oct 1): planning in `.agents/planning/`; browser tests (every story in Chromium with a11y, editor flows as play functions); package-shaped folders with one lint rule per layer; naming rules; one flat `Dashboard` type with `schemaVersion`; one owner per kind of state, `mode` only in the URL; `dashboard-builder:` storage keys with the version in the value. [Plan](plans/done/08-structure-cleanup.md)
+- [x] **07 stages 1 and 2, the edit MVP** (Oct 2): per-dashboard store, widget header and menu, edit mode with Save, Discard, Undo and a draft, drag and resize, menu actions, add widget, the widget editor. Every acceptance check passes or is a play function; the drag and resize numbers are in [grid-and-charts.md](../../docs/dashboard/grid-and-charts.md#tile-drag-and-resize). Only the widget editor's place waits on open decision 1 (Edit UI polish below). [Stage 1](plans/07-dashboard-model.md#stage-1-foundation-phase-3), [stage 2](plans/07-dashboard-model.md#stage-2-edit-mvp-phase-3)
 
 ## Next, in order
 
-Order decided Sep 30: the edit MVP, then 08 (done Oct 1, its browser tests closed most of the edit MVP's acceptance), then the viewing tools, then Sentry and integrations ([roadmap](roadmap.md#roadmap)).
+Order decided Sep 30: the edit MVP (done Oct 2), then 08 (done Oct 1), then the viewing tools, then Sentry and integrations ([roadmap](roadmap.md#roadmap)).
 
-- [ ] **1. 07 stages 1 and 2, the rest** (phase 3): the edit MVP is built. 08's play functions close its acceptance checks; the drag and resize measurement on `/dashboards/perf` remains. [Stage 1](plans/07-dashboard-model.md#stage-1-foundation-phase-3), [stage 2](plans/07-dashboard-model.md#stage-2-edit-mvp-phase-3)
-- [ ] **2. 07 stage 3, viewing** (phase 3): one cache entry per datasource query, scoped time with a time zone, per-widget time, full screen, the Inspect drawer, density, shortcuts. [Plan](plans/07-dashboard-model.md#stage-3-viewing-phase-3)
-- [ ] **3. 06 Sentry §1 and §2:** render errors from the boundaries, data errors from the query and mutation caches, a reportability policy, the startup buffer, source maps in CI. Paused until step 2. [Plan](plans/06-sentry.md)
-- [ ] **4. Integrations foundation** (not planned yet, below).
-- [ ] **5. 06 Sentry §3:** Sentry as the first telemetry integration, and its rebuilt page. [Plan](plans/06-sentry.md#3-sentry-as-the-first-telemetry-integration)
-- [ ] **6. 07 stage 4, layout, variables and data** (phase 4): document v2 with rows and then tabs (and the `metadata`/`spec` envelope), resolution from the layout, hover sync groups, variables through `getVariableRefs`, grouped datasource errors, per-datasource concurrency. [Plan](plans/07-dashboard-model.md#stage-4-layout-variables-data-phase-4)
+- [ ] **1. 07 stage 3, viewing** (phase 3): one cache entry per datasource query, scoped time with a time zone, per-widget time, full screen, the Inspect drawer, density, shortcuts. [Plan](plans/07-dashboard-model.md#stage-3-viewing-phase-3)
+- [ ] **2. 06 Sentry §1 and §2:** render errors from the boundaries, data errors from the query and mutation caches, a reportability policy, the startup buffer, source maps in CI. Paused until step 1. [Plan](plans/06-sentry.md)
+- [ ] **3. Integrations foundation** (not planned yet, below).
+- [ ] **4. 06 Sentry §3:** Sentry as the first telemetry integration, and its rebuilt page. [Plan](plans/06-sentry.md#3-sentry-as-the-first-telemetry-integration)
+- [ ] **5. 07 stage 4, layout, variables and data** (phase 4): document v2 with rows and then tabs (and the `metadata`/`spec` envelope), resolution from the layout, hover sync groups, variables through `getVariableRefs`, grouped datasource errors, per-datasource concurrency. [Plan](plans/07-dashboard-model.md#stage-4-layout-variables-data-phase-4)
 
 ### Edit UI polish (not planned yet)
 
@@ -59,7 +59,7 @@ These come from the Sep 30 review of the edit MVP ([07 › Sep 30 review](plans/
   - Move and Resize announce positions counted from 0 ("column 0, row 3"), while their dialogs count from 1.
 - [ ] **Query editor preview.** Debounce the preview query instead of running one per keystroke.
 
-### Integrations foundation (step 4, not planned yet)
+### Integrations foundation (step 3, not planned yet)
 
 The model and the reasons for it are in the [integrations research](research/integrations.md).
 

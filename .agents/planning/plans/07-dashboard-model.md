@@ -1,6 +1,6 @@
 # 07 Dashboard model
 
-Status: open · Stages 1–2 built (Sep 30); [08](done/08-structure-cleanup.md) is done (Oct 1) and its play functions prove most of stage 2's acceptance; the drag and resize measurement and the manual checks below remain · Phase 3: stages 1–3; phase 4: stage 4 · Order: stages 1 and 2 (the edit MVP), then 08, then stage 3, before 06 Sentry and the Integrations foundation · Depends on: 05 (done). Stage 4's integration datasources need the Integrations foundation. · Reference: [dashboard.md](../../../docs/dashboard/dashboard.md), [grid-and-charts.md](../../../docs/dashboard/grid-and-charts.md)
+Status: open · Stages 1–2 done (Oct 2), except the widget editor's place, which waits on open decision 1 ([tasks.md › Edit UI polish](../tasks.md#edit-ui-polish-not-planned-yet)); stage 3 is next · Phase 3: stages 1–3; phase 4: stage 4 · Order: stages 1 and 2 (the edit MVP), then 08, then stage 3, before 06 Sentry and the Integrations foundation · Depends on: 05 (done). Stage 4's integration datasources need the Integrations foundation. · Reference: [dashboard.md](../../../docs/dashboard/dashboard.md), [grid-and-charts.md](../../../docs/dashboard/grid-and-charts.md)
 
 ## Goal
 
@@ -272,13 +272,13 @@ Checkpoint Sep 30: completed implementation parts are ticked below. Parent tasks
 
 ### Stage 1: foundation (phase 3)
 
-- [ ] **State layers and `DashboardProvider`.** A store per dashboard id holding the document, the saved baseline and `dirty`; view state in zod-validated search params with defaults stripped; `keepPreviousData` removed from the `QueryClient` defaults. Done when switching between two dashboards never shows the first one's data under the second's URL.
+- [x] **State layers and `DashboardProvider`.** A store per dashboard id holding the document, the saved baseline and `dirty`; view state in zod-validated search params with defaults stripped; `keepPreviousData` removed from the `QueryClient` defaults. Done when switching between two dashboards never shows the first one's data under the second's URL.
   - [x] Per-dashboard provider/store, saved baseline, dirty comparison and isolated document selectors implemented; store isolation covered by a passing test.
   - [x] Zod search validation, default view-mode stripping and removal of global previous-data placeholders implemented.
-  - [ ] Complete the browser check for dashboard switching during loading.
-- [ ] **Widget header and menu.** Title, info icon, status, and the menu's visibility rules (hover, focus inside, edit mode, touch); `capabilities` on `WidgetPlugin` (08 removed the unused ones), and the menu built from them. Done when a keyboard-only user reaches every header control and each widget type's story shows the right items.
+  - [x] Complete the browser check for dashboard switching during loading. Oct 2: under the new URL the router keeps the previous page for at most `defaultPendingMs` (300ms), then shows the skeleton; the new route never renders the old document. The SwitchDashboard play function guards it (see Decisions).
+- [x] **Widget header and menu.** Title, info icon, status, and the menu's visibility rules (hover, focus inside, edit mode, touch); `capabilities` on `WidgetPlugin` (08 removed the unused ones), and the menu built from them. Done when a keyboard-only user reaches every header control and each widget type's story shows the right items.
   - [x] Header, description tooltip, fetching/error status, visibility rules and registry capabilities implemented; grid stories include all three built-in widget types and edit mode.
-  - [ ] Finish keyboard/focus acceptance for every header control.
+  - [x] Finish keyboard/focus acceptance for every header control. Oct 2: the HeaderKeyboard play function tabs through every header button and checks the menu button shows on focus.
 
 ### Stage 2: edit MVP (phase 3)
 
@@ -287,23 +287,25 @@ Checkpoint Sep 30: completed implementation parts are ticked below. Parent tasks
   - [x] Save retains undo; Undo after Save becomes dirty; Discard restores the saved baseline and clears history/draft. Passing store tests cover these cases, pending-save edits and failed saves. Browser checks reached Save/Undo, draft reload and Discard successfully.
   - [x] Leave guard: "Keep editing" is the LeaveGuard play function; "Leave dashboard" into view mode with a draft was checked by hand on Oct 1, after 08 moved `mode` into the URL. Back and forward stay on the manual list below.
   - Oct 1: the done-when holds in Chromium: RestoresDraft (a reload keeps the draft), SaveThenUndo and Discard.
-- [ ] **Drag and resize** following grid rules 5–7: the header as handle, the `se` handle, `constraints` for minimum sizes, commit on stop and never in `onLayoutChange`; the drag placeholder and handles styled with tokens (react-grid-layout's defaults are red and black). Done when one drag and one resize each add exactly one undo step.
+- [x] **Drag and resize** following grid rules 5–7: the header as handle, the `se` handle, `constraints` for minimum sizes, commit on stop and never in `onLayoutChange`; the drag placeholder and handles styled with tokens (react-grid-layout's defaults are red and black). Done when one drag and one resize each add exactly one undo step.
   - [x] RGL v2 handles, plugin minimum sizes, token styling and stop-only commits implemented; store tests cover one history step per committed layout action.
-  - [ ] Verify actual pointer drag and resize each need exactly one Undo in the browser.
-- [ ] **Menu actions:** Move to…, Resize…, Duplicate and Remove, with live-region announcements and focus back on the menu button. Done when every action works without a pointer and adds one undo step.
+  - [x] Verify actual pointer drag and resize each need exactly one Undo in the browser. Oct 2: real pointer drag and resize in the dev server, one Undo each back to the saved state.
+- [x] **Menu actions:** Move to…, Resize…, Duplicate and Remove, with live-region announcements and focus back on the menu button. Done when every action works without a pointer and adds one undo step.
   - [x] Actions, placement dialogs, live region and focus-return handlers implemented; duplicate/remove history covered by store tests.
-  - [ ] A keyboard-only run. Focus return and the announcement wording are proven by the MoveResizeDialogs play function (Oct 1).
-- [ ] **Add widget** at the end of the chosen grid, and reading order from the `lg` layout after each commit. Done when keyboard order follows the layout after a drag, and export writes items in reading order.
+  - [x] A keyboard-only run. Focus return and the announcement wording are proven by the MoveResizeDialogs play function (Oct 1). Oct 2: the MenuKeyboard play function runs all four actions keyboard only, each one Undo.
+- [x] **Add widget** at the end of the chosen grid, and reading order from the `lg` layout after each commit. Done when keyboard order follows the layout after a drag, and export writes items in reading order.
   - [x] Palette adds at the bottom; tile order and JSON export derive from the `lg` reading order. Store tests cover placement and export order.
-  - [ ] Verify DOM/keyboard order after an actual browser drag.
+  - [x] Verify DOM/keyboard order after an actual browser drag. Oct 2: after a real drag that reordered two rows, the tiles' DOM (and so tab) order followed the new reading order.
 - [ ] **Widget editor and palette** once open decision 1 is settled; text fields commit on blur, one undo step per field.
   - [x] Main-pane drawer, palette, title/description/display editing and query editor with preview/Apply implemented; editor states have stories.
   - [x] Field no-op handling and schema validation implemented. Browser investigation found and fixed disabled Save during typing and an empty-description undo step.
-  - [ ] Query Apply and Undo in the browser. Blur grouping (BlurCommitUndo) and the non-modal drawer's focus (DuplicateRemoveAdd) are play functions (Oct 1).
+  - [x] Query Apply and Undo in the browser. Blur grouping (BlurCommitUndo) and the non-modal drawer's focus (DuplicateRemoveAdd) are play functions (Oct 1). Oct 2: this found a bug, fixed: after Apply then Undo the editor kept the undone JSON and preview. It now follows the widget's queries; the QueryApplyUndo play function proves it.
+  - The parent stays open only for open decision 1 (drawer or docked pane), tracked in [tasks.md › Edit UI polish](../tasks.md#edit-ui-polish-not-planned-yet).
 - [-] **Browser tests** for drag, resize, undo, and "edit, undo, export, import identical". Moved to [08](done/08-structure-cleanup.md) step 2 (Sep 30): Storybook's Vitest addon runs the stories in Chromium, and play functions port the flows of the Playwright CLI script, which 08 deletes. The acceptance items above that those play functions prove get ticked when they pass.
   - Sep 30, passing in Chromium: blur commits one undo step; Save, then Undo is dirty, then Redo is clean; Discard restores the saved document with an empty history; a draft is restored on load in edit mode; Duplicate, Remove and Add each undo in one step, and Add places the widget last; Move and Resize dialogs return focus to the menu button and announce the change; export, edit, undo, export and import give identical JSON; the leave guard keeps the page on "Keep editing".
   - Still manual: pointer drag and resize (one undo each), keyboard-only runs, back and forward, switching dashboards while one loads, and query Apply and Undo.
-- [ ] **Measure** drag and resize on `/dashboards/perf` in a production build: chart resizes per interaction and long tasks. Done when the numbers are in grid-and-charts.md. Runs after 08; `scripts/dashboard-perf.browser.js` was a draft and is deleted in 08, so the measurement is a manual Performance trace or a play function.
+  - Oct 2: all done. Keyboard runs, switching dashboards and query Apply and Undo are play functions now; pointer drag and resize, DOM order after a drag, and back and forward were checked by hand in the dev server (Back while dirty asks; Keep editing restores `?mode=edit`; Leave keeps the draft; Forward returns to it).
+- [x] **Measure** drag and resize on `/dashboards/perf` in a production build: chart resizes per interaction and long tasks. Done when the numbers are in grid-and-charts.md. Runs after 08; `scripts/dashboard-perf.browser.js` was a draft and is deleted in 08, so the measurement is a manual Performance trace or a play function. Oct 2: measured with a Playwright script in headless Chromium against `pnpm preview` ([grid-and-charts.md › Tile drag and resize](../../../docs/dashboard/grid-and-charts.md#tile-drag-and-resize)): a drag resizes only the dragged tile's chart, once; a resize resizes only that chart, once per frame; no long tasks or long frames in warm runs.
 
 ### Stage 3: viewing (phase 3)
 
@@ -353,6 +355,7 @@ Integration datasources in the datasource manager need the Integrations foundati
 - **Sep 30: `version` stays the schema version;** phase 5 adds `revision`.
 - **Sep 30: resolution comes from the committed layout, in buckets.** Datasources aggregate; only drawing downsamples.
 - **Sep 30: variables go through `getVariableRefs`.** Identifiers are parameters only where the datasource supports it, otherwise allow-listed; filters stay separate from variables.
+- **Oct 2: switching dashboards may keep the previous page briefly.** TanStack Router navigates in a React transition and reuses a route's boundary when only the params change, so after the URL changes it keeps the previous dashboard for up to `defaultPendingMs` (300ms), then shows the skeleton. Showing the skeleton at once was tried and dropped: every fast switch would flash it. Stage 1's done-when therefore reads: the second dashboard's route never renders the first one's document, and the old page never outlasts the pending delay.
 
 ## Verification
 
