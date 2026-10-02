@@ -40,6 +40,14 @@ export function QueryEditor({
   const [value, setValue] = useState(JSON.stringify(widget.queries, null, 2));
   const [preview, setPreview] = useState(widget.queries);
   const [error, setError] = useState<string>();
+  // Apply, Undo, Redo or an import replaces the queries: show the dashboard's, not stale text.
+  const [previous, setPrevious] = useState(widget.queries);
+  if (previous !== widget.queries) {
+    setPrevious(widget.queries);
+    setValue(JSON.stringify(widget.queries, null, 2));
+    setPreview(widget.queries);
+    setError(undefined);
+  }
   const hasChanged = value !== JSON.stringify(widget.queries, null, 2);
   const handleApply = () => {
     try {

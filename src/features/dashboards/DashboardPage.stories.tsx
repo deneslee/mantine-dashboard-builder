@@ -115,6 +115,23 @@ export const Discard: Story = {
   },
 };
 
+export const QueryApplyUndo: Story = {
+  args: { url: `${EDIT}&widget=revenue&editor=queries` },
+  play: async () => {
+    const editor = await page.findByRole('textbox', { name: 'Queries' }, WAIT);
+    const original = (editor as HTMLTextAreaElement).value;
+    await userEvent.clear(editor);
+    await userEvent.paste(original.replace('"seed": "', '"seed": "edited-'));
+    await userEvent.click(page.getByRole('button', { name: 'Apply queries' }));
+    await expect(await page.findByText('Unsaved changes')).toBeVisible();
+    await userEvent.click(controls().getByRole('button', { name: 'Undo' }));
+    // The editor follows the dashboard: Undo brings the old queries back, with nothing left to apply.
+    await waitFor(() => expect(editor).toHaveValue(original));
+    await expect(page.getByRole('button', { name: 'Apply queries' })).toBeDisabled();
+    await expect(page.getByText('Saved locally')).toBeVisible();
+  },
+};
+
 export const DuplicateRemoveAdd: Story = {
   args: { url: EDIT },
   play: async ({ canvasElement }) => {
@@ -167,6 +184,96 @@ export const MoveResizeDialogs: Story = {
     await userEvent.click(controls().getByRole('button', { name: 'Undo' }));
     await userEvent.click(controls().getByRole('button', { name: 'Undo' }));
     await expect(await page.findByText('Saved locally')).toBeVisible();
+  },
+};
+
+/**
+ * Switching dashboards: the router keeps the old page for up to `defaultPendingMs` (300ms), then the
+ * skeleton. With the next file taking a second, the old dashboard must be gone well before it arrives.
+ */
+export const SwitchDashboard: Story = {
+  args: { url: '/dashboards/sales' },
+  play: async () => {
+    const fetch = window.fetch.bind(window);
+    spyOn(window, 'fetch').mockImplementation(async (input, init) => {
+      const url = input instanceof Request ? input.url : input.toString();
+      if (url.endsWith('/ops.json')) await new Promise((resolve) => setTimeout(resolve, 1000));
+      return fetch(input, init);
+    });
+    await page.findByRole('region', { name: 'Revenue' }, WAIT);
+    await userEvent.click(page.getByRole('link', { name: 'Operations' }));
+    await waitFor(
+      () => expect(page.queryByRole('heading', { name: 'Sales overview' })).not.toBeInTheDocument(),
+      { timeout: 700 },
+    );
+    await expect(await page.findByRole('heading', { name: 'Operations' }, WAIT)).toBeVisible();
+  },
+};
+
+/** Every widget header button is in the tab order, and the hidden menu button shows on focus. */
+export const HeaderKeyboard: Story = {
+  args: { url: '/dashboards/sales' },
+  play: async () => {
+    await page.findByRole('region', { name: 'Revenue' }, WAIT);
+    const headerButtons = [...document.querySelectorAll('[data-widget-drag] button')];
+    await expect(headerButtons.length).toBeGreaterThanOrEqual(5); // a menu per widget, at least
+    const reached = new Set<Element>();
+    for (let i = 0; i < 200 && reached.size < headerButtons.length; i++) {
+      await userEvent.tab();
+      const focused = document.activeElement;
+      if (!focused || !headerButtons.includes(focused)) continue;
+      reached.add(focused);
+      if (focused.hasAttribute('data-widget-menu'))
+        await waitFor(() => expect(getComputedStyle(focused).opacity).toBe('1'));
+    }
+    await expect(reached.size).toBe(headerButtons.length);
+  },
+};
+
+/** Opens a widget's menu and picks an item, keyboard only. */
+async function chooseWithKeyboard(widget: string, item: string) {
+  (await page.findByRole('button', { name: `Actions for ${widget}` }, WAIT)).focus();
+  await userEvent.keyboard('{Enter}');
+  await page.findByRole('menu', {}, WAIT);
+  for (let i = 0; i < 12 && document.activeElement?.textContent !== item; i++)
+    await userEvent.keyboard('{ArrowDown}');
+  await expect(document.activeElement).toHaveTextContent(item);
+  await userEvent.keyboard('{Enter}');
+}
+
+/**
+ * Every action returns focus to a widget's menu button (on the next frame); then one keyboard Undo
+ * must take the dashboard back to its saved state.
+ */
+async function undoOnceWithKeyboard() {
+  await waitFor(() => expect(document.activeElement).toHaveAttribute('data-widget-menu'));
+  await expect(await page.findByText('Unsaved changes')).toBeVisible();
+  controls().getByRole('button', { name: 'Undo' }).focus();
+  await userEvent.keyboard('{Enter}');
+  await expect(await page.findByText('Saved locally')).toBeVisible();
+  await expect(controls().getByRole('button', { name: 'Undo' })).toBeDisabled();
+}
+
+/** Move, Resize, Duplicate and Remove without a pointer, each one undo step. */
+export const MenuKeyboard: Story = {
+  args: { url: EDIT },
+  play: async () => {
+    await chooseWithKeyboard('Revenue', 'Move to…');
+    await page.findByRole('textbox', { name: 'Column' }, WAIT);
+    await userEvent.keyboard('{Control>}a{/Control}2{Tab}{Tab}{Enter}');
+    await undoOnceWithKeyboard();
+
+    await chooseWithKeyboard('Revenue', 'Resize…');
+    await page.findByRole('textbox', { name: 'Width (columns)' }, WAIT);
+    await userEvent.keyboard('{Control>}a{/Control}7{Tab}{Tab}{Enter}');
+    await undoOnceWithKeyboard();
+
+    await chooseWithKeyboard('Revenue', 'Duplicate');
+    await undoOnceWithKeyboard();
+
+    await chooseWithKeyboard('Revenue', 'Remove');
+    await undoOnceWithKeyboard();
+    await expect(page.getByRole('region', { name: 'Revenue' })).toBeInTheDocument();
   },
 };
 
