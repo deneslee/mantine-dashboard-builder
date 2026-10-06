@@ -80,7 +80,7 @@ Package-shaped folders, so each can move to `packages/` when the repo becomes a 
       app/          the only place features and built-in plugins meet: routes/ (thin TanStack file routes;
                     `-name.tsx` files are ignored), Providers, router, queryClient, plugins.ts, error pages
       features/     dashboards, settings, notifications, integrations, debug; grouped by area inside
-                    (dashboards: data/ state/ grid/ header/ editor/), small features flat
+                    (dashboards: data/ state/ grid/ header/ editor/ inspect/), small features flat
       shell/        the app frame: Shell, ShellProvider, useShell, navbar/, sidebar/, contextBar/, breadcrumbs/
       plugins/      WidgetPlugin and DatasourcePlugin contracts, usePlugins; widgets/*, datasources/*
       lib/          services: notify/ (toasts, inbox), sentry/, useMotion, useCurrentUser

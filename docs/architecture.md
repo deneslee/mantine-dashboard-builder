@@ -44,7 +44,7 @@ Each top-level folder is shaped like a package, so it can move to `packages/` wh
 ## Dashboard data flow
 
 ```text
-URL /dashboards/$id?mode&from&to&refresh&tz&wt&view ── validateSearch (zod)
+URL /dashboards/$id?mode&from&to&refresh&tz&wt&view&inspect ── validateSearch (zod)
   beforeLoad: on entry, a stored draft and no ?mode=edit → redirect to ?mode=edit
   loader: ensureQueryData(dashboardQuery(id))
     dashboardApi: saved copy (localStorage) ?? fetch public/data/dashboards/<id>.json
@@ -70,16 +70,16 @@ Widget data is cached per datasource query (`['ds', datasource, spec, range]`), 
 
 ## Where state lives
 
-| State                                                                                                                 | Owner                                                                | Mounted                              |
-| --------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------ |
-| Dashboard list, documents, widget data                                                                                | TanStack Query                                                       | `app/Providers`                      |
-| Time range, refresh, time zone (`tz`), viewers' widget times (`wt`), `mode`, `widget`, `editor`, `view`, settings tab | URL search params, validated with zod                                | routes                               |
-| Document being edited, saved baseline, undo history, editor tool, the dashboard's `now`                               | per-dashboard zustand store (`DashboardProvider`)                    | `routes/dashboards/$id`, keyed by id |
-| Sidebar and context bar layout; the app's nav and global tabs                                                         | shell zustand store and static values (`ShellProvider`)              | `routes/__root`                      |
-| Widget and datasource plugins                                                                                         | `PluginsContext`, filled from `app/plugins.ts`                       | `app/Providers`                      |
-| Inbox                                                                                                                 | global zustand store (`lib/notify/useInbox.ts`), written by `notify` | module                               |
-| Color scheme, motion                                                                                                  | Mantine color-scheme manager, `useMotion`                            | `app/Providers`                      |
-| Everything else                                                                                                       | component state                                                      | –                                    |
+| State                                                                                                                                          | Owner                                                                | Mounted                              |
+| ---------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------ |
+| Dashboard list, documents, widget data                                                                                                         | TanStack Query                                                       | `app/Providers`                      |
+| Time range, refresh, time zone (`tz`), viewers' widget times (`wt`), `mode`, `widget`, `editor`, `view`, `inspect`, `inspectTab`, settings tab | URL search params, validated with zod                                | routes                               |
+| Document being edited, saved baseline, undo history, editor tool, the dashboard's `now`                                                        | per-dashboard zustand store (`DashboardProvider`)                    | `routes/dashboards/$id`, keyed by id |
+| Sidebar and context bar layout; the app's nav and global tabs                                                                                  | shell zustand store and static values (`ShellProvider`)              | `routes/__root`                      |
+| Widget and datasource plugins                                                                                                                  | `PluginsContext`, filled from `app/plugins.ts`                       | `app/Providers`                      |
+| Inbox                                                                                                                                          | global zustand store (`lib/notify/useInbox.ts`), written by `notify` | module                               |
+| Color scheme, motion                                                                                                                           | Mantine color-scheme manager, `useMotion`                            | `app/Providers`                      |
+| Everything else                                                                                                                                | component state                                                      | –                                    |
 
 `app/Providers` is the only provider stack: the app, `testing/render` and the Storybook preview all use it.
 
