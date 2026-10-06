@@ -26,6 +26,10 @@ import classes from './DashboardPage.module.css';
 /** The viewer's time zone, when neither the URL nor the dashboard sets one. */
 const LOCAL_TIME_ZONE = localTimeZone();
 
+const InspectDrawer = lazy(() =>
+  import('./inspect/InspectDrawer').then((module) => ({ default: module.InspectDrawer })),
+);
+
 const EditDrawer = lazy(() =>
   import('./editor/EditDrawer').then((module) => ({ default: module.EditDrawer })),
 );
@@ -63,6 +67,11 @@ export function DashboardPage() {
   const viewId = useDashboard((s) =>
     !isEditing && search.view && s.doc.widgets[search.view] ? search.view : undefined,
   );
+  const inspectId = useDashboard((s) =>
+    !isEditing && search.inspect && s.doc.widgets[search.inspect]?.queries.length
+      ? search.inspect
+      : undefined,
+  );
   const range = isEditing
     ? defaultRange
     : { from: search.from ?? defaultRange.from, to: search.to ?? defaultRange.to };
@@ -79,10 +88,11 @@ export function DashboardPage() {
     if (viewed.current !== viewId) focusWidgetMenu(viewId ?? viewed.current);
     viewed.current = viewId;
   }, [viewId]);
-  // Esc leaves full screen, unless it is closing a menu, a dialog or a dropdown.
+  // Esc leaves full screen, unless it is closing a menu, a dialog, a dropdown or Inspect.
   useWindowEvent('keydown', (event) => {
     if (
       viewId &&
+      !inspectId &&
       event.key === 'Escape' &&
       !(event.target as Element).closest('[data-portal], [aria-expanded="true"]')
     )
@@ -157,6 +167,17 @@ export function DashboardPage() {
             <EditDrawer range={range} timeZone={timeZone} />
           </Suspense>
         )}
+        {inspectId ? (
+          <Suspense fallback={null}>
+            <InspectDrawer
+              key={inspectId}
+              id={inspectId}
+              tab={search.inspectTab ?? 'data'}
+              range={range}
+              timeZone={timeZone}
+            />
+          </Suspense>
+        ) : null}
         {isEmpty ? (
           <Group>
             <Text>No widgets yet.</Text>

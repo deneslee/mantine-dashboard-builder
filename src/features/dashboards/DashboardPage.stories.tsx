@@ -195,6 +195,81 @@ export const FullScreen: Story = {
   },
 };
 
+const inspector = async () => within(await page.findByRole('dialog', { name: 'Inspect Revenue' }, WAIT));
+const INSPECT = '/dashboards/sales?inspect=revenue';
+
+/** Inspect from the menu: focus moves to the tabs, the data shows as a table, Esc returns to the menu. */
+export const InspectData: Story = {
+  args: { url: '/dashboards/sales' },
+  play: async () => {
+    await chooseFromMenu('Revenue', 'Inspect');
+    const drawer = await inspector();
+    await waitFor(() => expect(drawer.getByRole('tab', { name: 'Data' })).toHaveFocus());
+    await expect(await drawer.findByRole('columnheader', { name: 'Revenue' }, WAIT)).toBeVisible();
+    await expect(drawer.getByRole('button', { name: 'Download CSV' })).toBeVisible();
+
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(page.queryByRole('dialog', { name: 'Inspect Revenue' })).toBeNull());
+    await waitFor(() =>
+      expect(document.activeElement).toBe(page.getByRole('button', { name: 'Actions for Revenue' })),
+    );
+  },
+};
+
+/** What was asked: the datasource, the resolved time in the dashboard's zone, the response. */
+export const InspectQuery: Story = {
+  args: { url: `${INSPECT}&inspectTab=query&tz=UTC` },
+  play: async () => {
+    const drawer = await inspector();
+    await expect(drawer.getByText('Mock data (mock)')).toBeVisible();
+    await expect(drawer.getByText('Last 24 hours')).toBeVisible();
+    await expect(drawer.getByText('UTC')).toBeVisible();
+    await expect(await drawer.findByText(/^1 frame, \d+ rows$/, {}, WAIT)).toBeVisible();
+  },
+};
+
+export const InspectJson: Story = {
+  args: { url: `${INSPECT}&inspectTab=json` },
+  play: async () => {
+    const drawer = await inspector();
+    await expect(drawer.getByText(/"title": "Revenue"/)).toBeVisible();
+    await expect(await drawer.findByText(/"name": "revenue"/, {}, WAIT)).toBeVisible();
+  },
+};
+
+export const InspectStats: Story = {
+  args: { url: `${INSPECT}&inspectTab=stats` },
+  play: async () => {
+    const drawer = await inspector();
+    await expect(await drawer.findByText(/^\d+ ms$/, {}, WAIT)).toBeVisible();
+    await expect(drawer.getByText(/"sales:revenue"/)).toBeVisible();
+  },
+};
+
+/** A widget with two queries: Inspect shows one at a time. */
+export const InspectQueries: Story = {
+  args: { url: `${INSPECT}&inspectTab=query` },
+  beforeEach: async () => {
+    const sales = await loadDemoDashboard('sales');
+    const revenue = sales.widgets.revenue!;
+    const second = {
+      ...revenue.queries[0]!,
+      spec: { ...(revenue.queries[0]!.spec as object), seed: 'second' },
+    };
+    await saveDashboard({
+      ...sales,
+      widgets: { ...sales.widgets, revenue: { ...revenue, queries: [...revenue.queries, second] } },
+    });
+  },
+  play: async () => {
+    const drawer = await inspector();
+    await expect(drawer.getByText(/"seed": "sales:revenue"/)).toBeVisible();
+    await userEvent.click(drawer.getByRole('combobox', { name: 'Query' }));
+    await userEvent.click(await page.findByRole('option', { name: '2. Mock data' }, WAIT));
+    await expect(await drawer.findByText(/"seed": "second"/, {}, WAIT)).toBeVisible();
+  },
+};
+
 /** In edit mode the same dialog changes the saved widget, as one undo step. */
 export const WidgetTimeEdit: Story = {
   args: { url: EDIT },

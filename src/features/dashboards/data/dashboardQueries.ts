@@ -1,5 +1,6 @@
 import { queryOptions } from '@tanstack/react-query';
 import { AppError } from '@/core/errors/AppError';
+import type { DataFrame } from '@/core/data/DataFrame';
 import type { DatasourcePlugin, Query } from '@/plugins/DatasourcePlugin';
 import { resolveEffectiveTime, type EffectiveTime } from '@/core/time/timeRange';
 import { getDashboard, listDashboards } from './dashboardApi';
@@ -26,6 +27,12 @@ export const dashboardQuery = (id: string) =>
     retry: false,
   });
 
+/** One query's entry in the cache: its frames, and how long the datasource took (Inspect's Stats). */
+export interface DatasourceResult {
+  frames: DataFrame[];
+  durationMs: number;
+}
+
 /**
  * One datasource query's frames: the cache unit for widget data. The key is the datasource, its spec
  * and, for a time-aware datasource, the widget's time as written (`now-24h`, shifts, time zone), so
@@ -46,7 +53,7 @@ export const datasourceQuery = (
   const timeKey = datasource?.isTimeAware ? [time.range, time.shifts, time.timeZone] : [];
   return queryOptions({
     queryKey: [...dashboardKeys.data, query.datasource, query.spec, ...timeKey],
-    queryFn: ({ signal }) => {
+    queryFn: async ({ signal }): Promise<DatasourceResult> => {
       const { range, timeZone } = time;
       const resolved = resolveEffectiveTime(time, getNow());
       if (!resolved) throw new AppError('validation', `Invalid time range "${range.from}" to "${range.to}".`);
@@ -54,7 +61,9 @@ export const datasourceQuery = (
         throw new AppError('validation', `No datasource of type "${query.datasource}".`, {
           isRetryable: false,
         });
-      return datasource.query(query.spec, { range: resolved, raw: range, timeZone }, signal);
+      const start = performance.now();
+      const frames = await datasource.query(query.spec, { range: resolved, raw: range, timeZone }, signal);
+      return { frames, durationMs: Math.round(performance.now() - start) };
     },
     meta: { source },
   });

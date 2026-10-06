@@ -1,18 +1,13 @@
 import { orderWidgets, storedDashboardSchema, type Dashboard } from '@/core/dashboard/dashboardSchema';
 import type { Plugins } from '@/plugins/usePlugins';
+import { downloadFile } from '@/utils/downloadFile';
 
 /** The exported file's text: widgets in reading order, so the file reads top to bottom. */
 export const serializeDashboard = (dashboard: Dashboard) => JSON.stringify(orderWidgets(dashboard), null, 2);
 
 /** Saves the dashboard as `<id>.json` through the browser's download. */
-export function downloadDashboard(dashboard: Dashboard) {
-  const url = URL.createObjectURL(new Blob([serializeDashboard(dashboard)], { type: 'application/json' }));
-  const anchor = document.createElement('a');
-  anchor.href = url;
-  anchor.download = `${dashboard.id}.json`;
-  anchor.click();
-  setTimeout(() => URL.revokeObjectURL(url), 0);
-}
+export const downloadDashboard = (dashboard: Dashboard) =>
+  downloadFile(`${dashboard.id}.json`, serializeDashboard(dashboard), 'application/json');
 
 /**
  * Reads an imported file: migrate and validate it, then check that every widget type and

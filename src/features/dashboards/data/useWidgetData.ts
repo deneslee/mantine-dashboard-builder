@@ -5,7 +5,7 @@ import type { EffectiveTime } from '@/core/time/timeRange';
 import type { Query } from '@/plugins/DatasourcePlugin';
 import { usePlugins } from '@/plugins/usePlugins';
 import { useReadNow } from '../state/useDashboard';
-import { datasourceQuery } from './dashboardQueries';
+import { datasourceQuery, type DatasourceResult } from './dashboardQueries';
 
 export interface WidgetData {
   /**
@@ -24,11 +24,11 @@ export interface WidgetData {
 }
 
 /** A module function, so `useQueries` re-runs it only when a query's result changes. */
-function combine(results: UseQueryResult<DataFrame[]>[]) {
+function combine(results: UseQueryResult<DatasourceResult>[]) {
   const isLoading = results.some((result) => result.isPending);
   const hasData = results.length === 0 || results.some((result) => result.data !== undefined);
   return {
-    frames: isLoading || !hasData ? undefined : results.flatMap((result) => result.data ?? []),
+    frames: isLoading || !hasData ? undefined : results.flatMap((result) => result.data?.frames ?? []),
     isLoading,
     error: results.find((result) => result.error)?.error,
     hasFailed: results.some((result) => result.isError),

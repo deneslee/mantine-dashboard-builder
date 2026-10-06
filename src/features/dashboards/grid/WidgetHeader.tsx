@@ -134,6 +134,21 @@ export function WidgetHeader({
                 View full screen
               </Menu.Item>
             ) : null}
+            {!isEditing && widget.queries.length ? (
+              <Menu.Item
+                renderRoot={(props) => (
+                  <Link
+                    to="/dashboards/$id"
+                    params={{ id: dashboardId }}
+                    search={(prev) => ({ ...prev, inspect: id, inspectTab: undefined })}
+                    resetScroll={false}
+                    {...props}
+                  />
+                )}
+              >
+                Inspect
+              </Menu.Item>
+            ) : null}
             {onEditTime ? <Menu.Item onClick={onEditTime}>Time range…</Menu.Item> : null}
             {widget.queries.length ? <Menu.Item onClick={onRefresh}>Refresh</Menu.Item> : null}
             <Menu.Item onClick={() => void handleCopyLink()}>Copy link</Menu.Item>

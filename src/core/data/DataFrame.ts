@@ -34,6 +34,26 @@ export function frameToRows(frame: DataFrame): Row[] {
   );
 }
 
+const csvCell = (text: string) => (/[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text);
+
+/** The frame as CSV: a header of field names, then one line per row. Times are ISO dates, nulls empty. */
+export function frameToCsv(frame: DataFrame): string {
+  const lines = [frame.fields.map((field) => csvCell(field.name)).join(',')];
+  for (let i = 0; i < frame.length; i++)
+    lines.push(
+      frame.fields
+        .map(({ type, values: { [i]: value } }) => {
+          if (value === null || value === undefined) return '';
+          if (type === 'time' && typeof value === 'number') return new Date(value).toISOString();
+          return csvCell(
+            typeof value === 'object' ? JSON.stringify(value) : String(value as string | number | boolean),
+          );
+        })
+        .join(','),
+    );
+  return lines.join('\n');
+}
+
 /** A field's display name. */
 export const getFieldLabel = (field: Field) => field.config?.label ?? field.name;
 

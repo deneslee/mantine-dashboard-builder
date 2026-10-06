@@ -19,7 +19,7 @@ The big-picture checklist, by roadmap phase ([roadmap](roadmap.md#roadmap)). Eac
 
 Order decided Sep 30: the edit MVP (done Oct 2), then 08 (done Oct 1), then the viewing tools, then Sentry and integrations ([roadmap](roadmap.md#roadmap)).
 
-- [ ] **1. 07 stage 3, viewing** (phase 3; Oct 6: per-query cache entries, the time scope resolver, per-widget time, times in the dashboard's zone and full-screen view are done; the Inspect drawer is next): one cache entry per datasource query, scoped time with a time zone, per-widget time, full screen, the Inspect drawer, density, shortcuts. [Plan](plans/07-dashboard-model.md#stage-3-viewing-phase-3)
+- [ ] **1. 07 stage 3, viewing** (phase 3; Oct 6: per-query cache entries, the time scope resolver, per-widget time, times in the dashboard's zone and full-screen view and the Inspect drawer are done; density is next): one cache entry per datasource query, scoped time with a time zone, per-widget time, full screen, the Inspect drawer, density, shortcuts. [Plan](plans/07-dashboard-model.md#stage-3-viewing-phase-3)
 - [ ] **2. 06 Sentry §1 and §2:** render errors from the boundaries, data errors from the query and mutation caches, a reportability policy, the startup buffer, source maps in CI. Paused until step 1. [Plan](plans/06-sentry.md)
 - [ ] **3. Integrations foundation** (not planned yet, below).
 - [ ] **4. 06 Sentry §3:** Sentry as the first telemetry integration, and its rebuilt page. [Plan](plans/06-sentry.md#3-sentry-as-the-first-telemetry-integration)
@@ -31,7 +31,7 @@ These come from the Sep 30 review of the edit MVP ([07 › Sep 30 review](plans/
 
 - [ ] **Docked editor pane.**
   - The palette and widget editor become a `Splitter` pane that resizes the grid, instead of an overlay covering the tiles.
-  - It is a shared side panel that Inspect (07 stage 3) reuses.
+  - Inspect already shares `PaneDrawer` with the editor; the docked pane replaces it for both, with the resizable width 07 §3 asks for.
 - [ ] **Edit bar.**
   - An "Editing" status that shows the dirty state.
   - Undo and Redo as `ActionIcon` + `Tooltip`, with `useHotkeys`.

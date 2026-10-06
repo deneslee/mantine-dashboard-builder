@@ -53,10 +53,12 @@ DashboardProvider key=id → createDashboardStore(dashboard)      restores a dra
 DashboardPage → isEditing = ?mode=edit; range = isEditing ? store range : URL ?? document range
   DashboardGrid → layouts per breakpoint; drag or resize stop → commitLayout (one undo step)
     WidgetTile(id) → widget from the store, plugin from usePlugins()
-      useWidgetData(queries, range) once the tile is near the viewport
-        → one datasourceQuery per query → resolveRange → DatasourcePlugin.query(spec, ctx) → DataFrame[]
+      useEffectiveTime(id) → useWidgetData(queries, time) once the tile is near the viewport and active
+        → one datasourceQuery per query → resolveEffectiveTime at the store's now
+        → DatasourcePlugin.query(spec, ctx) → DataFrame[], cached as { frames, durationMs }
         → combined in query order; a failed query's frames are left out and the header warns
-      QueryBoundary → <plugin.component frames options />
+      QueryBoundary → <plugin.component frames options timeZone />
+  InspectDrawer (?inspect) → the same cache entry per query, never refetched on open
 
 Save    store.save → saveDashboard (data/dashboardApi.ts) → localStorage saved copy → new baseline, draft cleared
         → setQueryData(['dashboards', id]) and the list invalidated
