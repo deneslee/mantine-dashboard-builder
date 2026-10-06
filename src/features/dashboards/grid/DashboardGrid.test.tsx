@@ -62,6 +62,7 @@ const nameWidget = defineWidget({
   type: 'name',
   name: 'Name',
   defaultSize: { w: 6, h: 3 },
+  isTimeAware: true,
   optionsSchema: z.object({}),
   component: lazy(async () => ({ default: FrameName })),
   skeleton: <p>Loading</p>,
@@ -76,13 +77,14 @@ function deferredDatasource() {
   );
   const release = (spec: string, from: string) =>
     act(async () => waiting.get(`${spec} ${from}`)?.([{ name: `${spec} ${from}`, length: 0, fields: [] }]));
-  const datasource: DatasourcePlugin = { type: 'deferred', name: 'Deferred', query };
+  const datasource: DatasourcePlugin = { type: 'deferred', name: 'Deferred', isTimeAware: true, query };
   return { datasource, query, release };
 }
 
 const brokenDatasource: DatasourcePlugin = {
   type: 'broken',
   name: 'Broken',
+  isTimeAware: true,
   query: async () => {
     throw new AppError('datasource', 'The broken source failed.', { isRetryable: false });
   },

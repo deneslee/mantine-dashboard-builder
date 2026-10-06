@@ -11,6 +11,7 @@ const widget = (type: string) =>
     type,
     name: type,
     defaultSize: { w: 6, h: 3 },
+    isTimeAware: true,
     optionsSchema: z.object({}),
     component: lazy(async () => ({ default: () => null })),
     skeleton: null,
@@ -22,6 +23,7 @@ const plugins: Plugins = {
     mock: {
       type: 'mock',
       name: 'Mock',
+      isTimeAware: true,
       querySchema: z.object({ seed: z.string() }),
       query: async () => [{ length: 0, fields: [] }],
     },

@@ -28,8 +28,8 @@ export const dashboardQuery = (id: string) =>
 
 /**
  * One datasource query's frames: the cache unit for widget data. The key is the datasource, its spec
- * and the widget's time as written (`now-24h`, shifts, time zone), so identical queries in two widgets
- * share one request, and each query fails, retries and is cancelled on its own. The range is resolved
+ * and, for a time-aware datasource, the widget's time as written (`now-24h`, shifts, time zone), so
+ * identical queries in two widgets share one request, and each query fails, retries and is cancelled on its own. The range is resolved
  * when the query runs, against the dashboard's `now` (`getNow`), so a refresh moves the window and all
  * widgets cover the same one. `source` names the widget in error toasts.
  */
@@ -41,14 +41,15 @@ export const datasourceQuery = (
     getNow,
     source,
   }: { datasources: Record<string, DatasourcePlugin>; getNow: () => number; source: string },
-) =>
-  queryOptions({
-    queryKey: [...dashboardKeys.data, query.datasource, query.spec, time.range, time.shifts, time.timeZone],
+) => {
+  const datasource = datasources[query.datasource];
+  const timeKey = datasource?.isTimeAware ? [time.range, time.shifts, time.timeZone] : [];
+  return queryOptions({
+    queryKey: [...dashboardKeys.data, query.datasource, query.spec, ...timeKey],
     queryFn: ({ signal }) => {
       const { range, timeZone } = time;
       const resolved = resolveEffectiveTime(time, getNow());
       if (!resolved) throw new AppError('validation', `Invalid time range "${range.from}" to "${range.to}".`);
-      const datasource = datasources[query.datasource];
       if (!datasource)
         throw new AppError('validation', `No datasource of type "${query.datasource}".`, {
           isRetryable: false,
@@ -57,3 +58,4 @@ export const datasourceQuery = (
     },
     meta: { source },
   });
+};

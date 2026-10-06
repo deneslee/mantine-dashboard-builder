@@ -15,6 +15,8 @@ export interface WidgetPlugin<Options = unknown> {
   /** Size in `lg` grid cells when added from the palette (phase 3). */
   defaultSize: { w: number; h: number };
   minSize?: { w: number; h: number };
+  /** It shows data over time, so a widget of this type can have its own time (when a query's datasource is time-aware too). */
+  isTimeAware: boolean;
   optionsSchema: z.ZodType<Options>;
   /** A lazy chunk: a dashboard loads only the widget code it shows. */
   component: LazyExoticComponent<ComponentType<WidgetProps<Options>>>;

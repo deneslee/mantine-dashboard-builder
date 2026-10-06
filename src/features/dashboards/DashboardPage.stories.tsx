@@ -42,6 +42,15 @@ export const View: Story = { args: { url: '/dashboards/sales' } };
 export const Editing: Story = { args: { url: EDIT } };
 export const WidgetOptions: Story = { args: { url: `${EDIT}&widget=revenue` } };
 export const QueryEditor: Story = { args: { url: `${EDIT}&widget=revenue&editor=queries` } };
+/** A viewer's own time for Revenue: the clock in its header. */
+export const WidgetTime: Story = {
+  args: { url: `/dashboards/sales?wt=${encodeURIComponent('{"revenue":{"mode":"shift","by":"1w"}}')}` },
+  play: async () => {
+    await expect(
+      await page.findByRole('button', { name: 'Time: Last 24 hours, 1 week earlier' }, WAIT),
+    ).toBeVisible();
+  },
+};
 
 export const Empty: Story = {
   args: { url: EDIT },
@@ -128,6 +137,55 @@ export const QueryApplyUndo: Story = {
     // The editor follows the dashboard: Undo brings the old queries back, with nothing left to apply.
     await waitFor(() => expect(editor).toHaveValue(original));
     await expect(page.getByRole('button', { name: 'Apply queries' })).toBeDisabled();
+    await expect(page.getByText('Saved locally')).toBeVisible();
+  },
+};
+
+const timeDialog = async () => within(await page.findByRole('dialog', { name: 'Time for Revenue' }, WAIT));
+const clock = () => page.queryByRole('button', { name: /^Time: / });
+
+/** A viewer's own time goes in the URL: the clock shows it, and back to the dashboard's removes it. */
+export const WidgetTimeView: Story = {
+  args: { url: '/dashboards/sales' },
+  play: async () => {
+    // A static file doesn't change with time, so Revenue by region has no time option.
+    await userEvent.click(await page.findByRole('button', { name: 'Actions for Revenue by region' }, WAIT));
+    await page.findByRole('menuitem', { name: 'Copy link' }, WAIT);
+    await expect(page.queryByRole('menuitem', { name: 'Time range…' })).toBeNull();
+    await userEvent.keyboard('{Escape}');
+
+    await chooseFromMenu('Revenue', 'Time range…');
+    let dialog = await timeDialog();
+    await userEvent.click(dialog.getByRole('radio', { name: 'Earlier' }));
+    await userEvent.click(dialog.getByRole('button', { name: 'Apply' }));
+    const time = await page.findByRole('button', { name: 'Time: Last 24 hours, 1 week earlier' }, WAIT);
+    await waitFor(() =>
+      expect(document.activeElement).toBe(page.getByRole('button', { name: 'Actions for Revenue' })),
+    );
+
+    await userEvent.click(time);
+    dialog = await timeDialog();
+    await userEvent.click(dialog.getByRole('radio', { name: "Dashboard's" }));
+    await userEvent.click(dialog.getByRole('button', { name: 'Apply' }));
+    await waitFor(() => expect(clock()).toBeNull());
+  },
+};
+
+/** In edit mode the same dialog changes the saved widget, as one undo step. */
+export const WidgetTimeEdit: Story = {
+  args: { url: EDIT },
+  play: async () => {
+    await chooseFromMenu('Revenue', 'Time range…');
+    const dialog = await timeDialog();
+    await userEvent.click(dialog.getByRole('radio', { name: 'Own range' }));
+    await userEvent.click(dialog.getByRole('button', { name: 'Time range' }));
+    await userEvent.click(await page.findByRole('option', { name: 'Today' }, WAIT));
+    await userEvent.click(dialog.getByRole('button', { name: 'Apply' }));
+    await expect(await page.findByRole('button', { name: 'Time: Today' }, WAIT)).toBeVisible();
+    await expect(page.getByText('Unsaved changes')).toBeVisible();
+
+    await userEvent.click(controls().getByRole('button', { name: 'Undo' }));
+    await waitFor(() => expect(clock()).toBeNull());
     await expect(page.getByText('Saved locally')).toBeVisible();
   },
 };

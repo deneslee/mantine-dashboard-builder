@@ -42,6 +42,7 @@ export const localJsonDatasource: DatasourcePlugin = {
   type: 'local-json',
   name: 'Local JSON',
   querySchema: spec,
+  isTimeAware: false,
   async query(input, _ctx, signal) {
     const parsedSpec = spec.safeParse(input);
     if (!parsedSpec.success)

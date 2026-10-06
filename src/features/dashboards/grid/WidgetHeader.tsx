@@ -1,5 +1,5 @@
 import { ActionIcon, Group, Menu, Text, Tooltip } from '@mantine/core';
-import { IconAlertTriangle, IconDots, IconInfoCircle } from '@tabler/icons-react';
+import { IconAlertTriangle, IconClock, IconDots, IconInfoCircle } from '@tabler/icons-react';
 import { Link } from '@tanstack/react-router';
 import { fontWeight, iconSize, iconStroke } from '@/ui/tokens/semantic';
 import { notify } from '@/lib/notify/notify';
@@ -16,6 +16,8 @@ export function WidgetHeader({
   isFetching,
   hasFailed,
   onRefresh,
+  timeLabel,
+  onEditTime,
 }: {
   id: string;
   widget: Widget;
@@ -26,6 +28,10 @@ export function WidgetHeader({
   hasFailed: boolean;
   /** Refetches the widget's queries. */
   onRefresh: () => void;
+  /** The widget's own time, when it differs from the dashboard's: a clock icon. */
+  timeLabel?: string;
+  /** Opens the widget's time dialog; without it the menu has no Time range… item. */
+  onEditTime?: () => void;
 }) {
   const dashboardId = useDashboard((state) => state.doc.id);
   const actions = useDashboardActions();
@@ -73,6 +79,13 @@ export function WidgetHeader({
             </ActionIcon>
           </Tooltip>
         ) : null}
+        {timeLabel ? (
+          <Tooltip label={timeLabel}>
+            <ActionIcon variant="subtle" aria-label={`Time: ${timeLabel}`} onClick={onEditTime}>
+              <IconClock size={iconSize.sm} stroke={iconStroke} />
+            </ActionIcon>
+          </Tooltip>
+        ) : null}
         {hasFailed ? (
           <Tooltip
             label="Some of this widget's data could not be loaded"
@@ -103,6 +116,7 @@ export function WidgetHeader({
             </Tooltip>
           </Menu.Target>
           <Menu.Dropdown>
+            {onEditTime ? <Menu.Item onClick={onEditTime}>Time range…</Menu.Item> : null}
             {widget.queries.length ? <Menu.Item onClick={onRefresh}>Refresh</Menu.Item> : null}
             <Menu.Item onClick={() => void handleCopyLink()}>Copy link</Menu.Item>
             {isEditing ? (

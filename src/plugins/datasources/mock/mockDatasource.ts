@@ -106,6 +106,7 @@ export const mockDatasource: DatasourcePlugin = {
   type: 'mock',
   name: 'Mock data',
   querySchema: spec,
+  isTimeAware: true,
   async query(input, ctx, signal) {
     const parsed = spec.safeParse(input);
     if (!parsed.success)

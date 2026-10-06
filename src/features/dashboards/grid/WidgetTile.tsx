@@ -9,10 +9,12 @@ import type { Query } from '@/plugins/DatasourcePlugin';
 import { useWidgetData } from '../data/useWidgetData';
 import { useEffectiveTime } from '../state/useEffectiveTime';
 import { useWidget } from '../state/useDashboard';
+import { formatRange, formatShift } from '../header/formatRange';
 import type { TimeRange } from '@/core/time/timeRange';
 import type { Widget } from '@/core/dashboard/dashboardSchema';
 import { usePlugins } from '@/plugins/usePlugins';
 import { WidgetHeader } from './WidgetHeader';
+import { WidgetTimeDialog } from './WidgetTimeDialog';
 import classes from './WidgetTile.module.css';
 
 const nearViewport = { rootMargin: '200px' };
@@ -64,8 +66,14 @@ function Tile({
   const { ref, entry } = useIntersection<HTMLDivElement>(nearViewport);
   const [hasBeenSeen, setSeen] = useState(false);
   if (!hasBeenSeen && entry?.isIntersecting) setSeen(true);
-  const { widgets } = usePlugins();
+  const { widgets, datasources } = usePlugins();
   const time = useEffectiveTime(id, range, timeZone, { isEditing });
+  const [isTimeOpen, setTimeOpen] = useState(false);
+  // A time option only where time changes the data: a time-aware type and datasource (07 §1).
+  const canSetTime =
+    !!widgets[widget.type]?.isTimeAware &&
+    widget.queries.some((query) => datasources[query.datasource]?.isTimeAware);
+  const hasOwnTime = time.shifts.length > 0 || time.range.from !== range.from || time.range.to !== range.to;
   const data = useWidgetData(widget.queries, time, { isEnabled: hasBeenSeen, source: widget.title });
   const skeleton = widgets[widget.type]?.skeleton ?? unknownSkeleton;
   return (
@@ -89,8 +97,23 @@ function Tile({
           isFetching={data.isFetching}
           hasFailed={data.hasFailed}
           onRefresh={() => void data.refetch()}
+          timeLabel={
+            canSetTime && hasOwnTime
+              ? [formatRange(time.range), ...time.shifts.map(formatShift)].join(', ')
+              : undefined
+          }
+          onEditTime={canSetTime ? () => setTimeOpen(true) : undefined}
         />
       )}
+      {isTimeOpen ? (
+        <WidgetTimeDialog
+          id={id}
+          title={widget.title}
+          range={range}
+          isEditing={isEditing}
+          onClose={() => setTimeOpen(false)}
+        />
+      ) : null}
       <Box ref={ref} className={classes.body}>
         <QueryBoundary name={widget.title} retry={data.refetch} resetKeys={[widget.options, widget.queries]}>
           {hasBeenSeen ? <WidgetBody widget={widget} frames={data.frames} error={data.error} /> : skeleton}

@@ -65,7 +65,7 @@ A widget's time has three modes:
 | --------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
 | Title     | Always                                                                                           | Required in the schema. It is the tile's accessible name; long titles truncate, with the full text on hover. |
 | Info icon | Only when the widget has a description                                                           | Hover or focus shows the description. It stays open while hovered and closes on Esc (WCAG 1.4.13).           |
-| Clock     | Only when the widget's time differs from the dashboard's                                         | Icon only, the range on hover (Kibana found a full-text badge distracting). Click opens the time popover.    |
+| Clock     | Only when the widget's time differs from the dashboard's                                         | Icon only, the range on hover (Kibana found a full-text badge distracting). Click opens the time dialog.     |
 | Status    | While refetching, or with partial data or a warning                                              | The planned 2px bar under the header, and a warning icon.                                                    |
 | Menu (…)  | On hover, on focus inside the tile, always in edit mode, always on touch screens (`hover: none`) | Hidden with opacity, never removed, so it stays in the tab order.                                            |
 
@@ -91,7 +91,7 @@ Single-letter keys work only while a tile is hovered or focused, and never while
 **Registry and document additions.** Datasource additions are in §6.
 
 ```ts
-WidgetPlugin { …, capabilities: { time: boolean; inspect: boolean; export: ('csv' | 'json')[]; hoverSync: boolean } }
+WidgetPlugin { …, isTimeAware: boolean }      inspect, export and hover-sync flags arrive with their stages
 Widget (document) { type, title, description?, options, queries, time?: TimeOverride, syncGroup? }
 TimeOverride = { mode: 'range'; from; to } | { mode: 'shift'; by }      absent = inherit
 ```
@@ -218,7 +218,7 @@ QueryContext {
 DatasourcePlugin { …,
   query(spec, ctx: QueryContext, signal): Promise<DataFrame[]>
   getVariableRefs(spec): VariableRef[]
-  timeAware: boolean; usesResolution: boolean; identifierParams: boolean
+  isTimeAware: boolean; usesResolution: boolean; identifierParams: boolean
   runsOn: 'browser' | 'server'; maxConcurrency: number
 }
 ```
@@ -313,7 +313,8 @@ Checkpoint Sep 30: completed implementation parts are ticked below. Parent tasks
   - Oct 6: `datasourceQuery` keyed `['ds', datasource, spec, range]`; `useWidgetData(queries, range, { isEnabled })` takes the queries rather than the widget id, so the query editor's preview uses it too. `DashboardGrid.test` proves the three done-when cases; a tile that never came near the viewport makes no request. `dataActive` as a prop arrives with **Full-screen view**, the first place a mounted tile is hidden; context-dependent keys (`timeAware`, resolution, variables) arrive with the scope resolver, resolution and variables.
 - [x] **Scope resolver** with time zone and the shared `now`: `useEffectiveTimeRange(widgetId)` over the URL (`from`, `to`, `tz`, `wt`) and the store, with the precedence in §1. Done when unit tests cover every precedence level, shift over shift, and `now/d` in two time zones, and one widget's override re-renders only that tile.
   - Oct 6: `core/time/timeRange.ts` resolves `now`, `now-<n><unit>` and `/<unit>` rounding in a time zone with `Intl` (core may not use date libraries), days and weeks by the wall clock so DST days stay midnight to midnight; `resolveWidgetTime` applies the precedence (viewer `wt`, saved `time`, dashboard) and `useEffectiveTime(id, …)` (named for what it returns: range, shifts and zone) reads each tile's own inputs. The store's `now` is retaken in a layout effect when the dashboard range or zone changes, and by `useRefreshAll`; queries resolve against it at fetch time. Tests: every precedence level, shift over shift, `now/d` in Budapest and New York and across a DST change (`timeRange.test.ts`); a `wt` shift moving one widget's window a week while no other tile re-renders (`DashboardGrid.test`). Not yet: sections (stage 4), the personal time-zone setting (needs its Settings control), and charts labelling their axes in the dashboard's zone (they use the browser's).
-- [ ] **Time range per widget:** the menu's Time range…, the clock, and the saved override in edit mode (one undo step).
+- [x] **Time range per widget:** the menu's Time range…, the clock, and the saved override in edit mode (one undo step).
+  - Oct 6: `isTimeAware` on widget and datasource plugins (chart, KPI, table and mock yes; local JSON no) decides whether the menu has Time range… (§1), and a query's cache key holds the time only for a time-aware datasource. `WidgetTimeDialog` offers the inherited time (the dashboard's, or "as saved" for a viewer over a saved override), an own range (the dashboard's picker, which gained "Today", `now/d → now`), or the inherited time 1 hour, 1 day, 1 week or 4 weeks earlier. In view mode it writes `wt`, keeping an entry only where it differs from the saved value; in edit mode `editWidget(id, { time })`, one undo step. The clock shows when the widget's time differs from the dashboard's, with the range and shifts on hover, and opens the same dialog; focus returns to the menu button. Play functions: WidgetTimeView (no option for a static file, a shift shows the clock, the dashboard's time removes it) and WidgetTimeEdit (own range Today, then one Undo), and the WidgetTime story shows the clock; unit tests for the cache key (`dashboardQueries.test`) and the labels (`formatRange.test`). The `t` key comes with **Shortcuts**.
 - [ ] **Times in the dashboard's zone.** Pass the time zone to widgets, so chart axes, tooltips and the range label show the dashboard's zone, not the browser's. Done when a dashboard with `tz=America/New_York` labels its axes in New York time.
 - [ ] **Full-screen view** (`?view`). Done when the hidden tiles' `dataActive` is false and no request is made while they're hidden.
 - [ ] **Inspect drawer** (`?inspect`, `inspectTab`) with its four tabs, per query. Done when every tab has a story and a test, and focus returns to the menu button on close.
@@ -359,6 +360,8 @@ Integration datasources in the datasource manager need the Integrations foundati
 - **Sep 30: resolution comes from the committed layout, in buckets.** Datasources aggregate; only drawing downsamples.
 - **Sep 30: variables go through `getVariableRefs`.** Identifiers are parameters only where the datasource supports it, otherwise allow-listed; filters stay separate from variables.
 - **Oct 2: switching dashboards may keep the previous page briefly.** TanStack Router navigates in a React transition and reuses a route's boundary when only the params change, so after the URL changes it keeps the previous dashboard for up to `defaultPendingMs` (300ms), then shows the skeleton. Showing the skeleton at once was tried and dropped: every fast switch would flash it. Stage 1's done-when therefore reads: the second dashboard's route never renders the first one's document, and the old page never outlasts the pending delay.
+- **Oct 6: a widget's time is set in a dialog, not a popover.** It holds three choices, a range picker with its own dropdown and an Apply button, like the Move and Resize dialogs, and focus returns to the menu button the same way. A viewer over a saved override gets "As saved" rather than "Dashboard's": `wt` holds overrides only, so it can move a saved time but not cancel it.
+- **Oct 6: plugin flags follow the naming rule:** `isTimeAware` on both plugins, not `capabilities.time` or `timeAware`. The inspect, export and hover-sync flags arrive with their stages.
 
 ## Verification
 

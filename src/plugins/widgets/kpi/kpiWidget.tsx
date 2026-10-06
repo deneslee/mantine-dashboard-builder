@@ -8,6 +8,7 @@ export const kpiWidget = defineWidget({
   name: 'Key figures',
   defaultSize: { w: 12, h: 3 },
   minSize: { w: 2, h: 2 },
+  isTimeAware: true,
   optionsSchema: z.object({}),
   component: lazy(() => import('./Stats').then((m) => ({ default: m.Stats }))),
   skeleton: <TextSkeleton lines={3} label="Loading key figures" />,

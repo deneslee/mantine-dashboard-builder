@@ -34,7 +34,7 @@ export interface DashboardState {
     editWidget(
       this: void,
       id: string,
-      patch: Partial<Pick<Widget, 'title' | 'description' | 'options' | 'queries'>>,
+      patch: Partial<Pick<Widget, 'title' | 'description' | 'options' | 'queries' | 'time'>>,
     ): void;
     commitLayout(
       this: void,

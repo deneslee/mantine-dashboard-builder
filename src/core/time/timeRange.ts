@@ -210,6 +210,7 @@ export const RANGE_PRESETS = [
   { from: 'now-1h', label: 'Last hour' },
   { from: 'now-24h', label: 'Last 24 hours' },
   { from: 'now-7d', label: 'Last 7 days' },
+  { from: 'now/d', label: 'Today' },
 ] as const;
 
 export const REFRESH_OPTIONS = [

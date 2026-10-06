@@ -22,6 +22,8 @@ export interface DatasourcePlugin {
   type: string;
   name: string;
   querySchema?: z.ZodType;
+  /** Its results depend on the time range: the range and time zone are part of each query's cache key. */
+  isTimeAware: boolean;
   /**
    * One query's frames: usually one, more when a query returns several series. Rejects with an
    * `AppError`; honours `signal`.
