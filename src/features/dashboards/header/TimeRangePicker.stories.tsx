@@ -16,7 +16,7 @@ function Controls({ initial }: { initial: TimeRange }) {
   return (
     <Stack gap="md" p="lg">
       <Group gap="xs">
-        <TimeRangePicker value={range} onChange={setRange} />
+        <TimeRangePicker value={range} onChange={setRange} timeZone="UTC" />
         <RefreshPicker value={refresh} onChange={setRefresh} />
       </Group>
       <Code>{`?from=${range.from}&to=${range.to}&refresh=${refresh}`}</Code>

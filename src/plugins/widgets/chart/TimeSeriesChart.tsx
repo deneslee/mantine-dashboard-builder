@@ -1,6 +1,6 @@
 import { AreaChart, BarChart, LineChart } from '@mantine/charts';
-import dayjs from 'dayjs';
 import { getFieldLabel, frameToRows, getUnitAffix, type DataFrame } from '@/core/data/DataFrame';
+import { formatTime } from '@/core/time/timeRange';
 import type { WidgetProps } from '@/plugins/WidgetPlugin';
 import type { ChartOptions } from './chartOptions';
 
@@ -13,17 +13,17 @@ const X = '__x';
 const empty: DataFrame = { length: 0, fields: [] };
 
 /** Number fields over the frame's time field, as an area, line or bar chart. Fills its tile. */
-export function TimeSeriesChart({ frames, options }: WidgetProps<ChartOptions>) {
+export function TimeSeriesChart({ frames, options, timeZone }: WidgetProps<ChartOptions>) {
   const frame = frames[0] ?? empty;
   const time = frame.fields.find((field) => field.type === 'time');
   const numbers = frame.fields.filter((field) => field.type === 'number');
 
   const times = (time?.values ?? []) as number[];
   const span = (times.at(-1) ?? 0) - (times[0] ?? 0);
-  const format = span > 2 * DAY ? 'D MMM' : span > DAY ? 'D MMM HH:mm' : 'HH:mm';
+  const format = span > 2 * DAY ? 'day' : span > DAY ? 'dayTime' : 'time';
   const data = frameToRows(frame).map((row) => ({
     ...row,
-    [X]: time ? dayjs(row[time.name] as number).format(format) : '',
+    [X]: time ? formatTime(row[time.name] as number, timeZone, format) : '',
   }));
 
   const series = numbers.map((field, i) => ({

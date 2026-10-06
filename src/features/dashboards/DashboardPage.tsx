@@ -105,7 +105,11 @@ export function DashboardPage() {
           <RefreshButton />
         </Page.Actions>
         <Page.ControlBar aria-label="Dashboard controls">
-          <TimeRangePicker value={range} onChange={isEditing ? actions.setRange : setSearch} />
+          <TimeRangePicker
+            value={range}
+            onChange={isEditing ? actions.setRange : setSearch}
+            timeZone={timeZone}
+          />
           <RefreshPicker
             value={refresh}
             onChange={isEditing ? actions.setRefresh : (next) => setSearch({ refresh: next })}

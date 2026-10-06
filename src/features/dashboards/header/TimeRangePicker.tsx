@@ -1,10 +1,9 @@
 import { Combobox, InputBase, useCombobox } from '@mantine/core';
 import { DatePicker, type DatesRangeValue } from '@mantine/dates';
 import { IconClock } from '@tabler/icons-react';
-import dayjs from 'dayjs';
 import { useState } from 'react';
 import { iconSize, iconStroke } from '@/ui/tokens/semantic';
-import { RANGE_PRESETS, type TimeRange } from '@/core/time/timeRange';
+import { dayRange, RANGE_PRESETS, type TimeRange } from '@/core/time/timeRange';
 import { formatRange } from './formatRange';
 
 const CUSTOM = 'custom';
@@ -12,10 +11,12 @@ const CUSTOM = 'custom';
 interface Props {
   value: TimeRange;
   onChange: (range: TimeRange) => void;
+  /** The dashboard's: calendar days start at its midnight, and dates show in it. */
+  timeZone: string;
 }
 
 /** Relative presets, or whole days from a calendar ("Custom range…"). Controlled: the URL holds the value. */
-export function TimeRangePicker({ value, onChange }: Props) {
+export function TimeRangePicker({ value, onChange, timeZone }: Props) {
   const [isCustom, setCustom] = useState(false);
   const [days, setDays] = useState<DatesRangeValue>([null, null]);
   const combobox = useCombobox({
@@ -33,11 +34,7 @@ export function TimeRangePicker({ value, onChange }: Props) {
   const handlePickDays = (next: DatesRangeValue) => {
     setDays(next);
     const [start, end] = next;
-    if (start && end)
-      handlePick({
-        from: dayjs(start).startOf('day').toISOString(),
-        to: dayjs(end).endOf('day').toISOString(),
-      });
+    if (start && end) handlePick(dayRange(String(start), String(end), timeZone));
   };
 
   return (
@@ -61,7 +58,7 @@ export function TimeRangePicker({ value, onChange }: Props) {
           rightSectionPointerEvents="none"
           onClick={() => combobox.toggleDropdown()}
         >
-          {formatRange(value)}
+          {formatRange(value, timeZone)}
         </InputBase>
       </Combobox.Target>
       <Combobox.Dropdown>

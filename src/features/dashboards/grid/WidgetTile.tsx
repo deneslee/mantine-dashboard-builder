@@ -99,7 +99,7 @@ function Tile({
           onRefresh={() => void data.refetch()}
           timeLabel={
             canSetTime && hasOwnTime
-              ? [formatRange(time.range), ...time.shifts.map(formatShift)].join(', ')
+              ? [formatRange(time.range, timeZone), ...time.shifts.map(formatShift)].join(', ')
               : undefined
           }
           onEditTime={canSetTime ? () => setTimeOpen(true) : undefined}
@@ -110,13 +110,18 @@ function Tile({
           id={id}
           title={widget.title}
           range={range}
+          timeZone={timeZone}
           isEditing={isEditing}
           onClose={() => setTimeOpen(false)}
         />
       ) : null}
       <Box ref={ref} className={classes.body}>
         <QueryBoundary name={widget.title} retry={data.refetch} resetKeys={[widget.options, widget.queries]}>
-          {hasBeenSeen ? <WidgetBody widget={widget} frames={data.frames} error={data.error} /> : skeleton}
+          {hasBeenSeen ? (
+            <WidgetBody widget={widget} frames={data.frames} error={data.error} timeZone={timeZone} />
+          ) : (
+            skeleton
+          )}
         </QueryBoundary>
       </Box>
     </Paper>
@@ -127,10 +132,12 @@ function WidgetBody({
   widget,
   frames,
   error,
+  timeZone,
 }: {
   widget: Widget;
   frames: DataFrame[] | undefined;
   error: unknown;
+  timeZone: string;
 }) {
   const definition = usePlugins().widgets[widget.type];
   if (!definition)
@@ -146,7 +153,7 @@ function WidgetBody({
   if (!frames) return definition.skeleton;
   return (
     <Suspense fallback={definition.skeleton}>
-      <definition.component frames={frames} options={options.data} />
+      <definition.component frames={frames} options={options.data} timeZone={timeZone} />
     </Suspense>
   );
 }

@@ -126,6 +126,46 @@ export function resolveTime(
   return Number.isNaN(time) ? undefined : new Date(time);
 }
 
+/**
+ * Whole calendar days `start` to `end` (`YYYY-MM-DD`, as a date picker gives them) in `timeZone`:
+ * from the first day's midnight to the last day's last millisecond, as ISO times.
+ */
+export function dayRange(start: string, end: string, timeZone: string): TimeRange {
+  const midnight = (date: string, after: number) => {
+    const [year = 1970, month = 1, day = 1] = date.split('-').map(Number);
+    return fromWallClock({ year, month, day: day + after, hour: 0, minute: 0, second: 0 }, timeZone);
+  };
+  return {
+    from: new Date(midnight(start, 0)).toISOString(),
+    to: new Date(midnight(end, 1) - 1).toISOString(),
+  };
+}
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const pad = (value: number) => String(value).padStart(2, '0');
+
+/**
+ * `time` as a clock in `timeZone` shows it: `20 Sep 2026` (date), `20 Sep` (day), `20 Sep 14:05`
+ * (dayTime), `14:05` (time) or `20 Sep, 14:05:09` (seconds). Built from the clock's numbers, so the
+ * text doesn't depend on the browser's locale data.
+ */
+export function formatTime(
+  time: number,
+  timeZone: string,
+  format: 'date' | 'day' | 'dayTime' | 'time' | 'seconds',
+): string {
+  const wall = wallClock(time, timeZone);
+  const day = `${wall.day} ${MONTHS[wall.month - 1]}`;
+  const clock = `${pad(wall.hour)}:${pad(wall.minute)}`;
+  return {
+    date: `${day} ${wall.year}`,
+    day,
+    dayTime: `${day} ${clock}`,
+    time: clock,
+    seconds: `${day}, ${clock}:${pad(wall.second)}`,
+  }[format];
+}
+
 export const isValidTime = (value: string) => resolveTime(value, 0, 'UTC') !== undefined;
 
 export function isValidTimeZone(timeZone: string): boolean {

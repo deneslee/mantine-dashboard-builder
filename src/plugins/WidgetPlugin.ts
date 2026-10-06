@@ -6,6 +6,8 @@ import type { DataFrame } from '@/core/data/DataFrame';
 export interface WidgetProps<Options> {
   frames: DataFrame[];
   options: Options;
+  /** The dashboard's time zone: show times as its clock does, never the browser's. */
+  timeZone: string;
 }
 
 /** A widget plugin. Features define them; `app/plugins.ts` collects them. */

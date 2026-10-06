@@ -8,7 +8,7 @@ describe('TimeRangePicker', () => {
   it('shows the preset name and picks another preset by keyboard', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
-    render(<TimeRangePicker value={{ from: 'now-24h', to: 'now' }} onChange={onChange} />);
+    render(<TimeRangePicker value={{ from: 'now-24h', to: 'now' }} onChange={onChange} timeZone="UTC" />);
 
     const trigger = screen.getByRole('button', { name: 'Time range' });
     expect(trigger).toHaveTextContent('Last 24 hours');
@@ -26,11 +26,10 @@ describe('TimeRangePicker', () => {
       <TimeRangePicker
         value={{ from: '2026-09-20T00:00:00.000Z', to: '2026-09-26T23:59:59.999Z' }}
         onChange={() => {}}
+        timeZone="UTC"
       />,
     );
-    expect(screen.getByRole('button', { name: 'Time range' })).toHaveTextContent(
-      /20 Sep 2026 – 2[67] Sep 2026/,
-    );
+    expect(screen.getByRole('button', { name: 'Time range' })).toHaveTextContent('20 Sep 2026 – 26 Sep 2026');
   });
 });
 

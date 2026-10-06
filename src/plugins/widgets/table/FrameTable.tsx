@@ -3,7 +3,6 @@ import { IconArrowDown, IconArrowUp, IconSelector } from '@tabler/icons-react';
 import type { Row } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import clsx from 'clsx';
-import dayjs from 'dayjs';
 import { useState, type ReactNode } from 'react';
 import {
   createAppColumnHelper,
@@ -12,6 +11,7 @@ import {
 } from '@/plugins/widgets/table/useAppTable';
 import { iconSize, iconStroke } from '@/ui/tokens/semantic';
 import { getFieldLabel, getUnitAffix, type DataFrame, type Field } from '@/core/data/DataFrame';
+import { formatTime } from '@/core/time/timeRange';
 import type { WidgetProps } from '@/plugins/WidgetPlugin';
 import type { ColumnOptions, TableOptions } from './tableOptions';
 import classes from './FrameTable.module.css';
@@ -26,9 +26,9 @@ interface RowRef {
 type TableRow = Row<typeof appTableFeatures, RowRef>;
 const column = createAppColumnHelper<RowRef>();
 
-function cell(field: Field, value: unknown, options: ColumnOptions | undefined): ReactNode {
+function cell(field: Field, value: unknown, options: ColumnOptions | undefined, timeZone: string): ReactNode {
   if (value === null || value === undefined) return null;
-  if (field.type === 'time' && typeof value === 'number') return dayjs(value).format('D MMM, HH:mm:ss');
+  if (field.type === 'time' && typeof value === 'number') return formatTime(value, timeZone, 'seconds');
   if (field.type === 'number' && typeof value === 'number') {
     if (options?.format === 'percent')
       return <NumberFormatter value={value * 100} decimalScale={1} fixedDecimalScale suffix="%" />;
@@ -47,7 +47,7 @@ const SortIcon = { asc: IconArrowUp, desc: IconArrowDown, none: IconSelector };
  * The first frame as a table. Headers sort (click or Enter); only the rows in view are in the
  * DOM, so a frame of 10 000 rows scrolls like one of 10.
  */
-export function FrameTable({ frames, options }: WidgetProps<TableOptions>) {
+export function FrameTable({ frames, options, timeZone }: WidgetProps<TableOptions>) {
   const frame = frames[0] ?? empty;
   const fields = new Map(frame.fields.map((field) => [field.name, field]));
   const columns = frame.fields.map((field) =>
@@ -92,7 +92,13 @@ export function FrameTable({ frames, options }: WidgetProps<TableOptions>) {
             </Table.Tr>
           ))}
         </Table.Thead>
-        <VirtualBody rows={table.getRowModel().rows} viewport={viewport} fields={fields} options={options} />
+        <VirtualBody
+          rows={table.getRowModel().rows}
+          viewport={viewport}
+          fields={fields}
+          options={options}
+          timeZone={timeZone}
+        />
       </Table>
     </ScrollArea>
   );
@@ -103,13 +109,14 @@ interface BodyProps {
   viewport: HTMLDivElement | null;
   fields: Map<string, Field>;
   options: TableOptions;
+  timeZone: string;
 }
 
 /**
  * The rows in view, with spacers standing in for the rest. Its own component: scrolling re-renders
  * only this, and the React Compiler, which skips TanStack Virtual, still memoizes the table above.
  */
-function VirtualBody({ rows, viewport, fields, options }: BodyProps) {
+function VirtualBody({ rows, viewport, fields, options, timeZone }: BodyProps) {
   // oxlint-disable-next-line react/incompatible-library -- scoped to this component on purpose (see above)
   const virtualizer = useVirtualizer({
     count: rows.length,
@@ -141,7 +148,7 @@ function VirtualBody({ rows, viewport, fields, options }: BodyProps) {
               const cellOptions = field ? options.columns[field.name] : undefined;
               return (
                 <Table.Td key={c.id} ta={field ? alignOf(field, cellOptions) : undefined}>
-                  {field ? cell(field, c.getValue(), cellOptions) : null}
+                  {field ? cell(field, c.getValue(), cellOptions, timeZone) : null}
                 </Table.Td>
               );
             })}

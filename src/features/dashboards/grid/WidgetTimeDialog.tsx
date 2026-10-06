@@ -18,6 +18,7 @@ export function WidgetTimeDialog({
   id,
   title,
   range,
+  timeZone,
   isEditing,
   onClose,
 }: {
@@ -25,6 +26,7 @@ export function WidgetTimeDialog({
   title: string;
   /** The dashboard range, where an own range starts. */
   range: TimeRange;
+  timeZone: string;
   isEditing: boolean;
   onClose: () => void;
 }) {
@@ -38,7 +40,7 @@ export function WidgetTimeDialog({
   const [shift, setShift] = useState(current?.mode === 'shift' ? current.by : '1w');
   const isOverSaved = !isEditing && saved !== undefined;
   const inherited = isOverSaved
-    ? `As saved: ${saved.mode === 'range' ? formatRange(saved) : formatShift(saved.by)}.`
+    ? `As saved: ${saved.mode === 'range' ? formatRange(saved, timeZone) : formatShift(saved.by)}.`
     : "The dashboard's time range.";
   const handleClose = () => {
     onClose();
@@ -82,7 +84,9 @@ export function WidgetTimeDialog({
             {inherited}
           </Text>
         ) : null}
-        {mode === 'range' ? <TimeRangePicker value={ownRange} onChange={setOwnRange} /> : null}
+        {mode === 'range' ? (
+          <TimeRangePicker value={ownRange} onChange={setOwnRange} timeZone={timeZone} />
+        ) : null}
         {mode === 'shift' ? (
           <Select
             label={isOverSaved ? 'Compared with as saved' : "Compared with the dashboard's range"}

@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+  dayRange,
+  formatTime,
   isValidTime,
   isValidTimeZone,
   parseRefreshInterval,
@@ -60,6 +62,40 @@ describe('resolveTime', () => {
     }
     expect(isValidTimeZone('Europe/Budapest')).toBe(true);
     expect(isValidTimeZone('Mars/Olympus')).toBe(false);
+  });
+});
+
+describe('dayRange', () => {
+  it('spans whole days in the time zone, also across a DST change', () => {
+    expect(dayRange('2026-09-20', '2026-09-26', 'UTC')).toEqual({
+      from: '2026-09-20T00:00:00.000Z',
+      to: '2026-09-26T23:59:59.999Z',
+    });
+    expect(dayRange('2026-09-20', '2026-09-20', 'America/New_York')).toEqual({
+      from: '2026-09-20T04:00:00.000Z',
+      to: '2026-09-21T03:59:59.999Z',
+    });
+    // Budapest leaves summer time on 25 Oct: that day is 25 hours long.
+    expect(dayRange('2026-10-25', '2026-10-25', 'Europe/Budapest')).toEqual({
+      from: '2026-10-24T22:00:00.000Z',
+      to: '2026-10-25T22:59:59.999Z',
+    });
+  });
+});
+
+describe('formatTime', () => {
+  const time = Date.UTC(2026, 8, 20, 2, 5, 9); // 20 Sep 2026, 02:05:09 UTC
+
+  it('shows the clock of the time zone', () => {
+    expect(formatTime(time, 'UTC', 'seconds')).toBe('20 Sep, 02:05:09');
+    expect(formatTime(time, 'America/New_York', 'seconds')).toBe('19 Sep, 22:05:09');
+    expect(formatTime(time, 'Europe/Budapest', 'dayTime')).toBe('20 Sep 04:05');
+  });
+
+  it('has a format for each span of a chart, and one for dates', () => {
+    expect(formatTime(time, 'UTC', 'date')).toBe('20 Sep 2026');
+    expect(formatTime(time, 'UTC', 'day')).toBe('20 Sep');
+    expect(formatTime(time, 'UTC', 'time')).toBe('02:05');
   });
 });
 

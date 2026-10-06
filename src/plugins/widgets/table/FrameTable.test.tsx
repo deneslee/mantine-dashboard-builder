@@ -34,7 +34,7 @@ describe('FrameTable', () => {
   afterEach(() => vi.restoreAllMocks());
 
   it('renders a column per field with labels, units and percent formatting', () => {
-    render(<FrameTable frames={[regions]} options={options} />);
+    render(<FrameTable frames={[regions]} options={options} timeZone="UTC" />);
     expect(screen.getAllByRole('columnheader').map((th) => th.textContent)).toEqual([
       'Region',
       'Revenue',
@@ -45,9 +45,18 @@ describe('FrameTable', () => {
     expect(screen.getByText('50.0%')).toBeInTheDocument();
   });
 
+  it("shows times as the dashboard's time zone has them", () => {
+    const events: DataFrame = {
+      length: 1,
+      fields: [{ name: 'at', type: 'time', values: [Date.UTC(2026, 8, 20, 2, 5, 9)] }],
+    };
+    render(<FrameTable frames={[events]} options={tableOptions.parse({})} timeZone="America/New_York" />);
+    expect(screen.getByText('19 Sep, 22:05:09')).toBeInTheDocument();
+  });
+
   it('sorts by a header, toggles the direction and exposes it with aria-sort', async () => {
     const user = userEvent.setup();
-    render(<FrameTable frames={[regions]} options={options} />);
+    render(<FrameTable frames={[regions]} options={options} timeZone="UTC" />);
 
     await user.click(screen.getByRole('button', { name: 'Region' }));
     expect(header('Region')).toHaveAttribute('aria-sort', 'ascending');
@@ -73,7 +82,9 @@ describe('FrameTable', () => {
       length: rows,
       fields: [{ name: 'n', type: 'number', values: Array.from({ length: rows }, (_, i) => i) }],
     };
-    const { container } = render(<FrameTable frames={[big]} options={tableOptions.parse({})} />);
+    const { container } = render(
+      <FrameTable frames={[big]} options={tableOptions.parse({})} timeZone="UTC" />,
+    );
     const rendered = screen.getAllByRole('row').length - 1;
     expect(rendered).toBeGreaterThan(0);
     expect(rendered).toBeLessThan(60);
