@@ -1,0 +1,10 @@
+/* One widget full screen: it fills what is left of the main pane. */
+.full {
+  height: 100%;
+  min-height: var(--app-chart-height-default);
+}
+
+.tile {
+  flex: 1 1 0;
+  min-height: 0;
+}

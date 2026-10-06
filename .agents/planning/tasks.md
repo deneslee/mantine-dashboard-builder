@@ -19,7 +19,7 @@ The big-picture checklist, by roadmap phase ([roadmap](roadmap.md#roadmap)). Eac
 
 Order decided Sep 30: the edit MVP (done Oct 2), then 08 (done Oct 1), then the viewing tools, then Sentry and integrations ([roadmap](roadmap.md#roadmap)).
 
-- [ ] **1. 07 stage 3, viewing** (phase 3; Oct 6: per-query cache entries, the time scope resolver, per-widget time and times in the dashboard's zone are done; full-screen view is next): one cache entry per datasource query, scoped time with a time zone, per-widget time, full screen, the Inspect drawer, density, shortcuts. [Plan](plans/07-dashboard-model.md#stage-3-viewing-phase-3)
+- [ ] **1. 07 stage 3, viewing** (phase 3; Oct 6: per-query cache entries, the time scope resolver, per-widget time, times in the dashboard's zone and full-screen view are done; the Inspect drawer is next): one cache entry per datasource query, scoped time with a time zone, per-widget time, full screen, the Inspect drawer, density, shortcuts. [Plan](plans/07-dashboard-model.md#stage-3-viewing-phase-3)
 - [ ] **2. 06 Sentry §1 and §2:** render errors from the boundaries, data errors from the query and mutation caches, a reportability policy, the startup buffer, source maps in CI. Paused until step 1. [Plan](plans/06-sentry.md)
 - [ ] **3. Integrations foundation** (not planned yet, below).
 - [ ] **4. 06 Sentry §3:** Sentry as the first telemetry integration, and its rebuilt page. [Plan](plans/06-sentry.md#3-sentry-as-the-first-telemetry-integration)

@@ -25,6 +25,7 @@ export function WidgetTile({
   range,
   timeZone,
   isEditing = false,
+  isDataActive = true,
   previewQueries,
 }: {
   id: string;
@@ -32,6 +33,8 @@ export function WidgetTile({
   range: TimeRange;
   timeZone: string;
   isEditing?: boolean;
+  /** False while the tile is hidden: it keeps its data but makes no requests. */
+  isDataActive?: boolean;
   previewQueries?: Query[];
 }) {
   const widget = useWidget(id);
@@ -42,6 +45,7 @@ export function WidgetTile({
       range={range}
       timeZone={timeZone}
       isEditing={isEditing}
+      isDataActive={isDataActive}
       isPreview={previewQueries !== undefined}
     />
   ) : null;
@@ -53,6 +57,7 @@ function Tile({
   range,
   timeZone,
   isEditing,
+  isDataActive,
   isPreview,
 }: {
   id: string;
@@ -60,6 +65,7 @@ function Tile({
   range: TimeRange;
   timeZone: string;
   isEditing: boolean;
+  isDataActive: boolean;
   isPreview: boolean;
 }) {
   const titleId = useId();
@@ -74,7 +80,10 @@ function Tile({
     !!widgets[widget.type]?.isTimeAware &&
     widget.queries.some((query) => datasources[query.datasource]?.isTimeAware);
   const hasOwnTime = time.shifts.length > 0 || time.range.from !== range.from || time.range.to !== range.to;
-  const data = useWidgetData(widget.queries, time, { isEnabled: hasBeenSeen, source: widget.title });
+  const data = useWidgetData(widget.queries, time, {
+    isEnabled: hasBeenSeen && isDataActive,
+    source: widget.title,
+  });
   const skeleton = widgets[widget.type]?.skeleton ?? unknownSkeleton;
   return (
     <Paper

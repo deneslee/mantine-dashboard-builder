@@ -1,22 +1,27 @@
-import { Alert, Button, Group, Text, VisuallyHidden } from '@mantine/core';
-import { useMediaQuery } from '@mantine/hooks';
+import { Alert, Button, Group, Stack, Text, VisuallyHidden } from '@mantine/core';
+import { useMediaQuery, useWindowEvent } from '@mantine/hooks';
 import { Link, useNavigate, useParams, useSearch } from '@tanstack/react-router';
-import { lazy, Suspense, useLayoutEffect } from 'react';
+import { IconArrowLeft } from '@tabler/icons-react';
+import { Activity, lazy, Suspense, useEffect, useLayoutEffect, useRef } from 'react';
 import { RouteBreadcrumbs } from '@/shell/breadcrumbs/RouteBreadcrumbs';
 import { Page } from '@/ui/components/Page';
 import { dimensions } from '@/ui/tokens/dimensions';
+import { iconSize, iconStroke } from '@/ui/tokens/semantic';
 import { localTimeZone } from '@/core/time/timeRange';
 import type { DashboardSearch } from './dashboardSearch';
 import { useAutoRefresh } from './data/useAutoRefresh';
 import { useRefreshAll } from './data/useRefreshAll';
 import { LeaveDialog } from './editor/LeaveDialog';
 import { DashboardGrid } from './grid/DashboardGrid';
+import { focusWidgetMenu } from './grid/focusWidgetMenu';
+import { WidgetTile } from './grid/WidgetTile';
 import { downloadDashboard } from './header/dashboardFile';
 import { EditToolbar } from './header/EditToolbar';
 import { RefreshButton } from './header/RefreshButton';
 import { RefreshPicker } from './header/RefreshPicker';
 import { TimeRangePicker } from './header/TimeRangePicker';
 import { useDashboard, useDashboardActions, useReadDashboard } from './state/useDashboard';
+import classes from './DashboardPage.module.css';
 
 /** The viewer's time zone, when neither the URL nor the dashboard sets one. */
 const LOCAL_TIME_ZONE = localTimeZone();
@@ -54,6 +59,10 @@ export function DashboardPage() {
   );
   const isWide = useMediaQuery(`(min-width: ${dimensions.grid.breakpoints.md}px)`, true);
   const isEditing = search.mode === 'edit';
+  // One widget full screen, outside edit mode only: editing has the query editor for that.
+  const viewId = useDashboard((s) =>
+    !isEditing && search.view && s.doc.widgets[search.view] ? search.view : undefined,
+  );
   const range = isEditing
     ? defaultRange
     : { from: search.from ?? defaultRange.from, to: search.to ?? defaultRange.to };
@@ -64,6 +73,21 @@ export function DashboardPage() {
   // A new dashboard range or time zone gets a new `now`. A layout effect, so it lands before the
   // tiles' queries start (their subscriptions are passive effects) and they resolve against it.
   useLayoutEffect(() => actions.takeNow(), [range.from, range.to, timeZone, actions]);
+  // Entering full screen focuses the big widget's menu, leaving it the tile's (the first in the DOM).
+  const viewed = useRef(viewId);
+  useEffect(() => {
+    if (viewed.current !== viewId) focusWidgetMenu(viewId ?? viewed.current);
+    viewed.current = viewId;
+  }, [viewId]);
+  // Esc leaves full screen, unless it is closing a menu, a dialog or a dropdown.
+  useWindowEvent('keydown', (event) => {
+    if (
+      viewId &&
+      event.key === 'Escape' &&
+      !(event.target as Element).closest('[data-portal], [aria-expanded="true"]')
+    )
+      void navigate({ search: (prev) => ({ ...prev, view: undefined }), resetScroll: false });
+  });
   // The URL holds only what differs from the dashboard's own defaults.
   const setSearch = (next: DashboardSearch) =>
     void navigate({
@@ -151,7 +175,41 @@ export function DashboardPage() {
           </Group>
         ) : (
           !(isEditing && isWide && isQueryEditorOpen) && (
-            <DashboardGrid range={range} timeZone={timeZone} isEditing={isEditing} />
+            <>
+              {viewId ? (
+                <Stack className={classes.full} data-full-screen>
+                  <Group>
+                    <Button
+                      variant="default"
+                      leftSection={<IconArrowLeft size={iconSize.sm} stroke={iconStroke} />}
+                      renderRoot={(props) => (
+                        <Link
+                          to="/dashboards/$id"
+                          params={{ id }}
+                          search={(prev) => ({ ...prev, view: undefined })}
+                          resetScroll={false}
+                          {...props}
+                        />
+                      )}
+                    >
+                      Back to dashboard
+                    </Button>
+                  </Group>
+                  <div className={classes.tile}>
+                    <WidgetTile id={viewId} range={range} timeZone={timeZone} />
+                  </div>
+                </Stack>
+              ) : null}
+              {/* Hidden, not unmounted: the tiles keep their state, and make no requests meanwhile. */}
+              <Activity mode={viewId ? 'hidden' : 'visible'}>
+                <DashboardGrid
+                  range={range}
+                  timeZone={timeZone}
+                  isEditing={isEditing}
+                  isDataActive={!viewId}
+                />
+              </Activity>
+            </>
           )
         )}
       </Page.Body>

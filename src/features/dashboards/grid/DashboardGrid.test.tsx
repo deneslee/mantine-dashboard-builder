@@ -130,10 +130,16 @@ const day: TimeRange = { from: 'now-24h', to: 'now' };
 /** The grid as the page has it: the dashboard range from the URL's `from`, viewers' overrides in `wt`. */
 function Page({ plugins, store }: { plugins: Plugins; store: DashboardStore }) {
   const from = useSearch({ strict: false, select: (search) => search.from ?? day.from });
+  const isDataActive = useSearch({ strict: false, select: (search) => search.view === undefined });
   return (
     <PluginsContext value={plugins}>
       <DashboardProvider dashboard={dashboard} store={store}>
-        <DashboardGrid range={{ from, to: 'now' }} timeZone="UTC" isEditing={false} />
+        <DashboardGrid
+          range={{ from, to: 'now' }}
+          timeZone="UTC"
+          isEditing={false}
+          isDataActive={isDataActive}
+        />
       </DashboardProvider>
     </PluginsContext>
   );
@@ -236,6 +242,19 @@ describe('DashboardGrid', () => {
     expect(first! - second!).toBe(7 * 86_400_000); // the same window, a week earlier
     expect(tileRenders.get('a')).toBeGreaterThan(before.get('a')!);
     for (const id of ['b', 'c', 'd']) expect(tileRenders.get(id), id).toBe(before.get(id));
+  });
+
+  it('makes no request while another widget is full screen, and catches up after', async () => {
+    const { query, go } = renderGrid();
+    const tile = await screen.findByRole('region', { name: 'Revenue' });
+    await go('view=b');
+    enter(tile);
+    await go('view=b&from=now-7d');
+    expect(query).not.toHaveBeenCalled();
+
+    await go('from=now-7d');
+    await waitFor(() => expect(query).toHaveBeenCalledTimes(1));
+    expect(query.mock.calls[0]![1].raw.from).toBe('now-7d');
   });
 
   it('shows an error in the tile for a widget type the plugins does not have', async () => {

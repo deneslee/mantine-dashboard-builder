@@ -8,13 +8,14 @@ import {
 
 /**
  * `/dashboards/$id`'s search params: `?mode=edit&widget=<id>&editor=queries&from=now-24h&to=now&refresh=1m`,
- * `tz` (a time zone) and `wt` (viewers' widget time overrides, by widget id).
+ * `tz` (a time zone), `wt` (viewers' widget time overrides, by widget id) and `view` (one widget full screen).
  * Invalid values are dropped, so the dashboard's own defaults apply instead.
  */
 export const dashboardSearchSchema = z.object({
   mode: z.enum(['view', 'edit']).default('view').catch('view'),
   widget: z.string().min(1).optional().catch(undefined),
   editor: z.literal('queries').optional().catch(undefined),
+  view: z.string().min(1).optional().catch(undefined),
   from: z.string().refine(isValidTime).optional().catch(undefined),
   tz: z.string().refine(isValidTimeZone).optional().catch(undefined),
   wt: z.record(z.string(), timeOverrideSchema).optional().catch(undefined),

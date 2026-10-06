@@ -13,6 +13,8 @@
   opacity: 0;
 }
 
+/* Full screen has the room: its menu always shows. */
+:global([data-full-screen]) .menu,
 .header:focus-within .menu,
 :global(.react-grid-item):hover .menu,
 .header[data-editing='true'] .menu {

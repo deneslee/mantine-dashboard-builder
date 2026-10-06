@@ -25,6 +25,7 @@ function Grid({ dashboard, mode }: { dashboard: Dashboard; mode: 'view' | 'edit'
               range={{ from: 'now-24h', to: 'now' }}
               timeZone="UTC"
               isEditing={mode === 'edit'}
+              isDataActive
             />
           </DashboardProvider>
         </Box>

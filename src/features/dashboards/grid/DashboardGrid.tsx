@@ -28,10 +28,13 @@ export function DashboardGrid({
   range,
   timeZone,
   isEditing,
+  isDataActive,
 }: {
   range: TimeRange;
   timeZone: string;
   isEditing: boolean;
+  /** False while the grid is hidden (one widget full screen): its tiles make no requests. */
+  isDataActive: boolean;
 }) {
   const { width, containerRef, mounted: isMounted } = useContainerWidth({ measureBeforeMount: true });
   const authored = useDashboard((state) => state.doc.layouts);
@@ -65,10 +68,16 @@ export function DashboardGrid({
     () =>
       ids.map((id) => (
         <div key={id}>
-          <WidgetTile id={id} range={range} timeZone={timeZone} isEditing={isEditing} />
+          <WidgetTile
+            id={id}
+            range={range}
+            timeZone={timeZone}
+            isEditing={isEditing}
+            isDataActive={isDataActive}
+          />
         </div>
       )),
-    [ids, range, timeZone, isEditing],
+    [ids, range, timeZone, isEditing, isDataActive],
   );
   // Below md the grid is a single reading-order column: no dragging, even in edit mode.
   const canEditLayout = isEditing && width >= grid.breakpoints.md;

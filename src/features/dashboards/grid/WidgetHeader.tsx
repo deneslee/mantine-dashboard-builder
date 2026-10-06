@@ -1,6 +1,6 @@
 import { ActionIcon, Group, Menu, Text, Tooltip } from '@mantine/core';
 import { IconAlertTriangle, IconClock, IconDots, IconInfoCircle } from '@tabler/icons-react';
-import { Link } from '@tanstack/react-router';
+import { Link, useSearch } from '@tanstack/react-router';
 import { fontWeight, iconSize, iconStroke } from '@/ui/tokens/semantic';
 import { notify } from '@/lib/notify/notify';
 import { useDashboardActions, useDashboard } from '../state/useDashboard';
@@ -34,6 +34,7 @@ export function WidgetHeader({
   onEditTime?: () => void;
 }) {
   const dashboardId = useDashboard((state) => state.doc.id);
+  const isViewed = useSearch({ strict: false, select: (search) => search.view === id });
   const actions = useDashboardActions();
   const handleCopyLink = async () => {
     const url = new URL(window.location.href);
@@ -101,7 +102,9 @@ export function WidgetHeader({
             </ActionIcon>
           </Tooltip>
         ) : null}
-        <Menu withinPortal returnFocus>
+        {/* No animation: View full screen hides the grid in an Activity while this menu closes, and a
+            transition hidden midway never ends, so the menu would come back open. */}
+        <Menu withinPortal returnFocus transitionProps={{ duration: 0 }}>
           <Menu.Target>
             <Tooltip label={'Actions for ' + widget.title}>
               <ActionIcon
@@ -116,6 +119,21 @@ export function WidgetHeader({
             </Tooltip>
           </Menu.Target>
           <Menu.Dropdown>
+            {!isEditing && !isViewed ? (
+              <Menu.Item
+                renderRoot={(props) => (
+                  <Link
+                    to="/dashboards/$id"
+                    params={{ id: dashboardId }}
+                    search={(prev) => ({ ...prev, view: id })}
+                    resetScroll={false}
+                    {...props}
+                  />
+                )}
+              >
+                View full screen
+              </Menu.Item>
+            ) : null}
             {onEditTime ? <Menu.Item onClick={onEditTime}>Time range…</Menu.Item> : null}
             {widget.queries.length ? <Menu.Item onClick={onRefresh}>Refresh</Menu.Item> : null}
             <Menu.Item onClick={() => void handleCopyLink()}>Copy link</Menu.Item>

@@ -171,6 +171,30 @@ export const WidgetTimeView: Story = {
   },
 };
 
+/** One widget full screen: the others hide, Esc in a menu only closes it, Esc returns to the grid. */
+export const FullScreen: Story = {
+  args: { url: '/dashboards/sales' },
+  play: async () => {
+    const menuButton = () => page.getByRole('button', { name: 'Actions for Occupancy' });
+    await chooseFromMenu('Occupancy', 'View full screen');
+    await expect(await page.findByRole('link', { name: 'Back to dashboard' }, WAIT)).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Occupancy' })).toBeVisible();
+    await expect(page.queryByRole('region', { name: 'Revenue' })).toBeNull();
+    await waitFor(() => expect(document.activeElement).toBe(menuButton()));
+
+    await userEvent.click(menuButton());
+    await page.findByRole('menuitem', { name: 'Copy link' }, WAIT);
+    await expect(page.queryByRole('menuitem', { name: 'View full screen' })).toBeNull();
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(page.queryByRole('menu')).toBeNull());
+    await expect(page.getByRole('link', { name: 'Back to dashboard' })).toBeVisible();
+
+    await userEvent.keyboard('{Escape}');
+    await expect(await page.findByRole('region', { name: 'Revenue' }, WAIT)).toBeVisible();
+    await waitFor(() => expect(document.activeElement).toBe(menuButton()));
+  },
+};
+
 /** In edit mode the same dialog changes the saved widget, as one undo step. */
 export const WidgetTimeEdit: Story = {
   args: { url: EDIT },
