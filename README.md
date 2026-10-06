@@ -24,21 +24,21 @@ Node 24.15+ and pnpm 12.5+ (see `package.json › engines`).
 
 ## Try it
 
-| URL                                                  | Shows                                                                                                        |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `/dashboards`                                        | The dashboard list                                                                                           |
-| `/dashboards/sales`                                  | A dashboard with live mock data, context-bar tabs from the route, one widget failing inside its own boundary |
-| `/dashboards/sales?mode=edit`                        | Edit mode: Save, Discard, Undo, Redo, drag and resize, widget menu, Add widget, Import and Export JSON       |
-| `/dashboards/sales?from=now-7d&to=now&refresh=1m`    | Time range and auto-refresh from the URL                                                                     |
-| `/dashboards/sales?tz=America/New_York`              | The dashboard in New York time: ranges, axes and table times                                                 |
-| `/dashboards/sales?view=revenue`                     | One widget full screen; Esc returns. A widget's menu also sets its own time range (the clock icon)           |
-| `/dashboards/sales?inspect=revenue&inspectTab=query` | Inspect: a widget query's data, request, JSON and stats                                                      |
-| `/dashboards/perf`                                   | 20 charts; tiles below the fold mount when scrolled near                                                     |
-| `/dashboards/infra`                                  | A virtualized 10k-row table                                                                                  |
-| `/dashboards/broken`                                 | A document that fails validation: route error with retry                                                     |
-| `/dashboards/missing`, `/anything`                   | 404 inside the frame                                                                                         |
-| `/settings`                                          | Appearance: theme, burger behaviour, dashboard density, reduced motion                                       |
-| `/debug`                                             | Every toast level, dedupe, progress, mutation error, a throwing widget, all skeletons                        |
+| URL                                                  | Shows                                                                                                                                |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `/dashboards`                                        | The dashboard list                                                                                                                   |
+| `/dashboards/sales`                                  | A dashboard with live mock data, context-bar tabs from the route, one widget failing inside its own boundary                         |
+| `/dashboards/sales?mode=edit`                        | Edit mode: Save, Discard, Undo, Redo, drag and resize, widget menu, Add widget, Import and Export JSON                               |
+| `/dashboards/sales?from=now-7d&to=now&refresh=1m`    | Time range and auto-refresh from the URL                                                                                             |
+| `/dashboards/sales?tz=America/New_York`              | The dashboard in New York time: ranges, axes and table times                                                                         |
+| `/dashboards/sales?view=revenue`                     | One widget full screen; Esc returns. A widget's menu also sets its own time range (the clock icon); `?` lists the keyboard shortcuts |
+| `/dashboards/sales?inspect=revenue&inspectTab=query` | Inspect: a widget query's data, request, JSON and stats                                                                              |
+| `/dashboards/perf`                                   | 20 charts; tiles below the fold mount when scrolled near                                                                             |
+| `/dashboards/infra`                                  | A virtualized 10k-row table                                                                                                          |
+| `/dashboards/broken`                                 | A document that fails validation: route error with retry                                                                             |
+| `/dashboards/missing`, `/anything`                   | 404 inside the frame                                                                                                                 |
+| `/settings`                                          | Appearance: theme, burger behaviour, dashboard density, reduced motion                                                               |
+| `/debug`                                             | Every toast level, dedupe, progress, mutation error, a throwing widget, all skeletons                                                |
 
 Saves and drafts stay in this browser's `localStorage`; the files in `public/data/` are never changed.
 

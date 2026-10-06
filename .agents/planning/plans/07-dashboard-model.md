@@ -1,6 +1,6 @@
 # 07 Dashboard model
 
-Status: open · Stages 1–2 done (Oct 2), except the widget editor's place, which waits on open decision 1 ([tasks.md › Edit UI polish](../tasks.md#edit-ui-polish-not-planned-yet)); stage 3 is next · Phase 3: stages 1–3; phase 4: stage 4 · Order: stages 1 and 2 (the edit MVP), then 08, then stage 3, before 06 Sentry and the Integrations foundation · Depends on: 05 (done). Stage 4's integration datasources need the Integrations foundation. · Reference: [dashboard.md](../../../docs/dashboard/dashboard.md), [grid-and-charts.md](../../../docs/dashboard/grid-and-charts.md)
+Status: open · Stages 1–2 done (Oct 2), except the widget editor's place, which waits on open decision 1 ([tasks.md › Edit UI polish](../tasks.md#edit-ui-polish-not-planned-yet)); stage 3 done (Oct 6); stage 4 comes after 06 Sentry and the Integrations foundation · Phase 3: stages 1–3; phase 4: stage 4 · Order: stages 1 and 2 (the edit MVP), then 08, then stage 3, before 06 Sentry and the Integrations foundation · Depends on: 05 (done). Stage 4's integration datasources need the Integrations foundation. · Reference: [dashboard.md](../../../docs/dashboard/dashboard.md), [grid-and-charts.md](../../../docs/dashboard/grid-and-charts.md)
 
 ## Goal
 
@@ -323,7 +323,8 @@ Checkpoint Sep 30: completed implementation parts are ticked below. Parent tasks
   - Oct 6: `?inspect=<id>&inspectTab=data|query|json|stats`, outside edit mode, in its own lazy chunk (10 kB). `PaneDrawer`, taken out of EditDrawer, is the non-modal right-side drawer both use: focus moves in (the active tab, or `[data-autofocus]`) a frame after its content mounts, and Esc closes it, and only it when a widget is also full screen; on close focus returns to the widget's menu. A Query select appears when a widget has several. Data: the first 100 rows of a frame, times in the dashboard's zone, with CSV (`frameToCsv`) and JSON downloads. Query: the datasource, the time as written and resolved (From, To) in the dashboard's zone, the response, and the request as the datasource gets it. JSON: the widget and its frames (up to 1 000 rows). Stats: when it was fetched, the request time (a cache entry is now `{ frames, durationMs }`), frames, rows and the cache key. Inspect reads the tile's cache entry and doesn't refetch on open. Play functions: InspectData (focus moves in, the table, Esc returns focus to the menu), InspectQuery, InspectJson, InspectStats and InspectQueries; a unit test for `frameToCsv`. Not yet: a resizable width (with the docked pane in [Edit UI polish](../tasks.md#edit-ui-polish-not-planned-yet)) and the variables a query uses (stage 4).
 - [x] **Density.** Tokens, the Settings › Appearance option, `data-density`, the react-grid-layout constant. Done when switching density lays the grid out once and changes no layout units.
   - Oct 6: `grid.gap` in the tokens is per step (compact 10, comfortable 16, spacious 24 px: spacing `sm`, `md`, `lg`) and is react-grid-layout's `margin`; widget padding takes the same spacing steps in CSS through `data-density` on the page root, which also covers a full-screen widget. The setting is `useDensity` in `lib/` (like `useMotion`), saved with the other Appearance fields. Measured in a production build ([grid-and-charts › Density switch](../../../docs/dashboard/grid-and-charts.md#density-switch)): one layout pass and one resize per chart, no change to the document; one 60–100 ms frame on `/dashboards/perf`, accepted for a settings change. Tests: `DashboardGrid.test` (switching keeps each tile's row and the document clean), `useDensity.test`, `AppearanceForm.test`; the Compact story.
-- [ ] **Shortcuts** `v`, `i`, `t` and the `?` list. Done when no shortcut fires while typing in a field.
+- [x] **Shortcuts** `v`, `i`, `t` and the `?` list. Done when no shortcut fires while typing in a field.
+  - Oct 6: each widget header registers `v` (full screen, again to leave), `i` (Inspect), `t` (time) and, in edit mode, `e` (Edit) with Mantine's `useHotkeys`, which skips keys typed in inputs, text areas, selects and editable content. A key acts on the widget with focus, or when focus is in no widget, the one under the pointer (`:hover`), and never from a menu, dialog or drawer. The menu shows each key (`Kbd`, with `aria-keyshortcuts`). `?` opens the list (`ShortcutsDialog`). Tests: `DashboardGrid.test` (in a text field inside a widget, `v` does nothing; on the widget's menu button it opens full screen) and the Shortcuts play function (`i`, `v` twice, `?`). Checked with a real pointer in headless Chromium: hovering a widget, `v` opens it; with focus on another widget, focus wins; in the refresh select, nothing fires.
 
 ### Stage 4: layout, variables, data (phase 4)
 
@@ -371,6 +372,11 @@ Integration datasources in the datasource manager need the Integrations foundati
 - **Oct 6: plugin flags follow the naming rule:** `isTimeAware` on both plugins, not `capabilities.time` or `timeAware`. The inspect, export and hover-sync flags arrive with their stages.
 
 ## Verification
+
+### Oct 6: stage 3 done
+
+- `pnpm test`: 52 files, 262 tests; lint, format and build green.
+- Of the acceptance checks below, these hold now: reload, back and forward and a shared link keep the range, time zone, viewers' widget times, full screen and Inspect (all URL state); every widget action is reachable by keyboard, through the menu and the shortcuts; a hidden widget (another one full screen) makes no request. Variables, tabs, rows and the v2 migration are stage 4.
 
 ### Sep 30 implementation checkpoint
 

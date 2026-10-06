@@ -1,8 +1,8 @@
 import { Alert, Button, Group, Stack, Text, VisuallyHidden } from '@mantine/core';
-import { useMediaQuery, useWindowEvent } from '@mantine/hooks';
+import { useHotkeys, useMediaQuery, useWindowEvent } from '@mantine/hooks';
 import { Link, useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { IconArrowLeft } from '@tabler/icons-react';
-import { Activity, lazy, Suspense, useEffect, useLayoutEffect, useRef } from 'react';
+import { Activity, lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { RouteBreadcrumbs } from '@/shell/breadcrumbs/RouteBreadcrumbs';
 import { Page } from '@/ui/components/Page';
 import { dimensions } from '@/ui/tokens/dimensions';
@@ -15,6 +15,7 @@ import { useRefreshAll } from './data/useRefreshAll';
 import { LeaveDialog } from './editor/LeaveDialog';
 import { DashboardGrid } from './grid/DashboardGrid';
 import { focusWidgetMenu } from './grid/focusWidgetMenu';
+import { ShortcutsDialog } from './grid/ShortcutsDialog';
 import { WidgetTile } from './grid/WidgetTile';
 import { downloadDashboard } from './header/dashboardFile';
 import { EditToolbar } from './header/EditToolbar';
@@ -90,6 +91,12 @@ export function DashboardPage() {
     if (viewed.current !== viewId) focusWidgetMenu(viewId ?? viewed.current);
     viewed.current = viewId;
   }, [viewId]);
+  // `?` lists the shortcuts; the widget letters are each header's (WidgetHeader).
+  const [isShortcutsOpen, setShortcutsOpen] = useState(false);
+  useHotkeys([
+    ['?', () => setShortcutsOpen(true)],
+    ['shift+?', () => setShortcutsOpen(true)],
+  ]);
   // Esc leaves full screen, unless it is closing a menu, a dialog, a dropdown or Inspect.
   useWindowEvent('keydown', (event) => {
     if (
@@ -237,6 +244,7 @@ export function DashboardPage() {
         )}
       </Page.Body>
       <LeaveDialog />
+      {isShortcutsOpen ? <ShortcutsDialog onClose={() => setShortcutsOpen(false)} /> : null}
     </Page.Root>
   );
 }

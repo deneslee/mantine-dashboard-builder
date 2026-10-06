@@ -90,6 +90,7 @@ function Tile({
       id={isPreview ? undefined : 'widget-' + id}
       variant="widget"
       component="section"
+      data-widget-tile
       aria-labelledby={titleId}
       aria-busy={data.isFetching}
     >

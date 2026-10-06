@@ -1,6 +1,8 @@
-import { ActionIcon, Group, Menu, Text, Tooltip } from '@mantine/core';
+import { ActionIcon, Group, Kbd, Menu, Text, Tooltip } from '@mantine/core';
+import { useHotkeys, type HotkeyItem } from '@mantine/hooks';
 import { IconAlertTriangle, IconClock, IconDots, IconInfoCircle } from '@tabler/icons-react';
-import { Link, useSearch } from '@tanstack/react-router';
+import { Link, useNavigate, useSearch } from '@tanstack/react-router';
+import { useRef } from 'react';
 import { fontWeight, iconSize, iconStroke } from '@/ui/tokens/semantic';
 import { notify } from '@/lib/notify/notify';
 import { useDashboardActions, useDashboard } from '../state/useDashboard';
@@ -36,6 +38,62 @@ export function WidgetHeader({
   const dashboardId = useDashboard((state) => state.doc.id);
   const isViewed = useSearch({ strict: false, select: (search) => search.view === id });
   const actions = useDashboardActions();
+  const navigate = useNavigate();
+  const header = useRef<HTMLDivElement>(null);
+  // Single letters act on the widget with focus, or else the one under the pointer; never from a
+  // menu, dialog or drawer. Mantine skips them while typing in a field.
+  const isShortcutTarget = (event: KeyboardEvent) => {
+    const tile = header.current?.closest('[data-widget-tile]');
+    if (!tile || (event.target as Element).closest('[data-portal], [role="dialog"]')) return false;
+    const focused = document.activeElement?.closest('[data-widget-tile]');
+    return focused ? focused === tile : tile.matches(':hover');
+  };
+  const shortcut = (key: string, action: (() => void) | false | undefined): HotkeyItem => [
+    key,
+    (event) => {
+      if (!action || !isShortcutTarget(event)) return;
+      event.preventDefault();
+      action();
+    },
+    { preventDefault: false },
+  ];
+  useHotkeys([
+    shortcut(
+      'v',
+      !isEditing &&
+        (() =>
+          void navigate({
+            to: '/dashboards/$id',
+            params: { id: dashboardId },
+            search: (prev) => ({ ...prev, view: isViewed ? undefined : id }),
+            resetScroll: false,
+          })),
+    ),
+    shortcut(
+      'i',
+      !isEditing &&
+        widget.queries.length > 0 &&
+        (() =>
+          void navigate({
+            to: '/dashboards/$id',
+            params: { id: dashboardId },
+            search: (prev) => ({ ...prev, inspect: id, inspectTab: undefined }),
+            resetScroll: false,
+          })),
+    ),
+    shortcut('t', onEditTime),
+    shortcut(
+      'e',
+      isEditing &&
+        (() =>
+          void navigate({
+            to: '/dashboards/$id',
+            params: { id: dashboardId },
+            search: (prev) => ({ ...prev, mode: 'edit', widget: id, editor: undefined }),
+            resetScroll: false,
+          })),
+    ),
+  ]);
   const handleCopyLink = async () => {
     const url = new URL(window.location.href);
     for (const key of ['mode', 'widget', 'editor']) url.searchParams.delete(key);
@@ -63,6 +121,7 @@ export function WidgetHeader({
   };
   return (
     <Group
+      ref={header}
       className={classes.header}
       justify="space-between"
       wrap="nowrap"
@@ -121,6 +180,12 @@ export function WidgetHeader({
           <Menu.Dropdown>
             {!isEditing && !isViewed ? (
               <Menu.Item
+                rightSection={
+                  <Kbd size="xs" aria-hidden>
+                    v
+                  </Kbd>
+                }
+                aria-keyshortcuts="v"
                 renderRoot={(props) => (
                   <Link
                     to="/dashboards/$id"
@@ -136,6 +201,12 @@ export function WidgetHeader({
             ) : null}
             {!isEditing && widget.queries.length ? (
               <Menu.Item
+                rightSection={
+                  <Kbd size="xs" aria-hidden>
+                    i
+                  </Kbd>
+                }
+                aria-keyshortcuts="i"
                 renderRoot={(props) => (
                   <Link
                     to="/dashboards/$id"
@@ -149,13 +220,31 @@ export function WidgetHeader({
                 Inspect
               </Menu.Item>
             ) : null}
-            {onEditTime ? <Menu.Item onClick={onEditTime}>Time range…</Menu.Item> : null}
+            {onEditTime ? (
+              <Menu.Item
+                rightSection={
+                  <Kbd size="xs" aria-hidden>
+                    t
+                  </Kbd>
+                }
+                aria-keyshortcuts="t"
+                onClick={onEditTime}
+              >
+                Time range…
+              </Menu.Item>
+            ) : null}
             {widget.queries.length ? <Menu.Item onClick={onRefresh}>Refresh</Menu.Item> : null}
             <Menu.Item onClick={() => void handleCopyLink()}>Copy link</Menu.Item>
             {isEditing ? (
               <>
                 <Menu.Divider />
                 <Menu.Item
+                  rightSection={
+                    <Kbd size="xs" aria-hidden>
+                      e
+                    </Kbd>
+                  }
+                  aria-keyshortcuts="e"
                   renderRoot={(props) => (
                     <Link
                       to="/dashboards/$id"

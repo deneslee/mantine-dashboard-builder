@@ -14,16 +14,16 @@ The big-picture checklist, by roadmap phase ([roadmap](roadmap.md#roadmap)). Eac
   - [x] **05 Dashboard read:** JSON documents, `DataFrame`, widget and datasource registries, time range in the URL, table widget. [Plan](plans/done/05-dashboard-read.md)
 - [x] **08 Structure cleanup** (Oct 1): planning in `.agents/planning/`; browser tests (every story in Chromium with a11y, editor flows as play functions); package-shaped folders with one lint rule per layer; naming rules; one flat `Dashboard` type with `schemaVersion`; one owner per kind of state, `mode` only in the URL; `dashboard-builder:` storage keys with the version in the value. [Plan](plans/done/08-structure-cleanup.md)
 - [x] **07 stages 1 and 2, the edit MVP** (Oct 2): per-dashboard store, widget header and menu, edit mode with Save, Discard, Undo and a draft, drag and resize, menu actions, add widget, the widget editor. Every acceptance check passes or is a play function; the drag and resize numbers are in [grid-and-charts.md](../../docs/dashboard/grid-and-charts.md#tile-drag-and-resize). Only the widget editor's place waits on open decision 1 (Edit UI polish below). [Stage 1](plans/07-dashboard-model.md#stage-1-foundation-phase-3), [stage 2](plans/07-dashboard-model.md#stage-2-edit-mvp-phase-3)
+- [x] **07 stage 3, viewing** (Oct 6), which completes phase 3: one cache entry per datasource query, scoped time with a time zone and one shared `now`, per-widget time from the menu, times in the dashboard's zone, one widget full screen, the Inspect drawer, density, keyboard shortcuts. Each task's tests and measurements are in its note. [Plan](plans/07-dashboard-model.md#stage-3-viewing-phase-3)
 
 ## Next, in order
 
-Order decided Sep 30: the edit MVP (done Oct 2), then 08 (done Oct 1), then the viewing tools, then Sentry and integrations ([roadmap](roadmap.md#roadmap)).
+Order decided Sep 30: the edit MVP (done Oct 2), then 08 (done Oct 1), then the viewing tools (done Oct 6), then Sentry and integrations ([roadmap](roadmap.md#roadmap)).
 
-- [ ] **1. 07 stage 3, viewing** (phase 3; Oct 6: per-query cache entries, the time scope resolver, per-widget time, times in the dashboard's zone and full-screen view, the Inspect drawer and density are done; shortcuts are next): one cache entry per datasource query, scoped time with a time zone, per-widget time, full screen, the Inspect drawer, density, shortcuts. [Plan](plans/07-dashboard-model.md#stage-3-viewing-phase-3)
-- [ ] **2. 06 Sentry §1 and §2:** render errors from the boundaries, data errors from the query and mutation caches, a reportability policy, the startup buffer, source maps in CI. Paused until step 1. [Plan](plans/06-sentry.md)
-- [ ] **3. Integrations foundation** (not planned yet, below).
-- [ ] **4. 06 Sentry §3:** Sentry as the first telemetry integration, and its rebuilt page. [Plan](plans/06-sentry.md#3-sentry-as-the-first-telemetry-integration)
-- [ ] **5. 07 stage 4, layout, variables and data** (phase 4): document v2 with rows and then tabs (and the `metadata`/`spec` envelope), resolution from the layout, hover sync groups, variables through `getVariableRefs`, grouped datasource errors, per-datasource concurrency. [Plan](plans/07-dashboard-model.md#stage-4-layout-variables-data-phase-4)
+- [ ] **1. 06 Sentry §1 and §2:** render errors from the boundaries, data errors from the query and mutation caches, a reportability policy, the startup buffer, source maps in CI. [Plan](plans/06-sentry.md)
+- [ ] **2. Integrations foundation** (not planned yet, below).
+- [ ] **3. 06 Sentry §3:** Sentry as the first telemetry integration, and its rebuilt page. [Plan](plans/06-sentry.md#3-sentry-as-the-first-telemetry-integration)
+- [ ] **4. 07 stage 4, layout, variables and data** (phase 4): document v2 with rows and then tabs (and the `metadata`/`spec` envelope), resolution from the layout, hover sync groups, variables through `getVariableRefs`, grouped datasource errors, per-datasource concurrency. [Plan](plans/07-dashboard-model.md#stage-4-layout-variables-data-phase-4)
 
 ### Edit UI polish (not planned yet)
 

@@ -1,3 +1,4 @@
+import userEvent from '@testing-library/user-event';
 import { RouterProvider, useSearch } from '@tanstack/react-router';
 import { lazy } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -59,6 +60,17 @@ function FrameName({ frames }: WidgetProps<unknown>) {
   return <p>{frames.map((frame) => frame.name).join(', ')}</p>;
 }
 
+/** A widget with a text field, as a filter in a table would be. */
+const fieldWidget = defineWidget({
+  type: 'field',
+  name: 'Field',
+  defaultSize: { w: 6, h: 3 },
+  isTimeAware: false,
+  optionsSchema: z.object({}),
+  component: lazy(async () => ({ default: () => <input aria-label="Filter" /> })),
+  skeleton: <p>Loading</p>,
+});
+
 const nameWidget = defineWidget({
   type: 'name',
   name: 'Name',
@@ -115,6 +127,7 @@ const dashboard: Dashboard = {
         { datasource: 'broken', spec: {} },
       ],
     },
+    e: { type: 'field', title: 'Filtered', options: {}, queries: [] },
   },
   layouts: {
     lg: [
@@ -122,6 +135,7 @@ const dashboard: Dashboard = {
       { i: 'b', x: 6, y: 0, w: 6, h: 3 },
       { i: 'c', x: 0, y: 3, w: 6, h: 3 },
       { i: 'd', x: 6, y: 3, w: 6, h: 3 },
+      { i: 'e', x: 0, y: 6, w: 6, h: 3 },
     ],
   },
 };
@@ -149,7 +163,7 @@ function Page({ plugins, store }: { plugins: Plugins; store: DashboardStore }) {
 function renderGrid() {
   const { datasource, query, release } = deferredDatasource();
   const plugins: Plugins = {
-    widgets: { name: nameWidget },
+    widgets: { name: nameWidget, field: fieldWidget },
     datasources: { deferred: datasource, broken: brokenDatasource },
   };
   const store = createDashboardStore(dashboard, { shouldPersist: false });
@@ -157,7 +171,7 @@ function renderGrid() {
   render(<RouterProvider router={router} />);
   /** Opens the dashboard at these search params, as a link or back and forward would. */
   const go = (search: string) => act(async () => router.history.push(`/dashboards/sales?${search}`));
-  return { query, release, go, store };
+  return { query, release, go, store, router };
 }
 
 const wt = (overrides: object) => `wt=${encodeURIComponent(JSON.stringify(overrides))}`;
@@ -274,6 +288,20 @@ describe('DashboardGrid', () => {
     await waitFor(() => expect(rowAt(10)).toBe(row));
     expect(store.getState().doc.layouts).toBe(layouts);
     expect(store.getState().isDirty).toBe(false);
+  });
+
+  it('takes a shortcut on the widget with focus, but not while typing in a field', async () => {
+    const { router } = renderGrid();
+    const user = userEvent.setup();
+    const tile = await screen.findByRole('region', { name: 'Filtered' });
+    enter(tile);
+    await user.click(await within(tile).findByRole('textbox', { name: 'Filter' }));
+    await user.keyboard('v');
+    expect(router.state.location.search).not.toHaveProperty('view');
+
+    within(tile).getByRole('button', { name: 'Actions for Filtered' }).focus();
+    await user.keyboard('v');
+    await waitFor(() => expect(router.state.location.search).toMatchObject({ view: 'e' }));
   });
 
   it('shows an error in the tile for a widget type the plugins does not have', async () => {

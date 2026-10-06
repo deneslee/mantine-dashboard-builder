@@ -276,6 +276,31 @@ export const InspectQueries: Story = {
   },
 };
 
+/** Single letters on the widget with focus: `i` inspects, `v` toggles full screen; `?` lists them. */
+export const Shortcuts: Story = {
+  args: { url: '/dashboards/sales' },
+  play: async () => {
+    const menuButton = () => page.getByRole('button', { name: 'Actions for Revenue' });
+    (await page.findByRole('button', { name: 'Actions for Revenue' }, WAIT)).focus();
+    await userEvent.keyboard('i');
+    await inspector();
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(document.activeElement).toBe(menuButton()));
+
+    await userEvent.keyboard('v');
+    await expect(await page.findByRole('link', { name: 'Back to dashboard' }, WAIT)).toBeVisible();
+    await waitFor(() => expect(document.activeElement).toBe(menuButton()));
+    await userEvent.keyboard('v');
+    await waitFor(() => expect(page.queryByRole('link', { name: 'Back to dashboard' })).toBeNull());
+
+    await userEvent.keyboard('?');
+    const dialog = within(await page.findByRole('dialog', { name: 'Keyboard shortcuts' }, WAIT));
+    await expect(dialog.getByText("Inspect the widget's data and queries")).toBeVisible();
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(page.queryByRole('dialog', { name: 'Keyboard shortcuts' })).toBeNull());
+  },
+};
+
 /** In edit mode the same dialog changes the saved widget, as one undo step. */
 export const WidgetTimeEdit: Story = {
   args: { url: EDIT },
