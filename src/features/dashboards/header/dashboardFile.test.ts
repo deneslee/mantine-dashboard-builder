@@ -23,7 +23,7 @@ const plugins: Plugins = {
       type: 'mock',
       name: 'Mock',
       querySchema: z.object({ seed: z.string() }),
-      query: async () => ({ length: 0, fields: [] }),
+      query: async () => [{ length: 0, fields: [] }],
     },
   },
 };

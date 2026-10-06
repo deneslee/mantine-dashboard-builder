@@ -41,7 +41,7 @@ Measured: during one sidebar collapse the unpinned navbar resized 22 times, the 
 
 - Each widget type is a `lazy()` chunk from its plugin; each tile gets its own `Suspense` and `QueryBoundary`.
 - Mount a tile's content the first time it comes within 200px of the viewport (Mantine `useIntersection` with `rootMargin`) and keep it mounted afterwards. The widget's chunk and query start then.
-- Refetches keep old data (`placeholderData: keepPreviousData`); no skeleton on refetch.
+- Refetches and range changes keep the old frames (`useWidgetData` keeps the last complete result); no skeleton.
 - `select` functions live outside components so `data` keeps its reference until it changes (Query's structural sharing does the rest).
 
 ## Charts

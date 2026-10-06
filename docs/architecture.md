@@ -53,8 +53,9 @@ DashboardProvider key=id → createDashboardStore(dashboard)      restores a dra
 DashboardPage → isEditing = ?mode=edit; range = isEditing ? store range : URL ?? document range
   DashboardGrid → layouts per breakpoint; drag or resize stop → commitLayout (one undo step)
     WidgetTile(id) → widget from the store, plugin from usePlugins()
-      useQuery(widgetDataQuery(queries, range)) once the tile is near the viewport
-        → resolveRange → DatasourcePlugin.query(spec, ctx) → DataFrame[]
+      useWidgetData(queries, range) once the tile is near the viewport
+        → one datasourceQuery per query → resolveRange → DatasourcePlugin.query(spec, ctx) → DataFrame[]
+        → combined in query order; a failed query's frames are left out and the header warns
       QueryBoundary → <plugin.component frames options />
 
 Save    store.save → saveDashboard (data/dashboardApi.ts) → localStorage saved copy → new baseline, draft cleared
@@ -63,7 +64,7 @@ Draft   every document change: isDirty ? write draft : clear draft
 Export  orderWidgets(dashboard) → <id>.json;  Import  JSON → storedDashboardSchema → plugin checks → importDocument
 ```
 
-Widget data is cached per widget (`['ds', queries, range]`); auto-refresh and the Refresh button invalidate `['ds']`. How the canvas stays fast is in [grid-and-charts.md](dashboard/grid-and-charts.md); the document model is in [dashboard.md](dashboard/dashboard.md).
+Widget data is cached per datasource query (`['ds', datasource, spec, range]`), so two widgets asking the same query share one request; auto-refresh and the Refresh button invalidate `['ds']`. While new keys load, a widget keeps its last complete frames. How the canvas stays fast is in [grid-and-charts.md](dashboard/grid-and-charts.md); the document model is in [dashboard.md](dashboard/dashboard.md).
 
 ## Where state lives
 

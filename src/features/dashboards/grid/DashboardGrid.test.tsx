@@ -1,8 +1,9 @@
 import { lazy } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
-import { act, render, screen, waitFor } from '@/testing/render';
+import { act, render, screen, waitFor, within } from '@/testing/render';
 import type { DataFrame } from '@/core/data/DataFrame';
+import { AppError } from '@/core/errors/AppError';
 import type { DatasourcePlugin, QueryContext } from '@/plugins/DatasourcePlugin';
 import { defineWidget, type WidgetProps } from '@/plugins/WidgetPlugin';
 import type { TimeRange } from '@/core/time/timeRange';
@@ -39,7 +40,7 @@ const enter = (tile: HTMLElement) =>
 
 // A fake plugins: what is under test is the tile, not a chart library or a real datasource.
 function FrameName({ frames }: WidgetProps<unknown>) {
-  return <p>{frames[0]?.name}</p>;
+  return <p>{frames.map((frame) => frame.name).join(', ')}</p>;
 }
 
 const nameWidget = defineWidget({
@@ -51,25 +52,59 @@ const nameWidget = defineWidget({
   skeleton: <p>Loading</p>,
 });
 
-/** Answers each query only when the test releases it, one answer per range. */
+/** Answers each query only when the test releases it: one frame named after the spec and the range. */
 function deferredDatasource() {
-  const waiting = new Map<string, (frame: DataFrame) => void>();
+  const waiting = new Map<string, (frames: DataFrame[]) => void>();
   const query = vi.fn(
-    (_spec: unknown, ctx: QueryContext) =>
-      new Promise<DataFrame>((resolve) => waiting.set(ctx.raw.from, resolve)),
+    (spec: unknown, ctx: QueryContext) =>
+      new Promise<DataFrame[]>((resolve) => waiting.set(`${String(spec)} ${ctx.raw.from}`, resolve)),
   );
-  const release = (from: string) =>
-    act(async () => waiting.get(from)?.({ name: `frame ${from}`, length: 0, fields: [] }));
+  const release = (spec: string, from: string) =>
+    act(async () => waiting.get(`${spec} ${from}`)?.([{ name: `${spec} ${from}`, length: 0, fields: [] }]));
   const datasource: DatasourcePlugin = { type: 'deferred', name: 'Deferred', query };
   return { datasource, query, release };
 }
 
-/** The fixture with a deferred-data widget in `a` and an unknown widget type in `b`. */
+const brokenDatasource: DatasourcePlugin = {
+  type: 'broken',
+  name: 'Broken',
+  query: async () => {
+    throw new AppError('datasource', 'The broken source failed.', { isRetryable: false });
+  },
+};
+
+/**
+ * The fixture with a deferred-data widget in `a`, an unknown widget type in `b`, `c` asking the same
+ * query as `a`, and `d` with one deferred query and one that fails.
+ */
 const dashboard: Dashboard = {
   ...testDashboard(),
   widgets: {
     a: { type: 'name', title: 'Revenue', options: {}, queries: [{ datasource: 'deferred', spec: 'a' }] },
     b: { type: 'nope', title: 'Regions', options: {}, queries: [] },
+    c: {
+      type: 'name',
+      title: 'Revenue again',
+      options: {},
+      queries: [{ datasource: 'deferred', spec: 'a' }],
+    },
+    d: {
+      type: 'name',
+      title: 'Mixed',
+      options: {},
+      queries: [
+        { datasource: 'deferred', spec: 'd' },
+        { datasource: 'broken', spec: {} },
+      ],
+    },
+  },
+  layouts: {
+    lg: [
+      { i: 'a', x: 0, y: 0, w: 6, h: 3 },
+      { i: 'b', x: 6, y: 0, w: 6, h: 3 },
+      { i: 'c', x: 0, y: 3, w: 6, h: 3 },
+      { i: 'd', x: 6, y: 3, w: 6, h: 3 },
+    ],
   },
 };
 
@@ -80,7 +115,7 @@ function renderGrid() {
   const { datasource, query, release } = deferredDatasource();
   const plugins: Plugins = {
     widgets: { name: nameWidget },
-    datasources: { deferred: datasource },
+    datasources: { deferred: datasource, broken: brokenDatasource },
   };
   const store = createDashboardStore(dashboard, { shouldPersist: false });
   const ui = (range: TimeRange) => (
@@ -122,18 +157,43 @@ describe('DashboardGrid', () => {
     const tile = await screen.findByRole('region', { name: 'Revenue' });
     enter(tile);
     await waitFor(() => expect(query).toHaveBeenCalledTimes(1));
-    await release('now-24h');
-    expect(await screen.findByText('frame now-24h')).toBeInTheDocument();
+    await release('a', 'now-24h');
+    expect(await screen.findByText('a now-24h')).toBeInTheDocument();
 
     setRange(week);
     await waitFor(() => expect(query).toHaveBeenCalledTimes(2));
-    expect(screen.getByText('frame now-24h')).toBeInTheDocument();
-    expect(screen.queryByText('Loading')).not.toBeInTheDocument();
+    expect(screen.getByText('a now-24h')).toBeInTheDocument();
+    expect(within(tile).queryByText('Loading')).not.toBeInTheDocument();
     expect(screen.getByRole('region', { name: 'Revenue' })).toBe(tile);
 
-    await release('now-7d');
-    expect(await screen.findByText('frame now-7d')).toBeInTheDocument();
+    await release('a', 'now-7d');
+    expect(await screen.findByText('a now-7d')).toBeInTheDocument();
     expect(screen.getByRole('region', { name: 'Revenue' })).toBe(tile);
+  });
+
+  it('makes one request when two widgets ask the same query', async () => {
+    const { query, release } = renderGrid();
+    enter(await screen.findByRole('region', { name: 'Revenue' }));
+    enter(screen.getByRole('region', { name: 'Revenue again' }));
+    await release('a', 'now-24h');
+    expect(
+      await within(screen.getByRole('region', { name: 'Revenue again' })).findByText('a now-24h'),
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByRole('region', { name: 'Revenue' })).getByText('a now-24h'),
+    ).toBeInTheDocument();
+    expect(query).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps showing the queries that loaded when another query of the widget fails', async () => {
+    const { release } = renderGrid();
+    const tile = await screen.findByRole('region', { name: 'Mixed' });
+    enter(tile);
+    await release('d', 'now-24h');
+    expect(await within(tile).findByText('d now-24h')).toBeInTheDocument();
+    expect(
+      await within(tile).findByRole('button', { name: "Some of this widget's data could not be loaded" }),
+    ).toBeInTheDocument();
   });
 
   it('shows an error in the tile for a widget type the plugins does not have', async () => {

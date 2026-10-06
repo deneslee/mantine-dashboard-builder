@@ -1,14 +1,10 @@
 import { ActionIcon, Group, Menu, Text, Tooltip } from '@mantine/core';
 import { IconAlertTriangle, IconDots, IconInfoCircle } from '@tabler/icons-react';
 import { Link } from '@tanstack/react-router';
-import { useQueryClient } from '@tanstack/react-query';
 import { fontWeight, iconSize, iconStroke } from '@/ui/tokens/semantic';
 import { notify } from '@/lib/notify/notify';
-import { widgetDataQuery } from '../data/dashboardQueries';
 import { useDashboardActions, useDashboard } from '../state/useDashboard';
-import type { TimeRange } from '@/core/time/timeRange';
 import type { Widget } from '@/core/dashboard/dashboardSchema';
-import { usePlugins } from '@/plugins/usePlugins';
 import { focusWidgetMenu } from './focusWidgetMenu';
 import classes from './WidgetTile.module.css';
 
@@ -16,23 +12,23 @@ export function WidgetHeader({
   id,
   widget,
   titleId,
-  range,
   isEditing,
   isFetching,
   hasFailed,
+  onRefresh,
 }: {
   id: string;
   widget: Widget;
   titleId: string;
-  range: TimeRange;
   isEditing: boolean;
   isFetching: boolean;
+  /** Some query failed: a warning icon, while the data that did load stays on screen. */
   hasFailed: boolean;
+  /** Refetches the widget's queries. */
+  onRefresh: () => void;
 }) {
   const dashboardId = useDashboard((state) => state.doc.id);
   const actions = useDashboardActions();
-  const plugins = usePlugins();
-  const client = useQueryClient();
   const handleCopyLink = async () => {
     const url = new URL(window.location.href);
     for (const key of ['mode', 'widget', 'editor']) url.searchParams.delete(key);
@@ -79,11 +75,15 @@ export function WidgetHeader({
         ) : null}
         {hasFailed ? (
           <Tooltip
-            label="Widget data could not be refreshed"
+            label="Some of this widget's data could not be loaded"
             interactive
             events={{ hover: true, focus: true, touch: true }}
           >
-            <ActionIcon variant="subtle" color="warning" aria-label="Widget data could not be refreshed">
+            <ActionIcon
+              variant="subtle"
+              color="warning"
+              aria-label="Some of this widget's data could not be loaded"
+            >
               <IconAlertTriangle size={iconSize.sm} stroke={iconStroke} />
             </ActionIcon>
           </Tooltip>
@@ -103,19 +103,7 @@ export function WidgetHeader({
             </Tooltip>
           </Menu.Target>
           <Menu.Dropdown>
-            {widget.queries.length ? (
-              <Menu.Item
-                onClick={() =>
-                  void client.invalidateQueries({
-                    queryKey: widgetDataQuery(widget.queries, range, plugins.datasources, widget.title)
-                      .queryKey,
-                    exact: true,
-                  })
-                }
-              >
-                Refresh
-              </Menu.Item>
-            ) : null}
+            {widget.queries.length ? <Menu.Item onClick={onRefresh}>Refresh</Menu.Item> : null}
             <Menu.Item onClick={() => void handleCopyLink()}>Copy link</Menu.Item>
             {isEditing ? (
               <>

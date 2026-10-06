@@ -20,6 +20,9 @@ export interface DatasourcePlugin {
   type: string;
   name: string;
   querySchema?: z.ZodType;
-  /** Rejects with an `AppError`; honours `signal`. */
-  query(spec: unknown, ctx: QueryContext, signal?: AbortSignal): Promise<DataFrame>;
+  /**
+   * One query's frames: usually one, more when a query returns several series. Rejects with an
+   * `AppError`; honours `signal`.
+   */
+  query(spec: unknown, ctx: QueryContext, signal?: AbortSignal): Promise<DataFrame[]>;
 }

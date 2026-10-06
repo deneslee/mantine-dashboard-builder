@@ -14,12 +14,12 @@ const series = {
   fields: [{ name: 'revenue', unit: '€', base: 100, spread: 10 }],
 };
 
-/** Runs a query past the mock's random latency. */
+/** Runs a query past the mock's random latency; the mock answers with one frame. */
 async function run(spec: unknown, context = ctx) {
   const result = mockDatasource.query(spec, context);
   result.catch(() => {});
   await vi.runAllTimersAsync();
-  return result;
+  return result.then((frames) => frames[0]!);
 }
 
 describe('mockDatasource', () => {

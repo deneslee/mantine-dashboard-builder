@@ -309,7 +309,8 @@ Checkpoint Sep 30: completed implementation parts are ticked below. Parent tasks
 
 ### Stage 3: viewing (phase 3)
 
-- [ ] **One cache entry per datasource query.** Datasources return `DataFrame[]` under the contract in §6; `useWidgetData(widgetId)`; `dataActive` gating. Done when two widgets with the same query make one request, one failed query leaves the widget's other results showing, and a hidden widget makes no request.
+- [x] **One cache entry per datasource query.** Datasources return `DataFrame[]` under the contract in §6; `useWidgetData(widgetId)`; `dataActive` gating. Done when two widgets with the same query make one request, one failed query leaves the widget's other results showing, and a hidden widget makes no request.
+  - Oct 6: `datasourceQuery` keyed `['ds', datasource, spec, range]`; `useWidgetData(queries, range, { isEnabled })` takes the queries rather than the widget id, so the query editor's preview uses it too. `DashboardGrid.test` proves the three done-when cases; a tile that never came near the viewport makes no request. `dataActive` as a prop arrives with **Full-screen view**, the first place a mounted tile is hidden; context-dependent keys (`timeAware`, resolution, variables) arrive with the scope resolver, resolution and variables.
 - [ ] **Scope resolver** with time zone and the shared `now`: `useEffectiveTimeRange(widgetId)` over the URL (`from`, `to`, `tz`, `wt`) and the store, with the precedence in §1. Done when unit tests cover every precedence level, shift over shift, and `now/d` in two time zones, and one widget's override re-renders only that tile.
 - [ ] **Time range per widget:** the menu's Time range…, the clock, and the saved override in edit mode (one undo step).
 - [ ] **Full-screen view** (`?view`). Done when the hidden tiles' `dataActive` is false and no request is made while they're hidden.

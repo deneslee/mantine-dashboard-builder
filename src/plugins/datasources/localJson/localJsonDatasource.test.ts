@@ -24,13 +24,13 @@ describe('localJsonDatasource', () => {
   it('reads a frame from a file under data/', async () => {
     const fetch = vi.fn().mockResolvedValue(json(regions));
     vi.stubGlobal('fetch', fetch);
-    const frame = await localJsonDatasource.query({ path: 'frames/regions.json' }, ctx);
+    const [frame] = await localJsonDatasource.query({ path: 'frames/regions.json' }, ctx);
     expect(fetch).toHaveBeenCalledWith(
       expect.stringMatching(/data\/frames\/regions\.json$/),
       expect.anything(),
     );
-    expect(frame.length).toBe(2);
-    expect(frame.fields.map((f) => f.name)).toEqual(['region', 'revenue']);
+    expect(frame?.length).toBe(2);
+    expect(frame?.fields.map((f) => f.name)).toEqual(['region', 'revenue']);
   });
 
   it('reports a missing file, including the dev server answering with HTML', async () => {

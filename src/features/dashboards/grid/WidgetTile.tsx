@@ -1,13 +1,12 @@
 import { Box, Paper } from '@mantine/core';
 import { useIntersection } from '@mantine/hooks';
-import { useQuery } from '@tanstack/react-query';
 import { Suspense, useId, useState } from 'react';
 import { QueryBoundary } from '@/ui/components/QueryBoundary';
 import { TextSkeleton } from '@/ui/components/Skeletons';
 import { AppError } from '@/core/errors/AppError';
 import type { DataFrame } from '@/core/data/DataFrame';
 import type { Query } from '@/plugins/DatasourcePlugin';
-import { widgetDataQuery } from '../data/dashboardQueries';
+import { useWidgetData } from '../data/useWidgetData';
 import { useWidget } from '../state/useDashboard';
 import type { TimeRange } from '@/core/time/timeRange';
 import type { Widget } from '@/core/dashboard/dashboardSchema';
@@ -58,12 +57,8 @@ function Tile({
   const { ref, entry } = useIntersection<HTMLDivElement>(nearViewport);
   const [hasBeenSeen, setSeen] = useState(false);
   if (!hasBeenSeen && entry?.isIntersecting) setSeen(true);
-  const { widgets, datasources } = usePlugins();
-  const result = useQuery({
-    ...widgetDataQuery(widget.queries, range, datasources, widget.title),
-    enabled: hasBeenSeen,
-    throwOnError: false,
-  });
+  const { widgets } = usePlugins();
+  const data = useWidgetData(widget.queries, range, { isEnabled: hasBeenSeen, source: widget.title });
   const skeleton = widgets[widget.type]?.skeleton ?? unknownSkeleton;
   return (
     <Paper
@@ -71,7 +66,7 @@ function Tile({
       variant="widget"
       component="section"
       aria-labelledby={titleId}
-      aria-busy={result.isFetching}
+      aria-busy={data.isFetching}
     >
       {isPreview ? (
         <Box p="sm" id={titleId}>
@@ -82,19 +77,15 @@ function Tile({
           id={id}
           widget={widget}
           titleId={titleId}
-          range={range}
           isEditing={isEditing}
-          isFetching={result.isFetching}
-          hasFailed={result.isError}
+          isFetching={data.isFetching}
+          hasFailed={data.hasFailed}
+          onRefresh={() => void data.refetch()}
         />
       )}
       <Box ref={ref} className={classes.body}>
-        <QueryBoundary
-          name={widget.title}
-          retry={() => result.refetch()}
-          resetKeys={[widget.options, widget.queries]}
-        >
-          {hasBeenSeen ? <WidgetBody widget={widget} frames={result.data} error={result.error} /> : skeleton}
+        <QueryBoundary name={widget.title} retry={data.refetch} resetKeys={[widget.options, widget.queries]}>
+          {hasBeenSeen ? <WidgetBody widget={widget} frames={data.frames} error={data.error} /> : skeleton}
         </QueryBoundary>
       </Box>
     </Paper>

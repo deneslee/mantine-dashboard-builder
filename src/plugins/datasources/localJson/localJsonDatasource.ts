@@ -68,6 +68,6 @@ export const localJsonDatasource: DatasourcePlugin = {
         details: frame.error.issues,
       });
     const { name, fields } = frame.data;
-    return { name, length: fields[0]?.values.length ?? 0, fields } satisfies DataFrame;
+    return [{ name, length: fields[0]?.values.length ?? 0, fields } satisfies DataFrame];
   },
 };

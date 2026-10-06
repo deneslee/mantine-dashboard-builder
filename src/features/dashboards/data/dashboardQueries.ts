@@ -1,4 +1,4 @@
-import { keepPreviousData, queryOptions } from '@tanstack/react-query';
+import { queryOptions } from '@tanstack/react-query';
 import { AppError } from '@/core/errors/AppError';
 import type { DatasourcePlugin, Query } from '@/plugins/DatasourcePlugin';
 import { resolveRange, type TimeRange } from '@/core/time/timeRange';
@@ -7,7 +7,7 @@ import { getDashboard, listDashboards } from './dashboardApi';
 export const dashboardKeys = {
   all: ['dashboards'] as const,
   detail: (id: string) => ['dashboards', id] as const,
-  /** Every widget query; auto-refresh and the Refresh button invalidate this. */
+  /** Every datasource query; auto-refresh and the Refresh button invalidate this. */
   data: ['ds'] as const,
 };
 
@@ -27,37 +27,28 @@ export const dashboardQuery = (id: string) =>
   });
 
 /**
- * A widget's data: all its queries, one frame each. One query per widget (not per datasource
- * query), because `keepPreviousData` needs the same observer across a key change, and `useQueries`
- * makes a new one per key. The key holds the range as written (`now-24h`), so it stays the same
- * between renders; "now" is resolved when the query runs, so a refetch moves the window. Widgets
- * with the same queries share one request.
+ * One datasource query's frames: the cache unit for widget data. The key is the datasource, its spec
+ * and the range as written (`now-24h`), so identical queries in two widgets share one request, and
+ * each query fails, retries and is cancelled on its own. "now" is resolved when the query runs, so a
+ * refetch moves the window. `source` names the widget in error toasts.
  */
-export const widgetDataQuery = (
-  queries: Query[],
+export const datasourceQuery = (
+  query: Query,
   range: TimeRange,
   datasources: Record<string, DatasourcePlugin>,
   source: string,
 ) =>
   queryOptions({
-    queryKey: [...dashboardKeys.data, queries, range],
+    queryKey: [...dashboardKeys.data, query.datasource, query.spec, range],
     queryFn: ({ signal }) => {
       const resolved = resolveRange(range);
       if (!resolved) throw new AppError('validation', `Invalid time range "${range.from}" to "${range.to}".`);
-      return Promise.all(
-        queries.map((query) => {
-          const datasource = datasources[query.datasource];
-          if (!datasource)
-            throw new AppError('validation', `No datasource of type "${query.datasource}".`, {
-              isRetryable: false,
-            });
-          return datasource.query(query.spec, { range: resolved, raw: range }, signal);
-        }),
-      );
+      const datasource = datasources[query.datasource];
+      if (!datasource)
+        throw new AppError('validation', `No datasource of type "${query.datasource}".`, {
+          isRetryable: false,
+        });
+      return datasource.query(query.spec, { range: resolved, raw: range }, signal);
     },
-    // A range change keeps showing the old data until the new data arrives: no skeleton flash.
-    placeholderData: keepPreviousData,
-    // First-load errors go to the tile's error boundary; a failed refetch keeps the old data (and toasts).
-    throwOnError: (_error, q) => q.state.data === undefined,
     meta: { source },
   });

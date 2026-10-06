@@ -118,9 +118,9 @@ export const mockDatasource: DatasourcePlugin = {
       case 'error':
         throw new AppError('datasource', s.message);
       case 'series':
-        return series(s, ctx);
+        return [series(s, ctx)];
       case 'table':
-        return table(s, ctx);
+        return [table(s, ctx)];
     }
   },
 };
