@@ -2,7 +2,8 @@ import { RouterProvider, useSearch } from '@tanstack/react-router';
 import { lazy } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
-import { act, render, screen, waitFor, within } from '@/testing/render';
+import { act, render, renderHook, screen, waitFor, within } from '@/testing/render';
+import { useDensity } from '@/lib/useDensity';
 import type { DataFrame } from '@/core/data/DataFrame';
 import { AppError } from '@/core/errors/AppError';
 import type { DatasourcePlugin, QueryContext } from '@/plugins/DatasourcePlugin';
@@ -156,7 +157,7 @@ function renderGrid() {
   render(<RouterProvider router={router} />);
   /** Opens the dashboard at these search params, as a link or back and forward would. */
   const go = (search: string) => act(async () => router.history.push(`/dashboards/sales?${search}`));
-  return { query, release, go };
+  return { query, release, go, store };
 }
 
 const wt = (overrides: object) => `wt=${encodeURIComponent(JSON.stringify(overrides))}`;
@@ -255,6 +256,24 @@ describe('DashboardGrid', () => {
     await go('from=now-7d');
     await waitFor(() => expect(query).toHaveBeenCalledTimes(1));
     expect(query.mock.calls[0]![1].raw.from).toBe('now-7d');
+  });
+
+  it('spaces tiles by the density, keeping every tile in its row and the document unchanged', async () => {
+    const { store } = renderGrid();
+    const tile = await screen.findByRole('region', { name: 'Revenue again' });
+    const item = tile.closest<HTMLElement>('.react-grid-item')!;
+    // RGL places a tile `row × (row height + gap)` from the top.
+    const rowAt = (gap: number) =>
+      Number(/translate\([^,]+,\s*([\d.]+)px\)/.exec(item.style.transform)?.[1]) / (40 + gap);
+    const row = rowAt(16);
+    expect(row).toBeGreaterThan(0);
+    const layouts = store.getState().doc.layouts;
+
+    const density = renderHook(() => useDensity());
+    act(() => density.result.current[1]('compact'));
+    await waitFor(() => expect(rowAt(10)).toBe(row));
+    expect(store.getState().doc.layouts).toBe(layouts);
+    expect(store.getState().isDirty).toBe(false);
   });
 
   it('shows an error in the tile for a widget type the plugins does not have', async () => {

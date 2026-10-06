@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, spyOn, userEvent, waitFor, within } from 'storybook/test';
+import { DENSITY_STORAGE_KEY } from '@/lib/useDensity';
 import { AppStory } from '@/testing/AppStory';
 import { loadDemoDashboard } from '@/testing/fixtures/dashboards';
 import { saveDashboard } from './data/dashboardApi';
@@ -42,6 +43,11 @@ export const View: Story = { args: { url: '/dashboards/sales' } };
 export const Editing: Story = { args: { url: EDIT } };
 export const WidgetOptions: Story = { args: { url: `${EDIT}&widget=revenue` } };
 export const QueryEditor: Story = { args: { url: `${EDIT}&widget=revenue&editor=queries` } };
+/** The compact density from Settings › Appearance: smaller gaps and padding, the same rows and columns. */
+export const Compact: Story = {
+  args: { url: '/dashboards/sales' },
+  beforeEach: () => localStorage.setItem(DENSITY_STORAGE_KEY, 'compact'),
+};
 /** A viewer's own time for Revenue: the clock in its header. */
 export const WidgetTime: Story = {
   args: { url: `/dashboards/sales?wt=${encodeURIComponent('{"revenue":{"mode":"shift","by":"1w"}}')}` },

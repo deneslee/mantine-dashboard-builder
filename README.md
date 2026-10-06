@@ -37,7 +37,7 @@ Node 24.15+ and pnpm 12.5+ (see `package.json › engines`).
 | `/dashboards/infra`                                  | A virtualized 10k-row table                                                                                  |
 | `/dashboards/broken`                                 | A document that fails validation: route error with retry                                                     |
 | `/dashboards/missing`, `/anything`                   | 404 inside the frame                                                                                         |
-| `/settings`                                          | Appearance: theme, burger behaviour, reduced motion                                                          |
+| `/settings`                                          | Appearance: theme, burger behaviour, dashboard density, reduced motion                                       |
 | `/debug`                                             | Every toast level, dedupe, progress, mutation error, a throwing widget, all skeletons                        |
 
 Saves and drafts stay in this browser's `localStorage`; the files in `public/data/` are never changed.

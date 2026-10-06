@@ -70,16 +70,16 @@ Widget data is cached per datasource query (`['ds', datasource, spec, range]`), 
 
 ## Where state lives
 
-| State                                                                                                                                          | Owner                                                                | Mounted                              |
-| ---------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------ |
-| Dashboard list, documents, widget data                                                                                                         | TanStack Query                                                       | `app/Providers`                      |
-| Time range, refresh, time zone (`tz`), viewers' widget times (`wt`), `mode`, `widget`, `editor`, `view`, `inspect`, `inspectTab`, settings tab | URL search params, validated with zod                                | routes                               |
-| Document being edited, saved baseline, undo history, editor tool, the dashboard's `now`                                                        | per-dashboard zustand store (`DashboardProvider`)                    | `routes/dashboards/$id`, keyed by id |
-| Sidebar and context bar layout; the app's nav and global tabs                                                                                  | shell zustand store and static values (`ShellProvider`)              | `routes/__root`                      |
-| Widget and datasource plugins                                                                                                                  | `PluginsContext`, filled from `app/plugins.ts`                       | `app/Providers`                      |
-| Inbox                                                                                                                                          | global zustand store (`lib/notify/useInbox.ts`), written by `notify` | module                               |
-| Color scheme, motion                                                                                                                           | Mantine color-scheme manager, `useMotion`                            | `app/Providers`                      |
-| Everything else                                                                                                                                | component state                                                      | –                                    |
+| State                                                                                                                                          | Owner                                                                | Mounted                                           |
+| ---------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------- |
+| Dashboard list, documents, widget data                                                                                                         | TanStack Query                                                       | `app/Providers`                                   |
+| Time range, refresh, time zone (`tz`), viewers' widget times (`wt`), `mode`, `widget`, `editor`, `view`, `inspect`, `inspectTab`, settings tab | URL search params, validated with zod                                | routes                                            |
+| Document being edited, saved baseline, undo history, editor tool, the dashboard's `now`                                                        | per-dashboard zustand store (`DashboardProvider`)                    | `routes/dashboards/$id`, keyed by id              |
+| Sidebar and context bar layout; the app's nav and global tabs                                                                                  | shell zustand store and static values (`ShellProvider`)              | `routes/__root`                                   |
+| Widget and datasource plugins                                                                                                                  | `PluginsContext`, filled from `app/plugins.ts`                       | `app/Providers`                                   |
+| Inbox                                                                                                                                          | global zustand store (`lib/notify/useInbox.ts`), written by `notify` | module                                            |
+| Color scheme, motion, density                                                                                                                  | Mantine color-scheme manager, `useMotion`, `useDensity`              | `app/Providers`; density is read where it is used |
+| Everything else                                                                                                                                | component state                                                      | –                                                 |
 
 `app/Providers` is the only provider stack: the app, `testing/render` and the Storybook preview all use it.
 
@@ -92,6 +92,7 @@ Every key is `storageKey(name)` from `lib/storage.ts`: `dashboard-builder:<name>
 | `shell`                        | Sidebar and context bar layout (zustand persist, `version` 2)          |
 | `notifications`                | Inbox items (zustand persist, `version` 2)                             |
 | `motion`                       | Reduced-motion preference                                              |
+| `density`                      | Dashboard density: compact, comfortable or spacious                    |
 | `color-scheme`                 | Light, dark or auto; also read by the pre-paint script in `index.html` |
 | `saved:<id>`                   | A saved dashboard (with `schemaVersion`), which overrides the file     |
 | `draft:<id>`                   | Unsaved edits and the baseline they started from                       |

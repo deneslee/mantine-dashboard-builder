@@ -5,6 +5,7 @@ import { gridBounds, minMaxSize } from 'react-grid-layout/core';
 import { fastVerticalCompactor } from 'react-grid-layout/extras';
 import 'react-grid-layout/css/styles.css';
 import { dimensions } from '@/ui/tokens/dimensions';
+import { useDensity } from '@/lib/useDensity';
 import { useDashboardActions, useDashboard } from '../state/useDashboard';
 import { compareReadingOrder, resolveLayouts, type Breakpoint } from '@/core/dashboard/layout';
 import type { TimeRange } from '@/core/time/timeRange';
@@ -13,7 +14,6 @@ import { WidgetTile } from './WidgetTile';
 import classes from './DashboardGrid.module.css';
 
 const { grid } = dimensions;
-const margin = [grid.gap, grid.gap] as const;
 const noPadding = [0, 0] as const;
 const drag = {
   enabled: true,
@@ -37,6 +37,8 @@ export function DashboardGrid({
   isDataActive: boolean;
 }) {
   const { width, containerRef, mounted: isMounted } = useContainerWidth({ measureBeforeMount: true });
+  const [density] = useDensity();
+  const gap = grid.gap[density];
   const authored = useDashboard((state) => state.doc.layouts);
   const types = useDashboard(
     useShallow((s) =>
@@ -95,7 +97,7 @@ export function DashboardGrid({
           cols={grid.cols}
           layouts={layouts}
           rowHeight={grid.rowHeight}
-          margin={margin}
+          margin={[gap, gap]}
           containerPadding={noPadding}
           dragConfig={canEditLayout ? drag : disabled}
           resizeConfig={canEditLayout ? resize : disabled}

@@ -29,6 +29,12 @@ const themeOptions = [
   { value: 'auto', label: 'System', icon: IconDeviceDesktop },
 ] as const;
 
+const densityOptions = [
+  { value: 'compact', label: 'Compact' },
+  { value: 'comfortable', label: 'Comfortable' },
+  { value: 'spacious', label: 'Spacious' },
+] as const;
+
 const motionOptions = [
   { value: 'system', label: 'Follow system' },
   { value: 'reduce', label: 'Reduce' },
@@ -102,6 +108,24 @@ export function AppearanceForm() {
                   </Group>
                 ),
               }))}
+            />
+          </SettingsRow>
+        </SettingsSection>
+
+        <SettingsSection title="Dashboards" description="How dashboards look to you.">
+          <SettingsRow
+            label="Density"
+            labelId="settings-density"
+            description="The space between widgets and inside them. Widgets keep their rows and columns."
+          >
+            <SegmentedControl
+              aria-labelledby="settings-density"
+              value={values.density}
+              onChange={(value) => {
+                const option = densityOptions.find((o) => o.value === value);
+                if (option) setField('density', option.value);
+              }}
+              data={densityOptions.map((o) => ({ value: o.value, label: o.label }))}
             />
           </SettingsRow>
         </SettingsSection>

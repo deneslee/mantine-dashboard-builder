@@ -96,6 +96,19 @@ Each drag and each resize is one Undo step; checked with real pointer events in 
 
 Cold start: the first two runs, right after the build and the server start, each had one long animation frame of 451–889ms after the first drop, with no script attribution (rendering, not JavaScript). None of the three later runs had one. Headless Chromium rasterizes in software, so a Performance trace on a real device is the check if a first drop ever feels slow.
 
+### Density switch
+
+Measured Oct 6, 2026 on `/dashboards/perf` against `pnpm build` + `pnpm preview`, headless Chromium at 1440 × 900 with 12–18 charts mounted: a Playwright script wrote the density to `localStorage` and fired the `storage` event another tab would, then watched for two seconds with a `ResizeObserver` on every chart container, a `MutationObserver` on the tiles' `style`, and `long-animation-frame` and `longtask` observers. Two runs of compact → spacious → comfortable.
+
+| Check                 | Measured                                                                                                                                   |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Grid layout passes    | One: each tile's `transform`, `width` and `height` written once (59 style writes for 20 tiles; the tile at the origin keeps its transform) |
+| Chart resizes         | Every mounted chart once                                                                                                                   |
+| Layout units          | Unchanged: no draft written, the document stays clean (`DashboardGrid.test` checks rows too)                                               |
+| Long animation frames | One per switch, 60–100 ms: every mounted chart re-renders at its new size at once (see below)                                              |
+
+A density change is a settings change, not an interaction, so one long frame is accepted; it would matter if density ever became a control on the dashboard itself.
+
 Recharts 3 applies size changes through `useSyncExternalStore`, which React cannot split across frames, so a reflow of many charts is one long task. Keep it out of animations and off-screen charts out of it. The accepted 150–250ms chart-reflow observation begins after the animation and is not evidence for the unmeasured animation interval. To count resizes, attach a `ResizeObserver` to the chart containers; to time the work, observe `longtask` or `long-animation-frame` entries.
 
 ### Remaining performance and motion record

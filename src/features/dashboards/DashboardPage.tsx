@@ -8,6 +8,7 @@ import { Page } from '@/ui/components/Page';
 import { dimensions } from '@/ui/tokens/dimensions';
 import { iconSize, iconStroke } from '@/ui/tokens/semantic';
 import { localTimeZone } from '@/core/time/timeRange';
+import { useDensity } from '@/lib/useDensity';
 import type { DashboardSearch } from './dashboardSearch';
 import { useAutoRefresh } from './data/useAutoRefresh';
 import { useRefreshAll } from './data/useRefreshAll';
@@ -63,6 +64,7 @@ export function DashboardPage() {
   );
   const isWide = useMediaQuery(`(min-width: ${dimensions.grid.breakpoints.md}px)`, true);
   const isEditing = search.mode === 'edit';
+  const [density] = useDensity();
   // One widget full screen, outside edit mode only: editing has the query editor for that.
   const viewId = useDashboard((s) =>
     !isEditing && search.view && s.doc.widgets[search.view] ? search.view : undefined,
@@ -112,7 +114,7 @@ export function DashboardPage() {
       resetScroll: false,
     });
   return (
-    <Page.Root>
+    <Page.Root mod={{ density }}>
       <Announcer />
       <Page.Header>
         <RouteBreadcrumbs />

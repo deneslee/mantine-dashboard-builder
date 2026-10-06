@@ -8,3 +8,15 @@
   flex: 1 1 0;
   min-height: 0;
 }
+
+/*
+ * Density (Settings › Appearance) on Page.Root: the padding inside widgets, in the same spacing steps
+ * as the gap between them, which react-grid-layout takes as numbers (`grid.gap` in the tokens).
+ */
+:global([data-density='compact']) {
+  --widget-padding: var(--mantine-spacing-sm);
+}
+
+:global([data-density='spacious']) {
+  --widget-padding: var(--mantine-spacing-lg);
+}

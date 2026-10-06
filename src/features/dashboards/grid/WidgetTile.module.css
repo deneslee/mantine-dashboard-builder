@@ -2,7 +2,7 @@
   position: relative;
   flex: 0 0 auto;
   min-height: rem(40px);
-  padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
+  padding: var(--mantine-spacing-xs) var(--widget-padding, var(--mantine-spacing-md));
 }
 
 .controls {
@@ -54,6 +54,6 @@
 .body {
   flex: 1 1 auto;
   min-height: 0;
-  padding: var(--mantine-spacing-md);
+  padding: var(--widget-padding, var(--mantine-spacing-md));
   overflow: hidden;
 }

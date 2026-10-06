@@ -264,7 +264,11 @@ export const shell = {
 export const grid = {
   breakpoints: { lg: 1100, md: 640, sm: 0 },
   rowHeight: 40,
-  gap: 16,
+  /**
+   * Gap between tiles per density step (a personal setting), from the spacing scale. Widget padding
+   * takes the same steps in CSS (`DashboardPage.module.css`); row height stays, so layouts keep their shape.
+   */
+  gap: { compact: spacingPx.sm, comfortable: spacingPx.md, spacious: spacingPx.lg },
 } as const;
 
 // 15. Third-party brand logos (not roles)

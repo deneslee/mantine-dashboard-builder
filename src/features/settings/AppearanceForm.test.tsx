@@ -3,6 +3,7 @@ import { notify } from '@/lib/notify/notify';
 import { createShellStore } from '@/shell/createShellStore';
 import { ShellProvider } from '@/shell/ShellProvider';
 import { fireEvent, render, screen, waitFor } from '@/testing/render';
+import { DENSITY_STORAGE_KEY } from '@/lib/useDensity';
 import { MOTION_STORAGE_KEY } from '@/lib/useMotion';
 import { AppearanceForm } from './AppearanceForm';
 
@@ -57,6 +58,13 @@ describe('AppearanceForm', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
     await waitFor(() => expect(localStorage.getItem(MOTION_STORAGE_KEY)).toBe('reduce'));
     await waitFor(() => expect(screen.getByRole('button', { name: 'Save changes' })).toBeDisabled());
+  });
+
+  it('saves the density', async () => {
+    setup();
+    fireEvent.click(screen.getByRole('radio', { name: 'Compact' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+    await waitFor(() => expect(localStorage.getItem(DENSITY_STORAGE_KEY)).toBe('compact'));
   });
 
   it('discards the draft without touching the stored setting', () => {
