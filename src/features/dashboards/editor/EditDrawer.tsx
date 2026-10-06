@@ -15,7 +15,7 @@ import classes from './EditDrawer.module.css';
  * widget (`tool: palette`) or editing one (`?widget=<id>`), the move and resize dialogs, and the
  * query editor (`&editor=queries`), which takes the grid's place.
  */
-export function EditDrawer({ range }: { range: TimeRange }) {
+export function EditDrawer({ range, timeZone }: { range: TimeRange; timeZone: string }) {
   const search = useSearch({ from: '/dashboards/$id' });
   const navigate = useNavigate({ from: '/dashboards/$id' });
   const tool = useDashboard((s) => s.tool);
@@ -31,7 +31,14 @@ export function EditDrawer({ range }: { range: TimeRange }) {
   };
   if (widget && search.editor === 'queries')
     return (
-      <QueryEditor key={widgetId} id={widgetId} widget={widget} range={range} onClose={handleCloseWidget} />
+      <QueryEditor
+        key={widgetId}
+        id={widgetId}
+        widget={widget}
+        range={range}
+        timeZone={timeZone}
+        onClose={handleCloseWidget}
+      />
     );
   return (
     <>

@@ -18,10 +18,16 @@ export interface DashboardState {
   isDirty: boolean;
   draftError: string | null;
   breakpoint: Breakpoint;
+  /**
+   * The dashboard's one `now` (epoch ms): every query resolves its range against it, so all widgets
+   * cover the same window. Taken when the dashboard range or time zone changes and on each refresh.
+   */
+  now: number;
   tool: EditorTool;
   announcement: string;
   actions: {
     setBreakpoint(this: void, breakpoint: Breakpoint): void;
+    takeNow(this: void): void;
     openTool(this: void, tool: EditorTool): void;
     setRange(this: void, range: TimeRange): void;
     setRefresh(this: void, refresh: string): void;
@@ -91,10 +97,12 @@ export function createDashboardStore(
         isDirty: serialized(initial) !== serialized(saved),
         draftError,
         breakpoint: 'lg',
+        now: Date.now(),
         tool: null,
         announcement: '',
         actions: {
           setBreakpoint: (breakpoint) => set({ breakpoint }),
+          takeNow: () => set({ now: Date.now() }),
           openTool: (tool) => set({ tool }),
           setRange: (timeRange) => set({ timeRange }),
           setRefresh: (refresh) => set({ refresh }),

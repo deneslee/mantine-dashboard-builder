@@ -5,6 +5,7 @@ import { localJsonDatasource } from './localJsonDatasource';
 const ctx: QueryContext = {
   range: { from: new Date(0), to: new Date(1) },
   raw: { from: 'now-24h', to: 'now' },
+  timeZone: 'UTC',
 };
 
 const json = (body: unknown, init: ResponseInit = {}) =>

@@ -1,9 +1,10 @@
 import { useQueries, type UseQueryResult } from '@tanstack/react-query';
 import { useState } from 'react';
 import type { DataFrame } from '@/core/data/DataFrame';
-import type { TimeRange } from '@/core/time/timeRange';
+import type { EffectiveTime } from '@/core/time/timeRange';
 import type { Query } from '@/plugins/DatasourcePlugin';
 import { usePlugins } from '@/plugins/usePlugins';
+import { useReadNow } from '../state/useDashboard';
 import { datasourceQuery } from './dashboardQueries';
 
 export interface WidgetData {
@@ -42,13 +43,14 @@ function combine(results: UseQueryResult<DataFrame[]>[]) {
  */
 export function useWidgetData(
   queries: Query[],
-  range: TimeRange,
+  time: EffectiveTime,
   { isEnabled, source }: { isEnabled: boolean; source: string },
 ): WidgetData {
   const { datasources } = usePlugins();
+  const getNow = useReadNow();
   const { isLoading, ...data } = useQueries({
     queries: queries.map((query) => ({
-      ...datasourceQuery(query, range, datasources, source),
+      ...datasourceQuery(query, time, { datasources, getNow, source }),
       enabled: isEnabled,
     })),
     combine,

@@ -21,7 +21,11 @@ function Grid({ dashboard, mode }: { dashboard: Dashboard; mode: 'view' | 'edit'
       page={
         <Box p="lg">
           <DashboardProvider dashboard={dashboard} store={store}>
-            <DashboardGrid range={{ from: 'now-24h', to: 'now' }} isEditing={mode === 'edit'} />
+            <DashboardGrid
+              range={{ from: 'now-24h', to: 'now' }}
+              timeZone="UTC"
+              isEditing={mode === 'edit'}
+            />
           </DashboardProvider>
         </Box>
       }

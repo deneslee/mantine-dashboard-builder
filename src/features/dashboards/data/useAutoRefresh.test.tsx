@@ -1,4 +1,3 @@
-import { createQueryClient } from '@/app/queryClient';
 import { act, renderHook } from '@/testing/render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useAutoRefresh } from './useAutoRefresh';
@@ -9,13 +8,11 @@ function setVisibility(state: DocumentVisibilityState) {
 }
 
 function setup(refresh: string) {
-  const queryClient = createQueryClient();
-  const invalidate = vi.spyOn(queryClient, 'invalidateQueries').mockResolvedValue();
-  const hook = renderHook((props: { refresh: string }) => useAutoRefresh(props.refresh), {
-    queryClient,
+  const onRefresh = vi.fn();
+  const hook = renderHook((props: { refresh: string }) => useAutoRefresh(props.refresh, onRefresh), {
     initialProps: { refresh },
   });
-  return { invalidate, hook };
+  return { onRefresh, hook };
 }
 
 const advance = (ms: number) => act(() => void vi.advanceTimersByTime(ms));
@@ -27,37 +24,36 @@ describe('useAutoRefresh', () => {
   });
   afterEach(() => vi.useRealTimers());
 
-  it('invalidates the widget queries once per tick', () => {
-    const { invalidate } = setup('30s');
+  it('refreshes once per tick', () => {
+    const { onRefresh } = setup('30s');
     advance(90_000);
-    expect(invalidate).toHaveBeenCalledTimes(3);
-    expect(invalidate).toHaveBeenCalledWith({ queryKey: ['ds'] });
+    expect(onRefresh).toHaveBeenCalledTimes(3);
   });
 
   it('never ticks with refresh off', () => {
-    const { invalidate } = setup('off');
+    const { onRefresh } = setup('off');
     advance(10 * 60_000);
-    expect(invalidate).not.toHaveBeenCalled();
+    expect(onRefresh).not.toHaveBeenCalled();
   });
 
   it('pauses while the tab is hidden', () => {
-    const { invalidate } = setup('30s');
+    const { onRefresh } = setup('30s');
     setVisibility('hidden');
     advance(120_000);
-    expect(invalidate).not.toHaveBeenCalled();
+    expect(onRefresh).not.toHaveBeenCalled();
 
     setVisibility('visible');
     advance(30_000);
-    expect(invalidate).toHaveBeenCalledTimes(1);
+    expect(onRefresh).toHaveBeenCalledTimes(1);
   });
 
   it('follows a new interval', () => {
-    const { invalidate, hook } = setup('1m');
+    const { onRefresh, hook } = setup('1m');
     hook.rerender({ refresh: '30s' });
     advance(60_000);
-    expect(invalidate).toHaveBeenCalledTimes(2);
+    expect(onRefresh).toHaveBeenCalledTimes(2);
     hook.rerender({ refresh: 'off' });
     advance(60_000);
-    expect(invalidate).toHaveBeenCalledTimes(2);
+    expect(onRefresh).toHaveBeenCalledTimes(2);
   });
 });

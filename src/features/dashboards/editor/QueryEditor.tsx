@@ -28,11 +28,13 @@ export function QueryEditor({
   id,
   widget,
   range,
+  timeZone,
   onClose,
 }: {
   id: string;
   widget: Widget;
   range: TimeRange;
+  timeZone: string;
   onClose: () => void;
 }) {
   const plugins = usePlugins();
@@ -73,7 +75,7 @@ export function QueryEditor({
         </Button>
       </Group>
       <div className={classes.preview}>
-        <WidgetTile id={id} range={range} previewQueries={preview} />
+        <WidgetTile id={id} range={range} timeZone={timeZone} previewQueries={preview} />
       </div>
       <JsonInput
         label="Queries"

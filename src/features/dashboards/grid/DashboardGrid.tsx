@@ -24,7 +24,15 @@ const resize = { enabled: true, handles: ['se'] as ['se'] };
 const disabled = { enabled: false };
 const constraints = [gridBounds, minMaxSize];
 
-export function DashboardGrid({ range, isEditing }: { range: TimeRange; isEditing: boolean }) {
+export function DashboardGrid({
+  range,
+  timeZone,
+  isEditing,
+}: {
+  range: TimeRange;
+  timeZone: string;
+  isEditing: boolean;
+}) {
   const { width, containerRef, mounted: isMounted } = useContainerWidth({ measureBeforeMount: true });
   const authored = useDashboard((state) => state.doc.layouts);
   const types = useDashboard(
@@ -57,10 +65,10 @@ export function DashboardGrid({ range, isEditing }: { range: TimeRange; isEditin
     () =>
       ids.map((id) => (
         <div key={id}>
-          <WidgetTile id={id} range={range} isEditing={isEditing} />
+          <WidgetTile id={id} range={range} timeZone={timeZone} isEditing={isEditing} />
         </div>
       )),
-    [ids, range, isEditing],
+    [ids, range, timeZone, isEditing],
   );
   // Below md the grid is a single reading-order column: no dragging, even in edit mode.
   const canEditLayout = isEditing && width >= grid.breakpoints.md;

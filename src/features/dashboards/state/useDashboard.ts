@@ -24,6 +24,12 @@ export function useUndoState() {
   );
 }
 /** Event callbacks read the latest document without subscribing the whole page. */
+/** Reads the dashboard's current `now` without subscribing: for query functions, which run later. */
+export function useReadNow() {
+  const store = useDashboardStore();
+  return () => store.getState().now;
+}
+
 export function useReadDashboard() {
   const store = useDashboardStore();
   return () => selectDashboard(store.getState());

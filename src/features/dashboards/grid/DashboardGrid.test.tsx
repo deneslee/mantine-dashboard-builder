@@ -1,3 +1,4 @@
+import { RouterProvider, useSearch } from '@tanstack/react-router';
 import { lazy } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
@@ -9,10 +10,24 @@ import { defineWidget, type WidgetProps } from '@/plugins/WidgetPlugin';
 import type { TimeRange } from '@/core/time/timeRange';
 import type { Dashboard } from '@/core/dashboard/dashboardSchema';
 import { testDashboard } from '@/testing/fixtures/dashboards';
+import { createTestRouter } from '@/testing/TestRouter';
 import { PluginsContext, type Plugins } from '@/plugins/usePlugins';
 import { DashboardProvider } from '../state/DashboardProvider';
-import { createDashboardStore } from '../state/createDashboardStore';
+import { createDashboardStore, type DashboardStore } from '../state/createDashboardStore';
+import type { useEffectiveTime } from '../state/useEffectiveTime';
 import { DashboardGrid } from './DashboardGrid';
+
+/** How often each tile rendered: `useEffectiveTime` runs once per tile render. */
+const { tileRenders } = vi.hoisted(() => ({ tileRenders: new Map<string, number>() }));
+vi.mock('../state/useEffectiveTime', async (importOriginal) => {
+  const original = await importOriginal<{ useEffectiveTime: typeof useEffectiveTime }>();
+  return {
+    useEffectiveTime: (...args: Parameters<typeof original.useEffectiveTime>) => {
+      tileRenders.set(args[0], (tileRenders.get(args[0]) ?? 0) + 1);
+      return original.useEffectiveTime(...args);
+    },
+  };
+});
 
 /** IntersectionObserver stub that the test drives by hand. */
 class Observer {
@@ -109,7 +124,18 @@ const dashboard: Dashboard = {
 };
 
 const day: TimeRange = { from: 'now-24h', to: 'now' };
-const week: TimeRange = { from: 'now-7d', to: 'now' };
+
+/** The grid as the page has it: the dashboard range from the URL's `from`, viewers' overrides in `wt`. */
+function Page({ plugins, store }: { plugins: Plugins; store: DashboardStore }) {
+  const from = useSearch({ strict: false, select: (search) => search.from ?? day.from });
+  return (
+    <PluginsContext value={plugins}>
+      <DashboardProvider dashboard={dashboard} store={store}>
+        <DashboardGrid range={{ from, to: 'now' }} timeZone="UTC" isEditing={false} />
+      </DashboardProvider>
+    </PluginsContext>
+  );
+}
 
 function renderGrid() {
   const { datasource, query, release } = deferredDatasource();
@@ -118,16 +144,14 @@ function renderGrid() {
     datasources: { deferred: datasource, broken: brokenDatasource },
   };
   const store = createDashboardStore(dashboard, { shouldPersist: false });
-  const ui = (range: TimeRange) => (
-    <PluginsContext value={plugins}>
-      <DashboardProvider dashboard={dashboard} store={store}>
-        <DashboardGrid range={range} isEditing={false} />
-      </DashboardProvider>
-    </PluginsContext>
-  );
-  const { rerender } = render(ui(day));
-  return { query, release, setRange: (range: TimeRange) => rerender(ui(range)) };
+  const router = createTestRouter({ page: <Page plugins={plugins} store={store} /> });
+  render(<RouterProvider router={router} />);
+  /** Opens the dashboard at these search params, as a link or back and forward would. */
+  const go = (search: string) => act(async () => router.history.push(`/dashboards/sales?${search}`));
+  return { query, release, go };
 }
+
+const wt = (overrides: object) => `wt=${encodeURIComponent(JSON.stringify(overrides))}`;
 
 describe('DashboardGrid', () => {
   beforeEach(() => {
@@ -153,14 +177,14 @@ describe('DashboardGrid', () => {
   });
 
   it('keeps the tile and its data on screen while a new range loads', async () => {
-    const { query, release, setRange } = renderGrid();
+    const { query, release, go } = renderGrid();
     const tile = await screen.findByRole('region', { name: 'Revenue' });
     enter(tile);
     await waitFor(() => expect(query).toHaveBeenCalledTimes(1));
     await release('a', 'now-24h');
     expect(await screen.findByText('a now-24h')).toBeInTheDocument();
 
-    setRange(week);
+    await go('from=now-7d');
     await waitFor(() => expect(query).toHaveBeenCalledTimes(2));
     expect(screen.getByText('a now-24h')).toBeInTheDocument();
     expect(within(tile).queryByText('Loading')).not.toBeInTheDocument();
@@ -194,6 +218,22 @@ describe('DashboardGrid', () => {
     expect(
       await within(tile).findByRole('button', { name: "Some of this widget's data could not be loaded" }),
     ).toBeInTheDocument();
+  });
+
+  it("applies a viewer's override to that widget's queries, and re-renders only its tile", async () => {
+    const { query, release, go } = renderGrid();
+    const tile = await screen.findByRole('region', { name: 'Revenue' });
+    enter(tile);
+    await release('a', 'now-24h');
+    expect(await within(tile).findByText('a now-24h')).toBeInTheDocument();
+    const before = new Map(tileRenders);
+
+    await go(wt({ a: { mode: 'shift', by: '1w' } }));
+    await waitFor(() => expect(query).toHaveBeenCalledTimes(2));
+    const [first, second] = query.mock.calls.map(([, ctx]) => ctx.range.to.getTime());
+    expect(first! - second!).toBe(7 * 86_400_000); // the same window, a week earlier
+    expect(tileRenders.get('a')).toBeGreaterThan(before.get('a')!);
+    for (const id of ['b', 'c', 'd']) expect(tileRenders.get(id), id).toBe(before.get(id));
   });
 
   it('shows an error in the tile for a widget type the plugins does not have', async () => {

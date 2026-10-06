@@ -1,8 +1,14 @@
 import { z } from 'zod';
-import { isValidTime, parseRefreshInterval } from '@/core/time/timeRange';
+import {
+  isValidTime,
+  isValidTimeZone,
+  parseRefreshInterval,
+  timeOverrideSchema,
+} from '@/core/time/timeRange';
 
 /**
- * `/dashboards/$id`'s search params: `?mode=edit&widget=<id>&editor=queries&from=now-24h&to=now&refresh=1m`.
+ * `/dashboards/$id`'s search params: `?mode=edit&widget=<id>&editor=queries&from=now-24h&to=now&refresh=1m`,
+ * `tz` (a time zone) and `wt` (viewers' widget time overrides, by widget id).
  * Invalid values are dropped, so the dashboard's own defaults apply instead.
  */
 export const dashboardSearchSchema = z.object({
@@ -10,6 +16,8 @@ export const dashboardSearchSchema = z.object({
   widget: z.string().min(1).optional().catch(undefined),
   editor: z.literal('queries').optional().catch(undefined),
   from: z.string().refine(isValidTime).optional().catch(undefined),
+  tz: z.string().refine(isValidTimeZone).optional().catch(undefined),
+  wt: z.record(z.string(), timeOverrideSchema).optional().catch(undefined),
   to: z.string().refine(isValidTime).optional().catch(undefined),
   refresh: z
     .string()

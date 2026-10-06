@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { isValidTime } from '../time/timeRange';
+import { isValidTimeZone, timeOverrideSchema, timeSchema } from '../time/timeRange';
 import { compareReadingOrder, GRID_COLUMNS, type Breakpoint } from './layout';
 
 /** An entry in `data/dashboards/index.json`, the dashboard list. */
@@ -15,8 +15,6 @@ export const dashboardSummarySchema = z.object({
 export const dashboardListSchema = z.object({ items: z.array(dashboardSummarySchema) });
 
 export type DashboardSummary = z.infer<typeof dashboardSummarySchema>;
-
-const time = z.string().refine(isValidTime, 'Expected now, now-<n><s|m|h|d|w> or an ISO date.');
 
 const layout = z.array(
   z.object({
@@ -35,6 +33,8 @@ const widget = z.object({
   description: z.string().optional(),
   options: z.record(z.string(), z.unknown()).default({}),
   queries: z.array(z.object({ datasource: z.string(), spec: z.unknown() })).default([]),
+  /** Its own range or a shift of the dashboard's; absent: inherit. */
+  time: timeOverrideSchema.optional(),
 });
 
 /**
@@ -51,7 +51,12 @@ export const dashboardSchema = z
     tags: z.array(z.string()).default([]),
     updatedAt: z.string(),
     /** Defaults; the URL overrides them. */
-    timeRange: z.object({ from: time, to: time }),
+    timeRange: z.object({ from: timeSchema, to: timeSchema }),
+    /** For relative ranges such as `now/d`; absent: the viewer's. The URL's `tz` overrides it. */
+    timeZone: z
+      .string()
+      .refine(isValidTimeZone, 'Expected an IANA time zone, e.g. Europe/Budapest.')
+      .optional(),
     refresh: z.string().default('off'),
     /** Reserved for template variables (phase 4). */
     variables: z.array(z.unknown()).default([]),

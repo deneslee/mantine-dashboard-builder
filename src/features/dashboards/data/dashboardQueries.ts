@@ -1,7 +1,7 @@
 import { queryOptions } from '@tanstack/react-query';
 import { AppError } from '@/core/errors/AppError';
 import type { DatasourcePlugin, Query } from '@/plugins/DatasourcePlugin';
-import { resolveRange, type TimeRange } from '@/core/time/timeRange';
+import { resolveEffectiveTime, type EffectiveTime } from '@/core/time/timeRange';
 import { getDashboard, listDashboards } from './dashboardApi';
 
 export const dashboardKeys = {
@@ -28,27 +28,32 @@ export const dashboardQuery = (id: string) =>
 
 /**
  * One datasource query's frames: the cache unit for widget data. The key is the datasource, its spec
- * and the range as written (`now-24h`), so identical queries in two widgets share one request, and
- * each query fails, retries and is cancelled on its own. "now" is resolved when the query runs, so a
- * refetch moves the window. `source` names the widget in error toasts.
+ * and the widget's time as written (`now-24h`, shifts, time zone), so identical queries in two widgets
+ * share one request, and each query fails, retries and is cancelled on its own. The range is resolved
+ * when the query runs, against the dashboard's `now` (`getNow`), so a refresh moves the window and all
+ * widgets cover the same one. `source` names the widget in error toasts.
  */
 export const datasourceQuery = (
   query: Query,
-  range: TimeRange,
-  datasources: Record<string, DatasourcePlugin>,
-  source: string,
+  time: EffectiveTime,
+  {
+    datasources,
+    getNow,
+    source,
+  }: { datasources: Record<string, DatasourcePlugin>; getNow: () => number; source: string },
 ) =>
   queryOptions({
-    queryKey: [...dashboardKeys.data, query.datasource, query.spec, range],
+    queryKey: [...dashboardKeys.data, query.datasource, query.spec, time.range, time.shifts, time.timeZone],
     queryFn: ({ signal }) => {
-      const resolved = resolveRange(range);
+      const { range, timeZone } = time;
+      const resolved = resolveEffectiveTime(time, getNow());
       if (!resolved) throw new AppError('validation', `Invalid time range "${range.from}" to "${range.to}".`);
       const datasource = datasources[query.datasource];
       if (!datasource)
         throw new AppError('validation', `No datasource of type "${query.datasource}".`, {
           isRetryable: false,
         });
-      return datasource.query(query.spec, { range: resolved, raw: range }, signal);
+      return datasource.query(query.spec, { range: resolved, raw: range, timeZone }, signal);
     },
     meta: { source },
   });

@@ -7,6 +7,7 @@ import { AppError } from '@/core/errors/AppError';
 import type { DataFrame } from '@/core/data/DataFrame';
 import type { Query } from '@/plugins/DatasourcePlugin';
 import { useWidgetData } from '../data/useWidgetData';
+import { useEffectiveTime } from '../state/useEffectiveTime';
 import { useWidget } from '../state/useDashboard';
 import type { TimeRange } from '@/core/time/timeRange';
 import type { Widget } from '@/core/dashboard/dashboardSchema';
@@ -20,11 +21,14 @@ const unknownSkeleton = <TextSkeleton lines={3} />;
 export function WidgetTile({
   id,
   range,
+  timeZone,
   isEditing = false,
   previewQueries,
 }: {
   id: string;
+  /** The dashboard range; the widget's own overrides apply on top. */
   range: TimeRange;
+  timeZone: string;
   isEditing?: boolean;
   previewQueries?: Query[];
 }) {
@@ -34,6 +38,7 @@ export function WidgetTile({
       id={id}
       widget={previewQueries ? { ...widget, queries: previewQueries } : widget}
       range={range}
+      timeZone={timeZone}
       isEditing={isEditing}
       isPreview={previewQueries !== undefined}
     />
@@ -44,12 +49,14 @@ function Tile({
   id,
   widget,
   range,
+  timeZone,
   isEditing,
   isPreview,
 }: {
   id: string;
   widget: Widget;
   range: TimeRange;
+  timeZone: string;
   isEditing: boolean;
   isPreview: boolean;
 }) {
@@ -58,7 +65,8 @@ function Tile({
   const [hasBeenSeen, setSeen] = useState(false);
   if (!hasBeenSeen && entry?.isIntersecting) setSeen(true);
   const { widgets } = usePlugins();
-  const data = useWidgetData(widget.queries, range, { isEnabled: hasBeenSeen, source: widget.title });
+  const time = useEffectiveTime(id, range, timeZone, { isEditing });
+  const data = useWidgetData(widget.queries, time, { isEnabled: hasBeenSeen, source: widget.title });
   const skeleton = widgets[widget.type]?.skeleton ?? unknownSkeleton;
   return (
     <Paper

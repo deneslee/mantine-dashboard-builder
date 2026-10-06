@@ -13,6 +13,8 @@ export interface QueryContext {
   range: ResolvedRange;
   /** The range as written (`now-24h`), stable across refreshes; the mock seeds its data with it. */
   raw: TimeRange;
+  /** The time zone `raw` was resolved in, for datasources that bucket by calendar day. */
+  timeZone: string;
 }
 
 /** A datasource plugin. `app/plugins.ts` collects them; features read them through `usePlugins`. */

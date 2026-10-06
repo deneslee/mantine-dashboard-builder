@@ -1,12 +1,14 @@
 import { Alert, Button, Group, Text, VisuallyHidden } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { Link, useNavigate, useParams, useSearch } from '@tanstack/react-router';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useLayoutEffect } from 'react';
 import { RouteBreadcrumbs } from '@/shell/breadcrumbs/RouteBreadcrumbs';
 import { Page } from '@/ui/components/Page';
 import { dimensions } from '@/ui/tokens/dimensions';
+import { localTimeZone } from '@/core/time/timeRange';
 import type { DashboardSearch } from './dashboardSearch';
 import { useAutoRefresh } from './data/useAutoRefresh';
+import { useRefreshAll } from './data/useRefreshAll';
 import { LeaveDialog } from './editor/LeaveDialog';
 import { DashboardGrid } from './grid/DashboardGrid';
 import { downloadDashboard } from './header/dashboardFile';
@@ -15,6 +17,9 @@ import { RefreshButton } from './header/RefreshButton';
 import { RefreshPicker } from './header/RefreshPicker';
 import { TimeRangePicker } from './header/TimeRangePicker';
 import { useDashboard, useDashboardActions, useReadDashboard } from './state/useDashboard';
+
+/** The viewer's time zone, when neither the URL nor the dashboard sets one. */
+const LOCAL_TIME_ZONE = localTimeZone();
 
 const EditDrawer = lazy(() =>
   import('./editor/EditDrawer').then((module) => ({ default: module.EditDrawer })),
@@ -41,6 +46,7 @@ export function DashboardPage() {
   const description = useDashboard((s) => s.doc.description);
   const defaultRange = useDashboard((s) => s.timeRange);
   const defaultRefresh = useDashboard((s) => s.refresh);
+  const savedTimeZone = useDashboard((s) => s.doc.timeZone);
   const draftError = useDashboard((s) => s.draftError);
   const isEmpty = useDashboard((s) => s.doc.layouts.lg.length === 0);
   const isQueryEditorOpen = useDashboard(
@@ -52,7 +58,12 @@ export function DashboardPage() {
     ? defaultRange
     : { from: search.from ?? defaultRange.from, to: search.to ?? defaultRange.to };
   const refresh = isEditing ? defaultRefresh : (search.refresh ?? defaultRefresh);
-  useAutoRefresh(refresh);
+  const timeZone = (!isEditing && search.tz) || savedTimeZone || LOCAL_TIME_ZONE;
+  const refreshAll = useRefreshAll();
+  useAutoRefresh(refresh, refreshAll);
+  // A new dashboard range or time zone gets a new `now`. A layout effect, so it lands before the
+  // tiles' queries start (their subscriptions are passive effects) and they resolve against it.
+  useLayoutEffect(() => actions.takeNow(), [range.from, range.to, timeZone, actions]);
   // The URL holds only what differs from the dashboard's own defaults.
   const setSearch = (next: DashboardSearch) =>
     void navigate({
@@ -115,7 +126,7 @@ export function DashboardPage() {
         )}
         {isEditing && isWide && (
           <Suspense fallback={<Text c="dimmed">Opening editor…</Text>}>
-            <EditDrawer range={range} />
+            <EditDrawer range={range} timeZone={timeZone} />
           </Suspense>
         )}
         {isEmpty ? (
@@ -135,7 +146,9 @@ export function DashboardPage() {
             </Button>
           </Group>
         ) : (
-          !(isEditing && isWide && isQueryEditorOpen) && <DashboardGrid range={range} isEditing={isEditing} />
+          !(isEditing && isWide && isQueryEditorOpen) && (
+            <DashboardGrid range={range} timeZone={timeZone} isEditing={isEditing} />
+          )
         )}
       </Page.Body>
       <LeaveDialog />

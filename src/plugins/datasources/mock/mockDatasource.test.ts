@@ -6,6 +6,7 @@ import { mockDatasource } from './mockDatasource';
 const ctx: QueryContext = {
   range: { from: new Date('2026-09-26T12:00:00Z'), to: new Date('2026-09-27T12:00:00Z') },
   raw: { from: 'now-24h', to: 'now' },
+  timeZone: 'UTC',
 };
 
 const series = {
