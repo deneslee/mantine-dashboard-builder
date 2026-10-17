@@ -33,3 +33,4 @@ export const metrics = {
 
 export const captureException = Sentry.captureException;
 export const captureMessage = Sentry.captureMessage;
+export const addBreadcrumb = Sentry.addBreadcrumb;

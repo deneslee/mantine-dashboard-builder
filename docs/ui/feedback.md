@@ -41,11 +41,11 @@ Errors are caught at the smallest boundary that can recover, and every boundary 
 | Offline                      | Mantine `useNetwork` in `OfflineBanner`            | Persistent banner ("You're offline"). With `networkMode: 'offlineFirst'` a query still runs once, then its retries pause until the network is back                                                                                |
 | Permission / 403             | `AppError` code                                    | _Later:_ a `Forbidden` variant of `ErrorState`                                                                                                                                                                                    |
 
-- **One error type:** `AppError { code: 'not_found' | 'network' | 'timeout' | 'validation' | 'datasource' | 'unknown', message, cause?, retryable, details? }`. Mappers in each feature's `api/` turn transport errors into `AppError`; the UI never inspects `fetch` responses. _Planned (06):_ `expected` and `reportable`, which decide what reaches Sentry.
+- **One error type:** `AppError { code: 'not_found' | 'network' | 'timeout' | 'validation' | 'datasource' | 'unknown', message, cause?, retryable, details? }`. Mappers in each feature's `api/` turn transport errors into `AppError`; the UI never inspects `fetch` responses.
 - **Messages:** say what happened and what to do next. No stack traces, no error codes in the title. Dev builds show a collapsible details block with the cause.
 - **Variants:** `ErrorState.Full` (page), `.Inline` (card or tile), `.Banner` (top of content), chosen by the parent. Full and Inline are built on Mantine `EmptyState`.
 - **Retry** buttons call a real retry (`refetch`, `router.invalidate`, `resetErrorBoundary`) and are disabled while pending.
-- **Reporting:** only the app root reports to Sentry today. [06-sentry](../../.agents/planning/plans/06-sentry.md) adds the route and widget boundaries for render errors, and the query and mutation caches for data errors: query errors are rendered inline (`throwOnError` is off), so they never reach a boundary.
+- **Reporting:** everything goes through `reportError` (`@/lib/sentry/runtime`): the app root, the router's `defaultOnCatch` for routes, `QueryBoundary`'s `onError` for widget tiles, and the query and mutation caches for data errors. It drops aborts, offline fetch failures and 404s, and sends each error once. Without a DSN it does nothing. The policy and tags are in [06-sentry §1](../../.agents/planning/plans/06-sentry.md#1-report-errors-through-reporterror).
 - **Tests:** every error component has a story and a Vitest test for role, message and the retry callback.
 
 ## Loading

@@ -9,18 +9,20 @@ import { ErrorState } from './ErrorState';
 
 /**
  * Per-tile boundary: one broken widget shows an inline error, the rest of the dashboard keeps running.
- * Also resets TanStack Query errors on retry.
+ * Also resets TanStack Query errors on retry. `onError` gets each caught error, for telemetry.
  */
 export function QueryBoundary({
   children,
   name,
   retry,
   resetKeys,
+  onError,
 }: {
   children: ReactNode;
   name?: string;
   retry?: () => Promise<unknown>;
   resetKeys?: unknown[];
+  onError?: (error: unknown) => void;
 }) {
   return (
     <QueryErrorResetBoundary>
@@ -28,6 +30,7 @@ export function QueryBoundary({
         <ErrorBoundary
           onReset={reset}
           resetKeys={resetKeys}
+          onError={onError}
           fallbackRender={({ error, resetErrorBoundary }) => {
             const e = toAppError(error);
             return (

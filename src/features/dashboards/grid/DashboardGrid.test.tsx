@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 import { act, render, renderHook, screen, waitFor, within } from '@/testing/render';
 import { useDensity } from '@/lib/useDensity';
+import { reportError } from '@/lib/sentry/runtime';
 import type { DataFrame } from '@/core/data/DataFrame';
 import { AppError } from '@/core/errors/AppError';
 import type { DatasourcePlugin, QueryContext } from '@/plugins/DatasourcePlugin';
@@ -18,6 +19,8 @@ import { DashboardProvider } from '../state/DashboardProvider';
 import { createDashboardStore, type DashboardStore } from '../state/createDashboardStore';
 import type { useEffectiveTime } from '../state/useEffectiveTime';
 import { DashboardGrid } from './DashboardGrid';
+
+vi.mock('@/lib/sentry/runtime', { spy: true });
 
 /** How often each tile rendered: `useEffectiveTime` runs once per tile render. */
 const { tileRenders } = vi.hoisted(() => ({ tileRenders: new Map<string, number>() }));
@@ -304,11 +307,17 @@ describe('DashboardGrid', () => {
     await waitFor(() => expect(router.state.location.search).toMatchObject({ view: 'e' }));
   });
 
-  it('shows an error in the tile for a widget type the plugins does not have', async () => {
+  it('shows and reports an error in the tile for a widget type the plugins does not have', async () => {
     renderGrid();
     const tile = await screen.findByRole('region', { name: 'Regions' });
     enter(tile);
     expect(await screen.findByText('No widget of type "nope".')).toBeInTheDocument();
     expect(screen.getByRole('region', { name: 'Revenue' })).toBeInTheDocument();
+    expect(reportError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'No widget of type "nope".' }),
+      {
+        tags: { boundary: 'widget', widget: 'nope' },
+      },
+    );
   });
 });

@@ -4,6 +4,7 @@ import { iconSize, iconStroke } from '@/ui/tokens/semantic';
 import type { NotifyInput, NotifyLevel } from './types';
 import { ActionMessage } from './ActionMessage';
 import { inboxLevels, useInbox } from '@/lib/notify/useInbox';
+import { addBreadcrumb } from '@/lib/sentry/runtime';
 
 const config: Record<
   NotifyLevel,
@@ -19,6 +20,16 @@ const DEDUPE_WINDOW = 10_000;
 const recent = new Map<string, { id: string; at: number }>();
 
 function show(level: NotifyLevel, input: NotifyInput): string {
+  addBreadcrumb({
+    category: 'notify',
+    level: level === 'success' ? 'info' : level,
+    message: input.title,
+    data: {
+      source: input.source,
+      message: typeof input.message === 'string' ? input.message : undefined,
+    },
+  });
+
   const { color, autoClose, icon: Icon, priority } = config[level];
   const key = input.dedupeKey ?? `${level}:${input.title}`;
   const now = Date.now();

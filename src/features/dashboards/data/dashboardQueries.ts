@@ -65,6 +65,6 @@ export const datasourceQuery = (
       const frames = await datasource.query(query.spec, { range: resolved, raw: range, timeZone }, signal);
       return { frames, durationMs: Math.round(performance.now() - start) };
     },
-    meta: { source },
+    meta: { source, datasource: query.datasource },
   });
 };

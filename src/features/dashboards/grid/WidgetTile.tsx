@@ -5,6 +5,7 @@ import { QueryBoundary } from '@/ui/components/QueryBoundary';
 import { TextSkeleton } from '@/ui/components/Skeletons';
 import { AppError } from '@/core/errors/AppError';
 import type { DataFrame } from '@/core/data/DataFrame';
+import { reportError } from '@/lib/sentry/runtime';
 import type { Query } from '@/plugins/DatasourcePlugin';
 import { useWidgetData } from '../data/useWidgetData';
 import { useEffectiveTime } from '../state/useEffectiveTime';
@@ -126,7 +127,12 @@ function Tile({
         />
       ) : null}
       <Box ref={ref} className={classes.body}>
-        <QueryBoundary name={widget.title} retry={data.refetch} resetKeys={[widget.options, widget.queries]}>
+        <QueryBoundary
+          name={widget.title}
+          retry={data.refetch}
+          resetKeys={[widget.options, widget.queries]}
+          onError={(error) => reportError(error, { tags: { boundary: 'widget', widget: widget.type } })}
+        >
           {hasBeenSeen ? (
             <WidgetBody widget={widget} frames={data.frames} error={data.error} timeZone={timeZone} />
           ) : (

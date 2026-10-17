@@ -2,7 +2,7 @@ import { createRouter, type RouterHistory } from '@tanstack/react-router';
 import { NotFound } from '@/app/NotFound';
 import { RouteError } from '@/app/RouteError';
 import { ListSkeleton } from '@/ui/components/Skeletons';
-import { connectRouter } from '@/lib/sentry/runtime';
+import { connectRouter, reportError } from '@/lib/sentry/runtime';
 import { routeTree } from './routeTree.gen';
 import type { QueryClient } from '@tanstack/react-query';
 
@@ -23,6 +23,9 @@ export function createAppRouter(
     defaultPendingMinMs: 500,
     defaultPendingComponent: ListSkeleton,
     defaultErrorComponent: RouteError,
+    // Loader and render errors that reach a route's errorComponent; `notFound()` never gets here.
+    defaultOnCatch: (error) =>
+      reportError(error, { tags: { boundary: 'route', route: router.state.location.pathname } }),
     defaultNotFoundComponent: NotFound,
     scrollRestoration: true,
   });

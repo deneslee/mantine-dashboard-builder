@@ -33,32 +33,31 @@ A Sentry prototype was merged in PR #13 ([done/06-sentry-prototype](done/06-sent
 
 Each kind of failure is reported in one place:
 
-| Failure                  | Where it's handled                                          | Reported from               | Tags                                        |
-| ------------------------ | ----------------------------------------------------------- | --------------------------- | ------------------------------------------- |
-| Render error in a route  | `RouteError`                                                | `RouteError`                | `boundary: 'route'`, `route`                |
-| Render error in a widget | `QueryBoundary`                                             | `ErrorBoundary`'s `onError` | `boundary: 'widget'`, `widget`              |
-| Any other render error   | The app-root boundary                                       | The app root (exists)       | `boundary: 'app_root'`                      |
-| Failed query             | Inline in its widget or editor; it never reaches a boundary | `QueryCache.onError`        | `boundary: 'query'`, `datasource`, `source` |
-| Failed mutation          | `MutationCache.onError`, which already toasts               | `MutationCache.onError`     | `boundary: 'mutation'`, `source`            |
+| Failure                           | Where it's handled                            | Reported from                            | Tags                                        |
+| --------------------------------- | --------------------------------------------- | ---------------------------------------- | ------------------------------------------- |
+| Render or loader error in a route | `RouteError`                                  | The router's `defaultOnCatch`            | `boundary: 'route'`, `route`                |
+| Render error in a widget          | `QueryBoundary`                               | Its `onError`, passed in by `WidgetTile` | `boundary: 'widget'`, `widget` (the type)   |
+| Any other render error            | The app-root boundary                         | The app root (exists)                    | `boundary: 'app_root'`                      |
+| Failed query                      | Inline in its widget or editor                | `QueryCache.onError`                     | `boundary: 'query'`, `datasource`, `source` |
+| Failed mutation                   | `MutationCache.onError`, which already toasts | `MutationCache.onError`                  | `boundary: 'mutation'`, `source`            |
 
-- **Query errors never reach a boundary.** TanStack Query's `throwOnError` defaults to false, and [feedback.md](../../../docs/ui/feedback.md) renders query errors inline. So the query cache is the only place to report them. Its global callback runs once per failed request, however many widgets show the result, which also removes any need to tell first loads from background refetches.
-- **A reportability policy instead of dropping errors by code.** `AppError` gets `expected` and `reportable`, set where the error is mapped, from the error and the operation's `meta.telemetry` (`'report' | 'expected'`):
+- **Every failed query is reported from the query cache,** once per failed request however many widgets show it. Some also reach a boundary: route loaders and suspense queries throw them, and a widget with no frames throws its query error. `reportError` sends each error object once, so the cache's report, with its datasource fingerprint, is the one that counts.
+- **One reportability policy, in `reportError`** (`isReportable` in `lib/sentry/runtime.ts`), decided from the error alone:
 
-  | Error                                                                       | Reported              |
-  | --------------------------------------------------------------------------- | --------------------- |
-  | Abort (`AbortError`, before `toAppError` turns it into `timeout`)           | Never                 |
-  | Browser offline (`navigator.onLine` is false)                               | Never                 |
-  | Fetch failed while online (`TypeError: Failed to fetch`)                    | As a warning, sampled |
-  | HTTP 5xx                                                                    | Yes                   |
-  | 404 for something the app expected, such as a dashboard listed in the index | Yes                   |
-  | 404 for a URL the user typed                                                | No                    |
-  | Validation errors shown in a form                                           | No                    |
+  | Error                                                    | Reported       |
+  | -------------------------------------------------------- | -------------- |
+  | Abort (`AbortError`)                                     | Never          |
+  | Fetch failed while offline (`navigator.onLine` is false) | Never          |
+  | Fetch failed while online (`TypeError: Failed to fetch`) | As a warning   |
+  | HTTP 5xx (`dashboardApi` maps it to `unknown`)           | Yes            |
+  | 404 (`not_found`), typed or followed from a link         | Never, for now |
+  | Data or config in the wrong shape (`validation`)         | Yes            |
 
   A browser can't tell CORS, a wrong hostname or being offline apart: each is the same `TypeError`. Incidents like those are better caught by backend and uptime monitoring once there is a backend.
 
 - **One outage, one issue:** query errors carry a fingerprint of the datasource and the error code, so twelve widgets failing on Datadog make one issue.
-- **Context before capture:** `reportError` takes the operation's context (source, datasource, route) and adds it to the event. `notify.error`'s breadcrumb is added before `reportError` runs, never after.
-- **Startup buffer:** until the Sentry runtime registers, `reportError` keeps up to 20 events in memory and sends them when it does. Global `error` and `unhandledrejection` listeners, installed first in `main.tsx`, feed the same buffer. Loading starts from `main.tsx`, not from a component effect, so a crash in the first render still loads Sentry and sends the crash.
+- **Context before capture:** `reportError` takes the operation's context (source, datasource, route) and adds it to the event. `notify.error`'s breadcrumb is added before `reportError` runs, and both wait on the same SDK promise, so it lands first.
+- **While the SDK loads:** reports wait on the SDK's promise, at most 20. `startSentry` also adds global `error` and `unhandledrejection` listeners and removes them once the SDK has installed its own. Loading starts from `main.tsx`, not from a component effect, so a crash in the first render still loads Sentry and sends the crash. Without a DSN there is no promise: no chunk, no listeners, and every `reportError` and `addBreadcrumb` call returns on its first line.
 
 ### 2. CI source maps
 
@@ -122,14 +121,14 @@ The integration registry, config port and catalog (the Integrations foundation),
 - [x] **Keep the prototype from affecting the app (done Sep 24, `1cc521f`).** Lazy SDK only with a DSN, Replay privacy defaults, console warn/error only, source maps only when uploaded and then deleted. First load back to 809 KiB, no `.map` files in `dist`.
 - [x] **Decision 3: Integrations is a product feature (Sep 27).** 04 migrates both integrations pages.
 - [x] **Decision 2: the DSN comes from the integration config (Sep 29).** See [Decisions](#decisions).
-- [ ] **Report errors ([§1](#1-report-errors-through-reporterror)).**
-  - Render errors: `RouteError` and `QueryBoundary` (`onError`) report.
+- [x] **Report errors ([§1](#1-report-errors-through-reporterror)).**
+  - Render errors: the router's `defaultOnCatch` and `QueryBoundary`'s `onError` (from `WidgetTile`) report.
   - Data errors: `QueryCache.onError` and `MutationCache.onError` report, once per failed request.
-  - `AppError` gets `expected` and `reportable`; queries and mutations get `meta.telemetry`.
+  - The reportability policy, in `reportError`.
   - Fingerprint by datasource and code; context attached; breadcrumb before capture.
-  - The startup buffer and the global listeners in `main.tsx`.
-  - Done when a test per row of the failure table checks the `reportError` call and its tags, a test covers each row of the policy table, and an error thrown before the SDK loads is sent once it does.
-- [ ] **Source maps in CI.** Add `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` and `SENTRY_PROJECT` secrets to the Pages workflow. Done when a production error shows a readable stack trace in Sentry and the deployed site has no `.map` files.
+  - Reports wait on the SDK while it loads; the global listeners live in `startSentry`.
+  - Done when a test per row of the failure table checks the `reportError` call and its tags, a test covers each row of the policy table, and an error thrown before the SDK loads is sent once it does. (Done Oct 17; the app-root row has no test of its own, its boundary predates this plan.)
+- [ ] **Source maps in CI.** Add `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` and `SENTRY_PROJECT` secrets to the Pages workflow. Done when a production error shows a readable stack trace in Sentry and the deployed site has no `.map` files. (Oct 17: the workflow passes the secrets; the check waits on "Verify with a real DSN".)
 - [ ] **Settle decisions 1 and 4.** Features and production sample rates ([open decisions](#open-decisions)). Done when the answers are moved to Decisions below.
 - [ ] **Sentry as an integration ([§3](#3-sentry-as-the-first-telemetry-integration)).** Needs the Integrations foundation.
   - The manifest and `SentryConfig`; start from `main.tsx` only when enabled and valid.
@@ -156,10 +155,15 @@ The integration registry, config port and catalog (the Integrations foundation),
 - **Sep 29: sample rates are config fields;** their production values are still decision 4.
 - **Sep 30: 06 follows the 07 edit MVP and 07 stage 3.** §1 comes right after stage 3, which changes how queries run.
 - **Sep 30: query errors are reported from `QueryCache.onError`,** once per failed request; boundaries report render errors only.
-- **Sep 30: a reportability policy on `AppError`** replaces dropping `network` and `not_found` by code.
+- **Sep 30: a reportability policy on `AppError`** replaces dropping `network` and `not_found` by code. _Changed Oct 17: the policy lives in `reportError`._
 - **Sep 30: reports made before the SDK loads are buffered;** loading starts in `main.tsx`.
 - **Sep 30: source maps match through Debug IDs;** a release is optional.
 - **Sep 30: the SDK major stays pinned;** the v11 upgrade is separate.
+- **Oct 17: the reportability policy lives in `reportError`, not on `AppError`.** Replaces the Sep 30 `expected` / `reportable` fields and `meta.telemetry`: only `reportError` reads them, and re-wrapping an `AppError` to flip them lost its stack. `toAppError` stays a plain mapping.
+- **Oct 17: `validation` errors are reported.** Every one the app throws today is bad data or config (dashboard JSON, widget options, an unknown widget type); forms validate inline and never throw.
+- **Oct 17: 404s are never reported, for now.** The dashboard query serves typed URLs, so it can't tell a typo from a listed dashboard that is missing. Report that case from the `$id` loader, by checking the cached list, if it ever matters.
+- **Oct 17: `reportError` sends each error object once,** since suspense queries and widget tiles throw query errors the cache already reported. Sentry gets the original error; `AppError` only supplies the `code` tag and the level.
+- **Oct 17: route errors are reported from the router's `defaultOnCatch`** and widget errors from `QueryBoundary`'s `onError`, which `WidgetTile` passes. No context in `ui/` for one caller.
 
 ## Verification
 

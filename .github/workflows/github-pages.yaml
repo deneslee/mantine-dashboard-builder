@@ -50,6 +50,10 @@ jobs:
       # Typechecks too (tsc -b).
       - name: Build
         run: pnpm build
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
 
       - name: SPA fallback (TanStack Router deep links)
         run: cp dist/index.html dist/404.html
