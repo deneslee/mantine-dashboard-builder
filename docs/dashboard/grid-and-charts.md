@@ -59,17 +59,16 @@ Measured: during one sidebar collapse the unpinned navbar resized 22 times, the 
 
 ## React Compiler
 
-Enabled: stable React Compiler 1.0 through Babel, in `vite.config.ts` (app and Storybook) and `vitest.config.ts` (tests run the compiled code). It adds about 2.5s to a production build. `@vitejs/plugin-react` also offers an experimental Rust port (`react({ compiler: true })`), a possible swap once it is stable.
+Enabled: the Rust port of React Compiler (`oxc-transform-react`, through `@vitejs/plugin-react`), in `vite.config.ts` (app and Storybook) and `vitest.config.ts` (tests run the compiled code). Upstream still calls it experimental. Keep `oxc-transform-react` on the version range plugin-react accepts (`^0.152.0` for plugin-react 6.1.2): for a 0.x version that is 0.152.x only, and strict peers reject anything newer.
 
 ```ts
-// vite.config.ts; needs @rolldown/plugin-babel, babel-plugin-react-compiler, @babel/core
-import react, { reactCompilerPreset } from '@vitejs/plugin-react';
-import babel from '@rolldown/plugin-babel';
-
-plugins: [react(), babel({ presets: [reactCompilerPreset()] })];
+// vite.config.ts; needs oxc-transform-react
+plugins: [react({ compiler: { reportDiagnostics: true } })];
 ```
 
-The oxlint React Compiler rules keep code compatible. One component is not compiled: `RouteError` uses `try`/`finally` without `catch`, which the compiler does not support yet.
+Compared with React Compiler 1.0 through Babel (Oct 22, 2026, 165 source files): both memoize the same 77 files and 119 components and hooks, skip the same ones, and give an identical bundle. Oxc compiles about 19 times faster (0.2 s against 3.9 s for all files), and a production build takes 3.3 s instead of 9 s.
+
+The oxlint React Compiler rules keep code compatible, and `reportDiagnostics` prints a warning for every component the compiler skips. Skipped today: `FrameTable` (TanStack Table is an incompatible library) and `SentryVerificationCard` (`try`/`finally` and `throw` inside `try`; [06](../../.agents/planning/plans/06-sentry.md) rebuilds it). The compiler can't compile `try`/`finally` without `catch`: use a promise chain with `.finally()` instead, as `RouteError` does.
 
 ## Checking
 

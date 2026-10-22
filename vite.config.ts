@@ -1,8 +1,7 @@
-import babel from '@rolldown/plugin-babel';
 import { sentryVitePlugin } from '@sentry/vite-plugin';
 import { devtools as tanstackDevtools } from '@tanstack/devtools-vite';
 import { tanstackRouter } from '@tanstack/router-plugin/vite';
-import react, { reactCompilerPreset } from '@vitejs/plugin-react';
+import react from '@vitejs/plugin-react';
 import { codeInspectorPlugin } from 'code-inspector-plugin';
 import { defineConfig } from 'vite';
 
@@ -12,6 +11,9 @@ export default defineConfig(({ command, mode }) => {
   // `pnpm dev:devtools` (`vite --mode devtools`): the dev server with TanStack Devtools, Vite DevTools
   // and click-to-source. `pnpm dev`, builds, Storybook and tests load none of them.
   const withDevtools = command === 'serve' && mode === 'devtools';
+  // `pnpm build:analyze` (`vite build --mode analyze`): builds, then serves Vite DevTools on :9999 until
+  // Ctrl+C. Normal builds must keep DevTools off, or they never exit.
+  const analyze = command === 'build' && mode === 'analyze';
 
   return {
     base: '/mantine-dashboard-builder/',
@@ -26,9 +28,9 @@ export default defineConfig(({ command, mode }) => {
       }),
       // Hold Alt+Shift and click an element to open its source in the editor. Must precede react().
       withDevtools && codeInspectorPlugin({ bundler: 'vite' }),
-      react(),
-      // React Compiler 1.0 (stable, through Babel): automatic memoization. See docs/grid-and-charts.md.
-      babel({ presets: [reactCompilerPreset()] }),
+      // React Compiler (Rust port, oxc-transform-react): automatic memoization. Skipped components are
+      // reported as warnings. See docs/dashboard/grid-and-charts.md.
+      react({ compiler: { reportDiagnostics: true } }),
       sentryVitePlugin({
         org: process.env.SENTRY_ORG,
         project: process.env.SENTRY_PROJECT,
@@ -38,11 +40,11 @@ export default defineConfig(({ command, mode }) => {
         sourcemaps: { filesToDeleteAfterUpload: ['./dist/**/*.map'] },
       }),
     ],
-    devtools: withDevtools,
+    // Also turns on Rolldown's build data (node_modules/.rolldown/) for analyze builds only.
+    devtools: withDevtools || analyze,
     resolve: { tsconfigPaths: true },
     server: { port: 5173 },
     build: {
-      // Every bundled dependency's license, in dist/.vite/license.md.
       license: true,
       // Source maps only when they go to Sentry; otherwise GitHub Pages would publish them.
       sourcemap: uploadSourcemaps ? 'hidden' : false,

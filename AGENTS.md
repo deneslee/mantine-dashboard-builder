@@ -22,6 +22,7 @@ Rules for humans and coding agents working in this repo. Read before writing cod
     pnpm dev              # http://localhost:5173
     pnpm dev:devtools     # same, plus TanStack Devtools, Vite DevTools and click-to-source (hold Alt+Shift, click)
     pnpm build            # typecheck + production build
+    pnpm build:analyze    # production build, then Vite DevTools (chunks, modules, plugins) on http://localhost:9999
     pnpm lint             # oxlint (type-aware) + Stylelint
     pnpm test             # Vitest: node + jsdom tests and every story in Chromium; `pnpm test <path>` runs one file
     pnpm test:unit        # node + jsdom only (fast)

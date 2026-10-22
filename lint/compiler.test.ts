@@ -1,18 +1,12 @@
-import { transformSync } from '@babel/core';
+import { transformSync } from 'oxc-transform-react';
 import { expect, it } from 'vitest';
 
-// With @babel/core 8, babel-plugin-react-compiler 1.0 silently skipped every component that
-// destructures a prop with a default, so a third of the app ran without memoization.
+// Babel 8 once made the React Compiler silently skip every component that destructures a prop with a
+// default, so a third of the app ran without memoization. Keep proving the compiler in use handles it.
 it('the React Compiler compiles a component with a destructured default', () => {
-  const output = transformSync(
+  const { code } = transformSync(
+    'Box.tsx',
     'export function Box({ size = 1 }: { size?: number }) { return <div>{size}</div>; }',
-    {
-      filename: 'Box.tsx',
-      babelrc: false,
-      configFile: false,
-      parserOpts: { plugins: ['typescript', 'jsx'] },
-      plugins: ['babel-plugin-react-compiler'],
-    },
   );
-  expect(output?.code).toContain('react/compiler-runtime');
+  expect(code).toContain('react/compiler-runtime');
 });

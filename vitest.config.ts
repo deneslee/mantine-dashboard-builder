@@ -1,6 +1,5 @@
-import babel from '@rolldown/plugin-babel';
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
-import react, { reactCompilerPreset } from '@vitejs/plugin-react';
+import react from '@vitejs/plugin-react';
 import { playwright } from '@vitest/browser-playwright';
 import { configDefaults, defineConfig } from 'vitest/config';
 
@@ -15,7 +14,7 @@ const NODE_TESTS = [
 
 export default defineConfig({
   // Same React Compiler as the app, so tests run the code that ships.
-  plugins: [react(), babel({ presets: [reactCompilerPreset()] })],
+  plugins: [react({ compiler: true })],
   resolve: { tsconfigPaths: true },
   test: {
     globals: true,

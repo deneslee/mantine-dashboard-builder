@@ -19,14 +19,13 @@ export function RouteError({ error, reset }: ErrorComponentProps) {
     queryReset.reset();
   }, [queryReset]);
 
-  const handleRetry = async () => {
+  // A promise chain, not try/finally: the React Compiler can't compile `finally` without `catch`.
+  const handleRetry = () => {
     setRetrying(true);
-    try {
-      await router.invalidate();
-      reset();
-    } finally {
-      setRetrying(false);
-    }
+    return router
+      .invalidate()
+      .then(() => reset())
+      .finally(() => setRetrying(false));
   };
 
   return (

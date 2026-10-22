@@ -1,5 +1,5 @@
 # Quarantine newly published versions by 24 hours to prevent supply-chain compromise
-minimumReleaseAge: 0
+minimumReleaseAge: 1440
 
 # Packages exempt from the 24-hour quarantine window
 minimumReleaseAgeExclude:
