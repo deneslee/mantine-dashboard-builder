@@ -1,11 +1,17 @@
 import { RouterProvider } from '@tanstack/react-router';
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { AppCrash } from '@/app/AppCrash';
 import { reportError } from '@/lib/sentry/runtime';
 import { Providers } from './Providers';
 import { createQueryClient } from './queryClient';
 import { createAppRouter } from './router';
+
+// `pnpm dev:devtools` only. Both checks are static, so every other build drops the import entirely.
+const Devtools =
+  import.meta.env.DEV && import.meta.env.MODE === 'devtools'
+    ? lazy(() => import('./Devtools').then((m) => ({ default: m.Devtools })))
+    : null;
 
 export function App() {
   const [queryClient] = useState(createQueryClient);
@@ -22,6 +28,11 @@ export function App() {
       >
         <RouterProvider router={router} />
       </ErrorBoundary>
+      {Devtools && (
+        <Suspense fallback={null}>
+          <Devtools router={router} />
+        </Suspense>
+      )}
     </Providers>
   );
 }

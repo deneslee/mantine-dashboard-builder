@@ -13,6 +13,7 @@ A dashboard builder on Mantine 9 and React 19. An app frame (top navbar, docking
 ```bash
 pnpm install
 pnpm dev          # http://localhost:5173/mantine-dashboard-builder/
+pnpm dev:devtools # the same, with TanStack Devtools, Vite DevTools and click-to-source
 pnpm storybook    # http://localhost:6006
 pnpm test         # node + jsdom tests and every story in Chromium
 pnpm test:unit    # node + jsdom only

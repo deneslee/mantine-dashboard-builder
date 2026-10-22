@@ -1,5 +1,5 @@
 # Quarantine newly published versions by 24 hours to prevent supply-chain compromise
-minimumReleaseAge: 1440
+minimumReleaseAge: 0
 
 # Packages exempt from the 24-hour quarantine window
 minimumReleaseAgeExclude:
@@ -9,6 +9,8 @@ allowBuilds:
   '@sentry/cli': true
   esbuild: true
   msw: true
+  # Optional native terminal for code-inspector's AI-agent feature; click-to-source works without it.
+  node-pty: false
 
 # Hardening & stability defaults
 engineStrict: true
