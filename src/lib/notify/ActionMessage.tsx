@@ -16,7 +16,7 @@ export function ActionMessage({
     <>
       {message ? <div>{message}</div> : null}
       <Button
-        size="compact-xs"
+        size="xs"
         variant="light"
         mt="xs"
         onClick={() => {
