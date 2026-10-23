@@ -63,7 +63,7 @@ export function SentryVerificationCard({ onGoToSettings }: { onGoToSettings?: ()
   const [connectionResult, setConnectionResult] = useState<ConnectionTestResult | null>(null);
   const [delivering, setDelivering] = useState(false);
   const [receipt, setReceipt] = useState<DeliveryReceipt | null>(null);
-  const [logs, setLogs] = useState<ActivityLogItem[]>([
+  const [logs, setLogs] = useState<ActivityLogItem[]>(() => [
     {
       id: 'init',
       time: new Date().toLocaleTimeString(),
@@ -90,31 +90,28 @@ export function SentryVerificationCard({ onGoToSettings }: { onGoToSettings?: ()
     setTestingConnection(true);
     addLog('ping', 'yellow', 'Pinging Sentry connection and testing transport flush…');
 
-    try {
-      const result = await testSentryConnection();
-      setConnectionResult(result);
-      setStatus(getSentryStatus());
+    // A promise chain, not try/finally: the React Compiler can't compile `finally` without `catch`.
+    const result = await testSentryConnection().finally(() => setTestingConnection(false));
+    setConnectionResult(result);
+    setStatus(getSentryStatus());
 
-      if (result.ok) {
-        addLog(
-          'flush',
-          'teal',
-          `Connection verified! Transport flush succeeded in ${result.durationMs}ms`,
-          result.eventId ? `Ping Event ID: ${result.eventId}` : undefined,
-        );
-        notify.success({
-          title: 'Sentry Connected',
-          message: result.message,
-        });
-      } else {
-        addLog('error', 'red', `Connection test failed: ${result.message}`);
-        notify.error({
-          title: 'Connection Failed',
-          message: result.message,
-        });
-      }
-    } finally {
-      setTestingConnection(false);
+    if (result.ok) {
+      addLog(
+        'flush',
+        'teal',
+        `Connection verified! Transport flush succeeded in ${result.durationMs}ms`,
+        result.eventId ? `Ping Event ID: ${result.eventId}` : undefined,
+      );
+      notify.success({
+        title: 'Sentry Connected',
+        message: result.message,
+      });
+    } else {
+      addLog('error', 'red', `Connection test failed: ${result.message}`);
+      notify.error({
+        title: 'Connection Failed',
+        message: result.message,
+      });
     }
   };
 
@@ -141,16 +138,13 @@ export function SentryVerificationCard({ onGoToSettings }: { onGoToSettings?: ()
     });
     addLog('metric', 'grape', 'Sentry.metrics.count: "test_counter" +1');
 
-    // 3. Capture exception (without crashing out of the page so the user sees immediate feedback!)
-    let eventId = '';
-    try {
-      throw new Error('This is your first error!');
-    } catch (err) {
-      eventId = Sentry.captureException(err, {
-        tags: { verification: 'break_the_world' },
-      });
-      addLog('error', 'red', 'Sentry.captureException: "This is your first error!"', `Event ID: ${eventId}`);
-    }
+    // 3. Capture exception (without crashing out of the page so the user sees immediate feedback!).
+    // Not thrown: `new Error()` already records the stack, and the React Compiler can't compile a
+    // `throw` inside `try`.
+    const eventId = Sentry.captureException(new Error('This is your first error!'), {
+      tags: { verification: 'break_the_world' },
+    });
+    addLog('error', 'red', 'Sentry.captureException: "This is your first error!"', `Event ID: ${eventId}`);
 
     // 4. Flush transport to ensure transmission
     await Sentry.flush(2500);
@@ -235,21 +229,16 @@ export function SentryVerificationCard({ onGoToSettings }: { onGoToSettings?: ()
   const handleHandledError = async () => {
     setDelivering(true);
     const start = performance.now();
-    let eventId = '';
 
-    try {
-      throw new Error('Handled verification error test');
-    } catch (e) {
-      eventId = Sentry.captureException(e, {
-        tags: { type: 'handled_test' },
-      });
-      addLog(
-        'error',
-        'orange',
-        'Sentry.captureException: "Handled verification error test"',
-        `Event ID: ${eventId}`,
-      );
-    }
+    const eventId = Sentry.captureException(new Error('Handled verification error test'), {
+      tags: { type: 'handled_test' },
+    });
+    addLog(
+      'error',
+      'orange',
+      'Sentry.captureException: "Handled verification error test"',
+      `Event ID: ${eventId}`,
+    );
 
     await Sentry.flush(2000);
     const durationMs = Math.round(performance.now() - start);

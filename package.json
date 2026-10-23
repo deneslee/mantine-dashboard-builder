@@ -7,30 +7,43 @@
     "**/*.css"
   ],
   "engines": {
-    "node": ">=24.15.0",
-    "pnpm": ">=12.5.1"
+    "node": "24.22.1",
+    "pnpm": "12.15.0"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "24.22.1",
+      "onFail": "error"
+    },
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.15.0",
+      "onFail": "error"
+    }
   },
   "scripts": {
-    "dev": "vite",
-    "dev:devtools": "vite --mode devtools",
-    "build": "tsc -b && vite build",
-    "build:analyze": "vite build --mode analyze",
-    "preview": "vite preview",
+    "dev": "vp dev",
+    "dev:devtools": "vp dev --mode devtools",
+    "build": "tsc -b && vp build",
+    "build:analyze": "vp build --mode analyze",
+    "preview": "vp preview",
     "typecheck": "tsc -b",
     "lint": "pnpm lint:code && pnpm lint:css",
-    "lint:code": "oxlint --ignore-pattern \"lint/fixtures/**\"",
+    "lint:code": "vp lint",
     "lint:css": "stylelint \"src/**/*.css\"",
     "lint:fix": "pnpm lint:code:fix && pnpm lint:css:fix",
-    "lint:code:fix": "oxlint --fix --ignore-pattern \"lint/fixtures/**\"",
+    "lint:code:fix": "vp lint --fix",
     "lint:css:fix": "stylelint \"src/**/*.css\" --fix",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "test": "vitest run",
-    "test:unit": "vitest run --project node --project dom",
-    "test:stories": "vitest run --project storybook",
-    "test:watch": "vitest",
+    "format": "vp fmt .",
+    "format:check": "vp fmt --check .",
+    "test": "vp test run",
+    "test:unit": "vp test run --project node --project dom",
+    "test:stories": "vp test run --project storybook",
+    "test:watch": "vp test",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "prepare": "vp config"
   },
   "dependencies": {
     "@fontsource-variable/dm-sans": "5.3.0",
@@ -86,27 +99,24 @@
     "@vitejs/devtools-rolldown": "0.8.0",
     "@vitejs/devtools-vite": "^0.8.0",
     "@vitejs/plugin-react": "^6.0.0",
-    "@vitest/browser": "5.0.5",
-    "@vitest/browser-playwright": "5.0.5",
+    "@vitest/browser-playwright": "catalog:",
     "code-inspector-plugin": "2.0.9",
     "jsdom": "^30.1.1",
     "msw": "^2.12.0",
     "oxc-transform-react": "0.152.0",
-    "oxlint": "1.85.0",
-    "oxlint-tsgolint": "7.0.2003",
     "playwright": "1.63.0",
     "postcss": "^8.5.6",
     "postcss-preset-mantine": "^1.18.0",
     "postcss-simple-vars": "^7.0.1",
-    "prettier": "^3.9.9",
     "storybook": "^10.6.1",
     "stylelint": "^17.16.0",
     "stylelint-config-standard": "^40.0.0",
     "typescript": "^7.0.2",
-    "vite": "^8.3.4",
-    "vitest": "^5.0.1"
+    "vite": "catalog:",
+    "vitest": "catalog:",
+    "vite-plus": "catalog:"
   },
-  "packageManager": "pnpm@12.5.1+sha512.e3f305bc784a2bc89f5ad3b6138889470fae8d2af5f36b61216ec91c2c3d64089775f9de38aac331044ea40f245cb0d5666392dfdf65824e1907ef6a2c62de5f",
+  "packageManager": "pnpm@12.15.0",
   "intent": {
     "skills": [
       "*"

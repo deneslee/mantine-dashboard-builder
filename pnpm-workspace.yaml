@@ -3,6 +3,16 @@ minimumReleaseAge: 1440
 
 # Packages exempt from the 24-hour quarantine window
 minimumReleaseAgeExclude:
+  - vite-plus
+  - '@voidzero-dev/*'
+  - oxlint
+  - '@oxlint/*'
+  - oxlint-tsgolint
+  - '@oxlint-tsgolint/*'
+  - oxfmt
+  - '@oxfmt/*'
+  - vitest
+  - '@vitest/*'
 
 # Explicitly allowed lifecycle scripts (replaces onlyBuiltDependencies)
 allowBuilds:
@@ -14,6 +24,23 @@ allowBuilds:
 
 # Hardening & stability defaults
 engineStrict: true
+pmOnFail: error
+runtimeOnFail: error
 saveExact: true
 strictPeerDependencies: true
 preferFrozenLockfile: true
+catalog:
+  vite: npm:@voidzero-dev/vite-plus-core@1.4.0
+  vitest: 5.0.5
+  vite-plus: 1.4.0
+  '@vitest/browser-playwright': 5.0.5
+overrides:
+  vite@*: 'catalog:'
+  vitest@*: 'catalog:'
+peerDependencyRules:
+  allowAny:
+    - vite
+    - vitest
+  allowedVersions:
+    vite: '*'
+    vitest: '*'

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import { AppError } from '@/core/errors/AppError';
 import type { QueryContext } from '@/plugins/DatasourcePlugin';
 import { mockDatasource } from './mockDatasource';

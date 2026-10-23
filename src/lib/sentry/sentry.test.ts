@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { getSentryStatus, testSentryConnection } from './client';
 import { loadSentryConfig, saveSentryConfig } from './sentryConfig';
 import { logger, metrics } from './telemetry';

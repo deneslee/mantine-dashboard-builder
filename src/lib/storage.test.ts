@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { beforeEach, expect, it } from 'vitest';
+import { beforeEach, expect, it } from 'vite-plus/test';
 import { migrateLegacyKeys, storageKey } from './storage';
 
 beforeEach(() => localStorage.clear());

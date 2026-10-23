@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 import { notify } from '@/lib/notify/notify';
 import { createShellStore } from '@/shell/createShellStore';
 import { ShellProvider } from '@/shell/ShellProvider';

@@ -1,5 +1,5 @@
 import { createMemoryHistory } from '@tanstack/react-router';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 import { reportError } from '@/lib/sentry/runtime';
 import { createQueryClient } from './queryClient';
 import { createAppRouter } from './router';

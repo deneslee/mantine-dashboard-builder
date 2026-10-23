@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { theme, cssVariablesResolver } from '../theme/theme';
 import { primitives } from './primitives';
 import {

@@ -1,4 +1,4 @@
-import { afterEach, expect, it, vi } from 'vitest';
+import { afterEach, expect, it, vi } from 'vite-plus/test';
 import { isAppError } from '@/core/errors/AppError';
 import { getDashboard, listDashboards, savedKey } from './dashboardApi';
 

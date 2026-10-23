@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { shadow, shape } from '../tokens/semantic';
 import { ActionIconTheme } from './components/ActionIconTheme';
 import { AlertTheme } from './components/AlertTheme';

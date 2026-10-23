@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { resolveLayouts, type LayoutItem } from './layout';
 
 const cells = (items: LayoutItem[]) => items.map(({ i, x, y, w }) => `${i}@${x},${y}:${w}`);

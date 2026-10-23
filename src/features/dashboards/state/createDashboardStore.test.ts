@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { dashboardSchema, orderWidgets } from '@/core/dashboard/dashboardSchema';
 import { testDashboard } from '@/testing/fixtures/dashboards';
 import { getDashboard } from '../data/dashboardApi';

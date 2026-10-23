@@ -1,5 +1,5 @@
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 import { render, screen } from '@/testing/render';
 import { AppError } from '@/core/errors/AppError';
 import { QueryBoundary } from './QueryBoundary';

@@ -1,7 +1,7 @@
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 import react from '@vitejs/plugin-react';
-import { playwright } from '@vitest/browser-playwright';
-import { configDefaults, defineConfig } from 'vitest/config';
+import { playwright } from 'vite-plus/test/browser-playwright';
+import { configDefaults, defineConfig } from 'vite-plus';
 
 // Pure logic: no DOM, so no jsdom start-up cost. Everything else runs in jsdom.
 const NODE_TESTS = [

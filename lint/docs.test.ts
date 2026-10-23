@@ -1,6 +1,6 @@
 import { existsSync, globSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { expect, it } from 'vitest';
+import { expect, it } from 'vite-plus/test';
 
 // Docs and plans move often; a moved file must not leave a dead link behind.
 const DOCS = ['*.md', 'docs/**/*.md', '.agents/planning/**/*.md', 'src/**/*.md', 'lint/**/*.md'];

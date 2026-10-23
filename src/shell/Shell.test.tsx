@@ -1,5 +1,5 @@
 import { RouterProvider } from '@tanstack/react-router';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import { fireEvent, render, screen } from '@/testing/render';
 import { createTestRouter } from '@/testing/TestRouter';
 import { dimensions } from '@/ui/tokens/dimensions';

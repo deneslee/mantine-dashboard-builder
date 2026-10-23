@@ -1,5 +1,5 @@
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { render, screen } from '@/testing/render';
 import { Page } from './Page';
 

@@ -4,6 +4,8 @@ The big-picture checklist, by roadmap phase ([roadmap](roadmap.md#roadmap)). Eac
 
 ## Done
 
+- [x] **09 Vite+ migration** (Oct 23): exact toolchain versions, preserved lint rules, Oxfmt/editor setup and CI; all 275 tests pass. [Plan](plans/done/09-vite-plus.md)
+
 - [x] **Phase 0, scaffold** and **phase 1, chrome** (Sep 22).
 - [x] **01 Shell performance** (Sep 24): the grid out of the entry chunk, `<main>` held during a window resize, reduced-motion setting. [Plan](plans/done/01-shell-performance.md)
 - [x] **02 Project structure** (Sep 24): bulletproof-react layers, no barrels, import direction enforced by oxlint. [Plan](plans/done/02-project-structure.md)
@@ -111,4 +113,4 @@ Nested layer tokens are no longer planned: they were for widgets inside a `conta
   Fix it in the semantic tokens ([design-system.md](../../docs/ui/design-system.md)): a darker dimmed shade, and a primary shade or text color for filled buttons. Done when `color-contrast` is enabled again in `.storybook/preview.tsx` and every story passes.
 
 - [ ] **`--mantine-color-body` points at the overlay surface.** Before the overlay and raised surfaces diverge, point it at the canvas surface, bind `ModalBase` (Modal, Drawer) to overlay, and bind the parts that must match the surface behind them (Table's sticky header, the active Tabs border, Scroller's fade) to `--app-layer-surface`. Details in [design-system.md](../../docs/ui/design-system.md#where-new-things-go). Done when a story shows each of those components on canvas and inside a widget.
-- [ ] **Components the React Compiler skips.** `RouteError` and `SentryVerificationCard` use `try`/`finally` without `catch`; `FrameTable` uses an incompatible library (TanStack Table). Restructure them if it ever matters. The `throw` and `?.` inside `try` in the old `DashboardView` and editor forms, and the `@babel/core` 8 skip of components with destructured defaults, were fixed in [08](plans/done/08-structure-cleanup.md) (Oct 1: nothing under `features/dashboards` bails out).
+- [x] **Components the React Compiler skips.** Oct 23: `SentryVerificationCard` no longer uses `finally` or `throw` inside `try`, and `RouteError` was already a promise chain. The only skip left is `VirtualBody` in `FrameTable` (TanStack Virtual), kept on purpose, and `lint/compiler.test.ts` now fails on any new one ([react-compiler.md](../../docs/upgrades/react-compiler.md)). The `throw` and `?.` inside `try` in the old `DashboardView` and editor forms, and the `@babel/core` 8 skip of components with destructured defaults, were fixed in [08](plans/done/08-structure-cleanup.md) (Oct 1: nothing under `features/dashboards` bails out).

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { dimensions } from '@/ui/tokens/dimensions';
 import { createShellStore, STORAGE_KEY, type ShellInit } from './createShellStore';
 

@@ -59,16 +59,17 @@ Measured: during one sidebar collapse the unpinned navbar resized 22 times, the 
 
 ## React Compiler
 
-Enabled: the Rust port of React Compiler (`oxc-transform-react`, through `@vitejs/plugin-react`), in `vite.config.ts` (app and Storybook) and `vitest.config.ts` (tests run the compiled code). Upstream still calls it experimental. Keep `oxc-transform-react` on the version range plugin-react accepts (`^0.152.0` for plugin-react 6.1.2): for a 0.x version that is 0.152.x only, and strict peers reject anything newer.
+Enabled: the Rust port of React Compiler (`oxc-transform-react`, through `@vitejs/plugin-react`), in `vite.config.ts` (app and Storybook) and `vitest.config.ts` (tests run the compiled code). Upstream still calls it experimental. Keep `oxc-transform-react` on the version range plugin-react accepts (`^0.152.0` for plugin-react 6.1.2): for a 0.x version that is 0.152.x only, and strict peers reject anything newer. Why Oxc rather than Babel, how memoization meets libraries such as TanStack Virtual and Table, and the options we turned down: [react-compiler.md](../upgrades/react-compiler.md).
 
 ```ts
 // vite.config.ts; needs oxc-transform-react
-plugins: [react({ compiler: { reportDiagnostics: true } })];
+plugins: [react({ compiler: true })];
 ```
 
-Compared with React Compiler 1.0 through Babel (Oct 22, 2026, 165 source files): both memoize the same 77 files and 119 components and hooks, skip the same ones, and give an identical bundle. Oxc compiles about 19 times faster (0.2 s against 3.9 s for all files), and a production build takes 3.3 s instead of 9 s.
+The oxlint React Compiler rules keep code compatible. `lint/compiler.test.ts` fails when the compiler skips a function that isn't on its list. The only skip today is on purpose: `VirtualBody` in `FrameTable`, because TanStack Virtual is an incompatible library. Keep the virtualizer in that small component so the table around it compiles. The compiler can't handle these, even inside a handler:
 
-The oxlint React Compiler rules keep code compatible, and `reportDiagnostics` prints a warning for every component the compiler skips. Skipped today: `FrameTable` (TanStack Table is an incompatible library) and `SentryVerificationCard` (`try`/`finally` and `throw` inside `try`; [06](../../.agents/planning/plans/06-sentry.md) rebuilds it). The compiler can't compile `try`/`finally` without `catch`: use a promise chain with `.finally()` instead, as `RouteError` does.
+- **`finally`**, with or without `catch`. Use a promise chain ending in `.finally()`, as `RouteError` does.
+- **`throw` inside `try`.** Don't throw an error only to catch it: pass the `new Error()` straight to whatever records it.
 
 ## Checking
 

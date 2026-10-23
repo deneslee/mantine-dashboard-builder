@@ -1,5 +1,11 @@
 export type AppErrorCode =
-  'not_found' | 'network' | 'timeout' | 'validation' | 'datasource' | 'forbidden' | 'unknown';
+  | 'not_found'
+  | 'network'
+  | 'timeout'
+  | 'validation'
+  | 'datasource'
+  | 'forbidden'
+  | 'unknown';
 
 /**
  * The one error shape the UI understands. Each feature's `api/mapper.ts` turns transport

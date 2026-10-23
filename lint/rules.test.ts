@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import stylelint from 'stylelint';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 interface Diagnostic {
   code: string;
@@ -9,15 +9,25 @@ interface Diagnostic {
   filename: string;
 }
 
-/** Runs oxlint on a fixture path. It exits non-zero on errors, which is what these tests expect. */
+/** Loads the shared rules directly so the app's fixture exclusion does not hide these violations. */
 function oxlint(path: string): Diagnostic[] {
   let json = '';
   try {
     json = execFileSync(
       process.execPath,
-      ['node_modules/oxlint/bin/oxlint', '--no-ignore', '-f', 'json', path],
+      [
+        'node_modules/vite-plus/bin/vp',
+        'lint',
+        '--config',
+        'oxlint.config.ts',
+        '--no-ignore',
+        '-f',
+        'json',
+        path,
+      ],
       {
         encoding: 'utf8',
+        timeout: 15_000,
       },
     );
   } catch (e) {
@@ -44,7 +54,8 @@ describe('token lint rules', () => {
     );
   });
 
-  it('oxlint reports raw style props and primitives imports as errors', () => {
+  // Vite+ config and JS plugin startup exceed 5s when the browser suite runs alongside these tests.
+  it('oxlint reports raw style props and primitives imports as errors', { timeout: 20_000 }, () => {
     const diagnostics = oxlint('lint/fixtures/raw-style-props.tsx');
     const raw = diagnostics.filter((d) => d.code === 'app(no-raw-style-props)');
     expect(raw.every((d) => d.severity === 'error')).toBe(true);
@@ -57,7 +68,7 @@ describe('token lint rules', () => {
 
 /** Folder imports must follow the layers (AGENTS.md › Structure), or package-shaped folders are a wish. */
 describe('layer lint rules', () => {
-  it('reports every import that crosses a layer, and none of the allowed ones', () => {
+  it('reports every import that crosses a layer, and none of the allowed ones', { timeout: 20_000 }, () => {
     const counts: Record<string, number> = {};
     for (const d of oxlint('lint/fixtures/src')) {
       if (d.code !== 'eslint(no-restricted-imports)') continue;

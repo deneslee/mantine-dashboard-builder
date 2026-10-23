@@ -3,7 +3,8 @@ import { devtools as tanstackDevtools } from '@tanstack/devtools-vite';
 import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import react from '@vitejs/plugin-react';
 import { codeInspectorPlugin } from 'code-inspector-plugin';
-import { defineConfig } from 'vite';
+import { defineConfig, lazyPlugins } from 'vite-plus';
+import { lint } from './oxlint.config';
 
 const uploadSourcemaps = Boolean(process.env.SENTRY_AUTH_TOKEN);
 
@@ -16,8 +17,40 @@ export default defineConfig(({ command, mode }) => {
   const analyze = command === 'build' && mode === 'analyze';
 
   return {
+    staged: {
+      '*': 'vp check --fix',
+    },
+    lint: {
+      ...lint,
+      jsPlugins: [...lint.jsPlugins, { name: 'vite-plus', specifier: 'vite-plus/oxlint-plugin' }],
+      rules: { ...lint.rules, 'vite-plus/prefer-vite-plus-imports': 'error' },
+      options: { ...lint.options, typeCheck: true },
+      ignorePatterns: [...lint.ignorePatterns, 'lint/fixtures/**', '.qartez/**'],
+    },
+    fmt: {
+      singleQuote: true,
+      semi: true,
+      printWidth: 110,
+      trailingComma: 'all',
+      arrowParens: 'always',
+      sortPackageJson: false,
+      ignorePatterns: [
+        'dist',
+        'storybook-static',
+        'node_modules',
+        'pnpm-lock.yaml',
+        'src/app/routeTree.gen.ts',
+        '.claude',
+        '.codex',
+        '.agents/skills',
+        'coverage/',
+        '.kiro',
+        '.qartez',
+        'public/assets',
+      ],
+    },
     base: '/mantine-dashboard-builder/',
-    plugins: [
+    plugins: lazyPlugins(() => [
       // First, as TanStack requires. Its click-to-source is off: code-inspector does that job.
       withDevtools && tanstackDevtools({ injectSource: { enabled: false } }),
       tanstackRouter({
@@ -28,9 +61,9 @@ export default defineConfig(({ command, mode }) => {
       }),
       // Hold Alt+Shift and click an element to open its source in the editor. Must precede react().
       withDevtools && codeInspectorPlugin({ bundler: 'vite' }),
-      // React Compiler (Rust port, oxc-transform-react): automatic memoization. Skipped components are
-      // reported as warnings. See docs/dashboard/grid-and-charts.md.
-      react({ compiler: { reportDiagnostics: true } }),
+      // React Compiler (Rust port, oxc-transform-react): automatic memoization. lint/compiler.test.ts
+      // fails when it skips a component it shouldn't. See docs/dashboard/grid-and-charts.md.
+      react({ compiler: true }),
       sentryVitePlugin({
         org: process.env.SENTRY_ORG,
         project: process.env.SENTRY_PROJECT,
@@ -39,7 +72,7 @@ export default defineConfig(({ command, mode }) => {
         // Uploaded to Sentry, then removed so the deployed site never serves them.
         sourcemaps: { filesToDeleteAfterUpload: ['./dist/**/*.map'] },
       }),
-    ],
+    ]),
     // Also turns on Rolldown's build data (node_modules/.rolldown/) for analyze builds only.
     devtools: withDevtools || analyze,
     resolve: { tsconfigPaths: true },
@@ -56,7 +89,11 @@ export default defineConfig(({ command, mode }) => {
           // left out on purpose: a group would also capture components only lazy routes use (+50 KiB).
           codeSplitting: {
             groups: [
-              { name: 'react', test: /node_modules[\\/](react|react-dom|scheduler)[\\/]/, priority: 30 },
+              {
+                name: 'react',
+                test: /node_modules[\\/](react|react-dom|scheduler)[\\/]/,
+                priority: 30,
+              },
               {
                 name: 'tanstack',
                 test: /node_modules[\\/]@tanstack[\\/](react-router|router-core|react-query|query-core)[\\/]/,

@@ -1,5 +1,5 @@
 import { IconBell, IconInfoCircle } from '@tabler/icons-react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { render, screen } from '@/testing/render';
 import { TestRouter } from '@/testing/TestRouter';
 import { ShellProvider } from '../ShellProvider';

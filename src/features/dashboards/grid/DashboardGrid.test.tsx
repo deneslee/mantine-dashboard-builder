@@ -1,7 +1,7 @@
 import userEvent from '@testing-library/user-event';
 import { RouterProvider, useSearch } from '@tanstack/react-router';
 import { lazy } from 'react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import { z } from 'zod';
 import { act, render, renderHook, screen, waitFor, within } from '@/testing/render';
 import { useDensity } from '@/lib/useDensity';

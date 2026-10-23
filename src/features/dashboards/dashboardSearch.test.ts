@@ -1,4 +1,4 @@
-import { expect, it } from 'vitest';
+import { expect, it } from 'vite-plus/test';
 import { dashboardSearchSchema } from './dashboardSearch';
 
 it('keeps valid search params and drops invalid ones, so the dashboard defaults apply', () => {

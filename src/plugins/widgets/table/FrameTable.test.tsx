@@ -1,5 +1,5 @@
 import userEvent from '@testing-library/user-event';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import { act, render, screen, waitFor, within } from '@/testing/render';
 import type { DataFrame } from '@/core/data/DataFrame';
 import { FrameTable } from './FrameTable';

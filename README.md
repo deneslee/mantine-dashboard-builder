@@ -11,17 +11,20 @@ A dashboard builder on Mantine 9 and React 19. An app frame (top navbar, docking
 ## Run
 
 ```bash
-pnpm install
-pnpm dev          # http://localhost:5173/mantine-dashboard-builder/
-pnpm dev:devtools # the same, with TanStack Devtools, Vite DevTools and click-to-source
-pnpm storybook    # http://localhost:6006
-pnpm test         # node + jsdom tests and every story in Chromium
-pnpm test:unit    # node + jsdom only
-pnpm lint
-pnpm build
+vp install
+vp run dev          # http://localhost:5173/mantine-dashboard-builder/
+vp run dev:devtools # the same, with TanStack Devtools, Vite DevTools and click-to-source
+vp run storybook    # http://localhost:6006
+vp run test         # node + jsdom tests and every story in Chromium
+vp run test:unit    # node + jsdom only
+vp check            # Oxfmt, Oxlint and type checks
+vp run lint:css     # Stylelint remains a separate check
+vp run build        # tsc -b, then the production build
 ```
 
-Node 24.15+ and pnpm 12.5+ (see `package.json › engines`).
+Install [Vite+](https://viteplus.dev/guide/) first. The exact Node and pnpm versions are pinned in [`package.json`](package.json); Vite+ selects them automatically. `.nvmrc` mirrors the Node pin for nvm and CI. `pnpm-workspace.yaml` makes version mismatches errors, with expected and actual versions in pnpm's diagnostic. `devEngines` also rejects unsupported npm invocations. Use `vp env current` to inspect the selected versions and `vp env doctor` to diagnose PATH or shell overrides.
+
+Run commands from the workspace root. Direct `pnpm` commands also work when the pinned versions are active. Use `vp run build` and `vp run lint` for the repository scripts: the built-in `vp build` omits our separate `tsc -b` step, and `vp lint` omits Stylelint. Formatting uses Oxfmt and the `fmt` block in `vite.config.ts`; lint rules are composed there from `oxlint.config.ts`. CI uses the same pins and commands.
 
 ## Try it
 

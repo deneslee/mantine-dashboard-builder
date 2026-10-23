@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { dashboardListSchema, dashboardSchema } from '@/core/dashboard/dashboardSchema';
 
 /** The demo data in public/: every listed dashboard has a valid document that matches its summary. */

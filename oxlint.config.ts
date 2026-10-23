@@ -1,4 +1,4 @@
-import { defineConfig } from 'oxlint';
+import type { OxlintConfig } from 'vite-plus/lint';
 
 /** Alias patterns for the given top-level folders. */
 const above = (...dirs: string[]) => dirs.flatMap((dir) => [`@/${dir}`, `@/${dir}/**`]);
@@ -65,7 +65,7 @@ const layer = (dir: string, group: string[], message: string, shared = [barrels,
   },
 });
 
-export default defineConfig({
+export const lint = {
   plugins: ['typescript', 'react', 'unicorn', 'oxc', 'import'],
 
   options: {
@@ -207,4 +207,6 @@ export default defineConfig({
       rules: { 'no-restricted-imports': 'off' },
     },
   ],
-});
+} satisfies OxlintConfig;
+
+export default { lint };

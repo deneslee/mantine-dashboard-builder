@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 import { AppError } from '@/core/errors/AppError';
 import { reportError } from '@/lib/sentry/runtime';
 import { createQueryClient } from './queryClient';

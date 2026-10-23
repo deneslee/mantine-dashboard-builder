@@ -6,7 +6,7 @@ import {
   createRoute,
   createRouter,
 } from '@tanstack/react-router';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { render, screen } from '@/testing/render';
 import { RouteBreadcrumbs } from './RouteBreadcrumbs';
 

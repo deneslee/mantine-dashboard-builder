@@ -6,42 +6,39 @@
     "*ts": "${capture}.test.ts"
   },
   "editor.formatOnSave": true,
-  "prettier.requireConfig": true,
   "oxc.enable.oxlint": true,
-  "oxc.enable.oxfmt": false,
+  "oxc.enable.oxfmt": true,
   "oxc.lint.run": "onType",
   "[javascript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "oxc.oxc-vscode"
   },
   "[javascriptreact]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "oxc.oxc-vscode"
   },
   "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "oxc.oxc-vscode"
   },
   "[typescriptreact]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "oxc.oxc-vscode"
   },
   "[html]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "oxc.oxc-vscode"
   },
   "[css]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "oxc.oxc-vscode"
   },
   "[markdown]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "oxc.oxc-vscode"
   },
   "[yaml]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "oxc.oxc-vscode"
   },
   // -----------------------------------------------------------------------
   // Oxlint
   // -----------------------------------------------------------------------
-  // "oxc.enable.oxlint": true,
-  // "oxc.enable.oxfmt": false,
   "oxc.requireConfig": true,
   // Fix safe Oxlint issues when explicitly saving.
-  // VS Code subsequently runs formatOnSave, so Prettier produces final layout.
+  // VS Code subsequently runs formatOnSave, so Oxfmt produces final layout.
   "editor.codeActionsOnSave": {
     "source.fixAll.oxc": "explicit",
     "source.fixAll.stylelint": "explicit"
@@ -59,5 +56,9 @@
   "css.validate": false,
   "scss.validate": false,
   "less.validate": false,
-  "stylelint.validate": ["css", "postcss"]
+  "stylelint.validate": ["css", "postcss"],
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "oxc.disableNestedConfig": true,
+  "oxc.fmt.disableNestedConfig": true,
+  "editor.formatOnSaveMode": "file"
 }

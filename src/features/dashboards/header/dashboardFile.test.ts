@@ -1,5 +1,5 @@
 import { lazy } from 'react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { z } from 'zod';
 import { defineWidget } from '@/plugins/WidgetPlugin';
 import type { Plugins } from '@/plugins/usePlugins';

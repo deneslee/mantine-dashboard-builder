@@ -4,11 +4,11 @@ How the app is put together today: the stack, the layers, how a dashboard's data
 
 ## Stack
 
-Mantine 9 needs React 19.2+, so all React 19 APIs (`ref` as prop, `use()`, `Activity`, `useEffectEvent`) are fair game. The React Compiler is on.
+Mantine 9 needs React 19.2+, so all React 19 APIs (`ref` as prop, `use()`, `Activity`, `useEffectEvent`) are fair game. The React Compiler is on ([grid-and-charts.md › React Compiler](dashboard/grid-and-charts.md#react-compiler)).
 
 | Area      | Package                                                                                   | Notes                                                                                                                                            |
 | --------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Build     | Vite 8, TypeScript strict, pnpm                                                           | tsconfig paths are native in Vite 8                                                                                                              |
+| Build     | Vite+, TypeScript strict, pnpm                                                            | Exact toolchain versions in `package.json`; setup and enforcement in [README](../README.md#run)                                                  |
 | UI        | `@mantine/core` 9.7.3, `hooks`, `notifications`, `modals`, `dates`, `charts`, `spotlight` | Spotlight drives the navbar search; `postcss-preset-mantine`                                                                                     |
 | Fonts     | Fontsource variable fonts: DM Sans, Source Sans 3, Source Code Pro, JetBrains Mono        | Self-hosted, no runtime requests to Google                                                                                                       |
 | Routing   | `@tanstack/react-router`                                                                  | File-based routes, `staticData` declares context-bar tabs and breadcrumbs                                                                        |
@@ -19,7 +19,7 @@ Mantine 9 needs React 19.2+, so all React 19 APIs (`ref` as prop, `use()`, `Acti
 | Tables    | `@tanstack/react-table` v9 + `@tanstack/react-virtual`                                    | Rendered with Mantine `Table`                                                                                                                    |
 | Later     | `@xyflow/react`, `react-markdown`                                                         | Each a lazy chunk                                                                                                                                |
 | Icons     | `@tabler/icons-react`                                                                     | Direct file imports, no barrel                                                                                                                   |
-| Tooling   | Storybook, Vitest + Testing Library, oxlint + Stylelint, Prettier                         | Three Vitest projects: `node` (pure logic), `dom` (jsdom) and `storybook` (every story in Chromium with an a11y check, play functions for flows) |
+| Tooling   | Storybook, Vite+ (Vitest, Oxlint, Oxfmt), Testing Library, Stylelint                      | Three Vitest projects: `node` (pure logic), `dom` (jsdom) and `storybook` (every story in Chromium with an a11y check, play functions for flows) |
 | Dev tools | TanStack Devtools (Query, Router), Vite DevTools, code-inspector                          | Only in `pnpm dev:devtools` (`vite --mode devtools`); `pnpm dev`, builds, Storybook and tests load none of them                                  |
 
 ## Layers
