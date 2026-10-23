@@ -1,0 +1,58 @@
+// Dependency updates, as grouped pull requests that CI checks (github-pages.yaml runs on every pull
+// request and deploys only from main). A group is packages that release together or must move together.
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    'config:recommended',
+    // A release is proposed once it is 3 days old. pnpm-workspace.yaml's `minimumReleaseAge` (1 day)
+    // rejects anything newer and Renovate doesn't read it, so keep this at least as long.
+    'security:minimumReleaseAgeNpm',
+    'schedule:weekly',
+    ':maintainLockFilesWeekly',
+  ],
+  // Ranges in package.json move with each update, so a floor such as `^6.0.0` never hides the version in use.
+  rangeStrategy: 'bump',
+  packageRules: [
+    { groupName: 'Mantine', matchPackageNames: ['@mantine/**', 'postcss-preset-mantine'] },
+    { groupName: 'TanStack', matchPackageNames: ['@tanstack/**'] },
+    { groupName: 'React', matchPackageNames: ['react', 'react-dom', '@types/react', '@types/react-dom'] },
+    { groupName: 'Storybook', matchPackageNames: ['storybook', '@storybook/**'] },
+    { groupName: 'Testing', matchPackageNames: ['@testing-library/**', 'jsdom', 'msw', 'playwright'] },
+    { groupName: 'Sentry', matchPackageNames: ['@sentry/**'] },
+    { groupName: 'Fontsource', matchPackageNames: ['@fontsource-variable/**'] },
+    { groupName: 'Stylelint', matchPackageNames: ['stylelint', 'stylelint-config-*'] },
+    { groupName: 'Vite DevTools', matchPackageNames: ['@vitejs/devtools', '@vitejs/devtools-*'] },
+    {
+      // vite-plus pins Vitest and its Vite build (the `vite` alias) exactly. Renovate can't know which
+      // versions a release expects; lint/toolchain.test.ts fails on a mismatch, and `vp migrate` fixes it.
+      groupName: 'Vite+ toolchain',
+      matchPackageNames: ['vite-plus', '@voidzero-dev/vite-plus-core', 'vitest', '@vitest/**'],
+    },
+    {
+      // plugin-react peers one oxc-transform-react minor; docs/dashboard/grid-and-charts.md › React Compiler.
+      groupName: 'React Compiler',
+      matchPackageNames: ['@vitejs/plugin-react', 'oxc-transform-react'],
+    },
+    {
+      // The range @vitejs/plugin-react 6.1.2 accepts. Widen it when a plugin-react update needs more.
+      matchPackageNames: ['oxc-transform-react'],
+      allowedVersions: '~0.152.0',
+    },
+    // Each is pinned exactly in several places (.nvmrc, `engines`, `devEngines`, `packageManager`), and
+    // pnpm fails on any mismatch, so one pull request moves them all.
+    { groupName: 'Node.js', matchDepNames: ['node'] },
+    { groupName: 'pnpm', matchDepNames: ['pnpm'] },
+    {
+      groupName: 'GitHub Actions',
+      matchManagers: ['github-actions'],
+      matchUpdateTypes: ['minor', 'patch', 'digest'],
+    },
+    {
+      // 2.3.0 broke dragging in edit mode (docs/upgrades/RGL.md). No pull requests: newer versions wait for
+      // approval on the Dependency Dashboard, to take only once RGL.md's "When to upgrade" holds.
+      matchPackageNames: ['react-grid-layout'],
+      allowedVersions: '!/^2\\.3\\.0$/',
+      dependencyDashboardApproval: true,
+    },
+  ],
+}

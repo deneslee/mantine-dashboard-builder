@@ -97,7 +97,8 @@ Nested layer tokens are no longer planned: they were for widgets inside a `conta
 
 ### Deployment
 
-- [ ] **First CI run.** `github-pages.yaml` (written in 08, Sep 30) runs lint, the format check, Chromium and `pnpm test` on pull requests and before each deploy, and deploys only from main. Done when a pull request runs the checks without deploying.
+- [ ] **First CI run.** `github-pages.yaml` (written in 08, Sep 30) runs lint, the format check, Chromium and `pnpm test` on pull requests and before each deploy, and deploys only from main. Done when a pull request runs the checks without deploying. Oct 23: the push run after 09 is green; Renovate's first pull request ([10](plans/10-renovate.md)) can close this.
+- [ ] **10 Renovate:** grouped dependency updates checked by CI, replacing Dependabot. Waits on installing the app. [Plan](plans/10-renovate.md)
 - [ ] **GitHub Pages deep links.** GitHub Pages has no SPA fallback, so `/dashboards/…` opened directly returns 404. The workflow already copies `index.html` to `404.html`; what's left is to check it. Done when a deep link loads on the deployed site.
 - [ ] **Bundle budget in CI.** Add `size-limit` with the first-load number, stating whether it's raw or gzipped; integration manifests count toward it. Done when a pull request that pushes first load past it fails.
 

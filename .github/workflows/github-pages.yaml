@@ -38,11 +38,12 @@ jobs:
       - name: Test
         run: vp run test
 
-      # Typechecks too (tsc -b).
+      # Typechecks too (tsc -b). Source maps go to Sentry only for main: pull requests, Renovate's included,
+      # get no token, so they build without uploading.
       - name: Build
         run: vp run build
         env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_AUTH_TOKEN: ${{ github.event_name != 'pull_request' && secrets.SENTRY_AUTH_TOKEN || '' }}
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
           SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
 

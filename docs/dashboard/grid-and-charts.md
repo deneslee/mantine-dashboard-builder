@@ -59,7 +59,7 @@ Measured: during one sidebar collapse the unpinned navbar resized 22 times, the 
 
 ## React Compiler
 
-Enabled: the Rust port of React Compiler (`oxc-transform-react`, through `@vitejs/plugin-react`), in `vite.config.ts` (app and Storybook) and `vitest.config.ts` (tests run the compiled code). Upstream still calls it experimental. Keep `oxc-transform-react` on the version range plugin-react accepts (`^0.152.0` for plugin-react 6.1.2): for a 0.x version that is 0.152.x only, and strict peers reject anything newer. Why Oxc rather than Babel, how memoization meets libraries such as TanStack Virtual and Table, and the options we turned down: [react-compiler.md](../upgrades/react-compiler.md).
+Enabled: the Rust port of React Compiler (`oxc-transform-react`, through `@vitejs/plugin-react`), in `vite.config.ts` (app and Storybook) and `vitest.config.ts` (tests run the compiled code). Upstream still calls it experimental. Keep `oxc-transform-react` on the version range plugin-react accepts (`^0.152.0` for plugin-react 6.1.2): for a 0.x version that is 0.152.x only, and strict peers reject anything newer. Renovate holds it there (`allowedVersions` in [renovate.json5](../../.github/renovate.json5)); widen both when plugin-react does. Why Oxc rather than Babel, how memoization meets libraries such as TanStack Virtual and Table, and the options we turned down: [react-compiler.md](../upgrades/react-compiler.md).
 
 ```ts
 // vite.config.ts; needs oxc-transform-react

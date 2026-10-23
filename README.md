@@ -26,6 +26,8 @@ Install [Vite+](https://viteplus.dev/guide/) first. The exact Node and pnpm vers
 
 Run commands from the workspace root. Direct `pnpm` commands also work when the pinned versions are active. Use `vp run build` and `vp run lint` for the repository scripts: the built-in `vp build` omits our separate `tsc -b` step, and `vp lint` omits Stylelint. Formatting uses Oxfmt and the `fmt` block in `vite.config.ts`; lint rules are composed there from `oxlint.config.ts`. CI uses the same pins and commands.
 
+Dependencies update through [Renovate](.github/renovate.json5): grouped pull requests (Mantine, TanStack, React, the Vite+ toolchain and others) early on Mondays, once a release is 3 days old, each checked by CI before you merge. react-grid-layout stays on 2.2.4 ([why](docs/upgrades/RGL.md)).
+
 ## Try it
 
 | URL                                                  | Shows                                                                                                                                |

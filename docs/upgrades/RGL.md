@@ -1,6 +1,6 @@
 # react-grid-layout 2.3.0
 
-Status (Oct 22, 2026): **not adopted.** 2.3.0 was tried and reverted to 2.2.4: in edit mode the drag preview and the dragged tile went wrong. `package.json` pins `2.2.4` exactly; keep it there until [When to upgrade](#when-to-upgrade) holds.
+Status (Oct 22, 2026): **not adopted.** 2.3.0 was tried and reverted to 2.2.4: in edit mode the drag preview and the dragged tile went wrong. `package.json` pins `2.2.4` exactly; keep it there until [When to upgrade](#when-to-upgrade) holds. Renovate opens no pull request for it: 2.3.0 is excluded, and anything newer waits for approval on the Dependency Dashboard ([renovate.json5](../../.github/renovate.json5)).
 
 2.3.0 (Oct 5, 2026) has no changelog entry or release notes. This summary comes from the published packages and the 48 commits between `v2.2.4` and `2.3.0` ([compare](https://github.com/react-grid-layout/react-grid-layout/compare/v2.2.4...2.3.0)). Grid rules live in [grid-and-charts.md](../dashboard/grid-and-charts.md).
 
