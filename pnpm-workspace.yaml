@@ -38,9 +38,12 @@ overrides:
   vite@*: 'catalog:'
   vitest@*: 'catalog:'
 peerDependencyRules:
+  # The Vite+ toolchain stands in for these; Storybook 10.6 still asks for vite-plus 0.x.
   allowAny:
     - vite
     - vitest
+    - vite-plus
   allowedVersions:
     vite: '*'
     vitest: '*'
+    vite-plus: '*'

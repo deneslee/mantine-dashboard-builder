@@ -25,6 +25,11 @@ export interface OptionalPluginEntry {
  * whose `plugins.json` lists them.
  */
 export const OPTIONAL_PLUGINS: Record<string, OptionalPluginEntry> = {
+  aws: {
+    name: 'AWS',
+    description: 'Athena, Aurora (RDS Data API), Redshift and DynamoDB, called straight from the browser.',
+    module: 'src/plugins/optional/aws/awsPlugin.ts',
+  },
   google: {
     name: 'Google Cloud',
     description: 'BigQuery and Firestore, called straight from the browser.',

@@ -46,6 +46,11 @@
     "prepare": "vp config"
   },
   "dependencies": {
+    "@aws-sdk/client-athena": "3.1156.0",
+    "@aws-sdk/client-dynamodb": "3.1156.0",
+    "@aws-sdk/client-rds-data": "3.1156.0",
+    "@aws-sdk/client-redshift-data": "3.1156.0",
+    "@aws-sdk/util-dynamodb": "3.996.9",
     "@fontsource-variable/dm-sans": "5.3.0",
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
     "@fontsource-variable/source-code-pro": "5.3.0",
@@ -113,8 +118,8 @@
     "stylelint-config-standard": "^40.0.0",
     "typescript": "^7.0.2",
     "vite": "catalog:",
-    "vitest": "catalog:",
-    "vite-plus": "catalog:"
+    "vite-plus": "catalog:",
+    "vitest": "catalog:"
   },
   "packageManager": "pnpm@12.15.0",
   "intent": {

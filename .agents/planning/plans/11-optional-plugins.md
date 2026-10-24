@@ -87,7 +87,7 @@ A stateless Hono service with `mssql` and `mongodb`. Browsers can't speak TDS or
 - [x] **3 Vault and connections stores.** Done when tests show no plaintext in storage; lock, unlock, a wrong passphrase and reset; session-only secrets lost on reload; a tampered connection refused; and no secrets in exports or query keys.
 - [x] **4 Google plugin.** Done when BigQuery and Firestore mapping, macros, JWT signing and the token cache are tested.
 - [x] **5 Data sources UI.** Routes, Data sources page, connection page and form, vault dialogs, the Plugins section (dev path), import warnings for missing datasources. Done when every state has a story and the flows are play functions.
-- [ ] **6 AWS plugin.** Done when the four runtimes are tested on mocked clients and each is its own chunk.
+- [x] **6 AWS plugin.** Done when the four runtimes are tested on mocked clients and each is its own chunk.
 - [ ] **7 Relay, Azure SQL and MongoDB.** Done when the relay's security rules and mapping are tested and both plugins pass their client tests.
 - [ ] **8 Add to build from the live site.** Done when the commit and polling flow is tested against mocked GitHub responses and its dialog states have stories.
 - [ ] **9 Docs.** `docs/dashboard/datasources.md` (including a "Try it free" table); roadmap, tasks, 06, architecture, dashboard, README and AGENTS updates. Done when `lint/docs.test.ts` passes and this plan is in `done/`.
