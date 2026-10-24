@@ -8,8 +8,9 @@ import { dimensions } from '@/ui/tokens/dimensions';
 import { useMotion } from '@/lib/useMotion';
 import { storageKey } from '@/lib/storage';
 import { CurrentUserContext, placeholderUser } from '@/lib/useCurrentUser';
-import { PluginsContext } from '@/plugins/usePlugins';
-import { plugins } from './plugins';
+import { VaultProvider } from '@/lib/vault/VaultProvider';
+import { ConnectionsProvider } from '@/features/datasources/connections/ConnectionsProvider';
+import { PluginsProvider } from './PluginsProvider';
 
 const colorSchemeManager = localStorageColorSchemeManager({ key: storageKey('color-scheme') });
 
@@ -47,18 +48,22 @@ export function Providers({
     >
       <QueryClientProvider client={queryClient}>
         <CurrentUserContext value={placeholderUser}>
-          <PluginsContext value={plugins}>
-            <ModalsProvider>
-              <Notifications
-                limit={3}
-                position="bottom-right"
-                zIndex={dimensions.zIndex.notification}
-                containerWidth={380}
-                transitionDuration={isReduced ? 0 : undefined}
-              />
-              {children}
-            </ModalsProvider>
-          </PluginsContext>
+          <VaultProvider>
+            <ConnectionsProvider>
+              <PluginsProvider>
+                <ModalsProvider>
+                  <Notifications
+                    limit={3}
+                    position="bottom-right"
+                    zIndex={dimensions.zIndex.notification}
+                    containerWidth={380}
+                    transitionDuration={isReduced ? 0 : undefined}
+                  />
+                  {children}
+                </ModalsProvider>
+              </PluginsProvider>
+            </ConnectionsProvider>
+          </VaultProvider>
         </CurrentUserContext>
       </QueryClientProvider>
     </MantineProvider>

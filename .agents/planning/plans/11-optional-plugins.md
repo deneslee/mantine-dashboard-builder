@@ -83,8 +83,8 @@ A stateless Hono service with `mssql` and `mongodb`. Browsers can't speak TDS or
   - Oct 24: the sandbox blocks `vite.plus`, so Node came from nodejs.org (checksum checked) and pnpm and `vite-plus` from npm.
   - `pnpm exec intent` runs `@tanstack/devtools-vite`'s bin of the same name, which fails. `node node_modules/@tanstack/intent/dist/cli.mjs list` runs the repo's Intent; the Router `search-params` skill was loaded.
 - [x] **1 Contracts and core.** `DatasourcePlugin.id` and `revision`, `OptionalPlugin.ts`, `connectionDatasource.ts`, `dataFrameSchema`, `columnsToFrame`, `timeMacros`, `passphraseCipher`, `relayContract`, and `forbidden` not reported. Done when each has unit tests.
-- [ ] **2 Build selection.** `plugins.json`, `plugins.config.ts`, config wiring, `app/plugins.ts`, `useAppPlugins`, `Providers`, the lint rules. Done when a mini build shows an unlisted plugin absent and a listed one in its own chunk.
-- [ ] **3 Vault and connections stores.** Done when tests show no plaintext in storage; lock, unlock, a wrong passphrase and reset; session-only secrets lost on reload; a tampered connection refused; and no secrets in exports or query keys.
+- [x] **2 Build selection.** `plugins.json`, `plugins.config.ts`, config wiring, `app/plugins.ts`, `useAppPlugins`, `Providers`, the lint rules. Done when a mini build shows an unlisted plugin absent and a listed one in its own chunk.
+- [x] **3 Vault and connections stores.** Done when tests show no plaintext in storage; lock, unlock, a wrong passphrase and reset; session-only secrets lost on reload; a tampered connection refused; and no secrets in exports or query keys.
 - [ ] **4 Google plugin.** Done when BigQuery and Firestore mapping, macros, JWT signing and the token cache are tested.
 - [ ] **5 Data sources UI.** Routes, Data sources page, connection page and form, vault dialogs, the Plugins section (dev path), import warnings for missing datasources. Done when every state has a story and the flows are play functions.
 - [ ] **6 AWS plugin.** Done when the four runtimes are tested on mocked clients and each is its own chunk.

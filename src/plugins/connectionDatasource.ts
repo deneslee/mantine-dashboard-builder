@@ -1,6 +1,18 @@
+import { canonicalJson } from '@/core/data/canonicalJson';
 import { AppError } from '@/core/errors/AppError';
 import type { DatasourcePlugin } from './DatasourcePlugin';
 import type { Connection, ConnectionValues, DatasourceType } from './OptionalPlugin';
+
+/** Where the vault keeps a connection's secrets. */
+export const connectionVaultKey = (id: string) => `connection:${id}`;
+
+/**
+ * What a connection's secrets were saved for: its plugin, type and settings. The vault stores it with
+ * the secrets, and a connection whose fingerprint differs (another page on the origin rewrote its
+ * relay URL, say) gets `changed` instead of its secrets.
+ */
+export const connectionFingerprint = ({ plugin, type, settings }: Connection) =>
+  canonicalJson({ plugin, type, settings });
 
 /** What the vault holds for a connection: its secrets, or why there are none. */
 export type SecretsLookup =
