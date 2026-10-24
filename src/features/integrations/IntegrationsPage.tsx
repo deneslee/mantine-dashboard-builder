@@ -1,4 +1,6 @@
 import {
+  Alert,
+  Anchor,
   Badge,
   Card,
   Center,
@@ -14,6 +16,7 @@ import {
 } from '@mantine/core';
 import {
   IconChevronRight,
+  IconDatabase,
   IconLayoutGrid,
   IconList,
   IconPlugConnected,
@@ -23,6 +26,7 @@ import { Link } from '@tanstack/react-router';
 import { useState } from 'react';
 import { RouteBreadcrumbs } from '@/shell/breadcrumbs/RouteBreadcrumbs';
 import { Page } from '@/ui/components/Page';
+import { iconSize, iconStroke } from '@/ui/tokens/semantic';
 import { getIntegrations } from './getIntegrations';
 import classes from './IntegrationsPage.module.css';
 
@@ -74,6 +78,13 @@ export function IntegrationsPage() {
       </Page.Header>
       <Page.Body>
         <Stack gap="md">
+          <Alert color="info" variant="light" icon={<IconDatabase size={iconSize.sm} stroke={iconStroke} />}>
+            Datasource plugins (Azure SQL, MongoDB, AWS and Google Cloud) are under{' '}
+            <Anchor size="sm" renderRoot={(props) => <Link to="/datasources" {...props} />}>
+              Data sources
+            </Anchor>
+            , where you add them to the build and connect them.
+          </Alert>
           <TextInput
             placeholder="Search integrations…"
             leftSection={<IconSearch size={16} />}

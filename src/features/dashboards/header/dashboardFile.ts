@@ -10,21 +10,26 @@ export const downloadDashboard = (dashboard: Dashboard) =>
   downloadFile(`${dashboard.id}.json`, serializeDashboard(dashboard), 'application/json');
 
 /**
- * Reads an imported file: migrate and validate it, then check that every widget type and
- * datasource exists here and accepts the file's options and query specs. Throws an Error that
- * says what is wrong.
+ * Reads an imported file: migrate and validate it, then check that every widget type exists here
+ * and accepts the file's options, and that every known datasource accepts its query specs. Throws an
+ * Error that says what is wrong. Datasources that don't exist here are listed, not rejected: a
+ * dashboard from another browser names connections this one may not have yet.
  */
-export function parseDashboardFile(text: string, plugins: Plugins): Dashboard {
+export function parseDashboardFile(
+  text: string,
+  plugins: Pick<Plugins, 'widgets' | 'datasources'>,
+): { dashboard: Dashboard; missingDatasources: string[] } {
   const dashboard = storedDashboardSchema.parse(JSON.parse(text));
+  const missing = new Set<string>();
   for (const widget of Object.values(dashboard.widgets)) {
     const definition = plugins.widgets[widget.type];
     if (!definition) throw new Error(`Unknown widget type "${widget.type}".`);
     definition.optionsSchema.parse(widget.options);
     for (const query of widget.queries) {
       const datasource = plugins.datasources[query.datasource];
-      if (!datasource) throw new Error(`Unknown datasource "${query.datasource}".`);
-      datasource.querySchema?.parse(query.spec);
+      if (!datasource) missing.add(query.datasource);
+      else datasource.querySchema?.parse(query.spec);
     }
   }
-  return dashboard;
+  return { dashboard, missingDatasources: [...missing] };
 }

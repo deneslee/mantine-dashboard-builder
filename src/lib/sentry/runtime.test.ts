@@ -90,6 +90,11 @@ describe('sentry runtime', () => {
       isReported: false,
     },
     {
+      label: 'a locked connection or a denied request',
+      make: (E: typeof AppError) => new E('forbidden', '“Analytics” is locked.'),
+      isReported: false,
+    },
+    {
       label: 'a server error',
       make: (E: typeof AppError) => new E('unknown', 'Request failed with status 503.'),
       isReported: true,

@@ -45,7 +45,7 @@ Errors are caught at the smallest boundary that can recover, and every boundary 
 - **Messages:** say what happened and what to do next. No stack traces, no error codes in the title. Dev builds show a collapsible details block with the cause.
 - **Variants:** `ErrorState.Full` (page), `.Inline` (card or tile), `.Banner` (top of content), chosen by the parent. Full and Inline are built on Mantine `EmptyState`.
 - **Retry** buttons call a real retry (`refetch`, `router.invalidate`, `resetErrorBoundary`) and are disabled while pending.
-- **Reporting:** everything goes through `reportError` (`@/lib/sentry/runtime`): the app root, the router's `defaultOnCatch` for routes, `QueryBoundary`'s `onError` for widget tiles, and the query and mutation caches for data errors. It drops aborts, offline fetch failures and 404s, and sends each error once. Without a DSN it does nothing. The policy and tags are in [06-sentry §1](../../.agents/planning/plans/06-sentry.md#1-report-errors-through-reporterror).
+- **Reporting:** everything goes through `reportError` (`@/lib/sentry/runtime`): the app root, the router's `defaultOnCatch` for routes, `QueryBoundary`'s `onError` for widget tiles, and the query and mutation caches for data errors. It drops aborts, offline fetch failures, 404s and `forbidden` errors (a locked connection, refused credentials), and sends each error once. Without a DSN it does nothing. The policy and tags are in [06-sentry §1](../../.agents/planning/plans/06-sentry.md#1-report-errors-through-reporterror).
 - **Tests:** every error component has a story and a Vitest test for role, message and the retry callback.
 
 ## Loading

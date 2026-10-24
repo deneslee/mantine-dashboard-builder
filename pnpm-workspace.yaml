@@ -1,3 +1,7 @@
+# The app is the root package; relay/ runs the database drivers browsers can't (.agents/planning/plans/done/11-optional-plugins.md).
+packages:
+  - relay
+
 # Quarantine newly published versions by 24 hours to prevent supply-chain compromise
 minimumReleaseAge: 1440
 
@@ -38,9 +42,12 @@ overrides:
   vite@*: 'catalog:'
   vitest@*: 'catalog:'
 peerDependencyRules:
+  # The Vite+ toolchain stands in for these; Storybook 10.6 still asks for vite-plus 0.x.
   allowAny:
     - vite
     - vitest
+    - vite-plus
   allowedVersions:
     vite: '*'
     vitest: '*'
+    vite-plus: '*'

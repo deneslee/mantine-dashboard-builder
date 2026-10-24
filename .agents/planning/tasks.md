@@ -4,6 +4,7 @@ The big-picture checklist, by roadmap phase ([roadmap](roadmap.md#roadmap)). Eac
 
 ## Done
 
+- [x] **11 Optional plugins** (Oct 24): Azure SQL, MongoDB, AWS and Google as datasource plugins chosen at build time in `plugins.json`, with Add to build from the dev server or the live site (a GitHub commit). Connections are typed into the app, their secrets kept in a passphrase vault, and `relay/` runs SQL Server and MongoDB queries. With `[]`, no plugin code is in the build. [Plan](plans/done/11-optional-plugins.md)
 - [x] **09 Vite+ migration** (Oct 23): exact toolchain versions, preserved lint rules, Oxfmt/editor setup and CI; all 275 tests pass. [Plan](plans/done/09-vite-plus.md)
 
 - [x] **Phase 0, scaffold** and **phase 1, chrome** (Sep 22).
@@ -21,11 +22,10 @@ The big-picture checklist, by roadmap phase ([roadmap](roadmap.md#roadmap)). Eac
 
 ## Next, in order
 
-Order decided Sep 30: the edit MVP (done Oct 2), then 08 (done Oct 1), then the viewing tools (done Oct 6), then Sentry and integrations ([roadmap](roadmap.md#roadmap)).
+Order decided Sep 30: the edit MVP (done Oct 2), then 08 (done Oct 1), then the viewing tools (done Oct 6), then Sentry and integrations ([roadmap](roadmap.md#roadmap)). Oct 24: 11 Optional plugins went first and is done.
 
-- [ ] **1. Integrations foundation** (not planned yet, below).
-- [ ] **2. 06 Sentry §3:** Sentry as the first telemetry integration, and its rebuilt page. [Plan](plans/06-sentry.md#3-sentry-as-the-first-telemetry-integration)
-- [ ] **3. 07 stage 4, layout, variables and data** (phase 4): document v2 with rows and then tabs (and the `metadata`/`spec` envelope), resolution from the layout, hover sync groups, variables through `getVariableRefs`, grouped datasource errors, per-datasource concurrency. [Plan](plans/07-dashboard-model.md#stage-4-layout-variables-data-phase-4)
+- [ ] **1. 06 Sentry §3:** Sentry as the first telemetry integration, and its rebuilt page. It should follow 11's `plugins.json` instead of a runtime `integrations.json`. [Plan](plans/06-sentry.md#3-sentry-as-the-first-telemetry-integration)
+- [ ] **2. 07 stage 4, layout, variables and data** (phase 4): document v2 with rows and then tabs (and the `metadata`/`spec` envelope), resolution from the layout, hover sync groups, variables through `getVariableRefs`, grouped datasource errors, per-datasource concurrency. [Plan](plans/07-dashboard-model.md#stage-4-layout-variables-data-phase-4)
 
 ### Edit UI polish (not planned yet)
 
@@ -61,28 +61,40 @@ These come from the Sep 30 review of the edit MVP ([07 › Sep 30 review](plans/
   - Move and Resize announce positions counted from 0 ("column 0, row 3"), while their dialogs count from 1.
 - [ ] **Query editor preview.** Debounce the preview query instead of running one per keystroke.
 
-### Integrations foundation (step 3, not planned yet)
+### Integrations foundation (replaced Oct 24)
 
-The model and the reasons for it are in the [integrations research](research/integrations.md).
+[11](plans/done/11-optional-plugins.md) replaced it for datasources: plugins are chosen at build time in `plugins.json`, not enabled by a runtime `integrations.json` ([integrations research](research/integrations.md)). What's left belongs to 06 §3.
 
-- [ ] **Manifests.** `IntegrationManifest` in `app/plugins.ts` next to widgets and datasources: `id`, `name`, `icon`, `category`, `provides` (`datasource`, `telemetry`), and `loadConfig`, `loadRuntime`, `loadSetup` as separate chunks. `features/integrations` never imports an integration.
-- [ ] **Config port.** `IntegrationConfigRepository` reads `public/config/integrations.json`: the outer shape first, then only the enabled entries' config schemas. The default file enables nothing. An entry that fails its schema stays off and shows why on its Setup page.
-- [ ] **Gating.** Telemetry runtimes start from `main.tsx` once the config is read, only when enabled; datasource types of disabled integrations aren't offered.
-- [ ] **Catalog.** Rebuild `/integrations` (grid and row) on `Page` and tokens, grouped by category: every registered integration with its state and a Set up link. Moved here from 06.
-- [ ] **Check.** Done when a build with the default config fetches no integration chunk and stays within the bundle budget, and editing the config of the same build turns Sentry on.
+- [-] **Manifests.** Replaced by the `OptionalPlugin` manifests and the table in `plugins.config.ts` (11).
+- [-] **Config port.** Replaced by `plugins.json`, read at build time (11).
+- [ ] **Telemetry gating.** Sentry's runtime is in a build only when it's chosen, following `plugins.json` (06 §3).
+- [ ] **Catalog.** Rebuild `/integrations` on `Page` and tokens (06 §3). Datasource plugins are listed under Data sources › Plugins (11).
+- [-] **Check.** 11's build checks cover datasources; 06 §3 adds Sentry's.
 
 ### Phase 4: widgets and data
 
-- [ ] **Datasource manager** offers the built-in types (`local-json`, `mock`, `csv`) plus those of enabled integrations.
+- [ ] **`csv` datasource** on the Data sources page, which 11 built: the built-in datasources and the connections of the plugins in the build.
 
 Nested layer tokens are no longer planned: they were for widgets inside a `container`, which 07 drops, so nothing nests. The variables and the Paper binding exist if something ever does ([03 §3](plans/done/03-design-tokens.md#3-surfaces-and-layering)).
 
 ### Phases 5 and 6
 
-- [ ] **Phase 5:** a `revision` field on stored dashboards for conflict checks; integration config read from the API. Saving it from Setup pages waits for "Who changes integration config" in [roadmap › Open questions](roadmap.md#open-questions-and-risks).
-- [ ] **Phase 6:** Datadog, Azure SQL, AWS and Haystack as datasource integrations. Their config and secrets live in the proxy; the browser chunk holds only the Setup form and the query editor.
+- [ ] **Phase 5:** a `revision` field on stored dashboards for conflict checks. Oct 24: integration config from the API is dropped, since plugins are chosen in `plugins.json` at build time ([11](plans/done/11-optional-plugins.md)).
+- [ ] **Phase 6:** Datadog and Haystack as optional plugins. Azure SQL and AWS came with [11](plans/done/11-optional-plugins.md), their secrets typed into the app; a backend proxy only if secrets must leave the browser.
 
 ## Any time
+
+### After 11: checks with real accounts
+
+These need the user's accounts and tokens, so they weren't run when 11 was built. Record each result in [11's Verification](plans/done/11-optional-plugins.md#verification).
+
+- [ ] **Add to build from the live site.** With a fine-grained token on the deployed site, add Google. Done when the commit appears, the deploy runs, `build-info.json` lists `google` and the page offers Reload.
+- [ ] **Each type on its free tier.** Done when Test connection passes and a chart or table renders for each of:
+  - Azure SQL and Atlas M0, through a local relay;
+  - the BigQuery sandbox, Firestore and DynamoDB;
+  - Athena, Aurora and Redshift, on credits.
+- [ ] **The relay's container.** Build it with `docker build -f relay/Dockerfile .` and run it on a host with a free container tier, with a token and the site's origin. Done when the live site queries through it.
+- [ ] **Passkey unlock** (not planned). WebAuthn PRF as a second way to unlock the vault ([browser-secrets](research/browser-secrets.md)).
 
 ### Performance (left from 01)
 
@@ -100,7 +112,7 @@ Nested layer tokens are no longer planned: they were for widgets inside a `conta
 - [ ] **First CI run.** `github-pages.yaml` (written in 08, Sep 30) runs lint, the format check, Chromium and `pnpm test` on pull requests and before each deploy, and deploys only from main. Done when a pull request runs the checks without deploying. Oct 23: the push run after 09 is green; Renovate's first pull request ([10](plans/10-renovate.md)) can close this.
 - [ ] **10 Renovate:** grouped dependency updates checked by CI, replacing Dependabot. Waits on installing the app. [Plan](plans/10-renovate.md)
 - [ ] **GitHub Pages deep links.** GitHub Pages has no SPA fallback, so `/dashboards/…` opened directly returns 404. The workflow already copies `index.html` to `404.html`; what's left is to check it. Done when a deep link loads on the deployed site.
-- [ ] **Bundle budget in CI.** Add `size-limit` with the first-load number, stating whether it's raw or gzipped; integration manifests count toward it. Done when a pull request that pushes first load past it fails.
+- [ ] **Bundle budget in CI.** Add `size-limit` with the first-load number, stating whether it's raw or gzipped; optional plugin manifests count toward it. Done when a pull request that pushes first load past it fails.
 
 ### Housekeeping
 

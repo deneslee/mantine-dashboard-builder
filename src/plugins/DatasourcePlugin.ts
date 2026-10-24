@@ -17,13 +17,22 @@ export interface QueryContext {
   timeZone: string;
 }
 
-/** A datasource plugin. `app/plugins.ts` collects them; features read them through `usePlugins`. */
+/**
+ * A datasource: a built-in one, or a connection of an optional plugin's type. `app/plugins.ts` and
+ * `app/useAppPlugins.ts` collect them; features read them through `usePlugins`.
+ */
 export interface DatasourcePlugin {
-  type: string;
+  /** What a query's `datasource` names: a built-in's id (`mock`) or a connection's (`analytics`). */
+  id: string;
   name: string;
   querySchema?: z.ZodType;
   /** Its results depend on the time range: the range and time zone are part of each query's cache key. */
   isTimeAware: boolean;
+  /**
+   * Changes whenever a connection's settings or secrets change. It is part of each query's cache
+   * key, so results fetched before an edit are never shown after it. Built-ins have none.
+   */
+  revision?: string;
   /**
    * One query's frames: usually one, more when a query returns several series. Rejects with an
    * `AppError`; honours `signal`.

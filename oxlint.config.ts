@@ -18,8 +18,10 @@ const barrels = {
     '@/shell/breadcrumbs',
     '@/plugins/widgets/*',
     '@/plugins/datasources/*',
+    '@/plugins/optional/*',
     '@/lib/notify',
     '@/lib/sentry',
+    '@/lib/vault',
   ],
   message: 'No barrel files: import the file that defines the name, e.g. @/ui/components/ErrorState.',
 };
@@ -28,6 +30,28 @@ const barrels = {
 const primitives = {
   group: ['@/ui/tokens/primitives'],
   message: 'Only ui/ may import the primitives: use @/ui/tokens/semantic.',
+};
+
+/** Drivers that need Node and raw sockets: they run in relay/, never in the browser bundle. */
+const serverPackages = {
+  group: [
+    'mssql',
+    'mssql/**',
+    'tedious',
+    'tedious/**',
+    'mongodb',
+    'mongodb/**',
+    'hono',
+    'hono/**',
+    '@hono/**',
+  ],
+  message: 'Server packages run in relay/, never in the browser: talk to them through the relay client.',
+};
+
+/** Generated from plugins.json by plugins.config.ts: what's in the build is decided in one place. */
+const virtualPlugins = {
+  group: ['virtual:optional-plugins'],
+  message: 'Only app/ imports virtual:optional-plugins; everything else reads plugins through usePlugins().',
 };
 
 /** Packages core/ may not use, type imports included: it runs anywhere and knows no UI or state. */
@@ -55,7 +79,12 @@ const uiAndStatePackages = [
  * One layer's import rule, for its folder and its fixture mirror under lint/fixtures/src/. It replaces
  * the global rule there, so it repeats the shared bans.
  */
-const layer = (dir: string, group: string[], message: string, shared = [barrels, primitives]) => ({
+const layer = (
+  dir: string,
+  group: string[],
+  message: string,
+  shared = [barrels, primitives, serverPackages, virtualPlugins],
+) => ({
   files: [`src/${dir}/**`, `lint/fixtures/src/${dir}/**`],
   rules: {
     'no-restricted-imports': ['error', { patterns: [{ group, message }, ...shared] }] as [
@@ -124,7 +153,7 @@ export const lint = {
     'app/no-raw-style-props': 'error',
 
     // No barrel files (bulletproof-react: they defeat tree-shaking); import the file that defines a name.
-    'no-restricted-imports': ['error', { patterns: [barrels, primitives] }],
+    'no-restricted-imports': ['error', { patterns: [barrels, primitives, serverPackages, virtualPlugins] }],
   },
   overrides: [
     {
@@ -173,7 +202,7 @@ export const lint = {
       'ui',
       [...above('lib', 'shell', 'plugins', 'features', 'app', 'testing'), '@tanstack/react-router'],
       'ui/ is the design system: it imports only core/ and utils/, and knows no routes.',
-      [barrels],
+      [barrels, serverPackages, virtualPlugins],
     ),
     layer(
       'lib',
@@ -197,10 +226,43 @@ export const lint = {
         '**/features/**',
         '@/plugins/widgets/**',
         '@/plugins/datasources/**',
+        '@/plugins/optional/**',
       ],
-      'Features never import app/, another feature, or a built-in widget or datasource (they come from usePlugins); app/ combines them. Inside a feature, use relative imports.',
+      'Features never import app/, another feature, or a built-in widget, datasource or optional plugin (they come from usePlugins); app/ combines them. Inside a feature, use relative imports.',
     ),
-    layer('app', above('testing'), 'testing/ is for tests and stories only.'),
+    // app/ alone reads virtual:optional-plugins.
+    layer('app', above('testing'), 'testing/ is for tests and stories only.', [
+      barrels,
+      primitives,
+      serverPackages,
+    ]),
+    // relay/ is a Node server: from the app it takes only core/, which it bundles.
+    {
+      files: ['relay/**', 'lint/fixtures/relay/**'],
+      env: { node: true, browser: false },
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            patterns: [
+              {
+                group: [
+                  '@/*',
+                  '@/**',
+                  ...['app', 'features', 'shell', 'plugins', 'lib', 'ui', 'utils', 'testing'].map(
+                    (dir) => `**/src/${dir}/**`,
+                  ),
+                  ...uiAndStatePackages,
+                ],
+                message:
+                  'relay/ imports only src/core/ from the app (by relative path) and no UI or state libraries.',
+              },
+              virtualPlugins,
+            ],
+          },
+        ] as ['error', { patterns: { group: string[]; message: string }[] }],
+      },
+    },
     // Tests, stories and their helpers assemble things, like app/: no layer rule.
     {
       files: ['**/*.test.{ts,tsx}', '**/*.stories.tsx', 'src/testing/**'],

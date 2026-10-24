@@ -14,5 +14,13 @@
     "isolatedModules": true,
     "moduleDetection": "force"
   },
-  "include": ["vite.config.ts", "vitest.config.ts", "oxlint.config.ts", "postcss.config.cjs", "lint/*.ts"]
+  "include": [
+    "vite.config.ts",
+    "vitest.config.ts",
+    "oxlint.config.ts",
+    "plugins.config.ts",
+    "plugins.config.test.ts",
+    "postcss.config.cjs",
+    "lint/*.ts"
+  ]
 }

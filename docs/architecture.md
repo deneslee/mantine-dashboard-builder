@@ -6,21 +6,23 @@ How the app is put together today: the stack, the layers, how a dashboard's data
 
 Mantine 9 needs React 19.2+, so all React 19 APIs (`ref` as prop, `use()`, `Activity`, `useEffectEvent`) are fair game. The React Compiler is on ([grid-and-charts.md › React Compiler](dashboard/grid-and-charts.md#react-compiler)).
 
-| Area      | Package                                                                                   | Notes                                                                                                                                            |
-| --------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Build     | Vite+, TypeScript strict, pnpm                                                            | Exact toolchain versions in `package.json`; setup and enforcement in [README](../README.md#run)                                                  |
-| UI        | `@mantine/core` 9.7.3, `hooks`, `notifications`, `modals`, `dates`, `charts`, `spotlight` | Spotlight drives the navbar search; `postcss-preset-mantine`                                                                                     |
-| Fonts     | Fontsource variable fonts: DM Sans, Source Sans 3, Source Code Pro, JetBrains Mono        | Self-hosted, no runtime requests to Google                                                                                                       |
-| Routing   | `@tanstack/react-router`                                                                  | File-based routes, `staticData` declares context-bar tabs and breadcrumbs                                                                        |
-| Data      | `@tanstack/react-query`                                                                   | One `QueryClient`                                                                                                                                |
-| State     | `zustand` + `immer` + `zundo`                                                             | Shell store (persisted) and one dashboard store per open dashboard (undo history)                                                                |
-| Grid      | `react-grid-layout` 2.x                                                                   | v2 API only, never `/legacy`                                                                                                                     |
-| Schemas   | `zod`                                                                                     | Dashboard document, widget options, datasource query specs, search params                                                                        |
-| Tables    | `@tanstack/react-table` v9 + `@tanstack/react-virtual`                                    | Rendered with Mantine `Table`                                                                                                                    |
-| Later     | `@xyflow/react`, `react-markdown`                                                         | Each a lazy chunk                                                                                                                                |
-| Icons     | `@tabler/icons-react`                                                                     | Direct file imports, no barrel                                                                                                                   |
-| Tooling   | Storybook, Vite+ (Vitest, Oxlint, Oxfmt), Testing Library, Stylelint                      | Three Vitest projects: `node` (pure logic), `dom` (jsdom) and `storybook` (every story in Chromium with an a11y check, play functions for flows) |
-| Dev tools | TanStack Devtools (Query, Router), Vite DevTools, code-inspector                          | Only in `pnpm dev:devtools` (`vite --mode devtools`); `pnpm dev`, builds, Storybook and tests load none of them                                  |
+| Area             | Package                                                                                                                           | Notes                                                                                                                                            |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Build            | Vite+, TypeScript strict, pnpm                                                                                                    | Exact toolchain versions in `package.json`; setup and enforcement in [README](../README.md#run)                                                  |
+| UI               | `@mantine/core` 9.7.3, `hooks`, `notifications`, `modals`, `dates`, `charts`, `spotlight`                                         | Spotlight drives the navbar search; `postcss-preset-mantine`                                                                                     |
+| Fonts            | Fontsource variable fonts: DM Sans, Source Sans 3, Source Code Pro, JetBrains Mono                                                | Self-hosted, no runtime requests to Google                                                                                                       |
+| Routing          | `@tanstack/react-router`                                                                                                          | File-based routes, `staticData` declares context-bar tabs and breadcrumbs                                                                        |
+| Data             | `@tanstack/react-query`                                                                                                           | One `QueryClient`                                                                                                                                |
+| State            | `zustand` + `immer` + `zundo`                                                                                                     | Shell store (persisted) and one dashboard store per open dashboard (undo history)                                                                |
+| Grid             | `react-grid-layout` 2.x                                                                                                           | v2 API only, never `/legacy`                                                                                                                     |
+| Schemas          | `zod`                                                                                                                             | Dashboard document, widget options, datasource query specs, search params                                                                        |
+| Optional plugins | `@aws-sdk/client-athena`, `client-rds-data`, `client-redshift-data`, `client-dynamodb`, `util-dynamodb`; nothing extra for Google | In a build only when `plugins.json` lists them; each datasource type's code is a lazy chunk ([datasources.md](dashboard/datasources.md))         |
+| Relay            | Hono, `@hono/node-server`, `mssql`, `mongodb`                                                                                     | `relay/`, a workspace package: the Node server that runs SQL Server and MongoDB queries, bundled with `vp pack`                                  |
+| Tables           | `@tanstack/react-table` v9 + `@tanstack/react-virtual`                                                                            | Rendered with Mantine `Table`                                                                                                                    |
+| Later            | `@xyflow/react`, `react-markdown`                                                                                                 | Each a lazy chunk                                                                                                                                |
+| Icons            | `@tabler/icons-react`                                                                                                             | Direct file imports, no barrel                                                                                                                   |
+| Tooling          | Storybook, Vite+ (Vitest, Oxlint, Oxfmt), Testing Library, Stylelint                                                              | Three Vitest projects: `node` (pure logic), `dom` (jsdom) and `storybook` (every story in Chromium with an a11y check, play functions for flows) |
+| Dev tools        | TanStack Devtools (Query, Router), Vite DevTools, code-inspector                                                                  | Only in `pnpm dev:devtools` (`vite --mode devtools`); `pnpm dev`, builds, Storybook and tests load none of them                                  |
 
 ## Layers
 
@@ -28,19 +30,19 @@ Imports go one way, from the bottom up; oxlint enforces it ([AGENTS.md › Struc
 
 ```text
 app/        routes  Providers  router  queryClient  plugins.ts  nav.ts
-  │         the only place features and the built-in plugins meet
-features/   dashboards  settings  notifications  integrations  debug
+  │         the only place features and the built-in plugins meet; only it reads virtual:optional-plugins
+features/   dashboards  datasources  settings  notifications  integrations  debug
   │         never import each other; widgets and datasources come from usePlugins()
 shell/      the app frame: Shell, ShellProvider, useShell, navbar, sidebar, context bar
-plugins/    WidgetPlugin and DatasourcePlugin contracts, usePlugins; widgets/*, datasources/*
-lib/        notify (toasts and the inbox), sentry, useMotion, useCurrentUser
+plugins/    WidgetPlugin, DatasourcePlugin and OptionalPlugin contracts, usePlugins; widgets/*, datasources/*, optional/*
+lib/        notify (toasts and the inbox), sentry, vault (secrets), useMotion, useCurrentUser
 ui/         tokens, the Mantine theme, generic components (Page, ErrorState, QueryBoundary, Skeletons)
-core/       plain TypeScript: dashboard schema and layout, time ranges, DataFrame, AppError
-utils/      wait
+core/       plain TypeScript: dashboard schema and layout, time ranges, DataFrame, AppError, the relay contract, the vault's cipher
+utils/      wait, slugify
 testing/    render, TestRouter, AppStory: for tests and stories only
 ```
 
-Each top-level folder is shaped like a package, so it can move to `packages/` when a monorepo (pnpm + Turborepo) arrives: a second app, a backend in the repo, or publishable packages. oxlint holds each folder to the layers below it (`oxlint.config.ts`), and `lint/rules.test.ts` proves every rule fires.
+Each top-level folder is shaped like a package, so it can move to `packages/` when a monorepo (pnpm + Turborepo) arrives: a second app, a backend in the repo, or publishable packages. oxlint holds each folder to the layers below it (`oxlint.config.ts`), and `lint/rules.test.ts` proves every rule fires. `relay/` sits beside `src/`: a Node server that imports only `src/core/` (a rule of its own), so the browser and the relay share one contract (`core/relay/relayContract.ts`).
 
 ## Dashboard data flow
 
@@ -67,20 +69,39 @@ Draft   every document change: isDirty ? write draft : clear draft
 Export  orderWidgets(dashboard) → <id>.json;  Import  JSON → storedDashboardSchema → plugin checks → importDocument
 ```
 
-Widget data is cached per datasource query (`['ds', datasource, spec, range]`), so two widgets asking the same query share one request; auto-refresh and the Refresh button invalidate `['ds']`. While new keys load, a widget keeps its last complete frames. How the canvas stays fast is in [grid-and-charts.md](dashboard/grid-and-charts.md); the document model is in [dashboard.md](dashboard/dashboard.md).
+Widget data is cached per datasource query (`['ds', datasource, spec, range]`, with a connection's `revision` after `datasource`), so two widgets asking the same query share one request; auto-refresh and the Refresh button invalidate `['ds']`. While new keys load, a widget keeps its last complete frames. How the canvas stays fast is in [grid-and-charts.md](dashboard/grid-and-charts.md); the document model is in [dashboard.md](dashboard/dashboard.md).
+
+## Datasource plugins and connections
+
+```text
+plugins.json ── plugins.config.ts (a Vite plugin) ── virtual:optional-plugins: the listed manifests, the catalog of all
+  app/plugins.ts → types: every datasource type in this build
+  withConnections(connections, vault versions) → one DatasourcePlugin per connection, keyed by its id
+    revision = the connection's updatedAt + its vault entry's version, so an edit never reuses a cached result
+    query(spec, ctx) → settings and spec parsed → vault lookup (locked, missing or changed → forbidden)
+      → type.load() once, a lazy chunk → runtime.query(values, spec, ctx, signal) → DataFrame[]
+         AWS, Google: straight from the browser · Azure SQL, MongoDB: relayRequest → relay/ → mssql, mongodb
+
+Add to build   dev: POST /__plugins → plugins.json → reload
+               live: commit through GitHub's API → the deploy → build-info.json → Reload
+```
+
+The page is `/datasources` (`features/datasources`); what each type needs is in [datasources.md](dashboard/datasources.md).
 
 ## Where state lives
 
-| State                                                                                                                                          | Owner                                                                | Mounted                                           |
-| ---------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------- |
-| Dashboard list, documents, widget data                                                                                                         | TanStack Query                                                       | `app/Providers`                                   |
-| Time range, refresh, time zone (`tz`), viewers' widget times (`wt`), `mode`, `widget`, `editor`, `view`, `inspect`, `inspectTab`, settings tab | URL search params, validated with zod                                | routes                                            |
-| Document being edited, saved baseline, undo history, editor tool, the dashboard's `now`                                                        | per-dashboard zustand store (`DashboardProvider`)                    | `routes/dashboards/$id`, keyed by id              |
-| Sidebar and context bar layout; the app's nav and global tabs                                                                                  | shell zustand store and static values (`ShellProvider`)              | `routes/__root`                                   |
-| Widget and datasource plugins                                                                                                                  | `PluginsContext`, filled from `app/plugins.ts`                       | `app/Providers`                                   |
-| Inbox                                                                                                                                          | global zustand store (`lib/notify/useInbox.ts`), written by `notify` | module                                            |
-| Color scheme, motion, density                                                                                                                  | Mantine color-scheme manager, `useMotion`, `useDensity`              | `app/Providers`; density is read where it is used |
-| Everything else                                                                                                                                | component state                                                      | –                                                 |
+| State                                                                                                                                          | Owner                                                                                               | Mounted                                           |
+| ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| Dashboard list, documents, widget data                                                                                                         | TanStack Query                                                                                      | `app/Providers`                                   |
+| Time range, refresh, time zone (`tz`), viewers' widget times (`wt`), `mode`, `widget`, `editor`, `view`, `inspect`, `inspectTab`, settings tab | URL search params, validated with zod                                                               | routes                                            |
+| Document being edited, saved baseline, undo history, editor tool, the dashboard's `now`                                                        | per-dashboard zustand store (`DashboardProvider`)                                                   | `routes/dashboards/$id`, keyed by id              |
+| Sidebar and context bar layout; the app's nav and global tabs                                                                                  | shell zustand store and static values (`ShellProvider`)                                             | `routes/__root`                                   |
+| Widget and datasource plugins                                                                                                                  | `PluginsContext`, filled from `app/plugins.ts` and the connections                                  | `app/Providers`                                   |
+| Connections: type, name, settings, never secrets                                                                                               | zustand persist store (`ConnectionsProvider`)                                                       | `app/Providers`                                   |
+| Secrets                                                                                                                                        | vault store (`VaultProvider`, `lib/vault`): memory, plus the entries saved encrypted on this device | `app/Providers`                                   |
+| Inbox                                                                                                                                          | global zustand store (`lib/notify/useInbox.ts`), written by `notify`                                | module                                            |
+| Color scheme, motion, density                                                                                                                  | Mantine color-scheme manager, `useMotion`, `useDensity`                                             | `app/Providers`; density is read where it is used |
+| Everything else                                                                                                                                | component state                                                                                     | –                                                 |
 
 `app/Providers` is the only provider stack: the app, `testing/render` and the Storybook preview all use it.
 
@@ -88,15 +109,18 @@ Widget data is cached per datasource query (`['ds', datasource, spec, range]`), 
 
 Every key is `storageKey(name)` from `lib/storage.ts`: `dashboard-builder:<name>`, because the GitHub Pages origin is shared with other projects.
 
-| Key (`dashboard-builder:` + …) | Holds                                                                  |
-| ------------------------------ | ---------------------------------------------------------------------- |
-| `shell`                        | Sidebar and context bar layout (zustand persist, `version` 2)          |
-| `notifications`                | Inbox items (zustand persist, `version` 2)                             |
-| `motion`                       | Reduced-motion preference                                              |
-| `density`                      | Dashboard density: compact, comfortable or spacious                    |
-| `color-scheme`                 | Light, dark or auto; also read by the pre-paint script in `index.html` |
-| `saved:<id>`                   | A saved dashboard (with `schemaVersion`), which overrides the file     |
-| `draft:<id>`                   | Unsaved edits and the baseline they started from                       |
-| `sentry`                       | Sentry prototype settings (plan 06 deletes them)                       |
+| Key (`dashboard-builder:` + …) | Holds                                                                                    |
+| ------------------------------ | ---------------------------------------------------------------------------------------- |
+| `shell`                        | Sidebar and context bar layout (zustand persist, `version` 2)                            |
+| `notifications`                | Inbox items (zustand persist, `version` 2)                                               |
+| `motion`                       | Reduced-motion preference                                                                |
+| `density`                      | Dashboard density: compact, comfortable or spacious                                      |
+| `color-scheme`                 | Light, dark or auto; also read by the pre-paint script in `index.html`                   |
+| `saved:<id>`                   | A saved dashboard (with `schemaVersion`), which overrides the file                       |
+| `draft:<id>`                   | Unsaved edits and the baseline they started from                                         |
+| `sentry`                       | Sentry prototype settings (plan 06 deletes them)                                         |
+| `connections`                  | Connections: type, name and settings, never secrets (zustand persist, `version` 1)       |
+| `vault`                        | Secrets saved on this device, encrypted with the passphrase (`{ version, keys, box }`)   |
+| `build-repo`                   | Add to build's repository and branch, for builds that don't know their own (`version` 1) |
 
 No key carries a version; each value does: zustand persist's `version` with a `migrate`, and a dashboard's `schemaVersion`. The keys from before Oct 2026 (`shell.v1`, `dashboard.saved.v1:<id>`, …) move to these names when `lib/storage.ts` is first evaluated, before any store hydrates; that code goes after 2027-01.

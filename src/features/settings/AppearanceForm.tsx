@@ -2,7 +2,7 @@ import { Button, Group, Radio, SegmentedControl, Stack, Text } from '@mantine/co
 import { IconDeviceDesktop, IconMoon, IconSun } from '@tabler/icons-react';
 import type { BurgerBehavior } from '@/shell/createShellStore';
 import { useAppearanceForm } from './useAppearanceForm';
-import { SettingsRow, SettingsSection } from './SettingsSection';
+import { Section, SectionRow } from '@/ui/components/Section';
 import classes from './AppearanceForm.module.css';
 
 const burgerOptions: { value: BurgerBehavior; label: string; description: string }[] = [
@@ -55,8 +55,8 @@ export function AppearanceForm() {
     >
       {/* Locked while isSaving so an edit can't land between submit and the draft being cleared. */}
       <fieldset disabled={isSaving} className={classes.fields}>
-        <SettingsSection title="Sidebar" description="How the navigation sidebar behaves on wide screens.">
-          <SettingsRow
+        <Section title="Sidebar" description="How the navigation sidebar behaves on wide screens.">
+          <SectionRow
             label="Menu button"
             labelId="settings-burger"
             description="What the menu button in the top bar does to the docked sidebar. On small screens it always opens the sidebar as a drawer."
@@ -83,11 +83,11 @@ export function AppearanceForm() {
                 ))}
               </Stack>
             </Radio.Group>
-          </SettingsRow>
-        </SettingsSection>
+          </SectionRow>
+        </Section>
 
-        <SettingsSection title="Theme" description="Colors used across the app.">
-          <SettingsRow
+        <Section title="Theme" description="Colors used across the app.">
+          <SectionRow
             label="Color scheme"
             labelId="settings-theme"
             description="System follows your operating system setting."
@@ -109,11 +109,11 @@ export function AppearanceForm() {
                 ),
               }))}
             />
-          </SettingsRow>
-        </SettingsSection>
+          </SectionRow>
+        </Section>
 
-        <SettingsSection title="Dashboards" description="How dashboards look to you.">
-          <SettingsRow
+        <Section title="Dashboards" description="How dashboards look to you.">
+          <SectionRow
             label="Density"
             labelId="settings-density"
             description="The space between widgets and inside them. Widgets keep their rows and columns."
@@ -127,11 +127,11 @@ export function AppearanceForm() {
               }}
               data={densityOptions.map((o) => ({ value: o.value, label: o.label }))}
             />
-          </SettingsRow>
-        </SettingsSection>
+          </SectionRow>
+        </Section>
 
-        <SettingsSection title="Motion" description="Animations across the app.">
-          <SettingsRow
+        <Section title="Motion" description="Animations across the app.">
+          <SectionRow
             label="Animations"
             labelId="settings-motion"
             description="Reduce makes panels, menus and drawers appear instantly. Follow system uses your operating system's reduced-motion setting."
@@ -145,8 +145,8 @@ export function AppearanceForm() {
               }}
               data={motionOptions.map((o) => ({ value: o.value, label: o.label }))}
             />
-          </SettingsRow>
-        </SettingsSection>
+          </SectionRow>
+        </Section>
       </fieldset>
 
       <div className={classes.actions}>

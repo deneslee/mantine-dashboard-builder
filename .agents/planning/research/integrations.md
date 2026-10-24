@@ -1,6 +1,8 @@
 # Integrations: feature flags or a registry
 
-Sep 29, 2026 · revised Sep 30 · Outcome: option B, adopted in [roadmap › Integrations](../roadmap.md#locked-decisions) and [06 Sentry](../plans/06-sentry.md)
+Sep 29, 2026 · revised Sep 30 and Oct 24 · Outcome: option B, adopted in [roadmap › Integrations](../roadmap.md#locked-decisions) and [06 Sentry](../plans/06-sentry.md)
+
+**Oct 24 revision.** For datasources, [11 Optional plugins](../plans/done/11-optional-plugins.md) replaced the runtime `integrations.json` with `plugins.json`, read at build time: a plugin that isn't listed has no code in the build at all, and Add to build edits the list from the app. Telemetry (Sentry) is to follow it in 06 §3. The comparison below still holds.
 
 **Question.** Can Sentry, Datadog, Haystack, Azure SQL, New Relic, AWS and the like be feature flags, switched on through a central service, so the app stays as light as possible and a fresh install only reads local files?
 

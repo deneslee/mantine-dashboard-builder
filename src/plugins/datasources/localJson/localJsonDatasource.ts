@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { AppError } from '@/core/errors/AppError';
-import type { DataFrame } from '@/core/data/DataFrame';
+import { dataFrameSchema } from '@/core/data/dataFrameSchema';
 import type { DatasourcePlugin } from '@/plugins/DatasourcePlugin';
 import { wait } from '@/utils/wait';
 
@@ -12,26 +12,6 @@ const spec = z.object({
     .refine((path) => !path.includes('..'), 'The path must stay inside data/.'),
 });
 
-/** A DataFrame as a JSON file; `length` comes from the values. */
-const frameDto = z
-  .object({
-    name: z.string().optional(),
-    fields: z
-      .array(
-        z.object({
-          name: z.string(),
-          type: z.enum(['time', 'number', 'string', 'boolean']),
-          values: z.array(z.unknown()),
-          config: z.object({ label: z.string().optional(), unit: z.string().optional() }).optional(),
-        }),
-      )
-      .min(1),
-  })
-  .refine(
-    (frame) => frame.fields.every((field) => field.values.length === frame.fields[0]?.values.length),
-    'Every field needs the same number of values.',
-  );
-
 const BASE = `${import.meta.env.BASE_URL}data/`;
 
 /** Simulated latency so loading states are visible in development. */
@@ -39,7 +19,7 @@ const LATENCY = import.meta.env.DEV ? 400 : 0;
 
 /** Reads a DataFrame from a static JSON file. The time range doesn't apply. */
 export const localJsonDatasource: DatasourcePlugin = {
-  type: 'local-json',
+  id: 'local-json',
   name: 'Local JSON',
   querySchema: spec,
   isTimeAware: false,
@@ -63,12 +43,11 @@ export const localJsonDatasource: DatasourcePlugin = {
     if (!res.ok || !res.headers.get('content-type')?.includes('json'))
       throw new AppError('datasource', `No data file at data/${path}.`, { isRetryable: false });
 
-    const frame = frameDto.safeParse(await res.json());
+    const frame = dataFrameSchema.safeParse(await res.json());
     if (!frame.success)
       throw new AppError('validation', `data/${path} isn't a valid data frame.`, {
         details: frame.error.issues,
       });
-    const { name, fields } = frame.data;
-    return [{ name, length: fields[0]?.values.length ?? 0, fields } satisfies DataFrame];
+    return [frame.data];
   },
 };
