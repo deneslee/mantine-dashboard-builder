@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { dataFrameSchema } from '../data/dataFrameSchema';
+import { maxRowsSchema } from '../data/maxRows';
 import { APP_ERROR_CODES } from '../errors/AppError';
 
 /**
@@ -16,12 +17,7 @@ export const RELAY_ROUTES = {
   health: '/v1/health',
 } as const;
 
-/** The most rows any query may return; the relay may set a lower limit. */
-export const RELAY_MAX_ROWS = 100_000;
-export const RELAY_DEFAULT_ROWS = 10_000;
-
 const connectionString = z.string().trim().min(1, 'Enter a connection string.').max(4096);
-const maxRows = z.number().int().positive().max(RELAY_MAX_ROWS).default(RELAY_DEFAULT_ROWS);
 
 /** The query's time range; the relay binds it as `@__from`, `@__to`, `@__fromMs` and `@__toMs`. */
 export const relayRangeSchema = z.object({ from: z.iso.datetime(), to: z.iso.datetime() });
@@ -30,7 +26,7 @@ export const sqlServerQuerySchema = z.object({
   connectionString,
   sql: z.string().min(1).max(100_000),
   range: relayRangeSchema.optional(),
-  maxRows,
+  maxRows: maxRowsSchema,
 });
 
 export const sqlServerTestSchema = z.object({ connectionString });
@@ -41,7 +37,7 @@ export const mongoQuerySchema = z.object({
   collection: z.string().min(1).max(255),
   /** An aggregation pipeline as Extended JSON text, so `{"$date": …}` and `{"$oid": …}` survive. */
   pipeline: z.string().min(2).max(100_000),
-  maxRows,
+  maxRows: maxRowsSchema,
 });
 
 export const mongoTestSchema = z.object({ connectionString, database: z.string().min(1).max(64).optional() });

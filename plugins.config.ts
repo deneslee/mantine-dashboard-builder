@@ -24,7 +24,13 @@ export interface OptionalPluginEntry {
  * descriptions are in every build, so Add to build can offer them; their code is only in builds
  * whose `plugins.json` lists them.
  */
-export const OPTIONAL_PLUGINS: Record<string, OptionalPluginEntry> = {};
+export const OPTIONAL_PLUGINS: Record<string, OptionalPluginEntry> = {
+  google: {
+    name: 'Google Cloud',
+    description: 'BigQuery and Firestore, called straight from the browser.',
+    module: 'src/plugins/optional/google/googlePlugin.ts',
+  },
+};
 
 export const VIRTUAL_ID = 'virtual:optional-plugins';
 const RESOLVED_ID = `\0${VIRTUAL_ID}`;
