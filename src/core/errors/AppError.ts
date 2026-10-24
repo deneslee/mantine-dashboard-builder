@@ -1,11 +1,14 @@
-export type AppErrorCode =
-  | 'not_found'
-  | 'network'
-  | 'timeout'
-  | 'validation'
-  | 'datasource'
-  | 'forbidden'
-  | 'unknown';
+export const APP_ERROR_CODES = [
+  'not_found',
+  'network',
+  'timeout',
+  'validation',
+  'datasource',
+  'forbidden',
+  'unknown',
+] as const;
+
+export type AppErrorCode = (typeof APP_ERROR_CODES)[number];
 
 /**
  * The one error shape the UI understands. Each feature's `api/mapper.ts` turns transport

@@ -103,7 +103,7 @@ function table(s: z.infer<typeof tableSpec>, ctx: QueryContext): DataFrame {
 
 /** Generated data for demos and tests, with a random delay so loading states show. */
 export const mockDatasource: DatasourcePlugin = {
-  type: 'mock',
+  id: 'mock',
   name: 'Mock data',
   querySchema: spec,
   isTimeAware: true,

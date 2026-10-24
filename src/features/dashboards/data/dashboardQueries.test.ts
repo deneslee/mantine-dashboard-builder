@@ -5,7 +5,7 @@ import { datasourceQuery } from './dashboardQueries';
 const time = { range: { from: 'now-24h', to: 'now' }, shifts: ['1w'], timeZone: 'UTC' };
 
 const keyFor = (isTimeAware: boolean) => {
-  const datasource: DatasourcePlugin = { type: 'x', name: 'X', isTimeAware, query: async () => [] };
+  const datasource: DatasourcePlugin = { id: 'x', name: 'X', isTimeAware, query: async () => [] };
   return datasourceQuery({ datasource: 'x', spec: 'a' }, time, {
     datasources: { x: datasource },
     getNow: Date.now,

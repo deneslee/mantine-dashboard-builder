@@ -23,8 +23,8 @@ The big-picture checklist, by roadmap phase ([roadmap](roadmap.md#roadmap)). Eac
 
 Order decided Sep 30: the edit MVP (done Oct 2), then 08 (done Oct 1), then the viewing tools (done Oct 6), then Sentry and integrations ([roadmap](roadmap.md#roadmap)).
 
-- [ ] **1. Integrations foundation** (not planned yet, below).
-- [ ] **2. 06 Sentry §3:** Sentry as the first telemetry integration, and its rebuilt page. [Plan](plans/06-sentry.md#3-sentry-as-the-first-telemetry-integration)
+- [ ] **1. 11 Optional plugins:** Azure SQL, MongoDB, AWS and Google as datasource plugins chosen at build time in `plugins.json` (Add to build from the dev server or the live site), connections typed into the app, secrets in a passphrase vault, and a relay for SQL Server and MongoDB. It replaces the Integrations foundation below for datasources. [Plan](plans/11-optional-plugins.md)
+- [ ] **2. 06 Sentry §3:** Sentry as the first telemetry integration, and its rebuilt page. It should follow 11's `plugins.json` instead of a runtime `integrations.json`. [Plan](plans/06-sentry.md#3-sentry-as-the-first-telemetry-integration)
 - [ ] **3. 07 stage 4, layout, variables and data** (phase 4): document v2 with rows and then tabs (and the `metadata`/`spec` envelope), resolution from the layout, hover sync groups, variables through `getVariableRefs`, grouped datasource errors, per-datasource concurrency. [Plan](plans/07-dashboard-model.md#stage-4-layout-variables-data-phase-4)
 
 ### Edit UI polish (not planned yet)

@@ -21,13 +21,15 @@ const plugins: Plugins = {
   widgets: { chart: widget('chart'), kpi: widget('kpi') },
   datasources: {
     mock: {
-      type: 'mock',
+      id: 'mock',
       name: 'Mock',
       isTimeAware: true,
       querySchema: z.object({ seed: z.string() }),
       query: async () => [{ length: 0, fields: [] }],
     },
   },
+  types: {},
+  build: { catalog: [] },
 };
 
 describe('dashboard files', () => {

@@ -8,6 +8,9 @@ import { tableWidget } from '@/plugins/widgets/table/tableWidget';
 const byType = <T extends { type: string }>(plugins: T[]) =>
   Object.fromEntries(plugins.map((plugin) => [plugin.type, plugin]));
 
+const byId = <T extends { id: string }>(plugins: T[]) =>
+  Object.fromEntries(plugins.map((plugin) => [plugin.id, plugin]));
+
 /**
  * Every widget and datasource the app ships, keyed by type. Features meet here: `Providers` puts
  * the maps in `PluginsContext`, so no feature imports a plugin. Adding a plugin is one
@@ -15,5 +18,7 @@ const byType = <T extends { type: string }>(plugins: T[]) =>
  */
 export const plugins: Plugins = {
   widgets: byType([kpiWidget, chartWidget, tableWidget]),
-  datasources: byType([mockDatasource, localJsonDatasource]),
+  datasources: byId([mockDatasource, localJsonDatasource]),
+  types: {},
+  build: { catalog: [] },
 };

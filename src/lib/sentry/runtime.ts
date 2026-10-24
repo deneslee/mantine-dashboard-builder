@@ -74,10 +74,13 @@ export function addBreadcrumb(breadcrumb: Parameters<Telemetry['addBreadcrumb']>
   );
 }
 
-/** The policy table in plans/06-sentry.md §1: aborts, offline failures and 404s are expected. */
+/**
+ * The policy table in plans/06-sentry.md §1: aborts, offline failures and 404s are expected, and so
+ * is `forbidden` (a locked connection, credentials without access), which is the user's setup to fix.
+ */
 function isReportable(error: unknown, e: AppError): boolean {
   if (error instanceof DOMException && error.name === 'AbortError') return false;
-  if (e.code === 'not_found') return false;
+  if (e.code === 'not_found' || e.code === 'forbidden') return false;
   return e.code !== 'network' || navigator.onLine;
 }
 

@@ -93,12 +93,12 @@ function deferredDatasource() {
   );
   const release = (spec: string, from: string) =>
     act(async () => waiting.get(`${spec} ${from}`)?.([{ name: `${spec} ${from}`, length: 0, fields: [] }]));
-  const datasource: DatasourcePlugin = { type: 'deferred', name: 'Deferred', isTimeAware: true, query };
+  const datasource: DatasourcePlugin = { id: 'deferred', name: 'Deferred', isTimeAware: true, query };
   return { datasource, query, release };
 }
 
 const brokenDatasource: DatasourcePlugin = {
-  type: 'broken',
+  id: 'broken',
   name: 'Broken',
   isTimeAware: true,
   query: async () => {
@@ -168,6 +168,8 @@ function renderGrid() {
   const plugins: Plugins = {
     widgets: { name: nameWidget, field: fieldWidget },
     datasources: { deferred: datasource, broken: brokenDatasource },
+    types: {},
+    build: { catalog: [] },
   };
   const store = createDashboardStore(dashboard, { shouldPersist: false });
   const router = createTestRouter({ page: <Page plugins={plugins} store={store} /> });

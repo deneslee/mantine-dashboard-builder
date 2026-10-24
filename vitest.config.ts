@@ -8,7 +8,9 @@ const NODE_TESTS = [
   'lint/**/*.test.ts',
   'src/core/**/*.test.ts',
   'src/utils/**/*.test.ts',
+  'src/plugins/*.test.ts',
   'src/plugins/datasources/**/*.test.ts',
+  'src/plugins/optional/**/*.test.ts',
   'src/features/dashboards/data/demoDashboards.test.ts',
 ];
 

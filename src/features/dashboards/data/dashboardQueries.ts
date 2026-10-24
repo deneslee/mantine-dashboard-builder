@@ -34,11 +34,13 @@ export interface DatasourceResult {
 }
 
 /**
- * One datasource query's frames: the cache unit for widget data. The key is the datasource, its spec
- * and, for a time-aware datasource, the widget's time as written (`now-24h`, shifts, time zone), so
- * identical queries in two widgets share one request, and each query fails, retries and is cancelled on its own. The range is resolved
- * when the query runs, against the dashboard's `now` (`getNow`), so a refresh moves the window and all
- * widgets cover the same one. `source` names the widget in error toasts.
+ * One datasource query's frames: the cache unit for widget data. The key is the datasource, its
+ * revision (a connection's, which changes when its settings or secrets do; never the secrets), its
+ * spec and, for a time-aware datasource, the widget's time as written (`now-24h`, shifts, time
+ * zone), so identical queries in two widgets share one request, and each query fails, retries and is
+ * cancelled on its own. The range is resolved when the query runs, against the dashboard's `now`
+ * (`getNow`), so a refresh moves the window and all widgets cover the same one. `source` names the
+ * widget in error toasts.
  */
 export const datasourceQuery = (
   query: Query,
@@ -51,16 +53,21 @@ export const datasourceQuery = (
 ) => {
   const datasource = datasources[query.datasource];
   const timeKey = datasource?.isTimeAware ? [time.range, time.shifts, time.timeZone] : [];
+  const revisionKey = datasource?.revision ? [datasource.revision] : [];
   return queryOptions({
-    queryKey: [...dashboardKeys.data, query.datasource, query.spec, ...timeKey],
+    queryKey: [...dashboardKeys.data, query.datasource, ...revisionKey, query.spec, ...timeKey],
     queryFn: async ({ signal }): Promise<DatasourceResult> => {
       const { range, timeZone } = time;
       const resolved = resolveEffectiveTime(time, getNow());
       if (!resolved) throw new AppError('validation', `Invalid time range "${range.from}" to "${range.to}".`);
       if (!datasource)
-        throw new AppError('validation', `No datasource of type "${query.datasource}".`, {
-          isRetryable: false,
-        });
+        throw new AppError(
+          'validation',
+          `No datasource "${query.datasource}". Add a connection with this id under Data sources.`,
+          {
+            isRetryable: false,
+          },
+        );
       const start = performance.now();
       const frames = await datasource.query(query.spec, { range: resolved, raw: range, timeZone }, signal);
       return { frames, durationMs: Math.round(performance.now() - start) };
