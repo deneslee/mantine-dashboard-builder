@@ -28,6 +28,7 @@ Rules for humans and coding agents working in this repo. Read before writing cod
     pnpm test:unit        # node + jsdom only (fast)
     pnpm test:stories     # stories only (needs `pnpm exec playwright install chromium` once)
     pnpm storybook        # http://localhost:6006
+    pnpm relay            # the relay for Azure SQL and MongoDB, on http://127.0.0.1:8787
 
 **Before you call a change done:**
 
@@ -40,15 +41,16 @@ Rules for humans and coding agents working in this repo. Read before writing cod
 
 Versions are in `package.json`; the stack, the layers, the data flow and where state lives are in [architecture.md](docs/architecture.md).
 
-| Working on                               | Read                                                                                                 |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| What to build next, and fixed decisions  | [roadmap.md](.agents/planning/roadmap.md), [tasks.md](.agents/planning/tasks.md)                     |
-| How the app fits together                | [architecture.md](docs/architecture.md)                                                              |
-| Navbar, sidebar, context bar, panes      | [shell.md](docs/ui/shell.md)                                                                         |
-| Styles, tokens, the Mantine theme        | [design-system.md](docs/ui/design-system.md)                                                         |
-| Toasts, errors, loading                  | [feedback.md](docs/ui/feedback.md)                                                                   |
-| Dashboards, widgets, datasources, charts | [dashboard.md](docs/dashboard/dashboard.md), [grid-and-charts.md](docs/dashboard/grid-and-charts.md) |
-| Planned work                             | Its plan in `.agents/planning/plans/`                                                                |
+| Working on                                        | Read                                                                                                 |
+| ------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| What to build next, and fixed decisions           | [roadmap.md](.agents/planning/roadmap.md), [tasks.md](.agents/planning/tasks.md)                     |
+| How the app fits together                         | [architecture.md](docs/architecture.md)                                                              |
+| Navbar, sidebar, context bar, panes               | [shell.md](docs/ui/shell.md)                                                                         |
+| Styles, tokens, the Mantine theme                 | [design-system.md](docs/ui/design-system.md)                                                         |
+| Toasts, errors, loading                           | [feedback.md](docs/ui/feedback.md)                                                                   |
+| Dashboards, widgets, datasources, charts          | [dashboard.md](docs/dashboard/dashboard.md), [grid-and-charts.md](docs/dashboard/grid-and-charts.md) |
+| Optional plugins, connections, secrets, the relay | [datasources.md](docs/dashboard/datasources.md)                                                      |
+| Planned work                                      | Its plan in `.agents/planning/plans/`                                                                |
 
 ## Mantine first
 
@@ -81,21 +83,27 @@ Package-shaped folders, so each can move to `packages/` when the repo becomes a 
     src/
       app/          the only place features and built-in plugins meet: routes/ (thin TanStack file routes;
                     `-name.tsx` files are ignored), Providers, router, queryClient, plugins.ts, error pages
-      features/     dashboards, settings, notifications, integrations, debug; grouped by area inside
+      features/     dashboards, datasources, settings, notifications, integrations, debug; grouped by area inside
                     (dashboards: data/ state/ grid/ header/ editor/ inspect/), small features flat
       shell/        the app frame: Shell, ShellProvider, useShell, navbar/, sidebar/, contextBar/, breadcrumbs/
-      plugins/      WidgetPlugin and DatasourcePlugin contracts, usePlugins; widgets/*, datasources/*
-      lib/          services: notify/ (toasts, inbox), sentry/, useMotion, useCurrentUser
+      plugins/      WidgetPlugin, DatasourcePlugin and OptionalPlugin contracts, usePlugins; widgets/*,
+                    datasources/*, optional/* (in a build only when plugins.json lists them)
+      lib/          services: notify/ (toasts, inbox), sentry/, vault/ (secrets), useMotion, useCurrentUser
       ui/           look only: tokens/, theme/, components/ (Page, ErrorState, QueryBoundary, Skeletons)
-      core/         plain TypeScript, no React: dashboard/, time/, data/ (DataFrame), errors/ (AppError)
-      utils/        tiny helpers (wait)
+      core/         plain TypeScript, no React: dashboard/, time/, data/ (DataFrame), errors/ (AppError),
+                    relay/ (the relay's contract), crypto/, build/
+      utils/        tiny helpers (wait, slugify)
       testing/      render, TestRouter, AppStory, setup: tests and stories only
+    relay/          beside src/: the Node server for SQL Server and MongoDB; it imports only src/core/
 
-- **Imports go down the tree above, never up** (`testing/` aside): `app` on top, `utils` at the bottom. `plugins/` imports only `core`, `ui` and `utils`; `shell/` never imports `plugins/`. oxlint enforces it with one rule per folder (`oxlint.config.ts`), plus `import/no-cycle`; `lint/rules.test.ts` proves each rule fires on the fixtures in `lint/fixtures/src/`. `core/` also may not use React, Mantine, TanStack, zustand or other UI and state libraries, and `ui/` may not use the router.
+- **Imports go down the tree above, never up** (`testing/` aside): `app` on top, `utils` at the bottom. `plugins/` imports only `core`, `ui` and `utils`; `shell/` never imports `plugins/`. oxlint enforces it with one rule per folder (`oxlint.config.ts`), plus `import/no-cycle`; `lint/rules.test.ts` proves each rule fires on the fixtures in `lint/fixtures/src/` and `lint/fixtures/relay/`. `core/` also may not use React, Mantine, TanStack, zustand or other UI and state libraries, and `ui/` may not use the router.
 - **Features never import each other, `app/`, or a built-in widget or datasource.** Combine them in `app/`:
   - A route may import several features and wrap parts in its own Suspense or error boundary.
   - A feature that needs something from another asks for it (props, context); `app/` passes it in, e.g. `ShellProvider nav` and `globalTabs`, `PluginsContext`.
   - Code both need moves down a layer.
+- **Optional plugins reach the app only through `virtual:optional-plugins`**, which only `app/` imports; everything else gets them from `usePlugins()`.
+  - Each one is an entry in `OPTIONAL_PLUGINS` (`plugins.config.ts`), and a build has it only when `plugins.json` lists it ([datasources.md](docs/dashboard/datasources.md)).
+  - `relay/` imports only `src/core/`, and `src/` never imports a server package (`mssql`, `mongodb`, `hono`).
 - **No barrel files (`index.ts`).** Import the file that defines the name: `@/ui/components/ErrorState`, `@/lib/notify/notify`. Barrels defeat tree-shaking.
 - **Relative imports** inside a feature or folder; `@/…` across folders.
 - **Where does it go?** Look only → `ui/`. Pure logic → `core/`. A service with side effects → `lib/`. The frame → `shell/`. Knows the domain or fetches data → `features/`. Places things on a page → `app/routes/`.
@@ -121,6 +129,7 @@ The skills below cover the general rules; these are this project's choices.
 - **Stores:** a `create*Store` factory, one `*Provider`, read only through `use*` hooks. Only `ShellProvider` knows the shell uses Zustand; consumers call `useSidebar`, `useContextBar`, `useShellActions`. Selectors return primitives or use `useShallow`; callbacks read state with `getState()`. Derived values (`isDirty`, `canUndo`) are computed, never stored.
 - **Performance:** lazy-load anything heavy or conditional (routes through the router's `autoCodeSplitting`, context-bar tabs, widgets, datasource adapters). One Suspense boundary per tile or tab, not per page. Drag and resize values stay out of React state and commit on release. The canvas has its own rules in [grid-and-charts.md](docs/dashboard/grid-and-charts.md).
 - **react-grid-layout:** the v2 API only, never `react-grid-layout/legacy`.
+- **Secrets** (passwords, keys, tokens, connection strings) live only in the vault (`@/lib/vault`). Never in a store, the URL, a query key, a dashboard, an export, a toast or a log.
 - **localStorage:** keys come from `storageKey(name)` (`@/lib/storage`). The version lives in the value, not the key: zustand persist's `version`, with a `migrate` when a persisted field changes; dashboards carry `schemaVersion`. Never persist transient UI such as open drawers.
 
 ## Notifications, errors, loading

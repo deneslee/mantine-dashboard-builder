@@ -6,7 +6,7 @@ import { APP_ERROR_CODES } from '../errors/AppError';
 /**
  * What the browser and the relay (`relay/`) send each other. Browsers can't speak SQL Server's or
  * MongoDB's protocols, so those queries go through the relay: the connection string comes with each
- * request and the relay keeps nothing. Plan: .agents/planning/plans/11-optional-plugins.md.
+ * request and the relay keeps nothing. Plan: .agents/planning/plans/done/11-optional-plugins.md.
  */
 
 export const RELAY_ROUTES = {

@@ -1,6 +1,6 @@
 # 11 Optional plugins
 
-Status: open · Phase 6 (real datasources) and the Integrations foundation · Depends on: 07 stage 3 (done), 08 (done) · Research: [browser-secrets](../research/browser-secrets.md), [integrations](../research/integrations.md)
+Status: done (2026-10-24) · Phase 6 (real datasources) and the Integrations foundation · Depends on: 07 stage 3 (done), 08 (done) · Research: [browser-secrets](../../research/browser-secrets.md), [integrations](../../research/integrations.md)
 
 ## Goal
 
@@ -42,7 +42,7 @@ Add datasource plugins for **Azure SQL, MongoDB, AWS** (Athena, Aurora, Redshift
 
 ### Secrets: the vault
 
-Following [browser-secrets](../research/browser-secrets.md):
+Following [browser-secrets](../../research/browser-secrets.md):
 
 - **Crypto:** PBKDF2-SHA256 at 600,000 iterations gives a non-extractable AES-GCM-256 key. The ciphertext is stored under `storageKey('vault')`.
 - **Session first:** secrets live in memory, and "Save on this device" encrypts them.
@@ -99,12 +99,15 @@ A stateless Hono service with `mssql` and `mongodb`. Browsers can't speak TDS or
   - The tests stub `fetch`, since MSW isn't used in `src/`.
   - `core/build/buildInfo.ts` holds the shape of `build-info.json`, for the build and the poller alike.
   - Not run against GitHub here: that needs the user's token.
-- [ ] **9 Docs.** `docs/dashboard/datasources.md` (including a "Try it free" table); roadmap, tasks, 06, architecture, dashboard, README and AGENTS updates. Done when `lint/docs.test.ts` passes and this plan is in `done/`.
+- [x] **9 Docs.** `docs/dashboard/datasources.md` (including a "Try it free" table); roadmap, tasks, 06, architecture, dashboard, README and AGENTS updates. Done when `lint/docs.test.ts` passes and this plan is in `done/`.
+  - Oct 24: [datasources.md](../../../../docs/dashboard/datasources.md) is new.
+  - Updated: the roadmap, tasks, 06, [integrations](../../research/integrations.md), architecture, dashboard and feedback docs, the README and AGENTS.md.
+  - Open in [tasks.md › After 11](../../tasks.md#after-11-checks-with-real-accounts): the checks that need the user's accounts (the live Add to build with a token, a test connection and a widget per type on the free tiers, the relay's Docker image).
 
 ## Decisions
 
 - **2026-10-24: a relay for Azure SQL and MongoDB.** It is stateless: the connection string comes with each request. AWS and Google run in the browser, because live CORS preflights succeeded against DynamoDB, Athena, the RDS and Redshift Data APIs, BigQuery, Firestore and `oauth2.googleapis.com/token`.
-- **2026-10-24: chosen at build time, from the UI.** `plugins.json`, `[]` by default, edited with Add to build (dev server, or a GitHub commit from the live site). This replaces the runtime `integrations.json` from [research/integrations](../research/integrations.md) for datasource plugins. "Plugins" is the name, at the user's suggestion.
+- **2026-10-24: chosen at build time, from the UI.** `plugins.json`, `[]` by default, edited with Add to build (dev server, or a GitHub commit from the live site). This replaces the runtime `integrations.json` from [research/integrations](../../research/integrations.md) for datasource plugins. "Plugins" is the name, at the user's suggestion.
 - **2026-10-24: AWS covers Athena, Aurora, Redshift and DynamoDB.** DynamoDB was added for its always-free tier. Google covers BigQuery and Firestore.
 - **2026-10-24: the relay caps rows by cancelling, not with `SET ROWCOUNT`.** Rows stream in and the query is cancelled at `maxRows`. `SET ROWCOUNT` would stay set on pooled connections.
 - **2026-10-24: the relay checks hosts with each driver's own parser.** That is mssql's `parseConnectionString` and `mongodb-connection-string-url`, so the hosts checked are the hosts each driver connects to.
@@ -116,7 +119,7 @@ A stateless Hono service with `mssql` and `mongodb`. Browsers can't speak TDS or
 - **2026-10-24: the live-site token is saved only into an unlocked vault.** Add to build is itself a dialog, so it doesn't open the vault's own. Otherwise the token lasts until the tab closes.
   - It sits under the vault key `github`, fingerprinted by repository and branch.
 - **2026-10-24: a build counts as live once it has the new commit or the new list.** A later commit may have built on ours, and `build-info.json` then names that one.
-- **2026-10-24: secrets go in a passphrase vault.** The user asked for researched advice ([browser-secrets](../research/browser-secrets.md)). Passkey (PRF) unlock comes later.
+- **2026-10-24: secrets go in a passphrase vault.** The user asked for researched advice ([browser-secrets](../../research/browser-secrets.md)). Passkey (PRF) unlock comes later.
 
 ## Verification
 
@@ -128,7 +131,7 @@ A stateless Hono service with `mssql` and `mongodb`. Browsers can't speak TDS or
   - **`["aws"]`:** lazy runtimes (Athena 16 kB, Redshift 17 kB, Aurora 30 kB, DynamoDB 42 kB) and a shared SDK chunk of 114 kB (39 kB gzip).
   - **`["azure-sql", "mongodb"]`:** the relay client and contract 2.4 kB, the Azure SQL runtime 0.6 kB, the MongoDB runtime 0.9 kB. Only the manifests' field labels and the refused-operator list are in the entry.
   - None of these chunks is in the entry or the modulepreloads.
-- **Gate (Oct 24, task 7):** `vp check` (format, lint, types: 420 files), `vp run lint` and `pnpm build` pass. `pnpm test`: 84 files and 469 tests, node, dom and storybook.
+- **Gate (Oct 24, when the plan closed):** `vp check` (format, lint, types: 430 files), `vp run lint` and `pnpm build` pass. `pnpm test`: 87 files and 489 tests, node, dom and storybook, with every relative docs link resolving. First load is unchanged since task 7.
   - In this sandbox the globally installed `vp` runs its own bundled Vitest for `vp test`, which can't find jsdom. `pnpm test` runs the repo's Vite+.
 
 ## Risks

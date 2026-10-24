@@ -1,6 +1,6 @@
 # Secrets typed into a browser app
 
-Oct 24, 2026 · For [11 Optional plugins](../plans/11-optional-plugins.md)
+Oct 24, 2026 · For [11 Optional plugins](../plans/done/11-optional-plugins.md)
 
 **Question.** Connections to Azure SQL, MongoDB, AWS and Google need passwords, keys and connection strings, and the user types them into the app. There is no backend to keep them. Where should the browser keep them, and how?
 

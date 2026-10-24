@@ -164,6 +164,8 @@ The integration registry, config port and catalog (the Integrations foundation),
 - **Oct 17: 404s are never reported, for now.** The dashboard query serves typed URLs, so it can't tell a typo from a listed dashboard that is missing. Report that case from the `$id` loader, by checking the cached list, if it ever matters.
 - **Oct 17: `reportError` sends each error object once,** since suspense queries and widget tiles throw query errors the cache already reported. Sentry gets the original error; `AppError` only supplies the `code` tag and the level.
 - **Oct 17: route errors are reported from the router's `defaultOnCatch`** and widget errors from `QueryBoundary`'s `onError`, which `WidgetTile` passes. No context in `ui/` for one caller.
+- **Oct 24: §3 should follow `plugins.json`.** [11](done/11-optional-plugins.md) chooses datasource plugins at build time instead of through a runtime `integrations.json`, and replaced the Integrations foundation for datasources. When §3 starts, list Sentry the same way, so a build without it has no Sentry code. Where its DSN comes from is still decision 2.
+- **Oct 24: `forbidden` errors aren't reported.** A locked connection, missing secrets and credentials a service refuses are for the user to fix, and AWS AccessDenied would otherwise flood Sentry (11). The rule is in `reportError`, with a test row.
 
 ## Verification
 
