@@ -88,7 +88,10 @@ A stateless Hono service with `mssql` and `mongodb`. Browsers can't speak TDS or
 - [x] **4 Google plugin.** Done when BigQuery and Firestore mapping, macros, JWT signing and the token cache are tested.
 - [x] **5 Data sources UI.** Routes, Data sources page, connection page and form, vault dialogs, the Plugins section (dev path), import warnings for missing datasources. Done when every state has a story and the flows are play functions.
 - [x] **6 AWS plugin.** Done when the four runtimes are tested on mocked clients and each is its own chunk.
-- [ ] **7 Relay, Azure SQL and MongoDB.** Done when the relay's security rules and mapping are tested and both plugins pass their client tests.
+- [x] **7 Relay, Azure SQL and MongoDB.** Done when the relay's security rules and mapping are tested and both plugins pass their client tests.
+  - Oct 24: `relay/` (Hono, `mssql`, `mongodb`) has 48 tests through `app.request()` and fake drivers. `vp run relay` starts it on this machine; `relay/Dockerfile` builds it for container hosts.
+  - The relay itself and its production `pnpm deploy` folder were run here. The Docker image wasn't, because the sandbox has no Docker daemon.
+  - The Plugins cards' buttons are now named after their plugin ("Remove from build (AWS)"). Several cards made the same name ambiguous for screen readers and broke the RemoveFromBuild story, which had been failing since task 6.
 - [ ] **8 Add to build from the live site.** Done when the commit and polling flow is tested against mocked GitHub responses and its dialog states have stories.
 - [ ] **9 Docs.** `docs/dashboard/datasources.md` (including a "Try it free" table); roadmap, tasks, 06, architecture, dashboard, README and AGENTS updates. Done when `lint/docs.test.ts` passes and this plan is in `done/`.
 
@@ -97,11 +100,27 @@ A stateless Hono service with `mssql` and `mongodb`. Browsers can't speak TDS or
 - **2026-10-24: a relay for Azure SQL and MongoDB.** It is stateless: the connection string comes with each request. AWS and Google run in the browser, because live CORS preflights succeeded against DynamoDB, Athena, the RDS and Redshift Data APIs, BigQuery, Firestore and `oauth2.googleapis.com/token`.
 - **2026-10-24: chosen at build time, from the UI.** `plugins.json`, `[]` by default, edited with Add to build (dev server, or a GitHub commit from the live site). This replaces the runtime `integrations.json` from [research/integrations](../research/integrations.md) for datasource plugins. "Plugins" is the name, at the user's suggestion.
 - **2026-10-24: AWS covers Athena, Aurora, Redshift and DynamoDB.** DynamoDB was added for its always-free tier. Google covers BigQuery and Firestore.
+- **2026-10-24: the relay caps rows by cancelling, not with `SET ROWCOUNT`.** Rows stream in and the query is cancelled at `maxRows`. `SET ROWCOUNT` would stay set on pooled connections.
+- **2026-10-24: the relay checks hosts with each driver's own parser.** That is mssql's `parseConnectionString` and `mongodb-connection-string-url`, so the hosts checked are the hosts each driver connects to.
+  - It refuses sign-ins as its own machine (managed identity, `MONGODB-AWS`, OIDC) and MongoDB options that read local files or use a proxy.
+  - Without a token it answers only when the Host is localhost, which defeats DNS rebinding.
+- **2026-10-24: relay errors say whether to retry** (`isRetryable`), so a SQL syntax error isn't retried.
+- **2026-10-24: the MongoDB operator check lives in `core/relay/mongoOperators.ts`.** The manifest is in the main bundle, and importing the check from `relayContract.ts` put the relay's routes and schemas there too.
+- **2026-10-24: `relay/Dockerfile` uses `pnpm deploy`.** A filtered `pnpm install` still installs the whole app (840 MB); `pnpm deploy --prod` gives an 81 MB folder from the same lockfile.
 - **2026-10-24: secrets go in a passphrase vault.** The user asked for researched advice ([browser-secrets](../research/browser-secrets.md)). Passkey (PRF) unlock comes later.
 
 ## Verification
 
 - **Baseline (Oct 24, before any change):** `vp run build` gives first-load JS of 44 files, 858.0 KiB raw and 275.5 KiB gzip (CSS: 321 KB raw). `vp run test`: 55 files, 277 tests passing. `vp run lint` and `vp run format:check` are clean.
+- **Not in the build (Oct 24, tasks 4–7):**
+  - **`plugins.json` = `[]`:** `dist/assets` has none of `/v1/sqlserver`, `/v1/mongodb`, the relay client's messages, `mongodb+srv`, `database.windows.net`, `AmazonAthena`, `rds-data`, `redshift-data`, `bigquery.googleapis.com` or `firestore.googleapis.com`. `build-info.json` lists `[]`.
+    - First-load JS: 41 files, 866.6 KiB raw, against the 858.0 KiB baseline.
+  - **`["google"]`:** three lazy chunks (BigQuery 3.0 kB, Firestore 1.8 kB, auth 5.5 kB).
+  - **`["aws"]`:** lazy runtimes (Athena 16 kB, Redshift 17 kB, Aurora 30 kB, DynamoDB 42 kB) and a shared SDK chunk of 114 kB (39 kB gzip).
+  - **`["azure-sql", "mongodb"]`:** the relay client and contract 2.4 kB, the Azure SQL runtime 0.6 kB, the MongoDB runtime 0.9 kB. Only the manifests' field labels and the refused-operator list are in the entry.
+  - None of these chunks is in the entry or the modulepreloads.
+- **Gate (Oct 24, task 7):** `vp check` (format, lint, types: 420 files), `vp run lint` and `pnpm build` pass. `pnpm test`: 84 files and 469 tests, node, dom and storybook.
+  - In this sandbox the globally installed `vp` runs its own bundled Vitest for `vp test`, which can't find jsdom. `pnpm test` runs the repo's Vite+.
 
 ## Risks
 

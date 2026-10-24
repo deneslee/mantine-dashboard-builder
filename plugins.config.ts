@@ -25,6 +25,16 @@ export interface OptionalPluginEntry {
  * whose `plugins.json` lists them.
  */
 export const OPTIONAL_PLUGINS: Record<string, OptionalPluginEntry> = {
+  'azure-sql': {
+    name: 'Azure SQL',
+    description: 'Azure SQL Database and SQL Server, through the relay in relay/.',
+    module: 'src/plugins/optional/azureSql/azureSqlPlugin.ts',
+  },
+  mongodb: {
+    name: 'MongoDB',
+    description: 'MongoDB and Atlas aggregation pipelines, through the relay in relay/.',
+    module: 'src/plugins/optional/mongodb/mongodbPlugin.ts',
+  },
   aws: {
     name: 'AWS',
     description: 'Athena, Aurora (RDS Data API), Redshift and DynamoDB, called straight from the browser.',

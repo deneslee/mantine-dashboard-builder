@@ -88,4 +88,12 @@ describe('layer lint rules', () => {
       'app/imports.ts': 2,
     });
   });
+
+  it('keeps relay/ to src/core/ and away from UI libraries', { timeout: 20_000 }, () => {
+    const flagged = oxlint('lint/fixtures/relay')
+      .filter((d) => d.code === 'eslint(no-restricted-imports)')
+      .map((d) => `${d.severity} ${d.filename.replaceAll('\\', '/').replace('lint/fixtures/', '')}`);
+    // One per import line in relay/imports.ts; relay/allowed.ts must not appear.
+    expect(flagged).toEqual(Array(4).fill('error relay/imports.ts'));
+  });
 });

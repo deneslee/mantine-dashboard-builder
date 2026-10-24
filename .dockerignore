@@ -1,0 +1,9 @@
+# relay/Dockerfile builds from the repo root: keep local installs, builds and secrets out of it.
+**/node_modules
+**/dist
+**/.env
+**/.env.*
+!**/.env.example
+.git
+storybook-static
+coverage

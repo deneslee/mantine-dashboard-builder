@@ -236,6 +236,33 @@ export const lint = {
       primitives,
       serverPackages,
     ]),
+    // relay/ is a Node server: from the app it takes only core/, which it bundles.
+    {
+      files: ['relay/**', 'lint/fixtures/relay/**'],
+      env: { node: true, browser: false },
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            patterns: [
+              {
+                group: [
+                  '@/*',
+                  '@/**',
+                  ...['app', 'features', 'shell', 'plugins', 'lib', 'ui', 'utils', 'testing'].map(
+                    (dir) => `**/src/${dir}/**`,
+                  ),
+                  ...uiAndStatePackages,
+                ],
+                message:
+                  'relay/ imports only src/core/ from the app (by relative path) and no UI or state libraries.',
+              },
+              virtualPlugins,
+            ],
+          },
+        ] as ['error', { patterns: { group: string[]; message: string }[] }],
+      },
+    },
     // Tests, stories and their helpers assemble things, like app/: no layer rule.
     {
       files: ['**/*.test.{ts,tsx}', '**/*.stories.tsx', 'src/testing/**'],

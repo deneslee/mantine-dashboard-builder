@@ -25,6 +25,7 @@
   "scripts": {
     "dev": "vp dev",
     "dev:devtools": "vp dev --mode devtools",
+    "relay": "pnpm --filter dashboard-relay dev",
     "build": "tsc -b && vp build",
     "build:analyze": "vp build --mode analyze",
     "preview": "vp preview",

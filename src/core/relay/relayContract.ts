@@ -48,9 +48,16 @@ export const relayFramesSchema = z.object({ frames: z.array(dataFrameSchema) });
 /** A test's result: what the server says it is, for the connection page. */
 export const relayTestResultSchema = z.object({ ok: z.literal(true), server: z.string() });
 
-/** Every failure. The message never contains the connection string. */
+/**
+ * Every failure. The message never contains the connection string. `isRetryable` is false for
+ * failures that would fail again, such as a SQL syntax error.
+ */
 export const relayErrorSchema = z.object({
-  error: z.object({ code: z.enum(APP_ERROR_CODES), message: z.string() }),
+  error: z.object({
+    code: z.enum(APP_ERROR_CODES),
+    message: z.string(),
+    isRetryable: z.boolean().optional(),
+  }),
 });
 
 export type SqlServerQuery = z.input<typeof sqlServerQuerySchema>;

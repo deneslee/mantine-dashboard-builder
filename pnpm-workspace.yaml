@@ -1,3 +1,7 @@
+# The app is the root package; relay/ runs the database drivers browsers can't (plans/11-optional-plugins.md).
+packages:
+  - relay
+
 # Quarantine newly published versions by 24 hours to prevent supply-chain compromise
 minimumReleaseAge: 1440
 

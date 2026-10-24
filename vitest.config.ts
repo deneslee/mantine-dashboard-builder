@@ -8,6 +8,7 @@ import { optionalPlugins } from './plugins.config';
 const NODE_TESTS = [
   'lint/**/*.test.ts',
   'plugins.config.test.ts',
+  'relay/src/**/*.test.ts',
   'src/core/**/*.test.ts',
   'src/utils/**/*.test.ts',
   'src/plugins/*.test.ts',

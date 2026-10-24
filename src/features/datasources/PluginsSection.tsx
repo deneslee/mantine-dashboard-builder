@@ -1,4 +1,4 @@
-import { Badge, Button, Card, Group, SimpleGrid, Stack, Text } from '@mantine/core';
+import { Badge, Button, Card, Group, SimpleGrid, Stack, Text, VisuallyHidden } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { useState } from 'react';
 import { toAppError } from '@/core/errors/AppError';
@@ -90,6 +90,8 @@ export function PluginsSection({
                     onClick={() => handleChange(entry)}
                   >
                     {entry.isInBuild ? 'Remove from build' : 'Add to build'}
+                    {/* Every card has this button: its name says which plugin it changes. */}
+                    <VisuallyHidden> ({entry.name})</VisuallyHidden>
                   </Button>
                 ) : null}
               </Stack>
