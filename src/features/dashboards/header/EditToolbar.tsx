@@ -31,7 +31,13 @@ export function EditToolbar({ isWide }: { isWide: boolean }) {
   const handleImport = async (file: File | null) => {
     if (!file) return;
     try {
-      actions.importDocument(parseDashboardFile(await file.text(), plugins));
+      const { dashboard, missingDatasources } = parseDashboardFile(await file.text(), plugins);
+      actions.importDocument(dashboard);
+      if (missingDatasources.length > 0)
+        notify.warning({
+          title: 'Imported without some datasources',
+          message: `Its widgets need ${missingDatasources.join(', ')}. Add connections with these ids under Data sources.`,
+        });
     } catch (error) {
       notify.error({ title: 'Dashboard was not imported', message: toAppError(error).message });
     }

@@ -39,15 +39,17 @@ describe('dashboard files', () => {
     const reversed = { ...dashboard, widgets: { b: dashboard.widgets.b!, a: dashboard.widgets.a! } };
     const text = serializeDashboard(reversed);
     expect(Object.keys(JSON.parse(text).widgets)).toEqual(['a', 'b']);
-    expect(parseDashboardFile(text, plugins)).toEqual(dashboard);
+    expect(parseDashboardFile(text, plugins)).toEqual({ dashboard, missingDatasources: [] });
   });
 
   it('reads files saved with `version` instead of `schemaVersion`', () => {
     const { schemaVersion: _, ...rest } = testDashboard();
-    expect(parseDashboardFile(JSON.stringify({ version: 1, ...rest }), plugins)).toEqual(testDashboard());
+    expect(parseDashboardFile(JSON.stringify({ version: 1, ...rest }), plugins).dashboard).toEqual(
+      testDashboard(),
+    );
   });
 
-  it('rejects unknown widget types and datasources, and specs their datasource refuses', () => {
+  it('rejects unknown widget types, and specs their datasource refuses', () => {
     const dashboard = testDashboard();
     const withWidget = (patch: object) =>
       JSON.stringify({
@@ -58,11 +60,20 @@ describe('dashboard files', () => {
       'Unknown widget type "nope".',
     );
     expect(() =>
-      parseDashboardFile(withWidget({ queries: [{ datasource: 'sql', spec: {} }] }), plugins),
-    ).toThrow('Unknown datasource "sql".');
-    expect(() =>
       parseDashboardFile(withWidget({ queries: [{ datasource: 'mock', spec: {} }] }), plugins),
     ).toThrow();
     expect(() => parseDashboardFile('{not json', plugins)).toThrow();
+  });
+
+  it('imports widgets whose datasources this browser lacks, and lists them', () => {
+    const dashboard = testDashboard();
+    const text = JSON.stringify({
+      ...dashboard,
+      widgets: {
+        ...dashboard.widgets,
+        a: { ...dashboard.widgets.a, queries: [{ datasource: 'analytics', spec: { sql: 'SELECT 1' } }] },
+      },
+    });
+    expect(parseDashboardFile(text, plugins).missingDatasources).toEqual(['analytics']);
   });
 });

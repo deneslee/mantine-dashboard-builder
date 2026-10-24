@@ -1,0 +1,5 @@
+/* Wrapped rather than scrolled: a scrolling block would need its own keyboard focus. */
+.code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

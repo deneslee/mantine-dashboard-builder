@@ -3,11 +3,22 @@
 }
 
 .header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--mantine-spacing-sm);
   padding: var(--mantine-spacing-md) var(--mantine-spacing-lg);
   border-bottom: 1px solid var(--app-color-border-default);
 }
 
-/* Label and help text on the left, the control on the right; stacked on small screens. */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mantine-spacing-xs);
+}
+
+/* Label and help text on the left, the control on the right; stacked when the page is narrow. */
 .row {
   display: grid;
   grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
@@ -17,11 +28,18 @@
   & + & {
     border-top: 1px solid var(--app-color-border-default);
   }
+}
 
-  @media (max-width: $mantine-breakpoint-sm) {
+/* The page's width, not the viewport's: <main> narrows when the side panels open. */
+@container (max-width: 40em) {
+  .row {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--mantine-spacing-sm);
   }
+}
+
+.body {
+  padding: var(--mantine-spacing-md) var(--mantine-spacing-lg);
 }
 
 .label {
