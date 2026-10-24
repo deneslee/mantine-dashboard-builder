@@ -92,7 +92,13 @@ A stateless Hono service with `mssql` and `mongodb`. Browsers can't speak TDS or
   - Oct 24: `relay/` (Hono, `mssql`, `mongodb`) has 48 tests through `app.request()` and fake drivers. `vp run relay` starts it on this machine; `relay/Dockerfile` builds it for container hosts.
   - The relay itself and its production `pnpm deploy` folder were run here. The Docker image wasn't, because the sandbox has no Docker daemon.
   - The Plugins cards' buttons are now named after their plugin ("Remove from build (AWS)"). Several cards made the same name ambiguous for screen readers and broke the RemoveFromBuild story, which had been failing since task 6.
-- [ ] **8 Add to build from the live site.** Done when the commit and polling flow is tested against mocked GitHub responses and its dialog states have stories.
+- [x] **8 Add to build from the live site.** Done when the commit and polling flow is tested against mocked GitHub responses and its dialog states have stories.
+  - Oct 24: `buildList/githubBuildList.ts` reads `plugins.json` and its sha, commits the new list (re-reading once on a 409), maps GitHub's refusals, and polls `build-info.json`.
+  - `buildTarget.ts` takes CI's repository, else the one kept under `storageKey('build-repo')`.
+  - `AddToBuildDialog` has six stories: Token, Incomplete, Committing, Waiting, Live, Failed. `PluginsSection` has `target: 'dev-server' | 'github'`.
+  - The tests stub `fetch`, since MSW isn't used in `src/`.
+  - `core/build/buildInfo.ts` holds the shape of `build-info.json`, for the build and the poller alike.
+  - Not run against GitHub here: that needs the user's token.
 - [ ] **9 Docs.** `docs/dashboard/datasources.md` (including a "Try it free" table); roadmap, tasks, 06, architecture, dashboard, README and AGENTS updates. Done when `lint/docs.test.ts` passes and this plan is in `done/`.
 
 ## Decisions
@@ -107,6 +113,9 @@ A stateless Hono service with `mssql` and `mongodb`. Browsers can't speak TDS or
 - **2026-10-24: relay errors say whether to retry** (`isRetryable`), so a SQL syntax error isn't retried.
 - **2026-10-24: the MongoDB operator check lives in `core/relay/mongoOperators.ts`.** The manifest is in the main bundle, and importing the check from `relayContract.ts` put the relay's routes and schemas there too.
 - **2026-10-24: `relay/Dockerfile` uses `pnpm deploy`.** A filtered `pnpm install` still installs the whole app (840 MB); `pnpm deploy --prod` gives an 81 MB folder from the same lockfile.
+- **2026-10-24: the live-site token is saved only into an unlocked vault.** Add to build is itself a dialog, so it doesn't open the vault's own. Otherwise the token lasts until the tab closes.
+  - It sits under the vault key `github`, fingerprinted by repository and branch.
+- **2026-10-24: a build counts as live once it has the new commit or the new list.** A later commit may have built on ours, and `build-info.json` then names that one.
 - **2026-10-24: secrets go in a passphrase vault.** The user asked for researched advice ([browser-secrets](../research/browser-secrets.md)). Passkey (PRF) unlock comes later.
 
 ## Verification

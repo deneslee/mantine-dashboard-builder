@@ -20,3 +20,18 @@ export const RemoveFromBuild: Story = {
     await expect(args.writeBuildList).toHaveBeenCalledWith(['azure-sql', 'mongodb', 'aws']);
   },
 };
+
+/** On the live site, Add to build and Remove commit to GitHub, through a dialog. */
+export const OnTheLiveSite: Story = {
+  args: { target: 'github' },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Remove from build (AWS)' }));
+    await expect(
+      await within(canvasElement.ownerDocument.body).findByRole('dialog', {
+        name: 'Remove AWS from the build',
+      }),
+    ).toBeInTheDocument();
+    await expect(args.writeBuildList).not.toHaveBeenCalled();
+  },
+};

@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { basename, resolve } from 'node:path';
 import type { Plugin } from 'vite-plus';
+import type { BuildInfo } from './src/core/build/buildInfo';
 import { formatPluginsFile, parsePluginsFile } from './src/core/build/pluginsFile';
 
 /**
@@ -219,7 +220,7 @@ export function optionalPlugins({
           plugins: list(),
           commit: process.env.GITHUB_SHA ?? null,
           builtAt: new Date().toISOString(),
-        }),
+        } satisfies BuildInfo),
       });
     },
   };
