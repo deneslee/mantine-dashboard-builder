@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react';
 import { codeInspectorPlugin } from 'code-inspector-plugin';
 import { defineConfig, lazyPlugins } from 'vite-plus';
 import { lint } from './oxlint.config';
+import { optionalPlugins } from './plugins.config';
 
 const uploadSourcemaps = Boolean(process.env.SENTRY_AUTH_TOKEN);
 
@@ -64,6 +65,8 @@ export default defineConfig(({ command, mode }) => {
       // React Compiler (Rust port, oxc-transform-react): automatic memoization. lint/compiler.test.ts
       // fails when it skips a component it shouldn't. See docs/dashboard/grid-and-charts.md.
       react({ compiler: true }),
+      // Only the optional plugins plugins.json lists are built in; the rest aren't in dist at all.
+      optionalPlugins(),
       sentryVitePlugin({
         org: process.env.SENTRY_ORG,
         project: process.env.SENTRY_PROJECT,

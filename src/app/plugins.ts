@@ -1,3 +1,4 @@
+import { build, optionalPlugins } from 'virtual:optional-plugins';
 import type { Plugins } from '@/plugins/usePlugins';
 import { localJsonDatasource } from '@/plugins/datasources/localJson/localJsonDatasource';
 import { mockDatasource } from '@/plugins/datasources/mock/mockDatasource';
@@ -15,10 +16,12 @@ const byId = <T extends { id: string }>(plugins: T[]) =>
  * Every widget and datasource the app ships, keyed by type. Features meet here: `Providers` puts
  * the maps in `PluginsContext`, so no feature imports a plugin. Adding a plugin is one
  * entry in a list. Static, no `registerWidget()` side effects, so unused plugins tree-shake.
+ * The optional plugins' types come from `virtual:optional-plugins`, which imports only those
+ * `plugins.json` lists (plugins.config.ts); `useAppPlugins` adds a datasource per connection.
  */
 export const plugins: Plugins = {
   widgets: byType([kpiWidget, chartWidget, tableWidget]),
   datasources: byId([mockDatasource, localJsonDatasource]),
-  types: {},
-  build: { catalog: [] },
+  types: byType(optionalPlugins.flatMap((plugin) => plugin.types)),
+  build,
 };

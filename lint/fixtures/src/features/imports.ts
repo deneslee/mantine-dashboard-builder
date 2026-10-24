@@ -3,3 +3,5 @@ import { chartWidget } from '@/plugins/widgets/chart/chartWidget';
 import { mockDatasource } from '@/plugins/datasources/mock/mockDatasource';
 import { SettingsPage } from '@/features/settings/SettingsPage';
 import { nav } from '@/app/nav';
+import { googlePlugin } from '@/plugins/optional/google/googlePlugin';
+import { optionalPlugins } from 'virtual:optional-plugins';

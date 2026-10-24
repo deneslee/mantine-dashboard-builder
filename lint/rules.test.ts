@@ -76,16 +76,16 @@ describe('layer lint rules', () => {
       const file = d.filename.replaceAll('\\', '/').replace('lint/fixtures/src/', '');
       counts[file] = (counts[file] ?? 0) + 1;
     }
-    // One per import line in each fixture; features/allowed.ts must not appear.
+    // One per import line in each fixture; features/allowed.ts and app/allowed.ts must not appear.
     expect(counts).toEqual({
       'utils/imports.ts': 1,
       'core/imports.ts': 5,
       'ui/imports.ts': 3,
       'lib/imports.ts': 2,
-      'plugins/imports.ts': 2,
+      'plugins/imports.ts': 3,
       'shell/imports.ts': 2,
-      'features/imports.ts': 4,
-      'app/imports.ts': 1,
+      'features/imports.ts': 6,
+      'app/imports.ts': 2,
     });
   });
 });

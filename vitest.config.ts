@@ -2,10 +2,12 @@ import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 import react from '@vitejs/plugin-react';
 import { playwright } from 'vite-plus/test/browser-playwright';
 import { configDefaults, defineConfig } from 'vite-plus';
+import { optionalPlugins } from './plugins.config';
 
 // Pure logic: no DOM, so no jsdom start-up cost. Everything else runs in jsdom.
 const NODE_TESTS = [
   'lint/**/*.test.ts',
+  'plugins.config.test.ts',
   'src/core/**/*.test.ts',
   'src/utils/**/*.test.ts',
   'src/plugins/*.test.ts',
@@ -15,8 +17,9 @@ const NODE_TESTS = [
 ];
 
 export default defineConfig({
-  // Same React Compiler as the app, so tests run the code that ships.
-  plugins: [react({ compiler: true })],
+  // Same React Compiler as the app, so tests run the code that ships. Every optional plugin, so tests
+  // and stories cover them all whatever plugins.json lists.
+  plugins: [react({ compiler: true }), optionalPlugins({ plugins: 'all' })],
   resolve: { tsconfigPaths: true },
   test: {
     globals: true,
