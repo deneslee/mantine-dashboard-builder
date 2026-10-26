@@ -6,7 +6,7 @@ Where a dashboard's data comes from:
 - **Optional plugins**, which add datasource types (Athena, BigQuery, Azure SQL, …) and are in a build only when it's chosen.
 - **Connections**, which a user creates on the Data sources page. A connection is a type plus its settings, and its secrets are kept in a passphrase vault.
 
-The design and its decisions are in [11 Optional plugins](../../.agents/planning/plans/done/11-optional-plugins.md); how queries are cached and run is in [dashboard.md](dashboard.md).
+The design and its decisions are in [11 Optional plugins](https://github.com/deneslee/mantine-dashboard-builder/blob/0e400dd/.agents/planning/plans/done/11-optional-plugins.md); how queries are cached and run is in [dashboard.md](dashboard.md).
 
 ## The plugins
 
@@ -50,7 +50,7 @@ Data sources › Add connection lists the types in this build.
 
 ## Secrets
 
-Passwords, keys, tokens and connection strings are typed into the app and kept in the vault (`lib/vault`), never in a connection's settings. The reasons and sources are in [browser-secrets](../../.agents/planning/research/browser-secrets.md).
+Passwords, keys, tokens and connection strings are typed into the app and kept in the vault (`lib/vault`), never in a connection's settings. The reasons and sources are in [browser-secrets](https://github.com/deneslee/mantine-dashboard-builder/blob/0e400dd/.agents/planning/research/browser-secrets.md).
 
 - **This session only (the default):** in memory, gone when the tab closes.
 - **Save on this device:** encrypted with a key derived from your passphrase.

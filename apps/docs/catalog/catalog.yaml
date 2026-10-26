@@ -1,0 +1,872 @@
+# The builder's catalog: the fixed foundations, the core capabilities with the providers that can fill
+# them, the plugins, and the patterns worth borrowing. Builder only: host apps keep their own lists.
+#
+# Checked by schema.mjs. To regenerate the pages: node apps/docs/scripts/generate-catalog.mjs && vp fmt apps/docs
+#
+# Status words: fixed (built on, never swapped), built, decided, default (the pick unless a decision changes it),
+# option, proposed, later, open, reference. Steps P1–P12 are the builder's phases in the project plan.
+
+foundations:
+  - id: frontend
+    area: Frontend
+    choice: React 19 with the React Compiler; TypeScript, strict
+  - id: tooling
+    area: Build and tooling
+    choice: Vite+ (Vite, Vitest, Oxlint, Oxfmt); pnpm workspaces
+    notes: Storybook stories run as component tests; Playwright for a few journeys
+  - id: routing
+    area: Routing
+    choice: TanStack Router
+  - id: server-state
+    area: Server state
+    choice: TanStack Query
+    notes: TanStack DB gets a spike in P4 for the records layer
+  - id: client-state
+    area: Client and editor state
+    choice: Zustand with Immer and Zundo
+    notes: One store per editor; one undo step per user action
+  - id: validation
+    area: Validation
+    choice: Zod
+    notes: Collections describe their records in JSON Schema, checked with Ajv
+  - id: ui
+    area: UI system
+    choice: Mantine 9, CSS Modules, design tokens
+    notes: Mantine components first; charts can be swapped
+  - id: grid
+    area: Dashboard grid
+    choice: react-grid-layout v2
+    notes: Held on 2.2.x
+  - id: tables
+    area: Tables
+    choice: TanStack Table and TanStack Virtual
+    notes: Under the table widget and the record pages
+  - id: icons
+    area: Icons
+    choice: Tabler Icons
+capabilities:
+  - id: shell
+    name: Shell and navigation
+    tier: core
+    group: Shell and workspace
+    status: decided
+    step: P5
+    must:
+      - Works with no server
+    default: The Mantine shell; areas from a YAML navigation manifest; registered views
+    options:
+      - Plugins add nav entries, record types, commands, context tabs and status indicators
+  - id: workspace
+    name: Workspace
+    tier: core
+    group: Shell and workspace
+    status: decided
+    step: P5
+    must:
+      - Each record tab keeps its own view and draft
+    default: Zustand stores and the URL; open tabs saved as ids in the browser
+    options:
+      - Cross-device state through a storage provider
+  - id: context-bar
+    name: Context bar
+    tier: core
+    group: Shell and workspace
+    status: decided
+    step: P1, P4
+    default: Details, Data used by this view, help, notifications
+    options:
+      - Plugins add context tabs
+      - The assistant (P12)
+  - id: page-frame
+    name: Page frame and header
+    tier: core
+    group: Shell and workspace
+    status: decided
+    step: P1
+    default: "The builder's `Page`: header, control bar, sections"
+    options:
+      - EUI's page template and page header as references, decided in P1
+  - id: studio
+    name: Studio
+    tier: core
+    group: Shell and workspace
+    status: decided
+    step: P4, P5
+    default: Mantine forms, Zod and JSON Schema, registries of editors
+    options:
+      - Plugins add Studio panels, such as a rule-test panel or a collection browser
+  - id: translations
+    name: Translations
+    tier: core
+    group: Shell and workspace
+    status: default
+    step: P2
+    default: Paraglide JS, compiled per package
+    options:
+      - i18next
+      - Lingui
+      - Messages supplied by the host
+  - id: app-data
+    name: App data storage
+    tier: core
+    group: Data
+    status: decided
+    step: P3
+    must:
+      - Works locally
+      - Downloads and uploads (export and import)
+    default: This browser (IndexedDB)
+    options:
+      - 'Files: export and import, or the dev server saving into a folder'
+      - Convex, the first server (free plan)
+      - A host app's own API
+    notes: The workspace, Studio work (navigation, collections, schemas, dashboards, graphs) and user preferences
+  - id: records
+    name: Records storage
+    tier: core
+    group: Data
+    status: decided
+    step: P3, P4
+    must:
+      - Works locally
+      - Downloads and uploads
+      - Data stays with its collection
+    default: This browser or files; Convex when shared
+    options:
+      - PostgreSQL through a host API or Supabase
+      - SQLite or PGlite in the browser
+      - Azure SQL through a host backend
+      - TanStack DB collections on top (P4 spike)
+    notes: Records in collections, such as a host app's patients and exercises
+  - id: catalog
+    name: Data catalog
+    tier: core
+    group: Data
+    status: decided
+    step: P4
+    default: Datasources, collections, schemas (JSON Schema), bindings and provenance (source and storage)
+    options:
+      - The schema graph (P10)
+      - Directus's data-model screens as the UX reference
+  - id: datasources
+    name: Datasources
+    tier: core
+    group: Data
+    status: built
+    step: Built
+    must:
+      - 'Kept apart from storage: a datasource reads data, storage owns records'
+    default: '`local-json` and `mock`'
+    options:
+      - The optional plugins below
+      - '`csv` (P11)'
+      - '`dataset` from a host backend (P8)'
+  - id: assets
+    name: Assets
+    tier: core
+    group: Data
+    status: proposed
+    step: P4 or later
+    must:
+      - Works locally
+      - Files travel in the download as a ZIP bundle
+    default: Local files and asset references
+    options:
+      - Convex file storage
+      - S3, Azure Blob or MinIO
+  - id: export
+    name: Import and export
+    tier: core
+    group: Data
+    status: decided
+    step: P3, P4
+    must:
+      - 'JSON always works: the full copy'
+      - CSV for anything shown as a table
+    default: JSON and CSV made in the browser
+    options:
+      - XLSX (SheetJS)
+      - PDF (@react-pdf/renderer)
+      - Markdown
+      - PNG and SVG
+      - ZIP bundles with assets
+      - Server jobs for large datasets
+  - id: query
+    name: Query and filtering
+    tier: core
+    group: Data
+    status: decided
+    step: P7
+    default: '`ListQuery`: text, filters, sorting and a page, for every provider'
+    options:
+      - 'A helper picked in P7: react-querybuilder, @ucast, mingo or sift'
+  - id: search
+    name: Search
+    tier: core
+    group: Search and assistant
+    status: decided
+    step: P4
+    must:
+      - Works without a server for small collections
+    default: Spotlight and in-table search on Convex search indexes (an accent-free text field)
+    options:
+      - 'An in-browser index: Orama, MiniSearch, FlexSearch or uFuzzy'
+      - PostgreSQL full text
+      - Meilisearch or Typesense
+      - OpenSearch or Elasticsearch
+  - id: assistant
+    name: Assistant
+    tier: core
+    group: Search and assistant
+    status: later
+    step: P12
+    must:
+      - The app works without it
+    default: A Mantine chat panel on the AI SDK; OpenRouter for models
+    options:
+      - Ollama or vLLM locally
+      - Direct model providers
+      - A host's Python agent (Pydantic AI)
+      - Convex Agent
+  - id: dashboards
+    name: Dashboards
+    tier: core
+    group: Visualisation and editors
+    status: built
+    step: Built; v2 in P8
+    default: Versioned dashboard documents on react-grid-layout; edit mode with undo
+    options:
+      - Layout and widget plugins
+      - Embedding with `DashboardView` and `WidgetView` (P8)
+  - id: charts
+    name: Charts
+    tier: core
+    group: Visualisation and editors
+    status: default
+    step: Built
+    default: Mantine Charts (Recharts)
+    options:
+      - 'ECharts: heatmaps, radar charts, treemaps; extends or replaces'
+      - uPlot for long time series
+      - Custom SVG
+  - id: table-widget
+    name: Table widget
+    tier: core
+    group: Visualisation and editors
+    status: decided
+    step: P7
+    default: Search, filters, sorting and paging on TanStack Table; state in the URL
+    options:
+      - Column types from the collection's JSON Schema, with detectors for loose JSON (EUI's data grid as reference)
+      - Editable cells later
+  - id: graphs
+    name: Graphs (node builder)
+    tier: core
+    group: Visualisation and editors
+    status: default
+    step: P6, P10
+    must:
+      - Every graph kind works by keyboard
+    default: React Flow with dagre
+    options:
+      - Another editor per graph kind, such as GoRules' JDM editor for decision graphs
+      - elkjs for large layered layouts
+  - id: rules
+    name: Decision rules
+    tier: core
+    group: Visualisation and editors
+    status: decided
+    step: P10
+    default: GoRules JDM graphs; previews with `zen-engine-wasm`
+    options:
+      - Other rule engines through an adapter
+  - id: calendar
+    name: Calendar
+    tier: core
+    group: Visualisation and editors
+    status: later
+    step: P9
+    default: '`@mantine/schedule` with events from the host'
+    options:
+      - ICS or CalDAV
+      - Google or Microsoft calendars
+  - id: documents
+    name: Documents
+    tier: core
+    group: Visualisation and editors
+    status: later
+    step: P9
+    default: '`react-markdown` with sanitizing'
+    options:
+      - Mantine Tiptap
+      - BlockNote
+  - id: plugin-system
+    name: Plugins
+    tier: core
+    group: Platform services
+    status: built
+    step: Built; catalogue in P11
+    default: Build-time `plugins.json`
+    options:
+      - A curated catalogue in the UI (P11)
+      - Versioned plugin packages
+      - Runtime plugins, if ever
+    notes: A plugin can contribute providers, widgets, views, editors, graph nodes, context tabs, commands, integrations, exporters and assistant tools
+  - id: jobs
+    name: Background jobs
+    tier: core
+    group: Platform services
+    status: open
+    step: Later
+    default: Run right away in the browser
+    options:
+      - Convex scheduled functions
+      - Convex Workflow
+      - Kestra
+  - id: identity
+    name: Sign-in and permissions
+    tier: core
+    group: Platform services
+    status: open
+    step: Before hosting
+    must:
+      - '`can()` only hides UI; the backend decides'
+    default: A placeholder user
+    options:
+      - Convex Auth
+      - Clerk
+      - Better Auth
+      - Keycloak
+      - Entra ID
+  - id: telemetry
+    name: Telemetry
+    tier: core
+    group: Platform services
+    status: default
+    step: P11
+    default: Sentry, as an optional plugin
+    options:
+      - OpenTelemetry
+      - Datadog RUM
+      - New Relic
+      - Grafana
+  - id: docs
+    name: Docs
+    tier: core
+    group: Platform services
+    status: decided
+    step: Now
+    default: Markdown pages generated from this catalog
+    options:
+      - 'A static docs site later: Astro Starlight first, or VitePress, Docusaurus, Zensical'
+  - id: knowledge
+    name: Knowledge (RAG)
+    tier: potential
+    group: Potential
+    status: proposed
+    adds: Document search and answers with sources, with or without the chat panel
+    candidates:
+      - pgvector
+      - Haystack
+      - Elasticsearch
+      - Qdrant
+      - Convex RAG
+  - id: collaboration
+    name: Collaboration
+    tier: potential
+    group: Potential
+    status: proposed
+    adds: Presence, comments and shared editing
+    candidates:
+      - Convex
+      - Supabase Realtime
+      - Yjs
+  - id: doc-intelligence
+    name: Document intelligence
+    tier: potential
+    group: Potential
+    status: proposed
+    adds: Parsing, OCR, extraction and indexing of documents
+    candidates:
+      - Haystack
+      - Document parsers
+      - OCR services
+  - id: analytics
+    name: Analytics explorer
+    tier: potential
+    group: Potential
+    status: proposed
+    adds: Profiling, SQL exploration and shared metric definitions
+    candidates:
+      - DuckDB-Wasm
+      - Cube
+      - ClickHouse
+  - id: reports
+    name: Reports
+    tier: potential
+    group: Potential
+    status: proposed
+    adds: Report templates and bulk generation
+    candidates:
+      - Typst
+      - WeasyPrint
+      - PDF renderers
+  - id: automation
+    name: Automation
+    tier: potential
+    group: Potential
+    status: proposed
+    adds: Pipelines and scheduled work
+    candidates:
+      - Kestra
+      - Convex Workflow
+  - id: knowledge-graph
+    name: Knowledge graph
+    tier: potential
+    group: Potential
+    status: proposed
+    adds: A relationship explorer
+    candidates:
+      - Neo4j
+      - React Flow views
+  - id: maps
+    name: Maps
+    tier: potential
+    group: Potential
+    status: proposed
+    adds: Map widgets and region selection
+    candidates:
+      - MapLibre
+      - deck.gl
+      - Leaflet
+  - id: viz-3d
+    name: 3D views
+    tier: potential
+    group: Potential
+    status: proposed
+    adds: 3D plots and spatial models
+    candidates:
+      - Three.js
+      - React Three Fiber
+plugins:
+  - id: builtin-datasources
+    name: '`local-json` and `mock`'
+    tier: core
+    group: Built or decided
+    status: built
+    step: Built
+    provides:
+      - datasources
+    adds:
+      - Files and generated data
+    runs: Browser
+  - id: relay
+    name: Relay
+    tier: core
+    group: Built or decided
+    status: built
+    step: Built
+    provides:
+      - datasources
+    adds:
+      - SQL Server and MongoDB queries a browser can't run
+      - Connection tests
+    runs: A stateless Node server
+    notes: Needs a token beyond localhost
+  - id: azure-sql
+    name: Azure SQL and SQL Server
+    tier: core
+    group: Built or decided
+    status: built
+    step: Built
+    provides:
+      - datasources
+    runs: Through the relay
+  - id: mongodb
+    name: MongoDB and Atlas
+    tier: core
+    group: Built or decided
+    status: built
+    step: Built
+    provides:
+      - datasources
+    runs: Through the relay
+  - id: aws
+    name: 'AWS: Athena, Aurora, Redshift, DynamoDB'
+    tier: core
+    group: Built or decided
+    status: built
+    step: Built
+    provides:
+      - datasources
+    runs: Browser, AWS SDK
+  - id: google
+    name: 'Google: BigQuery, Firestore'
+    tier: core
+    group: Built or decided
+    status: built
+    step: Built
+    provides:
+      - datasources
+    runs: Browser, REST with a signed key
+  - id: convex
+    name: Convex
+    tier: core
+    group: Built or decided
+    status: decided
+    step: P3
+    provides:
+      - app-data
+      - records
+      - search
+      - assets
+      - jobs
+      - identity
+      - datasources
+    adds:
+      - Live updates across open tabs
+      - 'Later: presence and comments, Agent and RAG components'
+    runs: Browser (Convex client) and a Convex component
+    notes: Convex Cloud's free plan; self-hosting with Docker is possible
+  - id: sentry
+    name: Sentry
+    tier: core
+    group: Built or decided
+    status: decided
+    step: P11
+    provides:
+      - telemetry
+    adds:
+      - Error reports with readable stack traces
+      - Release tracking
+    runs: Browser
+  - id: openrouter
+    name: OpenRouter
+    tier: core
+    group: Built or decided
+    status: default
+    step: P12
+    provides:
+      - assistant
+    adds:
+      - One key for many models
+    runs: 'Server: a host backend or Convex'
+  - id: csv
+    name: '`csv` datasource'
+    tier: core
+    group: Built or decided
+    status: later
+    step: P11
+    provides:
+      - datasources
+    runs: Browser
+  - id: dataset
+    name: '`dataset` datasource'
+    tier: core
+    group: Built or decided
+    status: later
+    step: P8
+    provides:
+      - datasources
+    adds:
+      - Named datasets from a host backend, with bound parameters
+    runs: Host backend
+  - id: supabase
+    name: Supabase
+    tier: potential
+    group: Data and backends
+    status: option
+    provides:
+      - app-data
+      - records
+      - assets
+      - identity
+      - search
+    adds:
+      - Postgres with a generated REST API
+      - Realtime updates
+      - File storage
+    notes: 'Free plan: 2 projects, paused after a week without use'
+  - id: postgres-host
+    name: PostgreSQL through a host API
+    tier: potential
+    group: Data and backends
+    status: option
+    provides:
+      - records
+      - search
+      - knowledge
+    adds:
+      - Relational data
+      - Full text and pgvector
+  - id: pglite
+    name: PGlite or SQLite WASM
+    tier: potential
+    group: Data and backends
+    status: option
+    provides:
+      - app-data
+      - records
+    adds:
+      - SQL in the browser, offline
+  - id: object-storage
+    name: S3, Azure Blob or MinIO
+    tier: potential
+    group: Data and backends
+    status: option
+    provides:
+      - assets
+    adds:
+      - A media browser
+      - Dataset snapshots
+  - id: duckdb
+    name: DuckDB-Wasm
+    tier: potential
+    group: Data and backends
+    status: option
+    provides:
+      - query
+      - analytics
+    adds:
+      - CSV and Parquet explored in the browser
+      - Data profiling
+  - id: cube
+    name: Cube
+    tier: potential
+    group: Data and backends
+    status: option
+    provides:
+      - datasources
+      - analytics
+    adds:
+      - Metric and KPI definitions kept in one place
+  - id: clickhouse
+    name: ClickHouse
+    tier: potential
+    group: Data and backends
+    status: option
+    provides:
+      - datasources
+      - analytics
+    adds:
+      - Analytics on large data
+  - id: more-datasources
+    name: '`postgres` and `elasticsearch` datasources'
+    tier: potential
+    group: Data and backends
+    status: proposed
+    provides:
+      - datasources
+  - id: datadog-metrics
+    name: Datadog metrics
+    tier: potential
+    group: Data and backends
+    status: later
+    provides:
+      - datasources
+    adds:
+      - Metrics widgets
+  - id: elasticsearch
+    name: Elasticsearch or OpenSearch
+    tier: potential
+    group: Search, knowledge and assistant
+    status: option
+    provides:
+      - search
+      - knowledge
+    adds:
+      - Hybrid text and vector search
+      - Aggregations
+      - Query diagnostics
+  - id: meilisearch
+    name: Meilisearch or Typesense
+    tier: potential
+    group: Search, knowledge and assistant
+    status: option
+    provides:
+      - search
+    adds:
+      - Typo tolerance and facets with little setup
+  - id: vector-db
+    name: Qdrant or Weaviate
+    tier: potential
+    group: Search, knowledge and assistant
+    status: option
+    provides:
+      - knowledge
+    adds:
+      - Similarity search
+  - id: haystack
+    name: Haystack
+    tier: potential
+    group: Search, knowledge and assistant
+    status: later
+    provides:
+      - knowledge
+      - doc-intelligence
+      - datasources
+    adds:
+      - Retrieval pipelines
+      - Answers with sources
+  - id: convex-agent
+    name: Convex Agent and RAG components
+    tier: potential
+    group: Search, knowledge and assistant
+    status: option
+    provides:
+      - assistant
+      - knowledge
+    adds:
+      - Saved threads
+      - Retrieval
+      - Live answers
+  - id: local-models
+    name: Ollama or vLLM
+    tier: potential
+    group: Search, knowledge and assistant
+    status: option
+    provides:
+      - assistant
+    adds:
+      - Offline demos
+  - id: model-providers
+    name: Direct model providers
+    tier: potential
+    group: Search, knowledge and assistant
+    status: option
+    provides:
+      - assistant
+    notes: Microsoft Foundry, Gemini, Mistral, OVHcloud, Scaleway
+  - id: langfuse
+    name: Langfuse
+    tier: potential
+    group: Search, knowledge and assistant
+    status: option
+    provides:
+      - telemetry
+    adds:
+      - A trace of every assistant call
+  - id: jev
+    name: Jev (typesafe.ai)
+    tier: potential
+    group: Search, knowledge and assistant
+    status: option
+    provides:
+      - assistant
+    adds:
+      - Typed choices with calibrated probabilities, for classifying text
+  - id: gorules-editor
+    name: GoRules JDM editor
+    tier: potential
+    group: Rules, workflows and telemetry
+    status: option
+    provides:
+      - graphs
+      - rules
+    adds:
+      - A ready-made editor for decision graphs
+    notes: 'A separate editor only: it bundles Ant Design and older Zod and Zustand'
+  - id: kestra
+    name: Kestra
+    tier: potential
+    group: Rules, workflows and telemetry
+    status: option
+    provides:
+      - jobs
+      - automation
+    adds:
+      - Import pipelines
+      - Scheduled exports
+      - Workflow monitoring
+  - id: convex-workflow
+    name: Convex Workflow
+    tier: potential
+    group: Rules, workflows and telemetry
+    status: option
+    provides:
+      - jobs
+      - automation
+    adds:
+      - Durable steps with retries and progress
+  - id: otel
+    name: OpenTelemetry and Grafana
+    tier: potential
+    group: Rules, workflows and telemetry
+    status: option
+    provides:
+      - telemetry
+    adds:
+      - Traces and metrics dashboards
+  - id: rum
+    name: Datadog RUM or New Relic
+    tier: potential
+    group: Rules, workflows and telemetry
+    status: option
+    provides:
+      - telemetry
+    adds:
+      - Real-user monitoring
+  - id: yjs
+    name: Yjs
+    tier: potential
+    group: Collaboration
+    status: proposed
+    provides:
+      - collaboration
+    adds:
+      - Shared editing of documents and graphs
+patterns:
+  - id: eui-data-grid
+    name: Column types and detectors
+    source: EUI data grid
+    use: The table widget (P7)
+    status: decided
+    url: https://eui.elastic.co/docs/components/data-grid/schema-and-columns/
+  - id: eui-page-header
+    name: 'Page header: title, description, tabs, up to ~3 actions'
+    source: EUI page header
+    use: The control-bar regrouping (P1)
+    status: open
+    url: https://eui.elastic.co/docs/components/layout/page-header/
+  - id: eui-page-template
+    name: Page frame with a bottom bar and an empty-state prompt
+    source: EUI page template
+    use: Edit mode and empty pages (P1)
+    status: open
+    url: https://eui.elastic.co/docs/components/templates/page-template/
+  - id: eui-sitewide-search
+    name: Inline header search with typed results
+    source: EUI sitewide search
+    use: Search results and their layout
+    status: open
+    url: https://eui.elastic.co/docs/components/templates/sitewide-search/
+  - id: directus
+    name: Collections, fields, interfaces and relations
+    source: Directus
+    use: Studio's data screens (P4)
+    status: reference
+    url: https://directus.com/docs/getting-started/data-model
+  - id: grafana-scenes
+    name: 'Scenes: dashboards as objects with scoped state'
+    source: Grafana Scenes
+    use: Dashboard v2 (P8)
+    status: reference
+    url: https://grafana.com/developers/scenes
+  - id: perses
+    name: Embeddable dashboards; UI packages apart from plugins
+    source: Perses
+    use: Dashboard v2 (P8)
+    status: reference
+    url: https://perses.dev/
+  - id: openmrs
+    name: Frontend modules and extension slots
+    source: OpenMRS O3
+    use: Plugin contributions (P11)
+    status: reference
+    url: https://openmrs.org/
+  - id: backstage
+    name: Typed extension blueprints
+    source: Backstage
+    use: Plugin contributions (P11)
+    status: reference
+    url: https://backstage.io/

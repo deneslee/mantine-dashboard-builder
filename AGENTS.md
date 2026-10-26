@@ -44,6 +44,7 @@ Versions are in `package.json`; the stack, the layers, the data flow and where s
 | Working on                                        | Read                                                                                                 |
 | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | What to build next, and fixed decisions           | [roadmap.md](.agents/planning/roadmap.md), [tasks.md](.agents/planning/tasks.md)                     |
+| What's fixed, core or swappable, and the plugins  | [core.md](apps/docs/core.md), [potential.md](apps/docs/potential.md)                                 |
 | How the app fits together                         | [architecture.md](docs/architecture.md)                                                              |
 | Navbar, sidebar, context bar, panes               | [shell.md](docs/ui/shell.md)                                                                         |
 | Styles, tokens, the Mantine theme                 | [design-system.md](docs/ui/design-system.md)                                                         |
@@ -74,7 +75,7 @@ How the tiers work and where a new value goes: [design-system.md](docs/ui/design
 - **Focus and press:** `className="mantine-focus-auto"` for the focus ring on custom focusable elements (no custom `:focus-visible` CSS); `mantine-active` for press feedback.
 - **Viewport classes** (`visibleFrom` / `hiddenFrom`) only in the shell. Inside a page, use `@container` queries: `<main>`'s width depends on the panels, not the screen.
 - **Scheme-dependent CSS** (`light-dark()`, `@mixin light/dark`) only in `ui/tokens` and `ui/theme`.
-- **Lint enforces these rules**, and `lint/rules.test.ts` proves each one fires. Exempt: `ui/tokens/**`, `ui/theme/**`, stories, tests, and `features/integrations/**` until [06](.agents/planning/plans/06-sentry.md) rebuilds it. The `ui/tokens/Tokens` story shows every semantic variable in both schemes.
+- **Lint enforces these rules**, and `lint/rules.test.ts` proves each one fires. Exempt: `ui/tokens/**`, `ui/theme/**`, stories, tests, and `features/integrations/**` until [06](https://github.com/deneslee/mantine-dashboard-builder/blob/0e400dd/.agents/planning/plans/06-sentry.md) rebuilds it. The `ui/tokens/Tokens` story shows every semantic variable in both schemes.
 
 ## Structure
 
@@ -170,25 +171,25 @@ Don't use `frontend-design` in this repo: it picks its own fonts and palettes, a
 
 ## Planning
 
-Planning lives in `.agents/planning/`; `docs/` holds only human-facing docs about what is built.
+Planning lives in `.agents/planning/` and covers only the current phase; `docs/` holds only human-facing docs about what is built. Finished plans, parked plans, the backlog and older research live in the project archive outside the repo, and links to them point at the last commit that had them.
 
-| Where                                  | Holds                                                                        |
-| -------------------------------------- | ---------------------------------------------------------------------------- |
-| `.agents/planning/roadmap.md`          | What we're building, locked decisions, phases, open questions                |
-| `.agents/planning/tasks.md`            | The checklist: done, next in order, notes for work that has no plan          |
-| `.agents/planning/plans/NN-slug.md`    | One piece of work, with its design and file-level tasks; `NN` is build order |
-| `.agents/planning/plans/done/`         | Finished plans, kept in git                                                  |
-| `.agents/planning/research/<topic>.md` | Background for one or more plans; its second line links the plan it serves   |
-| `docs/architecture.md`                 | Stack, layers, data flow, state owners, storage keys: how the app fits today |
-| `docs/ui/`, `docs/dashboard/`          | How the built parts work ([Read first](#read-first))                         |
-| `README.md`                            | What the app is, how to run it, a map of the repo                            |
+| Where                                  | Holds                                                                                               |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `.agents/planning/roadmap.md`          | The current phase: steps, locked decisions, open questions; the long-term plan is outside the repo  |
+| `.agents/planning/tasks.md`            | The checklist for the current phase, in order                                                       |
+| `.agents/planning/plans/NN-slug.md`    | One piece of work in the current phase, with its design and file-level tasks; `NN` is build order   |
+| `.agents/planning/research/<topic>.md` | Background for the current phase's plans; its second line links the plan it serves                  |
+| `apps/docs/`                           | The catalog: `catalog/catalog.yaml` and the pages generated from it ([README](apps/docs/README.md)) |
+| `docs/architecture.md`                 | Stack, layers, data flow, state owners, storage keys: how the app fits today                        |
+| `docs/ui/`, `docs/dashboard/`          | How the built parts work ([Read first](#read-first))                                                |
+| `README.md`                            | What the app is, how to run it, a map of the repo                                                   |
 
 - **One home per fact.** Link to the doc or plan that holds a fact instead of restating it. Relative links must resolve; `lint/docs.test.ts` checks them.
-- **Plan layout:** `# NN Title`, then one line: `Status: open | done (date) · Phase N | Cross-cutting · Depends on: … · Research: …`. Sections: Goal, Design, Tasks, Decisions, Verification; add Out of scope, Open decisions or Risks when they help.
+- **Plan layout:** `# NN Title`, then one line: `Status: open | done (date) · Step PN | Cross-cutting · Depends on: … · Research: …`. Sections: Goal, Design, Tasks, Decisions, Verification; add Out of scope, Open decisions or Risks when they help.
 - **Tasks:** `- [ ] **Title.** What to do. Done when …`. Tick `[x]` as you go; `[-]` for dropped or moved work, saying why or where to.
 - **Changing a plan:** edit it in place and add a dated line to Decisions. No version numbers in file names or headers; git keeps the history.
-- **New work:** add a line to `.agents/planning/tasks.md`; write a plan when it needs a design or more than a few tasks.
-- **Finishing:** move the plan to `done/`, tick its line in `tasks.md`, move any tasks it leaves open there, and update the doc in `docs/` (and the README, if the repo map or the try-it URLs changed) that describes what was built.
+- **New work:** add a line to `.agents/planning/tasks.md`; write a plan when it needs a design or more than a few tasks. Work outside the current phase belongs in the project plan, not here.
+- **Finishing:** tick its line in `tasks.md`, move any tasks it leaves open there, and update the doc in `docs/` (and the README, if the repo map or the try-it URLs changed) that describes what was built. Then the plan moves out of the repo to the project archive, and links to it point at the last commit that had it.
 
 <!-- /Workflow instructions -->
 

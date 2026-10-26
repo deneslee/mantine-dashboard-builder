@@ -14,7 +14,7 @@ import { storageKey } from '../storage';
  * Secrets the user typed in: connection passwords, keys and connection strings, and the GitHub token
  * for Add to build. They live in memory. One saved "on this device" is encrypted with a key derived
  * from the user's passphrase, and the key is held in memory only, so a reload locks the vault.
- * Research: .agents/planning/research/browser-secrets.md.
+ * Research: https://github.com/deneslee/mantine-dashboard-builder/blob/0e400dd/.agents/planning/research/browser-secrets.md.
  */
 
 export const VAULT_STORAGE_KEY = storageKey('vault');

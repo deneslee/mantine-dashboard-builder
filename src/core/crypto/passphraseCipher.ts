@@ -2,7 +2,7 @@
  * Encryption with a key derived from a passphrase, on WebCrypto alone: PBKDF2-SHA256 at OWASP's
  * 600,000 iterations (WebCrypto has no Argon2id), then AES-GCM-256, which also detects tampering.
  * The key is non-extractable, so nothing can read it back out of memory as bytes.
- * Research: .agents/planning/research/browser-secrets.md.
+ * Research: https://github.com/deneslee/mantine-dashboard-builder/blob/0e400dd/.agents/planning/research/browser-secrets.md.
  */
 
 export const PBKDF2_ITERATIONS = 600_000;

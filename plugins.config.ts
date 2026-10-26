@@ -8,7 +8,7 @@ import { formatPluginsFile, parsePluginsFile } from './src/core/build/pluginsFil
 /**
  * Optional plugins: datasource plugins that are in the build only when `plugins.json` lists them.
  * The Data sources page edits that file, through the dev server or a GitHub commit from the live
- * site, so the next build has exactly what was chosen. Plan: .agents/planning/plans/done/11-optional-plugins.md.
+ * site, so the next build has exactly what was chosen. Plan: https://github.com/deneslee/mantine-dashboard-builder/blob/0e400dd/.agents/planning/plans/done/11-optional-plugins.md.
  */
 
 /** An optional plugin the app knows. */

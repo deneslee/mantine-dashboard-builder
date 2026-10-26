@@ -1,6 +1,6 @@
 # Research: Project Structure (bulletproof-react, adapted)
 
-Sep 24, 2026 · Reference: [02-project-structure](../plans/done/02-project-structure.md)
+Sep 24, 2026 · Reference: [02-project-structure](https://github.com/deneslee/mantine-dashboard-builder/blob/0e400dd/.agents/planning/plans/done/02-project-structure.md)
 
 ---
 

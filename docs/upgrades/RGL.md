@@ -36,7 +36,7 @@ Status (Oct 22, 2026): **not adopted.** 2.3.0 was tried and reverted to 2.2.4: i
 
 - **Drag and resize performance.** Only the tiles that move re-render, instead of every tile on every move. We already memoize children by widget id (grid rule 4), so `/dashboards/perf` gains the most.
 - **The drag and resize fixes** above.
-- **Palette drag-in.** [07](../../.agents/planning/plans/07-dashboard-model.md) plans dragging widgets in from the palette through `dropConfig`; 2.3.0 fixes that path and adds touch drop.
+- **Palette drag-in.** [07](https://github.com/deneslee/mantine-dashboard-builder/blob/0e400dd/.agents/planning/plans/07-dashboard-model.md) plans dragging widgets in from the palette through `dropConfig`; 2.3.0 fixes that path and adds touch drop.
 
 ## What went wrong
 
