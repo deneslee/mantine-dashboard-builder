@@ -1,6 +1,6 @@
 # App shell
 
-How the chrome around every page works: panes, state, navbar, sidebar, context bar. Colors come from the always-dark `chrome` tokens ([design-system.md](design-system.md)).
+How the chrome around every page works: panes, state, navbar, sidebar, context bar. Colors come from the `chrome` tokens: a dark frame in both schemes (Carbon-style inline theming), softer in light and one step behind the canvas in dark ([design-system.md](design-system.md#surfaces-and-materials)).
 
 Code: `src/shell/`. Used from outside: `Shell`, `ShellProvider` (takes `nav` and `globalTabs` from the app), `useSidebar`, `useContextBar`, `useShellActions`, `useNav` (`useShell.ts`), `createShellStore`. The shell knows no routes: `app/nav.ts` lists them. No barrel; import the file.
 

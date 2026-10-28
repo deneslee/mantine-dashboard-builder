@@ -1,4 +1,5 @@
-import { Box, Paper } from '@mantine/core';
+import { Box } from '@mantine/core';
+import { Surface } from '@/ui/components/Surface/Surface';
 import { useIntersection } from '@mantine/hooks';
 import { Suspense, useId, useState } from 'react';
 import { QueryBoundary } from '@/ui/components/QueryBoundary';
@@ -87,9 +88,10 @@ function Tile({
   });
   const skeleton = widgets[widget.type]?.skeleton ?? unknownSkeleton;
   return (
-    <Paper
+    <Surface
+      level="raised"
+      className={classes.tile}
       id={isPreview ? undefined : 'widget-' + id}
-      variant="widget"
       component="section"
       data-widget-tile
       aria-labelledby={titleId}
@@ -140,7 +142,7 @@ function Tile({
           )}
         </QueryBoundary>
       </Box>
-    </Paper>
+    </Surface>
   );
 }
 

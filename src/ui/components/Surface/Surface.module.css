@@ -1,0 +1,52 @@
+/*
+ * One rule set per level. Each Surface also re-points the layer tokens at itself, so whatever sits
+ * inside reads "the surface behind me" from `--app-layer-surface` and `--app-layer-border`.
+ */
+.root {
+  --surface-bg: var(--app-elevation-surface-panel);
+  --surface-border: var(--app-color-border-subtle);
+  --surface-shadow: none;
+  --app-layer-surface: var(--surface-bg);
+  --app-layer-border: var(--surface-border);
+
+  background-color: var(--surface-bg);
+  border: 1px solid var(--surface-border);
+  box-shadow: var(--surface-shadow);
+
+  &[data-level='canvas'] {
+    --surface-bg: var(--app-elevation-surface-canvas);
+  }
+
+  &[data-level='raised'] {
+    --surface-bg: var(--app-elevation-surface-raised);
+    --surface-shadow: var(--app-elevation-shadow-raised);
+  }
+
+  &[data-level='sunken'] {
+    --surface-bg: var(--app-elevation-surface-sunken);
+  }
+
+  &[data-level='overlay'] {
+    --surface-bg: var(--app-elevation-surface-overlay);
+    --surface-shadow: var(--app-elevation-shadow-overlay);
+  }
+
+  &[data-borderless] {
+    border: 0;
+  }
+
+  /* Frosted glass; the solid surface when the browser can't blur or the user wants less transparency. */
+  &[data-material='acrylic'] {
+    background-color: color-mix(in srgb, var(--surface-bg) var(--app-material-acrylic-opacity), transparent);
+    backdrop-filter: blur(var(--app-material-acrylic-blur)) saturate(var(--app-material-acrylic-saturate));
+
+    @supports not (backdrop-filter: blur(1px)) {
+      background-color: var(--surface-bg);
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+      background-color: var(--surface-bg);
+      backdrop-filter: none;
+    }
+  }
+}

@@ -1,4 +1,5 @@
-import { Paper, Text, Title } from '@mantine/core';
+import { Text, Title } from '@mantine/core';
+import { Surface } from './Surface/Surface';
 import type { ReactNode } from 'react';
 import classes from './Section.module.css';
 
@@ -13,7 +14,7 @@ interface SectionProps {
 /** A bordered group of related content with a title. Rows inside are separated by rules. */
 export function Section({ title, description, actions, children }: SectionProps) {
   return (
-    <Paper variant="panel" component="section" className={classes.section}>
+    <Surface level="panel" component="section" className={classes.section}>
       <div className={classes.header}>
         <div>
           <Title order={2} size="h4">
@@ -24,7 +25,7 @@ export function Section({ title, description, actions, children }: SectionProps)
         {actions ? <div className={classes.actions}>{actions}</div> : null}
       </div>
       {children}
-    </Paper>
+    </Surface>
   );
 }
 

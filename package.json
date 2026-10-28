@@ -45,6 +45,7 @@
     "test:watch": "vp test",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
+    "current": "node .agents/planning/current.mjs",
     "deps": "pnpm outdated -r",
     "deps:up": "pnpm up -r -i -L",
     "deps:mantine": "pnpm up -r -L \"@mantine/*\" postcss-preset-mantine",

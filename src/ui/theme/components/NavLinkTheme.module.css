@@ -1,8 +1,8 @@
 /*
  * `sidebar` variant. Three states on top of the default:
  *   - hover: subtle raised background
- *   - [data-active]: the current route (tinted background, primary bar on the left, white text)
- *   - [data-child-active]: a parent whose child is current (white text, heavier weight, no bar)
+ *   - [data-active]: the current route (tinted background, primary bar on the left, active text)
+ *   - [data-child-active]: a parent whose child is current (strong text, heavier weight, no bar)
  * [data-compact] is the icon rail: label and chevron fade out but stay in the DOM (accessible name),
  * and the icon keeps its position. The sidebar sets `--nl-inset` so that position is the rail's center.
  */
@@ -23,10 +23,9 @@
       color var(--app-motion-duration-fast) var(--app-motion-easing-standard);
 
     /*
-     * Sidebar chrome is scheme-invariant (always dark), but Mantine's own NavLink
-     * hover rule is scoped to [data-mantine-color-scheme] and hardcodes gray-0 in
-     * light scheme instead of using --nl-hover. Override it explicitly so hover
-     * matches the sidebar palette in both schemes.
+     * Mantine's own NavLink hover rule is scoped to [data-mantine-color-scheme] and hardcodes
+     * gray-0 in light scheme instead of using --nl-hover. Override it so hover follows the
+     * sidebar tokens in both schemes.
      */
     @media (hover: hover) {
       &:hover {
@@ -58,7 +57,7 @@
     }
 
     &[data-child-active] {
-      --nl-color: var(--mantine-color-white);
+      --nl-color: var(--app-sidebar-text-strong);
 
       font-weight: 600;
     }

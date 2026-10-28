@@ -1,15 +1,15 @@
-/* `chrome` variant: icon button that lives on the dark navbar / sidebar. */
+/* `chrome` variant: icon button on the navbar / sidebar, which stay dark in both schemes. */
 .root {
   &[data-variant='chrome'] {
     --ai-bg: transparent;
     --ai-color: var(--app-navbar-text);
-    --ai-hover: rgb(255 255 255 / 10%);
-    --ai-hover-color: var(--mantine-color-white);
+    --ai-hover: var(--app-navbar-hover);
+    --ai-hover-color: var(--app-navbar-text-strong);
     --ai-bd: none;
 
     &[data-active] {
-      --ai-bg: rgb(255 255 255 / 14%);
-      --ai-color: var(--mantine-color-white);
+      --ai-bg: var(--app-navbar-active);
+      --ai-color: var(--app-navbar-text-strong);
     }
   }
 }

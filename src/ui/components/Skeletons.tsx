@@ -1,4 +1,5 @@
-import { Box, Group, Paper, SimpleGrid, Skeleton, Stack, VisuallyHidden } from '@mantine/core';
+import { Box, Group, SimpleGrid, Skeleton, Stack, VisuallyHidden } from '@mantine/core';
+import { Surface } from './Surface/Surface';
 import type { ReactNode } from 'react';
 import classes from './Skeletons.module.css';
 
@@ -116,14 +117,14 @@ export function GridSkeleton({ label = 'Loading dashboard' }: { label?: string }
         </Group>
         <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
           {[0, 1, 2, 3, 4, 5].map((i) => (
-            <Paper key={i} variant="panel" p="md" h={220}>
+            <Surface key={i} level="raised" p="md" h={220}>
               <Stack gap="sm" h="100%">
                 <Skeleton height={12} width="40%" />
                 <Box className={classes.grow}>
                   {i % 3 === 1 ? <TableSkeleton rows={4} columns={3} /> : <ChartSkeleton />}
                 </Box>
               </Stack>
-            </Paper>
+            </Surface>
           ))}
         </SimpleGrid>
       </Stack>
@@ -139,7 +140,7 @@ export function ListSkeleton({ rows = 6, label = 'Loading list' }: { rows?: numb
         <Skeleton height={20} width={200} />
         <Stack gap="xs">
           {Array.from({ length: rows }, (_, i) => (
-            <Paper key={i} variant="panel" p="sm">
+            <Surface key={i} level="raised" p="sm">
               <Group gap="sm" wrap="nowrap">
                 <Skeleton height={32} width={32} />
                 <Stack gap="xs" className={classes.grow}>
@@ -147,7 +148,7 @@ export function ListSkeleton({ rows = 6, label = 'Loading list' }: { rows?: numb
                   <Skeleton height={8} width="60%" />
                 </Stack>
               </Group>
-            </Paper>
+            </Surface>
           ))}
         </Stack>
       </Stack>

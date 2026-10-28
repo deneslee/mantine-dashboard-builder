@@ -38,47 +38,46 @@ export const virtualColors = {
   info: virtualColor({ name: 'info', light: 'blue', dark: 'blue' }),
 } as const;
 
-// 1. Elevation & Surfaces: Atlassian vocabulary + exact surface model
+const { neutral } = primitives;
+const shadowRamp = primitives.elevationShadows;
+
+/**
+ * 1. Elevation: surfaces from back to front,
+ * - `canvas` the page; `panel` regions on it (panes, sections, the context bar); `raised` cards
+ *   and widgets; `sunken` wells inside a card; `overlay` menus, popovers, drawers, modals.
+ * - Light separates with white panels on a grey canvas plus shadow; dark gets lighter toward the
+ *   viewer, so shadows alone don't have to carry it.
+ * - Shadows only from `raised` up
+ */
 export const elevation = {
   surface: {
-    canvas: {
-      light: primitives.palette.gray[0],
-      dark: primitives.palette.dark[8],
-    },
-    sunken: {
-      light: primitives.palette.gray[1],
-      dark: primitives.palette.dark[9],
-    },
-    raised: {
-      light: primitives.white,
-      dark: primitives.palette.dark[7],
-    },
-    raisedHovered: {
-      light: primitives.palette.gray[0],
-      dark: primitives.palette.dark[6],
-    },
-    raisedPressed: {
-      light: primitives.palette.gray[1],
-      dark: primitives.palette.dark[5],
-    },
-    overlay: {
-      light: primitives.white,
-      dark: primitives.palette.dark[7],
-    },
-    overlayHovered: {
-      light: primitives.palette.gray[0],
-      dark: primitives.palette.dark[6],
-    },
+    canvas: { light: neutral[96], dark: neutral[10] },
+    panel: { light: primitives.white, dark: neutral[14] },
+    sunken: { light: neutral[98], dark: neutral[12] },
+    raised: { light: primitives.white, dark: neutral[18] },
+    raisedHovered: { light: neutral[98], dark: neutral[20] },
+    raisedPressed: { light: neutral[94], dark: neutral[16] },
+    overlay: { light: primitives.white, dark: neutral[20] },
+    overlayHovered: { light: neutral[96], dark: neutral[24] },
   },
   shadow: {
-    raised: {
-      light: primitives.shadows.raised,
-      dark: 'none',
-    },
-    overlay: {
-      light: primitives.shadows.overlay,
-      dark: primitives.shadows.overlay,
-    },
+    /** Cards and widgets on a panel or the canvas (Fluent shadow 4). */
+    raised: { light: shadowRamp.light[4], dark: shadowRamp.dark[4] },
+    /** Things that float over content: a dragged tile, a sticky or floating bar (shadow 8). */
+    floating: { light: shadowRamp.light[8], dark: shadowRamp.dark[8] },
+    /** Menus, popovers, the Spotlight (shadow 16). */
+    overlay: { light: shadowRamp.light[16], dark: shadowRamp.dark[16] },
+    /** Modals and drawers, above a scrim (shadow 64). */
+    modal: { light: shadowRamp.light[64], dark: shadowRamp.dark[64] },
+  },
+} as const;
+
+/** Acrylic: frosted glass for surfaces floating over moving content (Fluent 2 materials). */
+export const material = {
+  acrylic: {
+    opacity: primitives.acrylic.opacity,
+    blur: primitives.acrylic.blur,
+    saturate: primitives.acrylic.saturate,
   },
 } as const;
 
@@ -106,18 +105,19 @@ export const color = {
       dark: primitives.palette.dark[4],
     },
   },
+  // Translucent stroke the same token reads on every surface it sits on.
   border: {
     default: {
-      light: primitives.palette.gray[3],
-      dark: primitives.palette.dark[4],
+      light: primitives.alpha.black[16],
+      dark: primitives.alpha.white[14],
     },
     subtle: {
-      light: primitives.palette.gray[2],
-      dark: primitives.palette.dark[5],
+      light: primitives.alpha.black[8],
+      dark: primitives.alpha.white[8],
     },
     strong: {
-      light: primitives.palette.gray[4],
-      dark: primitives.palette.dark[3],
+      light: primitives.alpha.black[32],
+      dark: primitives.alpha.white[24],
     },
     focused: {
       light: primitives.palette.indigo[6],
@@ -126,9 +126,13 @@ export const color = {
   },
 } as const;
 
-// 3. Contextual layer defaults (Carbon-aligned baseline before layers.css nesting)
+/**
+ * 3. The surface something sits on. These are the page-level defaults; every `Surface` overrides
+ * `surface` and `border` for its own subtree, so a Table header or a Tabs border inside a widget
+ * matches the widget.
+ */
 export const layer = {
-  surface: elevation.surface.raised,
+  surface: elevation.surface.canvas,
   surfaceHovered: elevation.surface.raisedHovered,
   surfacePressed: elevation.surface.raisedPressed,
   border: color.border.default,
@@ -164,7 +168,9 @@ export const fontWeight = {
 /** Values for Mantine `shadow=` props. Mantine passes `var(…)` through unchanged. */
 export const shadow = {
   raised: 'var(--app-elevation-shadow-raised)',
+  floating: 'var(--app-elevation-shadow-floating)',
   overlay: 'var(--app-elevation-shadow-overlay)',
+  modal: 'var(--app-elevation-shadow-modal)',
 } as const;
 
 // 5. Motion: semantic durations and easings
@@ -213,21 +219,37 @@ export const shell = {
   contextDefault: rem(primitives.shell.contextBar.default),
 } as const;
 
-// 10. Chrome: the navbar and sidebar stay dark in both schemes (docs/design-system.md)
+/**
+ * 10. Chrome: the navbar and sidebar stay dark in both schemes, Carbon's "inline theming" of a dark
+ * shell around the page. Only the background differs: in light it is a softer dark grey, so it
+ * frames a white page without a hard black edge; in dark it sits one step behind the canvas.
+ * Everything drawn on it (text, hover, borders, the active item) is light-on-dark, the same in both.
+ * The navbar is acrylic: content scrolls under it.
+ */
+const chromeBg = { light: neutral[14], dark: neutral[8] };
+const acrylicOf = (bg: string) => `color-mix(in srgb, ${bg} 92%, transparent)`;
+const tint = (shade: string, percent: number) => `color-mix(in srgb, ${shade} ${percent}%, transparent)`;
+const chromeText = primitives.palette.gray[3];
+const chromeMuted = primitives.palette.gray[5];
+
 export const chrome = {
-  navbarBg: primitives.alpha.black[92],
+  navbarBg: { light: acrylicOf(chromeBg.light), dark: acrylicOf(chromeBg.dark) },
   navbarBorder: primitives.alpha.white[8],
-  navbarText: primitives.palette.gray[2],
-  navbarMuted: primitives.palette.gray[5],
+  navbarText: chromeText,
+  navbarTextStrong: primitives.white,
+  navbarMuted: chromeMuted,
+  navbarHover: primitives.alpha.white[8],
+  navbarActive: primitives.alpha.white[12],
   navbarInputBg: primitives.alpha.white[8],
   navbarInputBgHover: primitives.alpha.white[12],
   navbarInputBorder: primitives.alpha.white[10],
-  sidebarBg: primitives.palette.dark[7],
-  sidebarBorder: primitives.palette.dark[5],
-  sidebarText: primitives.palette.gray[4],
-  sidebarMuted: primitives.palette.gray[6],
-  sidebarHover: primitives.palette.dark[6],
-  sidebarActiveBg: `color-mix(in srgb, ${primitives.palette.indigo[5]} 24%, transparent)`,
+  sidebarBg: chromeBg,
+  sidebarBorder: primitives.alpha.white[8],
+  sidebarText: chromeText,
+  sidebarTextStrong: primitives.white,
+  sidebarMuted: chromeMuted,
+  sidebarHover: primitives.alpha.white[8],
+  sidebarActiveBg: tint(primitives.palette.indigo[5], 24),
   sidebarActiveText: primitives.white,
   sidebarActiveBar: primitives.palette.indigo[4],
 } as const;
@@ -235,6 +257,7 @@ export const chrome = {
 /** Complete semantic token tree. */
 export const semantic = {
   elevation,
+  material,
   color,
   layer,
   radius,

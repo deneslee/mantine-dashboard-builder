@@ -46,6 +46,14 @@ packageExtensions:
   '@mantine/hooks@9':
     peerDependencies:
       react-dom: '^19.2.0'
+  # storybook loads its framework and addon presets by name; same global-store linking gap.
+  'storybook@10':
+    peerDependencies:
+      '@storybook/react-vite': '^10.6.4'
+      '@storybook/addon-a11y': '^10.6.4'
+      '@storybook/addon-docs': '^10.6.4'
+      '@storybook/addon-mcp': '^10.6.4'
+      '@storybook/addon-vitest': '^10.6.4'
 catalog:
   vite: npm:@voidzero-dev/vite-plus-core@1.4.0
   vitest: 5.0.5

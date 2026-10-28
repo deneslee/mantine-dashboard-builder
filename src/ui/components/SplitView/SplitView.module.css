@@ -1,0 +1,106 @@
+/* Fills its parent; the parent sets the height (a page region, a widget body, a story frame). */
+.root {
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+
+.frame,
+.splitter {
+  height: 100%;
+}
+
+.pane {
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+
+  /* Animate open, compact and close; not while the user drags. Reduced motion zeroes the token. */
+  .frame:not([data-resizing]) & {
+    transition: flex-basis var(--app-motion-duration-base) var(--app-motion-easing-standard);
+  }
+
+  /* Pane content can switch layout by its own width as it is dragged. */
+  container-type: inline-size;
+}
+
+.body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+
+/*
+ * A 1px line with a wider invisible hit area. Inert next to a fixed (compact) pane, gone next to a
+ * closed one.
+ */
+.handle {
+  --splitter-handle-color: var(--app-color-border-default);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    margin: rem(-3px);
+  }
+
+  &:hover,
+  &:focus-visible,
+  &[data-active] {
+    --splitter-handle-color: var(--mantine-primary-color-filled);
+  }
+
+  .pane[data-fixed] + &,
+  &:has(+ .pane[data-fixed]) {
+    pointer-events: none;
+  }
+
+  .pane[data-closed] + &,
+  &:has(+ .pane[data-closed]) {
+    visibility: hidden;
+    flex-basis: 0;
+  }
+}
+
+.header {
+  flex: 0 0 auto;
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-xs) var(--mantine-spacing-xs)
+    var(--mantine-spacing-sm);
+  border-bottom: 1px solid var(--app-color-border-subtle);
+}
+
+.headerCompact {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  padding-block: var(--mantine-spacing-xs);
+  border-bottom: 1px solid var(--app-color-border-subtle);
+}
+
+.titleIcon {
+  display: inline-flex;
+  color: var(--app-color-text-subtle);
+}
+
+.title {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  outline: none;
+}
+
+.drawerContent {
+  display: flex;
+  flex-direction: column;
+}
+
+.drawerBody {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}

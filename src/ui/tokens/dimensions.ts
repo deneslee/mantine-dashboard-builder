@@ -4,7 +4,7 @@
  */
 
 import { GRID_COLUMNS } from '@/core/dashboard/layout';
-import { grid, shell, zIndex } from './primitives';
+import { grid, pane, shell, zIndex } from './primitives';
 
 /** `grid.cols` is the document's `GRID_COLUMNS`: layouts are validated against it. */
-export const dimensions = { shell, zIndex, grid: { ...grid, cols: GRID_COLUMNS } } as const;
+export const dimensions = { shell, pane, zIndex, grid: { ...grid, cols: GRID_COLUMNS } } as const;

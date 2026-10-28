@@ -1,5 +1,5 @@
 .root {
-  color: var(--mantine-color-white);
+  color: var(--app-sidebar-text-strong);
   min-width: 0;
 }
 

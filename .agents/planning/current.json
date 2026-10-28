@@ -1,0 +1,760 @@
+{
+  "about": "What the app has when each task is finished, in build order. One task = one finished thing; its parts are the concrete elements or behaviours it ends up with. The current task is the first one not done or dropped; inside it, the first part not done.",
+  "legend": {
+    "todo": "not there yet",
+    "done": "built and checked",
+    "dropped": "not doing it; say why in note"
+  },
+  "phases": [
+    {
+      "id": "P1",
+      "title": "Cleanup",
+      "tasks": [
+        {
+          "id": "P1.0",
+          "status": "done",
+          "title": "Split view component",
+          "where": "ui/components/SplitView, Storybook › ui › components › SplitView",
+          "result": "One resizable-panes component for the editor pane, split widgets and multi-column pages, with stories you can drive from controls (plans/split-view.md).",
+          "parts": [
+            {
+              "id": "P1.0.1",
+              "status": "done",
+              "element": "2 or 3 panes, horizontal or vertical, each with default size, min and max in % or px"
+            },
+            {
+              "id": "P1.0.2",
+              "status": "done",
+              "element": "Collapse: drag past min or press Enter on the handle; the handle stays to reopen it"
+            },
+            {
+              "id": "P1.0.3",
+              "status": "done",
+              "element": "Compact: the pane shrinks to a fixed-width rail; its header and lists (e.g. widget cards) show icons only, with tooltips, and the header icon expands it"
+            },
+            {
+              "id": "P1.0.4",
+              "status": "done",
+              "element": "Close: the pane goes away and focus returns to what opened it"
+            },
+            {
+              "id": "P1.0.5",
+              "status": "done",
+              "element": "Pane header with Back, title, Collapse and Close"
+            },
+            {
+              "id": "P1.0.6",
+              "status": "done",
+              "element": "Narrow container: the pane opens as a Drawer instead"
+            },
+            {
+              "id": "P1.0.7",
+              "status": "done",
+              "element": "Sizes saved on release, double-click resets"
+            },
+            {
+              "id": "P1.0.8",
+              "status": "done",
+              "element": "Playground story with controls for every option"
+            },
+            {
+              "id": "P1.0.9",
+              "status": "done",
+              "element": "Stories: editor side pane, chart | table widget (side by side and stacked), three-column planner, narrow drawer"
+            },
+            {
+              "id": "P1.0.10",
+              "status": "done",
+              "element": "Keyboard story: arrows resize, Enter collapses, Close returns focus"
+            }
+          ]
+        },
+        {
+          "id": "P1.1",
+          "status": "todo",
+          "title": "Docked side pane",
+          "where": "Dashboard page, right of the grid",
+          "result": "Palette, widget editor and Inspect open in a resizable pane beside the grid instead of a drawer over it.",
+          "parts": [
+            {
+              "id": "P1.1.1",
+              "status": "todo",
+              "element": "Side pane (SplitView) next to the grid; the grid gets narrower when it opens"
+            },
+            {
+              "id": "P1.1.2",
+              "status": "todo",
+              "element": "Add widget palette opens in the pane"
+            },
+            {
+              "id": "P1.1.3",
+              "status": "todo",
+              "element": "Widget editor opens in the pane"
+            },
+            {
+              "id": "P1.1.4",
+              "status": "todo",
+              "element": "Inspect opens in the pane"
+            },
+            {
+              "id": "P1.1.5",
+              "status": "todo",
+              "element": "Close button in the pane header; focus goes into the pane on open and back to the button that opened it on close"
+            },
+            {
+              "id": "P1.1.6",
+              "status": "todo",
+              "element": "PaneDrawer is gone; Drawer only for real overlays"
+            }
+          ]
+        },
+        {
+          "id": "P1.2",
+          "status": "todo",
+          "title": "Grouped page control bar",
+          "where": "Dashboard page header (Page.ControlBar)",
+          "result": "The header bar shows three separate groups and folds into an overflow menu when narrow.",
+          "parts": [
+            {
+              "id": "P1.2.1",
+              "status": "todo",
+              "element": "Page actions group: create, edit, share, export, save"
+            },
+            {
+              "id": "P1.2.2",
+              "status": "todo",
+              "element": "View controls group: filters, time range, refresh, view"
+            },
+            {
+              "id": "P1.2.3",
+              "status": "todo",
+              "element": "Editor controls group: undo, redo, add widget (edit mode only)"
+            },
+            {
+              "id": "P1.2.4",
+              "status": "todo",
+              "element": "Overflow menu that takes the controls that don't fit; groups stay apart at 667 px"
+            }
+          ]
+        },
+        {
+          "id": "P1.3",
+          "status": "todo",
+          "title": "Edit bar",
+          "where": "Dashboard header in edit mode (EditToolbar)",
+          "result": "Edit mode has a clear bar: what is being edited, whether it's saved, and one obvious primary action.",
+          "parts": [
+            {
+              "id": "P1.3.1",
+              "status": "todo",
+              "element": "\"Editing\" badge that changes when there are unsaved changes"
+            },
+            {
+              "id": "P1.3.2",
+              "status": "todo",
+              "element": "Undo icon button with tooltip, Ctrl+Z; disabled when nothing to undo"
+            },
+            {
+              "id": "P1.3.3",
+              "status": "todo",
+              "element": "Redo icon button with tooltip, Ctrl+Shift+Z; disabled when nothing to redo"
+            },
+            {
+              "id": "P1.3.4",
+              "status": "todo",
+              "element": "Add widget as the only filled button, never hidden by screen width"
+            },
+            {
+              "id": "P1.3.5",
+              "status": "todo",
+              "element": "Save button with spinner while saving, plus a menu entry \"Save and done\"; disabled while clean"
+            },
+            {
+              "id": "P1.3.6",
+              "status": "todo",
+              "element": "Discard as a quiet button; disabled while clean; asks \"Discard changes?\" (Keep editing / Discard changes)"
+            },
+            {
+              "id": "P1.3.7",
+              "status": "todo",
+              "element": "One icon menu with Import JSON and Export JSON; Export no longer also in the page actions"
+            },
+            {
+              "id": "P1.3.8",
+              "status": "todo",
+              "element": "Done button; with unsaved changes it opens the leave dialog (Save, Keep draft, Discard, Keep editing)"
+            },
+            {
+              "id": "P1.3.9",
+              "status": "todo",
+              "element": "Save stays reachable while scrolling a long dashboard, without covering a tile or the side pane"
+            },
+            {
+              "id": "P1.3.10",
+              "status": "todo",
+              "element": "At 667 px the bar and grid dragging are both on or both off (one editable flag from the grid's width)"
+            }
+          ]
+        },
+        {
+          "id": "P1.4",
+          "status": "todo",
+          "title": "Draft and leave behaviour",
+          "where": "Dashboard page, view mode and leaving edit mode",
+          "result": "Unsaved work is visible and never lost by surprise.",
+          "parts": [
+            {
+              "id": "P1.4.1",
+              "status": "todo",
+              "element": "Draft marker on a dashboard in view mode that has unsaved changes"
+            },
+            {
+              "id": "P1.4.2",
+              "status": "todo",
+              "element": "One-time \"Restored your unsaved draft\" toast when a draft is reopened"
+            },
+            {
+              "id": "P1.4.3",
+              "status": "todo",
+              "element": "Query editor asks before closing with unapplied changes (Mantine confirm modal, no window.confirm)"
+            }
+          ]
+        },
+        {
+          "id": "P1.5",
+          "status": "todo",
+          "title": "Empty and loading states",
+          "where": "Dashboard page and editor",
+          "result": "An empty or loading dashboard looks intentional.",
+          "parts": [
+            {
+              "id": "P1.5.1",
+              "status": "todo",
+              "element": "Empty dashboard: EmptyState with icon, title, text, \"Add widget\" (opens palette) and \"Start from a template\""
+            },
+            {
+              "id": "P1.5.2",
+              "status": "todo",
+              "element": "Editor loading skeleton instead of the \"Opening editor…\" text"
+            }
+          ]
+        },
+        {
+          "id": "P1.6",
+          "status": "todo",
+          "title": "Placement and palette forms",
+          "where": "Add widget palette, Move and Resize dialogs",
+          "result": "These dialogs behave like forms.",
+          "parts": [
+            {
+              "id": "P1.6.1",
+              "status": "todo",
+              "element": "Enter submits the palette, Move and Resize"
+            },
+            {
+              "id": "P1.6.2",
+              "status": "todo",
+              "element": "Move and Resize inputs show the valid range (\"Column 1–12\")"
+            },
+            {
+              "id": "P1.6.3",
+              "status": "todo",
+              "element": "Screen-reader position announcements count from 1, like the dialogs"
+            }
+          ]
+        },
+        {
+          "id": "P1.7",
+          "status": "todo",
+          "title": "Widget accessibility fixes",
+          "where": "Widget tile header and toasts",
+          "result": "Widget actions work correctly with a screen reader.",
+          "parts": [
+            {
+              "id": "P1.7.1",
+              "status": "todo",
+              "element": "Widget menu button keeps aria-haspopup and aria-expanded under its tooltip"
+            },
+            {
+              "id": "P1.7.2",
+              "status": "todo",
+              "element": "Repeating the same action announces it again"
+            },
+            {
+              "id": "P1.7.3",
+              "status": "todo",
+              "element": "Undo in the \"Widget removed\" toast restores that widget, not the latest change"
+            }
+          ]
+        },
+        {
+          "id": "P1.8",
+          "status": "todo",
+          "title": "Query editor live preview",
+          "where": "Widget editor, query section",
+          "result": "The preview updates after typing pauses, not on every keystroke.",
+          "parts": [
+            {
+              "id": "P1.8.1",
+              "status": "todo",
+              "element": "Debounced preview query"
+            }
+          ]
+        },
+        {
+          "id": "P1.9",
+          "status": "todo",
+          "title": "Context bar Details tab",
+          "where": "Context bar (right panel), Details tab",
+          "result": "The Details tab shows what the current page is made of, supplied by the page itself.",
+          "parts": [
+            {
+              "id": "P1.9.1",
+              "status": "todo",
+              "element": "Title and record of the current view"
+            },
+            {
+              "id": "P1.9.2",
+              "status": "todo",
+              "element": "List of the dashboard's widgets and their queries"
+            },
+            {
+              "id": "P1.9.3",
+              "status": "todo",
+              "element": "Related objects and actions"
+            }
+          ]
+        },
+        {
+          "id": "P1.10",
+          "status": "todo",
+          "title": "Inspect tabs",
+          "where": "Inspect, in the side pane",
+          "result": "Inspect has four tabs, each with populated, empty and error states.",
+          "parts": [
+            {
+              "id": "P1.10.1",
+              "status": "todo",
+              "element": "Data tab: table preview with limited rows, Export button"
+            },
+            {
+              "id": "P1.10.2",
+              "status": "todo",
+              "element": "Query tab: source, query spec, resolved variables and time range"
+            },
+            {
+              "id": "P1.10.3",
+              "status": "todo",
+              "element": "JSON tab: widget definition and data frames in sections"
+            },
+            {
+              "id": "P1.10.4",
+              "status": "todo",
+              "element": "Diagnostics tab: duration, cache age, errors"
+            }
+          ]
+        },
+        {
+          "id": "P1.11",
+          "status": "todo",
+          "title": "Readable light theme",
+          "where": "Whole app, light scheme",
+          "result": "Text and badges pass WCAG AA in light mode; the contrast check is on for every story.",
+          "parts": [
+            {
+              "id": "P1.11.1",
+              "status": "todo",
+              "element": "Dimmed text"
+            },
+            {
+              "id": "P1.11.2",
+              "status": "todo",
+              "element": "White text on primary filled buttons"
+            },
+            {
+              "id": "P1.11.3",
+              "status": "todo",
+              "element": "Links on the canvas"
+            },
+            {
+              "id": "P1.11.4",
+              "status": "todo",
+              "element": "Warning and success badges and alert titles"
+            },
+            {
+              "id": "P1.11.5",
+              "status": "todo",
+              "element": "Avatar initials"
+            }
+          ]
+        },
+        {
+          "id": "P1.12",
+          "status": "todo",
+          "title": "Correct surface colours",
+          "where": "Modals, drawers, tables, tabs, scroll fades",
+          "result": "Components match the surface they sit on, on the canvas and inside a widget.",
+          "parts": [
+            {
+              "id": "P1.12.1",
+              "status": "todo",
+              "element": "Modal and Drawer on the overlay surface"
+            },
+            {
+              "id": "P1.12.2",
+              "status": "todo",
+              "element": "Table sticky header, active Tabs border and Scroller fade on the surface behind them"
+            }
+          ]
+        },
+        {
+          "id": "P1.13",
+          "status": "todo",
+          "title": "Storybook by area",
+          "where": "Storybook",
+          "result": "Stories grouped Shell, Dashboard, Studio, Data, Shared UI, with controls, one story per distinct state.",
+          "parts": [
+            {
+              "id": "P1.13.1",
+              "status": "todo",
+              "element": "Page: one composition story, one narrow"
+            },
+            {
+              "id": "P1.13.2",
+              "status": "todo",
+              "element": "Shell: one configurable, one narrow, one interaction"
+            },
+            {
+              "id": "P1.13.3",
+              "status": "todo",
+              "element": "DashboardPage and DatasourcesPage: only distinct states"
+            }
+          ]
+        },
+        {
+          "id": "P1.14",
+          "status": "todo",
+          "title": "Lean test suite",
+          "where": "Tests",
+          "result": "Only tests that guard a named regression remain.",
+          "parts": [
+            {
+              "id": "P1.14.1",
+              "status": "todo",
+              "element": "Kept: schemas, migrations, undo/redo, save/discard, tabs, manifest, bindings, rules"
+            },
+            {
+              "id": "P1.14.2",
+              "status": "todo",
+              "element": "Removed: tests of static markup a story already shows"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P2",
+      "title": "Packages",
+      "tasks": [
+        {
+          "id": "P2.1",
+          "status": "todo",
+          "title": "Monorepo",
+          "where": "Repo",
+          "result": "packages/core, ui, platform, dashboards and apps/builder in the pnpm workspace; everything runs as before.",
+          "parts": []
+        },
+        {
+          "id": "P2.2",
+          "status": "todo",
+          "title": "Package boundary lint",
+          "where": "Lint",
+          "result": "Packages importing apps/* fails the lint.",
+          "parts": []
+        },
+        {
+          "id": "P2.3",
+          "status": "todo",
+          "title": "Scratch app on the packages",
+          "where": "Separate app",
+          "result": "A second app renders the shell with one nav entry from the linked packages.",
+          "parts": []
+        },
+        {
+          "id": "P2.4",
+          "status": "todo",
+          "title": "English and Hungarian",
+          "where": "Shell",
+          "result": "Shell strings switch language.",
+          "parts": []
+        }
+      ]
+    },
+    {
+      "id": "P3",
+      "title": "Where to save",
+      "tasks": [
+        {
+          "id": "P3.1",
+          "status": "todo",
+          "title": "Storage providers",
+          "where": "Behind the app",
+          "result": "Dashboards can live in this browser, in files, or in Convex.",
+          "parts": [
+            {
+              "id": "P3.1.1",
+              "status": "todo",
+              "element": "This browser (IndexedDB)"
+            },
+            {
+              "id": "P3.1.2",
+              "status": "todo",
+              "element": "Files: export/import a bundle; dev server saves into a folder"
+            },
+            {
+              "id": "P3.1.3",
+              "status": "todo",
+              "element": "Convex plugin"
+            }
+          ]
+        },
+        {
+          "id": "P3.2",
+          "status": "todo",
+          "title": "Where to save setting",
+          "where": "Settings page",
+          "result": "Pick where dashboards are saved and copy them between places.",
+          "parts": [
+            {
+              "id": "P3.2.1",
+              "status": "todo",
+              "element": "\"Where to save\" choice"
+            },
+            {
+              "id": "P3.2.2",
+              "status": "todo",
+              "element": "\"Copy to…\" action"
+            }
+          ]
+        },
+        {
+          "id": "P3.3",
+          "status": "todo",
+          "title": "Save conflicts",
+          "where": "Dashboard save",
+          "result": "A save over a newer version is refused with a clear message.",
+          "parts": []
+        }
+      ]
+    },
+    {
+      "id": "P4",
+      "title": "Data",
+      "tasks": [
+        {
+          "id": "P4.1",
+          "status": "todo",
+          "title": "Dataset import",
+          "where": "Data",
+          "result": "A JSON dataset imports with its schema and original source recorded.",
+          "parts": []
+        },
+        {
+          "id": "P4.2",
+          "status": "todo",
+          "title": "Record pages",
+          "where": "Records area",
+          "result": "Browse, view, edit and extend records.",
+          "parts": [
+            {
+              "id": "P4.2.1",
+              "status": "todo",
+              "element": "Records table"
+            },
+            {
+              "id": "P4.2.2",
+              "status": "todo",
+              "element": "Record view with a form built from the schema"
+            },
+            {
+              "id": "P4.2.3",
+              "status": "todo",
+              "element": "JSON editor for loose fields"
+            },
+            {
+              "id": "P4.2.4",
+              "status": "todo",
+              "element": "Custom fields and new collections from Studio"
+            }
+          ]
+        },
+        {
+          "id": "P4.3",
+          "status": "todo",
+          "title": "Schema view",
+          "where": "Collection page",
+          "result": "Fields, types and references of a collection, with original keys.",
+          "parts": []
+        },
+        {
+          "id": "P4.4",
+          "status": "todo",
+          "title": "Context bar Data tab",
+          "where": "Context bar",
+          "result": "\"Data used by this view\": each binding's collection, source, storage and record count, with links to Studio.",
+          "parts": []
+        },
+        {
+          "id": "P4.5",
+          "status": "todo",
+          "title": "Search",
+          "where": "Spotlight and table search",
+          "result": "Records found by a partial, accent-free word.",
+          "parts": []
+        }
+      ]
+    },
+    {
+      "id": "P5",
+      "title": "Navigation and Studio",
+      "tasks": [
+        {
+          "id": "P5.1",
+          "status": "todo",
+          "title": "Editable navigation manifest",
+          "where": "Behind the sidebar",
+          "result": "Navigation from YAML, stored as JSON, exportable back to YAML, with Reset.",
+          "parts": []
+        },
+        {
+          "id": "P5.2",
+          "status": "todo",
+          "title": "Areas and record tabs",
+          "where": "Sidebar and tab strip",
+          "result": "Dashboard, record and link areas; open records as tabs that survive reload.",
+          "parts": []
+        },
+        {
+          "id": "P5.3",
+          "status": "todo",
+          "title": "Page modes",
+          "where": "Pages",
+          "result": "Custom, composed and hybrid pages; hybrid pages have widget slots.",
+          "parts": []
+        },
+        {
+          "id": "P5.4",
+          "status": "todo",
+          "title": "Studio",
+          "where": "Studio area",
+          "result": "Outline to add, move, rename and hide areas and pages; changes appear in the sidebar.",
+          "parts": []
+        }
+      ]
+    },
+    {
+      "id": "P6",
+      "title": "Node builder",
+      "tasks": [
+        {
+          "id": "P6.1",
+          "status": "todo",
+          "title": "Node canvas",
+          "where": "Flow view",
+          "result": "React Flow canvas with undo, auto layout and a keyboard outline to add and connect nodes.",
+          "parts": []
+        },
+        {
+          "id": "P6.2",
+          "status": "todo",
+          "title": "Navigation as a graph",
+          "where": "Studio",
+          "result": "Edit navigation as nodes; changes show in the outline too.",
+          "parts": []
+        },
+        {
+          "id": "P6.3",
+          "status": "todo",
+          "title": "Decision trees",
+          "where": "Flow view",
+          "result": "JSON trees with number conditions per node, and an evaluator that shows what matched and why.",
+          "parts": []
+        }
+      ]
+    },
+    {
+      "id": "P7",
+      "title": "Table widget (in parallel)",
+      "tasks": [
+        {
+          "id": "P7.1",
+          "status": "todo",
+          "title": "Full table widget",
+          "where": "Table widget",
+          "result": "Large tables you can search, filter and sort.",
+          "parts": [
+            {
+              "id": "P7.1.1",
+              "status": "todo",
+              "element": "Search box"
+            },
+            {
+              "id": "P7.1.2",
+              "status": "todo",
+              "element": "Column filters"
+            },
+            {
+              "id": "P7.1.3",
+              "status": "todo",
+              "element": "Multi-column sorting"
+            },
+            {
+              "id": "P7.1.4",
+              "status": "todo",
+              "element": "Paging"
+            },
+            {
+              "id": "P7.1.5",
+              "status": "todo",
+              "element": "Column order and visibility menu"
+            },
+            {
+              "id": "P7.1.6",
+              "status": "todo",
+              "element": "Row selection"
+            },
+            {
+              "id": "P7.1.7",
+              "status": "todo",
+              "element": "Virtual rows: 10k rows scroll smoothly"
+            }
+          ]
+        },
+        {
+          "id": "P7.2",
+          "status": "todo",
+          "title": "Typed columns",
+          "where": "Table cells",
+          "result": "Number, date, boolean, text and JSON columns format, align and sort correctly, with a cell detail view.",
+          "parts": []
+        },
+        {
+          "id": "P7.3",
+          "status": "todo",
+          "title": "Server-side table",
+          "where": "Table widget",
+          "result": "Filtering and sorting run on the provider when it can, in the browser otherwise.",
+          "parts": []
+        },
+        {
+          "id": "P7.4",
+          "status": "todo",
+          "title": "Shareable table view",
+          "where": "URL",
+          "result": "Search, filters, sorting and page are in the link.",
+          "parts": []
+        }
+      ]
+    }
+  ]
+}

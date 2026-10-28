@@ -17,16 +17,19 @@ theme/components   Paper.extend + Paper.module.css  what Mantine components appl
 **1. Primitives** ([primitives.ts](../../src/ui/tokens/primitives.ts))
 
 - The only file with raw values: palette tuples (`palette.dark[7] = '#242424'`), alpha steps, and the spacing, radius, type, weight, shadow, motion, z-index, icon and shell scales.
+- Surfaces use Fluent 2's untinted `neutral` grey ramp (`neutral[16] = '#292929'`), its shadow ramp (`elevationShadows`, by blur, twice the opacity in dark) and the `acrylic` numbers. Text and brand stay on `palette`.
 - Nothing outside `ui/` may import it; oxlint blocks the import.
 
 **2. Semantic tokens** ([semantic.ts](../../src/ui/tokens/semantic.ts)) name what a value is _for_.
 
 - **Per-scheme roles** have a light and a dark value:
-  - `elevation.surface.canvas | sunken | raised | overlay`
+  - `elevation.surface.canvas | panel | raised | sunken | overlay` ([Surfaces](#surfaces-and-materials))
+  - `elevation.shadow.raised | floating | overlay | modal`
   - `color.text.primary | subtle | …`
-  - `color.border.default | …`
+  - `color.border.default | subtle | strong` (translucent, so they read on every surface) and `focused`
   - `layer.*`
-- **Fixed roles** are the same in both schemes: `motion`, `z`, `radius`, `chart`, `shell`, and `chrome` (the always-dark navbar and sidebar).
+  - `chrome` background: the navbar and sidebar stay dark in both schemes, a softer dark grey in light. What sits on them (text, hover, borders, the active item) is fixed light-on-dark.
+- **Fixed roles** are the same in both schemes: `motion`, `z`, `radius`, `chart`, `shell` and `material`.
 - `toCssVars()` walks this tree and turns each leaf into a variable, e.g. `elevation.surface.raised` → `--app-elevation-surface-raised`.
 - **TS-only constants** exist for places where a CSS variable can't go:
   - `shape` (radius keys)
@@ -37,14 +40,14 @@ theme/components   Paper.extend + Paper.module.css  what Mantine components appl
 
 **3. Contextual layers** (`--app-layer-surface`, `-border`, `-field`)
 
-- These are meant to follow placement: a panel nested inside a widget would get the next step.
-- Today there's only one level, equal to `raised`. The nesting CSS was meant for the `container` widget, which [07](https://github.com/deneslee/mantine-dashboard-builder/blob/0e400dd/.agents/planning/plans/07-dashboard-model.md#4-layout) drops, so nothing nests yet ([03 §3](https://github.com/deneslee/mantine-dashboard-builder/blob/0e400dd/.agents/planning/plans/done/03-design-tokens.md#3-surfaces-and-layering)).
+- They name "the surface behind me". At the page level they are the canvas.
+- Every [`Surface`](../../src/ui/components/Surface/Surface.tsx) re-points `--app-layer-surface` and `--app-layer-border` at itself for its subtree, so parts that must match the surface behind them (a sticky table header, a Tabs border) do, at any depth.
 
 **4. Component bindings** (`theme/`)
 
 - [theme.ts](../../src/ui/theme/theme.ts) builds `createTheme` from the primitives: colors plus the aliases, spacing, radius, font sizes and weights, shadows, and `defaultRadius: shape.control`.
 - `theme/components/<Name>.ts` sets defaults with `X.extend({ defaultProps, classNames })`. Examples: radius from `shape.*`, the overlay shadow, and variant styles in `theme/styles/*.module.css`.
-- The variants today: ActionIcon `chrome` (the dark navbar and sidebar), Paper `panel` and `widget` (read `--app-layer-*`), NavLink `sidebar` (with the compact rail state).
+- The variants today: ActionIcon `chrome` (the navbar and sidebar), NavLink `sidebar` (with the compact rail state), and Paper `panel` and `widget`: older aliases for a raised card, kept for existing code; new code uses `Surface`.
 - `cssVariablesResolver` emits the semantic variables. It also points two of Mantine's own variables at ours (`--mantine-color-body` → overlay surface, `--mantine-color-dimmed` → subtle text), so Mantine's internals follow the tokens.
 
 ## How it reaches the page
@@ -67,44 +70,68 @@ Components then get their styling in one of three ways:
 | Component bindings            | every `<Button>` gets `radius: shape.control`; every `<Menu>` gets the overlay shadow | `theme/components/<Name>.ts`                                                              |
 | CSS modules                   | `border-bottom: 1px solid var(--app-color-border-default)`                            | the semantic variables                                                                    |
 
+## Surfaces and materials
+
+Layers are told apart by background first, a shadow only from `raised` up, and translucent borders. The model follows Fluent 2 (neutral ramp, shadow ramp, acrylic), with Grafana's background roles and EUI's rule that only the top or bottom of a stack gets a shadow.
+
+| Level     | For                                        | Light         | Dark          | Shadow    |
+| --------- | ------------------------------------------ | ------------- | ------------- | --------- |
+| `canvas`  | the page, the grid                         | `neutral[96]` | `neutral[10]` | –         |
+| `panel`   | regions: panes, sections, the context bar  | white         | `neutral[14]` | –         |
+| `raised`  | cards and widgets                          | white         | `neutral[18]` | `raised`  |
+| `sunken`  | wells inside a card: a table, a code block | `neutral[98]` | `neutral[12]` | –         |
+| `overlay` | menus, popovers, Drawer and Modal content  | white         | `neutral[20]` | `overlay` |
+| chrome    | the navbar and sidebar, dark in both       | `neutral[14]` | `neutral[8]`  | –         |
+
+- **Dark gets lighter toward the viewer**, so depth doesn't rest on shadows that barely show on dark grey.
+- **Shadows** come from Fluent's ramp: `raised` = 4, `floating` = 8 (a dragged tile, a floating bar), `overlay` = 16, `modal` = 64.
+- **Materials:** `solid` by default. `acrylic` is frosted glass for something floating over moving content: the sticky navbar, a toolbar over a chart. It falls back to solid where `backdrop-filter` is missing or the user prefers reduced transparency. The scrim behind a modal is the Drawer/Modal overlay.
+
+`Surface` ([ui/components/Surface](../../src/ui/components/Surface/Surface.tsx)) applies all of this:
+
+```tsx
+<Surface level="panel">          {/* a region */}
+  <Surface>…</Surface>           {/* no level: one step in front, here raised */}
+</Surface>
+<Surface level="overlay" material="acrylic">…</Surface>
+```
+
+Without a `level`, a Surface takes the next step from the one around it (canvas → panel → raised → sunken → raised), so a widget or card dropped anywhere looks right without choosing. `SplitView.Pane` takes a `level` too. The `Surface` stories (`Levels`, `Nesting`, `Acrylic`, `Composition`) show every case in both schemes.
+
 ## Example: a widget tile's background
 
 **1. The raw values** (primitives):
 
 ```ts
 white = '#ffffff';
-palette.dark[7] = '#242424';
+neutral[18] = '#2e2e2e';
 ```
 
 **2. A role, per scheme** (semantic):
 
 ```ts
-elevation.surface.raised = { light: primitives.white, dark: primitives.palette.dark[7] };
-layer.surface = elevation.surface.raised; // depth 1 = raised
+elevation.surface.raised = { light: primitives.white, dark: neutral[18] };
+elevation.shadow.raised = { light: elevationShadows.light[4], dark: elevationShadows.dark[4] };
 ```
 
-**3. Emitted:** `toCssVars` produces `--app-layer-surface: #ffffff` in the light block and `#242424` in the dark block.
+**3. Emitted:** `toCssVars` produces `--app-elevation-surface-raised: #ffffff` in the light block and `#2e2e2e` in the dark block.
 
-**4. Bound to a component:** [Paper.module.css](../../src/ui/theme/components/PaperTheme.module.css) plus `Paper.ts`:
+**4. Bound to a component:** [Surface.module.css](../../src/ui/components/Surface/Surface.module.css):
 
 ```css
-.root[data-variant='widget'] {
-  background-color: var(--app-layer-surface);
-  border: 1px solid var(--app-layer-border);
+.root[data-level='raised'] {
+  --surface-bg: var(--app-elevation-surface-raised);
+  --surface-shadow: var(--app-elevation-shadow-raised);
 }
-```
-
-```ts
-export const PaperTheme = Paper.extend({ defaultProps: { radius: shape.container }, classNames: paper });
 ```
 
 **5. Used in a feature:** [WidgetTile.tsx](../../src/features/dashboards/grid/WidgetTile.tsx) only says what the element is:
 
 ```tsx
-<Paper variant="widget" component="section">
+<Surface level="raised" component="section">
 ```
 
-It never mentions a color, radius or border. To make dark-mode widgets lighter, you edit one line: `raised.dark` → `palette.dark[6]`. Every widget and panel follows.
+It never mentions a color, radius or border. To make dark-mode widgets lighter, you edit one line: `raised.dark` → `neutral[20]`. Every widget and card follows.
 
 The same path, shorter:
 
@@ -116,9 +143,10 @@ The same path, shorter:
 
 - **A new visual value:** add the raw value to `primitives.ts` (if new), name its role in `semantic.ts`, and read `var(--app-…)` in CSS or the constant in TSX.
 - **A default for a Mantine component:** `theme/components/<Name>.ts`, registered in `components.ts`.
-- **A reusable look** (like `widget`): a variant in `theme/styles/<Name>.module.css`, selected with `[data-variant]`.
+- **Something that sits in front of something else** (a card, a pane, a floating bar): `Surface`, with a `level` only when the automatic step is wrong.
+- **A reusable look:** a variant in `theme/components/<Name>Theme.module.css`, selected with `[data-variant]`.
 - **One-off layout in a feature:** a CSS module reading semantic variables.
 
 The lint rules keep this honest. oxlint rejects numeric spacing, `fw`, `fz` and `radius`, palette colors, numeric icon sizes, and primitive imports. Stylelint rejects hex, `rgb()`, palette shades, and raw colors, radii, z-index and durations. [lint/rules.test.ts](../../lint/rules.test.ts) proves each rule fires.
 
-**One subtlety, fix planned:** a plain `<Paper>` or `<Card>` with no variant is painted by Mantine's `--mantine-color-body`, which now points at the **overlay** surface, not `raised`, and so is the page body. The two have the same values today, so nothing looks wrong. Before they diverge: point `--mantine-color-body` at the canvas surface, bind `ModalBase` (Modal, Drawer) to overlay, and bind the parts that must match the surface behind them (Table's sticky header, the active Tabs border, Scroller's fade) to `--app-layer-surface`. In Mantine 9.6, Popover and Menu don't use `--mantine-color-body`. The task is in [tasks.md](../../.agents/planning/tasks.md#tokens-and-contrast).
+**One subtlety, fix planned:** a plain `<Paper>` or `<Card>` with no variant is painted by Mantine's `--mantine-color-body`, which points at the **overlay** surface. In light that is white like `raised`; in dark it is now one step lighter (`neutral[20]` against `neutral[18]`), so use `Surface` for cards. The fix: point `--mantine-color-body` at the canvas surface, bind `ModalBase` (Modal, Drawer) to overlay, and bind the parts that must match the surface behind them (Table's sticky header, the active Tabs border, Scroller's fade) to `--app-layer-surface`. In Mantine 9.6, Popover and Menu don't use `--mantine-color-body`. The task is in [tasks.md](../../.agents/planning/tasks.md#tokens-and-contrast).

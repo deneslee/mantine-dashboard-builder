@@ -43,7 +43,7 @@
 }
 
 .contextPane {
-  background: var(--app-elevation-surface-raised);
+  background: var(--app-elevation-surface-panel);
   z-index: var(--app-z-context);
 }
 

@@ -1,13 +1,19 @@
-/* Contextual surfaces: at depth 1 the layer tokens equal the raised surface and default border. */
+/*
+ * Older aliases for a raised card: `Surface` is the component for new code (it also nests).
+ * Each sets the layer tokens for what sits inside it, as `Surface` does.
+ */
 .root {
-  &[data-variant='panel'] {
+  &[data-variant='panel'],
+  &[data-variant='widget'] {
+    --app-layer-surface: var(--app-elevation-surface-raised);
+    --app-layer-border: var(--app-color-border-subtle);
+
     background-color: var(--app-layer-surface);
     border: 1px solid var(--app-layer-border);
+    box-shadow: var(--app-elevation-shadow-raised);
   }
 
   &[data-variant='widget'] {
-    background-color: var(--app-layer-surface);
-    border: 1px solid var(--app-layer-border);
     display: flex;
     flex-direction: column;
     overflow: hidden;

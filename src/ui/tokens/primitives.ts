@@ -100,6 +100,26 @@ export const palette: Record<
 export const white = '#ffffff';
 export const black = '#000000';
 
+/**
+  grey ramp, keyed by lightness (grey 16 = #292929). Untinted, unlike Mantine's
+ * blue-ish `gray`, so stacked surfaces read as one material. Surfaces, strokes and the shell chrome
+ * use it; text and brand colors stay on `palette`.
+ */
+export const neutral = {
+  8: '#141414',
+  10: '#1a1a1a',
+  12: '#1f1f1f',
+  14: '#242424',
+  16: '#292929',
+  18: '#2e2e2e',
+  20: '#333333',
+  24: '#3d3d3d',
+  92: '#ebebeb',
+  94: '#f0f0f0',
+  96: '#f5f5f5',
+  98: '#fafafa',
+} as const;
+
 // 2. Alpha steps for dark/light overlays and borders
 export const alpha = {
   white: {
@@ -217,8 +237,35 @@ export const shadows = {
   md: '0 calc(0.0625rem * var(--mantine-scale)) calc(0.1875rem * var(--mantine-scale)) rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.05) 0 calc(1.25rem * var(--mantine-scale)) calc(1.5625rem * var(--mantine-scale)) calc(-0.3125rem * var(--mantine-scale)), rgba(0, 0, 0, 0.04) 0 calc(0.625rem * var(--mantine-scale)) calc(0.625rem * var(--mantine-scale)) calc(-0.3125rem * var(--mantine-scale))',
   lg: '0 calc(0.0625rem * var(--mantine-scale)) calc(0.1875rem * var(--mantine-scale)) rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.05) 0 calc(1.75rem * var(--mantine-scale)) calc(1.4375rem * var(--mantine-scale)) calc(-0.4375rem * var(--mantine-scale)), rgba(0, 0, 0, 0.04) 0 calc(0.75rem * var(--mantine-scale)) calc(0.75rem * var(--mantine-scale)) calc(-0.4375rem * var(--mantine-scale))',
   xl: '0 calc(0.0625rem * var(--mantine-scale)) calc(0.1875rem * var(--mantine-scale)) rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.05) 0 calc(2.25rem * var(--mantine-scale)) calc(1.75rem * var(--mantine-scale)) calc(-0.4375rem * var(--mantine-scale)), rgba(0, 0, 0, 0.04) 0 calc(1.0625rem * var(--mantine-scale)) calc(1.0625rem * var(--mantine-scale)) calc(-0.4375rem * var(--mantine-scale))',
-  raised: '0 1px 3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-  overlay: '0 4px 12px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08)',
+} as const;
+
+/**
+ * shadow ramp, named by blur: a soft ambient shadow plus a sharper key shadow below.
+ * Dark uses twice the opacity, since a shadow on a dark surface reads much weaker.
+ */
+const fluentShadow = (ambient: number, keyY: number, keyBlur: number, a: number, k: number) =>
+  `0 0 ${ambient}px rgba(0, 0, 0, ${a}), 0 ${keyY}px ${keyBlur}px rgba(0, 0, 0, ${k})`;
+
+export const elevationShadows = {
+  light: {
+    4: fluentShadow(2, 2, 4, 0.12, 0.14),
+    8: fluentShadow(2, 4, 8, 0.12, 0.14),
+    16: fluentShadow(2, 8, 16, 0.12, 0.14),
+    64: fluentShadow(8, 32, 64, 0.12, 0.14),
+  },
+  dark: {
+    4: fluentShadow(2, 2, 4, 0.24, 0.28),
+    8: fluentShadow(2, 4, 8, 0.24, 0.28),
+    16: fluentShadow(2, 8, 16, 0.24, 0.28),
+    64: fluentShadow(8, 32, 64, 0.24, 0.28),
+  },
+} as const;
+
+/** Acrylic (frosted glass): how much of the surface color stays, and the backdrop blur behind it. */
+export const acrylic = {
+  opacity: '78%',
+  blur: '20px',
+  saturate: '160%',
 } as const;
 
 // 10. Motion durations and easings
@@ -260,6 +307,13 @@ export const shell = {
   contextBar: { default: 360, min: 280, max: 640 },
 } as const;
 
+/** SplitView panes: the compact rail fits one `ActionIcon` plus padding, like the compact sidebar. */
+export const pane = {
+  rail: 56,
+  /** Below this container width, panes with a Drawer fallback leave the split. */
+  drawerBelow: 640,
+} as const;
+
 // 14. Grid settings (dashboard canvas)
 export const grid = {
   breakpoints: { lg: 1100, md: 640, sm: 0 },
@@ -281,6 +335,7 @@ export const primitives = {
   palette,
   white,
   black,
+  neutral,
   alpha,
   spacingPx,
   spacing,
@@ -292,11 +347,14 @@ export const primitives = {
   lineHeights,
   headings,
   shadows,
+  elevationShadows,
+  acrylic,
   motion,
   zIndex,
   iconSize,
   iconStroke,
   shell,
+  pane,
   grid,
   brand,
 } as const;

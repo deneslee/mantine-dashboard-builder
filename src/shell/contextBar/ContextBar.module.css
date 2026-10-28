@@ -3,7 +3,7 @@
   flex-direction: column;
   height: 100%;
   min-height: 0;
-  background: var(--app-elevation-surface-raised);
+  background: var(--app-elevation-surface-panel);
 }
 
 .header {

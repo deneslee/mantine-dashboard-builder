@@ -37,9 +37,12 @@ describe('Component tier defaults', () => {
     expect(PopoverTheme.defaultProps?.radius).toBe(shape.container);
   });
 
-  it('gives every overlay the overlay shadow token', () => {
-    for (const overlay of [MenuTheme, PopoverTheme, ModalTheme, DrawerTheme, SpotlightTheme]) {
+  it('gives menus and popovers the overlay shadow, modals and drawers the deeper modal one', () => {
+    for (const overlay of [MenuTheme, PopoverTheme, SpotlightTheme]) {
       expect(overlay.defaultProps?.shadow).toBe(shadow.overlay);
+    }
+    for (const modal of [ModalTheme, DrawerTheme]) {
+      expect(modal.defaultProps?.shadow).toBe(shadow.modal);
     }
   });
 

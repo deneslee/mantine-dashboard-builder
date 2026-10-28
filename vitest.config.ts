@@ -15,6 +15,8 @@ const NODE_TESTS = [
   'src/plugins/datasources/**/*.test.ts',
   'src/plugins/optional/**/*.test.ts',
   'src/features/dashboards/data/demoDashboards.test.ts',
+  'src/ui/components/SplitView/splitViewLayout.test.ts',
+  'src/ui/components/Surface/surfaceLevel.test.ts',
 ];
 
 export default defineConfig({

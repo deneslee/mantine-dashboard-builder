@@ -1,6 +1,7 @@
+/* Acrylic: content scrolls under the sticky navbar. */
 .root {
   background: var(--app-navbar-bg);
-  backdrop-filter: saturate(140%) blur(8px);
+  backdrop-filter: blur(var(--app-material-acrylic-blur)) saturate(var(--app-material-acrylic-saturate));
   color: var(--app-navbar-text);
   border-bottom: 1px solid var(--app-navbar-border);
 }

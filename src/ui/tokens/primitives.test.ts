@@ -9,6 +9,7 @@ import {
   fontSizes,
   fontWeights,
   shadows,
+  elevationShadows,
 } from './primitives';
 
 describe('primitives token tier', () => {
@@ -46,8 +47,12 @@ describe('primitives token tier', () => {
     expect(fontWeights.medium).toBe('600');
     expect(fontWeights.bold).toBe('700');
     expect(shadows.xs).toBeDefined();
-    expect(shadows.raised).toBeDefined();
-    expect(shadows.overlay).toBeDefined();
+  });
+
+  it('has the same Fluent shadow steps in both schemes, darker in dark', () => {
+    expect(Object.keys(elevationShadows.dark)).toEqual(Object.keys(elevationShadows.light));
+    expect(elevationShadows.light[4]).toContain('rgba(0, 0, 0, 0.14)');
+    expect(elevationShadows.dark[4]).toContain('rgba(0, 0, 0, 0.28)');
   });
 
   it('provides shell dimensions, z-index, motion, and icon tokens', () => {

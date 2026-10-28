@@ -1,6 +1,6 @@
 # Edit bar polish
 
-Status: open · Step P1 (Edit UI polish) · Depends on: Control bar groups, Docked panels · Research: EUI lookups below
+Status: open · Step P1 (Edit UI polish) · Depends on: Control bar groups, Docked panels · Research: EUI lookups below, [p1-ui-reference](../research/p1-ui-reference.md) (Grafana and more EUI)
 
 ## Goal
 

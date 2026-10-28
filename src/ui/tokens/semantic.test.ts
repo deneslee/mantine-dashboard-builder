@@ -150,9 +150,41 @@ describe('semantic tokens and toCssVars generator', () => {
     expect(cssVars.variables['--app-navbar-height']).toBeDefined();
     expect(cssVars.variables['--app-sidebar-expanded']).toBeDefined();
     expect(cssVars.variables['--app-sidebar-compact']).toBeDefined();
-    expect(cssVars.variables['--app-navbar-bg']).toBeDefined();
-    expect(cssVars.variables['--app-sidebar-bg']).toBeDefined();
+    expect(cssVars.light['--app-navbar-bg']).toBeDefined();
+    expect(cssVars.dark['--app-sidebar-bg']).toBeDefined();
     expect(cssVars.variables['--app-navbar-input-bg']).toBeDefined();
+  });
+
+  it('keeps the chrome dark in both schemes, a different shade in each', () => {
+    const light = cssVars.light['--app-sidebar-bg'];
+    const dark = cssVars.dark['--app-sidebar-bg'];
+    expect(light).not.toBe(dark);
+    // Both dark greys: the red channel well under the midpoint.
+    for (const bg of [light, dark]) expect(parseInt(bg!.slice(1, 3), 16)).toBeLessThan(0x40);
+    // What sits on the chrome is light-on-dark and the same in both schemes.
+    expect(cssVars.variables['--app-sidebar-text']).toBeDefined();
+    expect(cssVars.variables['--app-sidebar-active-text']).toBe('#ffffff');
+    expect(cssVars.light['--app-navbar-bg']).toContain('color-mix');
+  });
+
+  it('separates every surface from the one behind it', () => {
+    for (const scheme of ['light', 'dark'] as const) {
+      const s = elevation.surface;
+      expect(s.panel[scheme]).not.toBe(s.canvas[scheme]);
+      expect(s.sunken[scheme]).not.toBe(s.panel[scheme]);
+    }
+    // Dark gets lighter toward the viewer: canvas < panel < raised < overlay.
+    const dark = ['canvas', 'panel', 'raised', 'overlay'] as const;
+    const lightness = dark.map((k) => parseInt(elevation.surface[k].dark.slice(1, 3), 16));
+    expect([...lightness].sort((a, b) => a - b)).toEqual(lightness);
+  });
+
+  it('has a shadow for every level from raised up, in both schemes', () => {
+    for (const level of ['raised', 'floating', 'overlay', 'modal'] as const) {
+      expect(cssVars.light[`--app-elevation-shadow-${level}`]).toBe(elevation.shadow[level].light);
+      expect(cssVars.dark[`--app-elevation-shadow-${level}`]).not.toBe('none');
+    }
+    expect(cssVars.variables['--app-material-acrylic-blur']).toBeDefined();
   });
 
   it('has no legacy variable names left', () => {
