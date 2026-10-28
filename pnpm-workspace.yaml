@@ -64,3 +64,12 @@ peerDependencyRules:
     vite: '*'
     vitest: '*'
     vite-plus: '*'
+permissions:
+  '@tanstack/devtools-vite':
+    skills: false
+  '@tanstack/react-router':
+    skills: true
+  '@tanstack/react-table':
+    skills: true
+  '@tanstack/router-plugin':
+    skills: true
