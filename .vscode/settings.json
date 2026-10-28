@@ -60,5 +60,8 @@
   "editor.defaultFormatter": "oxc.oxc-vscode",
   "oxc.disableNestedConfig": true,
   "oxc.fmt.disableNestedConfig": true,
-  "editor.formatOnSaveMode": "file"
+  "editor.formatOnSaveMode": "file",
+  "vitest.rootConfig": "C:/Users/leede/Documents/Projects/CDSS/PROJECT/mantine-dashboard-builder/vitest.config.ts",
+  "vitest.nodeExecutable": "C:/nvm4w/nodejs/node.exe",
+  "vitest.shellType": "child_process"
 }

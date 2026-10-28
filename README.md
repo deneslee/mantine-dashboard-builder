@@ -22,12 +22,12 @@ vp run test         # node + jsdom tests and every story in Chromium
 vp run test:unit    # node + jsdom only
 vp check            # Oxfmt, Oxlint and type checks
 vp run lint:css     # Stylelint remains a separate check
-vp run build        # tsc -b, then the production build
+vp run build        # the production build (types are checked by `vp run lint`)
 ```
 
 Install [Vite+](https://viteplus.dev/guide/) first. The exact Node and pnpm versions are pinned in [`package.json`](package.json); Vite+ selects them automatically. `.nvmrc` mirrors the Node pin for nvm and CI. `pnpm-workspace.yaml` makes version mismatches errors, with expected and actual versions in pnpm's diagnostic. `devEngines` also rejects unsupported npm invocations. Use `vp env current` to inspect the selected versions and `vp env doctor` to diagnose PATH or shell overrides.
 
-Run commands from the workspace root. Direct `pnpm` commands also work when the pinned versions are active. Use `vp run build` and `vp run lint` for the repository scripts: the built-in `vp build` omits our separate `tsc -b` step, and `vp lint` omits Stylelint. Formatting uses Oxfmt and the `fmt` block in `vite.config.ts`; lint rules are composed there from `oxlint.config.ts`. CI uses the same pins and commands.
+Run commands from the workspace root. Direct `pnpm` commands also work when the pinned versions are active. Use `vp run build` and `vp run lint` for the repository scripts: they are cached by Vite Task, and the built-in `vp lint` omits Stylelint. Type errors come from `vp lint` (tsgolint with `typeCheck`); there is no separate `tsc` step. Formatting uses Oxfmt and the `fmt` block in `vite.config.ts`; lint rules are composed there from `oxlint.config.ts`. CI uses the same pins and commands.
 
 Dependencies update through [Renovate](.github/renovate.json5): grouped pull requests (Mantine, TanStack, React, the Vite+ toolchain and others) early on Mondays, once a release is 3 days old, each checked by CI before you merge. react-grid-layout stays on 2.2.4 ([why](docs/upgrades/RGL.md)).
 

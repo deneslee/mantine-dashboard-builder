@@ -2,6 +2,8 @@
 packages:
   - relay
 
+virtualStoreType: global
+
 # Quarantine newly published versions by 24 hours to prevent supply-chain compromise
 minimumReleaseAge: 1440
 
@@ -33,6 +35,17 @@ runtimeOnFail: error
 saveExact: true
 strictPeerDependencies: true
 preferFrozenLockfile: true
+# `pnpm up` / `pnpm up -L` skip these. react-grid-layout stays on 2.2.4 (docs/upgrades/RGL.md);
+# move it by hand with `pnpm add react-grid-layout@<version>` once RGL.md's "When to upgrade" holds.
+updateConfig:
+  ignoreDependencies:
+    - react-grid-layout
+# @mantine/hooks 9.7.4 imports react-dom (use-horizontal-collapse) without declaring it; the global
+# virtual store only links declared deps. Drop once Mantine declares it.
+packageExtensions:
+  '@mantine/hooks@9':
+    peerDependencies:
+      react-dom: '^19.2.0'
 catalog:
   vite: npm:@voidzero-dev/vite-plus-core@1.4.0
   vitest: 5.0.5

@@ -38,7 +38,7 @@ jobs:
       - name: Test
         run: vp run test
 
-      # Typechecks too (tsc -b). Source maps go to Sentry only for main: pull requests, Renovate's included,
+      # Types were checked in Lint (tsgolint). Source maps go to Sentry only for main: pull requests, Renovate's included,
       # get no token, so they build without uploading.
       - name: Build
         run: vp run build

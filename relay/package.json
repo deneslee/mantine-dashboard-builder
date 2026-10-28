@@ -11,10 +11,10 @@
   },
   "dependencies": {
     "@hono/node-server": "2.1.5",
-    "hono": "4.13.13",
+    "hono": "4.13.14",
     "mongodb": "7.7.0",
     "mongodb-connection-string-url": "7.0.2",
-    "mssql": "12.7.11",
+    "mssql": "12.7.13",
     "zod": "4.6.7"
   },
   "devDependencies": {

@@ -21,14 +21,18 @@ Rules for humans and coding agents working in this repo. Read before writing cod
 
     pnpm dev              # http://localhost:5173
     pnpm dev:devtools     # same, plus TanStack Devtools, Vite DevTools and click-to-source (hold Alt+Shift, click)
-    pnpm build            # typecheck + production build
+    pnpm build            # production build
     pnpm build:analyze    # production build, then Vite DevTools (chunks, modules, plugins) on http://localhost:9999
-    pnpm lint             # oxlint (type-aware) + Stylelint
-    pnpm test             # Vitest: node + jsdom tests and every story in Chromium; `pnpm test <path>` runs one file
+    pnpm lint             # oxlint + type check (tsgolint) + Stylelint; `pnpm typecheck` is the same lint run
+    pnpm test             # Vitest: node + jsdom tests and every story in Chromium; `vp test run <path>` runs one file
     pnpm test:unit        # node + jsdom only (fast)
     pnpm test:stories     # stories only (needs `pnpm exec playwright install chromium` once)
+    pnpm test:changed     # only tests affected by uncommitted changes: the check while working
     pnpm storybook        # http://localhost:6006
     pnpm relay            # the relay for Azure SQL and MongoDB, on http://127.0.0.1:8787
+    pnpm deps             # outdated packages; `deps:up` picks interactively, `deps:mantine` etc. move a group together
+
+`build`, `typecheck`, `lint`, `format:check` and `test*` are cached by Vite Task (the `check:*` tasks in `vite.config.ts`): a rerun with no input changed replays the last result in seconds. Don't rerun them to reread output; save it once and search it. `vp cache clean` resets the cache.
 
 **Before you call a change done:**
 
@@ -158,6 +162,11 @@ Levels, timings and the full tables are in [feedback.md](docs/ui/feedback.md).
 
 ## Skills
 
+When Grafana has a relevant analogue for the current work, use
+[`grafana-lookup`](.agents/skills/grafana-lookup/SKILL.md) to check its UI, React and
+data implementation through `grafana-ui-mcp` before settling an open design detail.
+Keep the lookup scoped to the current task and adapt findings to this app. Same for elastic ui: [`eui-lookup`](.agents/skills/eui-lookup/SKILL.md)
+
 | Skill                                                           | Use it for                                                                |
 | --------------------------------------------------------------- | ------------------------------------------------------------------------- |
 | `vercel-composition-patterns`                                   | Component APIs: parts, variants, providers                                |
@@ -172,6 +181,11 @@ Don't use `frontend-design` in this repo: it picks its own fonts and palettes, a
 ## Planning
 
 Planning lives in `.agents/planning/` and covers only the current phase; `docs/` holds only human-facing docs about what is built. Finished plans, parked plans, the backlog and older research live in the project archive outside the repo, and links to them point at the last commit that had them.
+
+[tasks](../../planning/tasks.md) and [roadmap](../../planning/roadmap.md); their
+checklists are starting points, not final implementation designs. Separate locked
+decisions from details still open to evidence. Follow the repository's preferred
+code discovery tools for local source.
 
 | Where                                  | Holds                                                                                               |
 | -------------------------------------- | --------------------------------------------------------------------------------------------------- |

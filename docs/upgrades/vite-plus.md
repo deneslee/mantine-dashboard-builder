@@ -14,6 +14,8 @@ Vite+ advises against oxlint.config.ts and wants a lint block in vite.config.ts.
 Migration removes the standalone oxlint dependency. But lint/rules.test.ts calls node_modules/oxlint/bin/oxlint directly, so the tests proving your rules fire would break until rewritten.
 Prettier vs. Oxfmt. You chose Prettier on purpose (oxc.enable.oxfmt: false), and it formats your many Markdown and YAML docs. If you keep it, you’d set check: { fmt: false } and lose one of the main gains. If you switch, expect a whole-repo reformat diff and a check of how the docs come out.
 It doesn’t replace everything. Stylelint isn’t covered. The docs don’t say typeCheck replaces tsc -b with project references, so you’d keep that. Storybook stays separate. You still end up with several tools.
+
+2026-10-28: dropped `tsc -b`. A type error in src/, relay/, a root config and .storybook/ each failed `vp lint` (tsgolint with `typeCheck`), so the separate step only doubled the work.
 Built-in commands take over your script names. vp build is just a Vite build. Your tsc -b && vite build would need vp run build.
 Migration edits files you’ve curated. For a project not yet on Vite+, vp migrate always does the full setup: hooks, editor config, and agent files. That means changes to your hand-written AGENTS.md and .vscode, so review the diff carefully.
 Release lag and churn. You only get new Vite, Vitest or oxlint versions when Vite+ releases them. It went from 1.0 to 1.3 in about 3.5 weeks. VoidZero now belongs to Cloudflare. That’s low risk under MIT, but worth knowing.
