@@ -7,19 +7,19 @@
     "**/*.css"
   ],
   "engines": {
-    "node": "24.22.1",
-    "pnpm": "12.15.0"
+    "node": ">=24.15.0",
+    "pnpm": ">=12.15.0"
   },
   "devEngines": {
     "runtime": {
       "name": "node",
-      "version": "24.22.1",
-      "onFail": "error"
+      "version": ">=24.15.0",
+      "onFail": "warn"
     },
     "packageManager": {
       "name": "pnpm",
-      "version": "12.15.0",
-      "onFail": "error"
+      "version": ">=12.15.0",
+      "onFail": "warn"
     }
   },
   "scripts": {
