@@ -1,951 +1,366 @@
-I reviewed 150+ results across Kibana/EUI, Grafana, Superset, Metabase, Cloudscape, OpenSearch Dashboards, and layout-focused React projects. The clearest conclusion is that your current direction is already converging on what the stronger systems have moved toward: **serializable composition documents + small capability-based widgets + data/query runtime outside the layout + narrowly scoped UI/editor state**.
+I checked `deneslee/mantine-dashboard-builder` at current `main` commit `e25254d` from October 28, 2026. The current architecture is actually quite clean: you have deliberately separated **remote/query data**, **editable application state**, and **persistent browser state**.
 
-The best references are not all from one project. I would borrow **Grafana Scenes for runtime composition/data inheritance**, **Kibana for widget/embeddable contracts and action capabilities**, **Cloudscape/EUI for shell splitters/editor UX**, and some **Superset/Metabase ideas for tabs/filter scope**.
+### How data is handled now
 
-## 1. Widgets: Kibana has probably the best contract to copy
+| Concern                             | Current owner                    | What happens                                                   |
+| ----------------------------------- | -------------------------------- | -------------------------------------------------------------- |
+| Dashboard list / dashboard document | TanStack Query                   | Loaded through `dashboardQuery()` / `dashboardListQuery()`     |
+| Widget datasource results           | TanStack Query                   | One cache entry per individual datasource query                |
+| Dashboard being edited              | Zustand + Immer + zundo          | Separate store per open dashboard, with undo/redo              |
+| Unsaved dashboard draft             | `localStorage`                   | Whole dashboard + baseline                                     |
+| Saved dashboard                     | `localStorage`                   | Overrides the static JSON seed                                 |
+| Connections                         | Zustand persist → `localStorage` | Settings only; secrets excluded                                |
+| Secrets                             | custom vault                     | Encrypted local persistence                                    |
+| URL/view state                      | TanStack Router search params    | time range, mode, editor, inspect, etc.                        |
+| Future records/storage              | Not implemented yet              | Your roadmap says IndexedDB/files/Convex + a TanStack DB spike |
 
-Kibana's current Embeddable system is much more relevant to your `WidgetPlugin` idea than older dashboard code.
+Your Query client has global `staleTime: 30s`, `gcTime: 5m`, `refetchOnWindowFocus: false`, `networkMode: 'offlineFirst'`, and a single retry only for retryable application errors. Importantly, **the Query cache itself isn't persisted across reloads**; durable state is stored separately. [queryClient.ts](https://github.com/deneslee/mantine-dashboard-builder/blob/e25254d974401d8df0438eccc75ca77de1cdbc48/src/app/queryClient.ts)
 
-An embeddable is essentially:
-
-```ts
-type EmbeddableDefinition = {
-  type: string;
-  buildEmbeddable(...): Promise<{
-    Component: React.ComponentType;
-    api: EmbeddableApi;
-  }>;
-};
-```
-
-The important architectural rule is that **the dashboard doesn't know the internal state of every widget type**. Each embeddable manages its own runtime state; the parent only owns/persists its serialized state. The component exposes a deliberately small imperative API. [GitHub](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/embeddable/README.md?utm_source=chatgpt.com)
-
-Even better is Kibana's capability/interface model. Panels don't have one enormous interface with:
-
-```ts
-canInspect
-canExport
-canEdit
-canDrilldown
-canSetTimeRange
-canFullscreen
-...
-```
-
-Instead the API can implement capabilities like:
+For widget data, this is the important part:
 
 ```text
-HasSerializableState
-HasEditCapabilities
-HasInspectorAdapters
-HasDrilldowns
-PublishesDataLoading
-PublishesTimeRange
-PublishesTitle
-PublishesBlockingError
-...
+['ds', datasource, revision?, query.spec, time?]
 ```
 
-Actions ask whether an embeddable supports the interface before appearing in the panel menu. [GitHub](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/embeddable/README.md?utm_source=chatgpt.com)
+Time only enters the key for time-aware datasources. Connection revisions enter the key so an edited connection can't accidentally reuse old results. Two widgets issuing the exact same datasource query therefore share one request/cache entry. [dashboardQueries.ts](https://github.com/deneslee/mantine-dashboard-builder/blob/e25254d974401d8df0438eccc75ca77de1cdbc48/src/features/dashboards/data/dashboardQueries.ts)
 
-That maps exceptionally well to your plugin model.
+`useWidgetData()` then uses `useQueries()` to combine several datasource queries. Because changing the time range creates new query observers, you've added your own small "last complete result" mechanism so charts don't disappear while the new keys load. [useWidgetData.ts](https://github.com/deneslee/mantine-dashboard-builder/blob/e25254d974401d8df0438eccc75ca77de1cdbc48/src/features/dashboards/data/useWidgetData.ts)
 
-I would evolve your `WidgetPlugin` roughly toward:
-
-```ts
-interface WidgetDefinition<TOptions, TApi = WidgetApi> {
-  type: string;
-  name: string;
-
-  optionsSchema: Schema<TOptions>;
-
-  defaultSize: Size;
-  minSize?: Size;
-
-  component: LazyComponent;
-  editor?: LazyComponent;
-
-  createRuntime?: (instance: WidgetInstance<TOptions>) => TApi;
-
-  capabilities: readonly WidgetCapability[];
-}
-```
-
-Then actions become separately registered:
-
-```ts
-interface WidgetAction {
-  id: string;
-  isCompatible(api: WidgetApi): boolean;
-  run(api: WidgetApi): void | Promise<void>;
-}
-```
-
-That is considerably better than teaching `WidgetTile` what a chart/table/node/markdown/etc. can do.
-
-Your planned plugin contributions—widgets, editors, exporters, actions, context views—fit this directly. [GitHub](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/embeddable/README.md?utm_source=chatgpt.com)
-
----
-
-# 2. Grafana Scenes is the strongest reference for your overall runtime
-
-Grafana's newer architecture is probably the single most valuable codebase for you to study.
-
-The older dashboard architecture accumulated a lot of coupled model/React/state logic. Grafana created **Scenes** specifically to support:
-
-- nested composition
-- multiple layouts
-- variables at different levels
-- query runners at different levels
-- runtime state outside React
-- efficient granular updates
-- URL synchronization
-- conditional rendering
-- programmatic dashboards
-
-The current model is effectively:
+Dashboard persistence is separate from Query:
 
 ```text
-Scene
-│
-├─ $timeRange
-├─ $variables
-├─ $data
-├─ controls
-│
-└─ body
-    └─ Layout
-       ├─ Panel
-       ├─ Panel
-       └─ Nested layout
+seed JSON
+   ↓
+saved localStorage copy if one exists
+   ↓
+TanStack Query cache
+   ↓
+DashboardProvider
+   ↓
+Zustand editable copy
 ```
 
-A child resolves data from itself or the nearest ancestor `SceneDataProvider`. So you can put a query runner on:
+On Save, Zustand calls `saveDashboard()`, which currently writes the whole dashboard to `localStorage`. Then `EditToolbar` manually updates `['dashboards', id]` and invalidates the dashboard list. [dashboardApi.ts](https://github.com/deneslee/mantine-dashboard-builder/blob/e25254d974401d8df0438eccc75ca77de1cdbc48/src/features/dashboards/data/dashboardApi.ts)
+
+Draft handling is also intentionally outside Query. Every meaningful edit causes the current document + original baseline to be written under `dashboard-builder:draft:<id>`. That is what allows reload → restore edit session. [drafts.ts](https://github.com/deneslee/mantine-dashboard-builder/blob/e25254d974401d8df0438eccc75ca77de1cdbc48/src/features/dashboards/data/drafts.ts)
+
+So conceptually you currently have:
 
 ```text
-Dashboard
-    $data
-    ├─ Chart
-    └─ Table
+TanStack Query = asynchronous read/cache lifecycle
+
+Zustand = working/editing state + undo/redo
+
+localStorage = persistence backend
+
+Router = navigable/shareable state
 ```
 
-and both consume it, or override it lower down:
+I would **keep that separation**.
+
+## Would TanStack DB improve it?
+
+**Yes—but not by replacing your current Query architecture.** I think your roadmap's existing idea of a **TanStack DB spike specifically for P4 Records** is exactly the right boundary.
+
+TanStack itself describes DB as an extension around Query: collections, live relational queries and optimistic mutations, with Query Collections able to use the existing `QueryClient`. Query still owns freshness, retries, invalidation and GC. [TanStack](https://tanstack.com/db/latest/docs/overview?utm_source=chatgpt.com)
+
+For your project, I'd make the architecture:
 
 ```text
-Dashboard
-    $data A
-    │
-    ├─ Section
-    │    $data B
-    │    ├─ Chart
-    │    └─ Table
-    │
-    └─ Chart   ← gets A
+                 ┌─ Dashboard documents ─ Query + Zustand editor
+StorageProvider ─┤
+                 └─ Record collections ── TanStack DB
+                                         │
+                                         ├─ useLiveQuery()
+                                         ├─ joins
+                                         ├─ filters/sort/search
+                                         └─ optimistic CRUD
 ```
 
-Grafana exposes this through `sceneGraph.getData(model)`. [Grafana Labs](https://grafana.com/developers/scenes/advanced-data?utm_source=chatgpt.com)
+That is substantially better than putting everything into DB.
 
-That directly supports something you've already been planning:
+### Where DB would genuinely simplify your code
+
+Your planned `patients`, `exercises`, schemas, collections, bindings, provenance, etc. are almost textbook TanStack DB data. They are **entities with stable IDs**, used in lots of different views and relationships.
+
+Imagine:
 
 ```text
-dashboard
-→ section
-→ widget
-
-inherit:
-time
-variables
-data context
-resolution
+patients
+exercises
+therapyPlans
+therapySessions
+assessments
+schemas
+collections
+bindings
 ```
 
-### But I would NOT copy Scenes wholesale
-
-Scenes has its own reactive object framework with `SceneObjectBase`, RxJS subscriptions and activation/deactivation semantics.
-
-Your stack already has:
+Then you can locally express views such as:
 
 ```text
-TanStack Query
-Zustand
-TanStack Router
-React
+patient
+  JOIN assessments
+  JOIN therapyPlans
+  JOIN sessions
+  WHERE patient.id = X
+  ORDER BY session.date
 ```
 
-You don't need another reactive runtime yet.
-
-Borrow the **hierarchical resolution model**, not necessarily the implementation.
-
-Something like:
-
-```ts
-interface RuntimeContext {
-  time?: EffectiveTime;
-  variables?: Variables;
-  data?: DataBinding[];
-}
-
-function resolveContext(node: LayoutNode, ancestors: LayoutNode[]): ResolvedContext;
-```
-
-would get most of the architectural benefit without inventing another state library.
-
----
-
-# 3. Your DataFrame + datasource abstraction is very close to Grafana
-
-Grafana standardizes wildly different datasource outputs into **DataFrames**. Panels consume DataFrames rather than Prometheus/SQL/Loki/etc.-specific objects. [Grafana Labs](https://grafana.com/docs/grafana/latest/developer-resources/developer-tools/?utm_source=chatgpt.com)
-
-Its basic flow is:
+or:
 
 ```text
-DataSourcePlugin
-      ↓
+exercises
+WHERE bodyRegion = 'upper-limb'
+AND difficulty <= patientLevel
+ORDER BY name
+```
+
+without inventing another Query key/cache shape for each UI. Live queries update incrementally when relevant records change and support filtering, joining, projection, grouping and aggregation. [TanStack](https://tanstack.com/db/latest/docs/guides/live-queries?utm_source=chatgpt.com)
+
+This is particularly attractive for your future **table/search/data catalog** work.
+
+Instead of:
+
+```text
+Query:
+['records', collectionId, filter, sort, page]
+
+plus
+client filtering
+
+plus
+selectors
+
+plus
+manually synchronizing caches after CRUD
+```
+
+you could have:
+
+```text
+collection: exercises
+
+useLiveQuery(
+  exercises
+    .where(...)
+    .orderBy(...)
+    .limit(...)
+)
+```
+
+TanStack DB can also use **on-demand sync**, where the predicates/order/limit coming from a live query are forwarded to the loader. That's very interesting for your planned `ListQuery` abstraction because the application's filtering model can become the driver of remote requests rather than every screen defining a bespoke Query key. [TanStack](https://tanstack.com/db/latest/docs/overview?utm_source=chatgpt.com)
+
+### CRUD gets noticeably nicer
+
+This is probably the clearest simplification.
+
+With Query alone, optimistic mutation usually means some combination of:
+
+```text
+cancelQueries
+snapshot cache
+setQueryData
+mutation
+rollback
+invalidateQueries
+```
+
+TanStack DB keeps optimistic mutations separately from synchronized collection data and automatically rolls them back when persistence fails. [TanStack](https://tanstack.com/db/latest/docs/guides/mutations?utm_source=chatgpt.com)
+
+That would remove quite a lot of future CRUD plumbing from your patient/exercise/record editors.
+
+For example your current dashboard save needs:
+
+```text
+save
+→ local persistence
+→ setQueryData(detail)
+→ invalidate list
+```
+
+For entity-style records, DB can own much more of that reconciliation.
+
+## Where I would NOT use DB
+
+**Widget datasource results:** keep your current TanStack Query implementation.
+
+Your widget results are not really "database entities." They are often:
+
+```text
 query specification
-      ↓
-SceneQueryRunner
-      ↓
-DataFrame[]
-      ↓
-transformations
-      ↓
-Panel
-```
-
-That's almost exactly what you're doing.
-
-Your:
-
-```text
-DatasourcePlugin.query(spec, ctx, signal)
-      ↓
+    ↓
+time window
+    ↓
 DataFrame[]
 ```
 
-is a good boundary.
+with request cancellation, freshness, retry, auto-refresh and per-query timing metadata.
 
-I would keep it.
+That is exactly what TanStack Query is good at.
 
-Where Grafana gets particularly interesting is `SceneQueryRunner`: it owns things like datasource, queries, max datapoints, time range and cache hints. It can also execute secondary requests **in parallel** with the primary and uses `combineLatest` so intermediate results can arrive without waiting for everything. [GitHub](https://github.com/grafana/scenes/blob/main/packages/scenes/src/querying/SceneQueryRunner.ts?utm_source=chatgpt.com)
-
-So I would evolve your architecture toward:
+Putting something like:
 
 ```text
-Widget
-   ↓ declares
-QuerySpec[]
-   ↓
-QueryRuntime / QueryBroker
-   ↓
-DatasourcePlugin
-   ↓
+Azure SQL query
+Prometheus query
+CSV query
+BigQuery query
+```
+
+through DB Collections just because DB exists would create:
+
+```text
+TanStack Query cache
+    ↓
+TanStack DB collection
+    ↓
 DataFrame[]
-   ↓
-Transform[]
-   ↓
-Widget
 ```
 
-rather than allowing widget implementations themselves to become fetch orchestrators.
+without giving you much.
 
----
+It could actually make your current elegant query identity more difficult, especially because a time-window datasource frequently returns **a subset rather than the authoritative complete contents of an entity collection**. Query Collections have explicit reconciliation semantics around complete collection state and subset/on-demand loading, so careless use here could produce undesirable removal/reconciliation behaviour. [TanStack](https://tanstack.com/db/latest/docs/collections/query-collection?utm_source=chatgpt.com)
 
-# 4. Your current query caching is good; Grafana suggests one improvement
-
-Grafana server-side query caching builds identity from roughly:
+Keep:
 
 ```text
-datasource instance
-+ query
-+ time range
+datasourceQuery()
+useQueries()
+DataFrame[]
 ```
 
-and for time series it normalizes/rounds the range according to the query resolution/interval. Its interval is influenced by:
+for analytics/widget queries.
+
+## I also wouldn't replace the dashboard Zustand store
+
+Your dashboard editor has:
 
 ```text
-time range / max datapoints
+editable aggregate document
+baseline
+dirty state
+undo/redo
+draft
+layout transactions
+discard
+explicit Save
 ```
 
-and max datapoints is related to panel width. [Grafana Labs](https://grafana.com/docs/grafana/latest/administration/data-source-management/?utm_source=chatgpt.com)
-
-That confirms the direction already present in your plan.
-
-I'd eventually make your key conceptually:
-
-```ts
-[
-  'data',
-  datasourceId,
-  datasourceRevision,
-
-  normalizedQuerySpec,
-
-  resolvedVariables,
-
-  timeBucket,
-
-  resolution,
-];
-```
-
-and specifically **not**:
-
-```ts
-widgetId;
-```
-
-unless the query genuinely depends on the widget.
-
-Then:
-
-```text
-two widgets
-same datasource
-same query
-same context
-
-→ one cache entry
-```
-
-which you already have.
-
-Your planned addition of datasource-aware `resolution` is very Grafana-like and worth keeping. [GitHub](https://github.com/grafana/scenes/blob/main/packages/scenes/src/querying/SceneQueryRunner.ts?utm_source=chatgpt.com)
-
----
-
-# 5. React waterfalls: both Kibana and Grafana deliberately avoid parent-driven fetching
-
-This was one of the more useful findings.
-
-Kibana's embeddable renderer dynamically loads dependencies/factory/runtime pieces rather than requiring everything at page bootstrap. Embeddable definitions themselves can be async imports. [GitHub](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/embeddable/README.md?utm_source=chatgpt.com)
-
-Inside data-driven embeddables, Kibana commonly uses an observable fetch pipeline where changing inputs:
-
-```text
-query/filter/time changes
-       ↓
-cancel old request
-       ↓
-start new request
-       ↓
-publish loading/data/error
-```
-
-rather than:
-
-```text
-Dashboard useEffect()
-   await fetch A
-   await fetch B
-   await fetch C
-   render widgets
-```
-
-Kibana's Lens team explicitly warns that a page with many independent embeddables can become expensive—roughly beyond ~20 is called out as a case where custom shared fetching may make sense—and recommends stable configuration references so panels don't unnecessarily reinitialize/refetch. [GitHub](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/lens/readme.md?utm_source=chatgpt.com)
-
-Grafana goes further. A `SceneQueryRunner` launches independent/secondary requests in parallel; secondary data isn't supposed to block the primary panel's first usable result. [GitHub](https://github.com/grafana/scenes/blob/main/packages/scenes/src/querying/SceneQueryRunner.ts?utm_source=chatgpt.com)
-
-Grafana's grid also directly supports:
-
-```ts
-new SceneGridLayout({
-  isLazy: true,
-});
-```
-
-so offscreen objects don't initialize until needed. [Grafana Labs](https://grafana.com/developers/scenes/scene-layout?utm_source=chatgpt.com)
-
-### For your app
+That's not really a server-record cache problem.
 
 Your current:
 
 ```text
-tile approaches viewport
-→ enable useWidgetData
-→ datasource queries execute
+Zustand
++ Immer
++ zundo
 ```
 
-is already the correct pattern.
+is a better representation of a document editor.
 
-I'd keep and extend it to:
+TanStack DB does now have manual transactions that can accumulate optimistic edits and later commit/rollback, including explicit draft-style workflows. [TanStack](https://tanstack.com/db/latest/docs/guides/mutations?utm_source=chatgpt.com)
 
-```text
-route loader
-    dashboard document
-         ↓
-render layout immediately
-         ↓
-tiles independently activate
-         ↓
-plugin chunk + query start concurrently
-```
+So technically you **could** model dashboard editing using DB. But you'd be replacing a very small, understandable editor store with a much more general data engine, and you would still need specialized undo semantics. I don't see a win currently.
 
-rather than loaders pre-fetching every widget.
+## StorageProvider should still exist
 
-For expensive dashboards:
+This is important.
 
-```text
-IntersectionObserver
-      ↓
-preload plugin chunk
-+
-enable Query
-```
-
-with a margin before the panel enters the viewport.
-
-And preserve your existing:
-
-```text
-last complete frames
-```
-
-during key transitions.
-
-That's essentially the direction Grafana and Kibana have arrived at.
-
----
-
-# 6. Split panes: EUI provides a very useful lesson about what NOT to do
-
-EUI's `EuiResizableContainer` is quite nice from an accessibility perspective:
-
-```text
-ResizableContainer
-├─ ResizablePanel
-├─ ResizableButton
-└─ ResizablePanel
-```
-
-It supports horizontal/vertical layouts, min/max constraints, collapsible/main panels, pointer resizing and keyboard arrow resizing. [Grafana Labs](https://grafana.com/developers/scenes/scene-layout?utm_source=chatgpt.com)
-
-But there's a particularly relevant Elastic discussion about its limitations.
-
-EUI historically treats panels largely proportionally. Elastic engineers explicitly noted that this is poor for the common:
-
-```text
-fixed-ish left sidebar
-fluid center
-fixed-ish right inspector
-```
-
-case, because resizing the browser should mainly resize the center—not proportionally change the side panels. Kibana ended up building additional resizable-layout machinery around this. [GitHub](https://github.com/elastic/eui/discussions/7290?utm_source=chatgpt.com)
-
-That describes your shell almost exactly.
-
-### Cloudscape's solution is closer to what you need
-
-Cloudscape `AppLayout` treats the split panel as shell state:
-
-```tsx
-splitPanelOpen={...}
-splitPanelSize={360}
-onSplitPanelResize={...}
-splitPanelPreferences={{ position: 'side' }}
-```
-
-Their configurable-dashboard demo persists the panel width independently of the dashboard layout. [GitHub](https://github.com/cloudscape-design/components/issues/2105?utm_source=chatgpt.com)
-
-For your shell I'd therefore do:
-
-```text
-sidebar px | flexible main | context pane px
-```
-
-not percentages.
-
-And critically:
-
-```text
-pointer move
-→ update CSS/grid geometry directly
-
-pointer up
-→ commit width to store
-```
-
-rather than:
-
-```text
-pointer move
-→ Zustand
-→ React tree rerender
-→ dashboard recalculates
-→ charts rerender
-```
-
-EUI's current container-query guidance explicitly recommends using CSS container queries rather than JS resize observation where possible because JS-driven resize state causes React rerenders and can make applications feel sluggish. [eui.elastic.co](https://eui.elastic.co/docs/layout/page-components/?utm_source=chatgpt.com)
-
-That is directly applicable to the width-performance issue you've seen.
-
----
-
-# 7. For in-page splitters, Grafana's model is surprisingly simple
-
-Scenes has a `SplitLayout`:
-
-```text
-SplitLayout
-├─ primary
-└─ secondary
-```
-
-with:
-
-```ts
-direction: 'row' | 'column';
-```
-
-and each child is another scene/layout/panel. [Grafana Labs](https://grafana.com/developers/scenes/scene-layout?utm_source=chatgpt.com)
-
-This is the model I'd use for your **content-level** split views.
-
-So distinguish:
-
-```text
-Shell panes
-    persistent app chrome
-    px width
-    not part of page document
-
-Page SplitLayout
-    part of page/view composition
-    serializable
-```
-
-That's an important boundary.
-
----
-
-# 8. Dynamic tabs: Grafana 2026 is almost exactly your planned model
-
-Grafana's Dynamic Dashboards became GA in April 2026.
-
-The new model supports:
-
-- tabs
-- rows
-- nested tabs inside rows
-- rows inside tabs
-- nesting up to three levels
-- variables scoped to individual sections
-- custom grid or auto-grid per section
-- show/hide rules based on variables/data. [Grafana Labs](https://grafana.com/whats-new/2026-04-08-dynamic-dashboards-is-now-generally-available/?utm_source=chatgpt.com)
-
-This is strong validation for your idea of something around:
-
-```text
-grid | row | tabs
-```
-
-rather than arbitrary HTML/page-builder containers.
-
-I'd use a discriminated layout tree:
-
-```ts
-type LayoutNode = GridNode | RowNode | TabsNode;
-
-interface TabsNode {
-  kind: 'tabs';
-  id: string;
-  tabs: TabNode[];
-}
-
-interface TabNode {
-  id: string;
-  title: string;
-  content: LayoutNode;
-}
-
-interface RowNode {
-  kind: 'row';
-  id: string;
-  content: LayoutNode;
-}
-```
-
-with panels themselves referenced by ID rather than embedded as arbitrary React children.
-
-Something like:
-
-```text
-Dashboard
-└─ Tabs
-   ├─ Overview
-   │   └─ Grid
-   │       ├─ KPI
-   │       └─ Chart
-   │
-   └─ Therapy
-       └─ Row
-           └─ Grid
-               ├─ Table
-               └─ Chart
-```
-
-is much closer to Grafana's current direction than a general page builder. [Grafana Labs](https://grafana.com/whats-new/2025-04-10-dynamic-dashboards/?utm_source=chatgpt.com)
-
-And I would copy Grafana's **limited nesting**, not infinite arbitrary containers.
-
----
-
-# 9. Dashboard tabs and workspace tabs should be separate concepts
-
-This is important for your plan.
-
-Grafana has `SceneAppPage` tabs where every tab is effectively another page/scene with its own lazy `getScene()`. It also explicitly recommends caching the root `SceneApp` so navigation doesn't destroy runtime/data state. [Grafana Labs](https://grafana.com/developers/scenes/scene-app?utm_source=chatgpt.com)
-
-So:
-
-### Dashboard/layout tabs
-
-Persisted inside a dashboard:
-
-```text
-Overview
-Analytics
-Details
-```
-
-### Workspace/document tabs
-
-User runtime:
-
-```text
-Patient A
-Patient B
-Exercise library
-Therapy Plan 17
-```
-
-I would make those completely different models.
-
-For workspace tabs:
-
-```ts
-interface WorkspaceTab {
-  id: string;
-  kind: 'patient' | 'exercise' | 'dashboard' | 'flow';
-  resourceId: string;
-  title: string;
-  dirty?: boolean;
-}
-```
-
-And use Router state for the active tab/resource.
-
-Do **not** reuse your dashboard `TabsNode`.
-
----
-
-# 10. If you eventually want VS-Code-style docking/windows, FlexLayout is the reference
-
-I would not put this in your core yet, but it is useful research.
-
-FlexLayout has a serializable model:
-
-```text
-row
-├─ tabset
-│  ├─ tab
-│  └─ tab
-└─ row
-   └─ tabset
-```
-
-Every change is an explicit action:
-
-```text
-ADD_TAB
-DELETE_TAB
-SELECT_TAB
-MOVE_NODE
-ADJUST_WEIGHTS
-MAXIMIZE
-POPOUT_TAB
-POPOUT_TABSET
-```
-
-and its JSON can represent sublayouts, floating panels and actual browser-window popouts. It also preserves component state while tabs move. This is a very good model to study if your future "windows" becomes true docking rather than simply document tabs.
-
-But it is much more machinery than your current healthcare showcase needs.
-
-So I would borrow the idea:
-
-```text
-serializable model
-+
-commands/actions
-```
-
-without adopting a docking runtime yet.
-
----
-
-# 11. Cloudscape is an excellent reference for your widget palette/editor UX
-
-Cloudscape separates:
-
-```text
-widget registry
-layout records
-rendered BoardItems
-palette
-```
-
-Their configurable dashboard demo has essentially:
-
-```ts
-const allWidgets: Record<string, WidgetConfig>;
-```
-
-and independently stored placement data:
-
-```text
-id
-columnSpan
-columnOffset
-rowSpan
-```
-
-The widget definition supplies default spans, while layout overrides them. That is exactly the separation you've been aiming for between:
-
-```text
-Widget
-vs
-LayoutItem
-```
-
-Their recommended editor is also interesting:
-
-```text
-Dashboard
-+
-"Add widget"
-    ↓
-discrete SplitPanel
-    ↓
-ItemsPalette
-```
-
-rather than permanently cramming a massive builder toolbar above the dashboard. [Cloudscape](https://cloudscape.design/components/board-components/?utm_source=chatgpt.com)
-
-For your app I'd combine this with Grafana's new context-aware editor side pane:
-
-```text
-nothing selected
-→ dashboard settings
-
-widget selected
-→ widget inspector
-
-layout selected
-→ row/tab/grid settings
-
-Add widget
-→ widget palette
-
-datasource selected
-→ query / provenance
-```
-
-This fits your planned right context bar extremely well.
-
----
-
-# 12. Superset is valuable mainly as a warning
-
-Current Superset represents dashboard layout as a normalized tree/map:
-
-```ts
-type LayoutItem = {
-  id;
-  type;
-  children;
-  parents;
-  meta;
-};
-```
-
-and separately maintains:
-
-```text
-charts
-dashboardLayout
-dashboardState
-dataMask
-nativeFilters
-...
-```
-
-in Redux. [GitHub](https://github.com/apache/superset/blob/master/superset-frontend/src/dashboard/types.ts?utm_source=chatgpt.com)
-
-That's interesting for normalized layout operations, but the more telling thing is that Superset is now proposing to move away from having Redux own both server and UI state.
-
-SIP-207 proposes:
-
-```text
-Zustand       → browser/UI state
-TanStack Query → server state
-```
-
-precisely because those concerns are fundamentally different. [GitHub](https://github.com/apache/superset/issues/39209?utm_source=chatgpt.com)
-
-Even newer Superset work identifies another problem: native/cross filters currently go through central `dataMask` orchestration and the dashboard has to compute and push merged state down into every chart. The proposed Widget Framework explicitly calls this pipeline heavy and overly centralized. [GitHub](https://github.com/apache/superset/issues/44875?utm_source=chatgpt.com)
-
-So **don't copy current Superset's state architecture**.
-
-It actually validates your existing direction.
-
----
-
-# 13. Filter/data scope: borrow Grafana + Metabase
-
-Metabase now has a useful scope hierarchy:
-
-```text
-dashboard filter
-header/section filter
-card filter
-```
-
-Dashboard-level filters span tabs, while header/card widgets can be constrained to smaller scopes. [metabase.com](https://www.metabase.com/docs/latest/dashboards/filters?utm_source=chatgpt.com)
-
-Grafana's Dynamic Dashboards similarly allows variables at section level, so one tab/row can have independent variables from another. [Grafana Labs](https://grafana.com/whats-new/2026-04-08-dynamic-dashboards-is-now-generally-available/?utm_source=chatgpt.com)
-
-I would therefore make your eventual context inheritance:
-
-```text
-Workspace
-  ↓
-Page/Dashboard
-  ↓
-Section/Tab/Row
-  ↓
-Widget
-```
-
-with:
-
-```text
-time
-variables
-filters
-datasource bindings
-```
-
-being overrideable at each level.
-
-Not necessarily immediately—but design the schema so it can support it.
-
----
-
-# What I would adopt for `mantine-dashboard-builder`
-
-The resulting architecture I'd use is:
-
-```text
-Workspace document
-│
-├─ navigation
-│
-├─ open workspace tabs
-│
-└─ pages
-    │
-    └─ Dashboard
-        │
-        ├─ context
-        │   ├─ time
-        │   ├─ filters
-        │   └─ variables
-        │
-        └─ LayoutNode
-            ├─ Grid
-            │   └─ WidgetInstance IDs
-            │
-            ├─ Row
-            │   └─ LayoutNode
-            │
-            └─ Tabs
-                └─ Tab
-                    └─ LayoutNode
-```
-
-Runtime:
-
-```text
-WidgetInstance
-      │
-      ├────────────── WidgetDefinition registry
-      │                   component
-      │                   editor
-      │                   schema
-      │                   capabilities
-      │
-      ↓
-resolved inherited context
-      ↓
-QuerySpec[]
-      ↓
-TanStack Query / QueryBroker
-      ↓
-DatasourcePlugin
-      ↓
-DataFrame[]
-      ↓
-Transform pipeline
-      ↓
-Widget component
-```
-
-Persistence remains separate:
+Your roadmap currently says:
 
 ```text
 StorageProvider
-├─ IndexedDB
-├─ files
-├─ Convex
-└─ future backend
+
+Browser / IndexedDB
+Files
+Convex
+future backend
 ```
 
-Records can later sit behind TanStack DB as we discussed.
+I would **not replace that abstraction with TanStack DB**.
 
-UI/runtime state:
+TanStack DB answers:
+
+> How does my client model/query/react to collections of records?
+
+Your `StorageProvider` answers:
+
+> Where does this application's durable data physically live?
+
+Those are different layers.
+
+A very good future design would be:
 
 ```text
-TanStack Query    server/query results
-TanStack DB       record collections, later
-Zustand           editor/document runtime + shell
-TanStack Router   navigable/shareable state
-StorageProvider   durable documents/records
-local component   transient interaction
+                    ┌─ IndexedDBStorageProvider
+                    ├─ FileStorageProvider
+StorageProvider ────┼─ ConvexStorageProvider
+                    ├─ RESTStorageProvider
+                    └─ ...
+
+                            ↓
+
+                     TanStack DB
+                  record collections
+                            ↓
+                       UI/views
 ```
 
-## The parts I would explicitly copy
+Alternatively, for backends that integrate directly with DB, the collection adapter can bypass some of that plumbing.
 
-| Your requirement          | Best reference         | What I'd borrow                                            |
-| ------------------------- | ---------------------- | ---------------------------------------------------------- |
-| Widget architecture       | **Kibana**             | serializable widget + internal runtime + capability API    |
-| Widget menus/actions      | **Kibana**             | action registry gated by capabilities                      |
-| Data model                | **Grafana**            | datasource → query → DataFrame → transform → visualization |
-| Context inheritance       | **Grafana Scenes**     | nearest parent data/time/variables                         |
-| Query orchestration       | **Grafana**            | parallel independent queries, partial readiness            |
-| Cache identity            | **Grafana**            | datasource + query + normalized time + resolution          |
-| Avoid React waterfalls    | **Grafana + Kibana**   | lazy activation, cancellation, parallel load               |
-| Dashboard layout          | **Grafana 2026**       | grid/row/tabs with intentionally limited nesting           |
-| Widget palette            | **Cloudscape**         | registry + palette in side split panel                     |
-| Persistent editor pane    | **Grafana/Cloudscape** | context-aware docked inspector                             |
-| Shell splitter            | **Cloudscape/Kibana**  | px side panes + fluid center                               |
-| Responsive widget content | **EUI**                | CSS container queries instead of React width state         |
-| Dashboard filters         | **Grafana/Metabase**   | hierarchical scope                                         |
-| Workspace tabs            | **Grafana SceneApp**   | distinct from dashboard tabs, preserve runtime             |
-| Future docking/windows    | **FlexLayout**         | serializable tabset tree + command model                   |
-| State ownership           | **Superset SIP-207**   | Query server state / Zustand UI state                      |
+TanStack DB already includes LocalStorage, in-memory and IndexedDB Collections; IndexedDB in particular is much more appropriate than `localStorage` for actual collections of records. [TanStack](https://tanstack.com/db/latest/docs/installation?utm_source=chatgpt.com)
 
-The **biggest change I'd make to your plan after this research** is not a new library. It's to formalize two concepts that are currently somewhat implicit:
+## What I'd change in your roadmap
 
-1. a **hierarchical runtime context** (`time / variables / filters / bindings / dataActive`) inspired by Grafana Scenes, and
-2. a **widget capability/action API** inspired by Kibana.
+Your current P4 already says:
 
-Those two pieces would make your later dashboard, record pages, flow/node views, inspectors, exports, contextual actions, and plugins fit together without turning the shell/dashboard component into a giant coordinator.
+> “A TanStack DB spike for the records layer.”
+
+I would make that a stronger architectural decision:
+
+```text
+P3 — Persistence
+
+StorageProvider
+├─ IndexedDB
+├─ files
+└─ Convex
+
+Dashboard documents continue:
+Query → Zustand editor → StorageProvider
+
+
+P4 — Structured application data
+
+TanStack DB
+├─ CollectionDefinition
+├─ Schema / JSON Schema metadata
+├─ Record collections
+├─ LiveQuery
+├─ optimistic CRUD
+└─ adapters
+    ├─ StorageProvider-backed
+    ├─ QueryCollection
+    └─ future sync engines
+```
+
+And specifically **do not put DataFrames/widget query results into DB in P4**.
+
+Your resulting ownership model becomes very clean:
+
+| Data                                     | Owner               |
+| ---------------------------------------- | ------------------- |
+| SQL/metrics/chart query results          | **TanStack Query**  |
+| Dashboard fetched document               | **TanStack Query**  |
+| Dashboard currently being edited         | **Zustand + zundo** |
+| Navigation/search params                 | **TanStack Router** |
+| Patients/exercises/therapy plans/records | **TanStack DB**     |
+| Persistent physical storage              | **StorageProvider** |
+| Component-only interaction               | React state         |
+
+That is the architecture I'd choose.
+
+The main benefit of adding TanStack DB therefore isn't "better caching." **Your caching is already good.** The big win is that when your application starts getting a genuine domain-data layer—patients, exercises, plans, assessments, schemas, relationships—you won't end up building a second mini database/query system yourself out of Query keys, Zustand selectors, table filters and CRUD invalidation.
+
+In that part of `mantine-dashboard-builder`, I think TanStack DB would **meaningfully simplify the architecture**. For the dashboard/dataframe code that exists today, it would mostly add complexity. [TanStack](https://tanstack.com/db/latest/docs/overview?utm_source=chatgpt.com)
