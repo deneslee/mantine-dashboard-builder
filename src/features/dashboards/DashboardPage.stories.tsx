@@ -27,7 +27,7 @@ async function chooseFromMenu(widget: string, item: string) {
   await userEvent.click(await page.findByRole('menuitem', { name: item }, WAIT));
 }
 
-/** Edits the Revenue title in the widget drawer and leaves the field, which commits one undo step. */
+/** Edits the Revenue title in the widget pane and leaves the field, which commits one undo step. */
 async function renameRevenue(title: string) {
   await chooseFromMenu('Revenue', 'Edit');
   const field = await page.findByRole('textbox', { name: 'Title' }, WAIT);
@@ -201,21 +201,24 @@ export const FullScreen: Story = {
   },
 };
 
-const inspector = async () => within(await page.findByRole('dialog', { name: 'Inspect Revenue' }, WAIT));
+const inspector = async () => within(await page.findByRole('region', { name: 'Inspect' }, WAIT));
 const INSPECT = '/dashboards/sales?inspect=revenue';
 
-/** Inspect from the menu: focus moves to the tabs, the data shows as a table, Esc returns to the menu. */
+/**
+ * Inspect from the menu: the side pane opens beside the grid with focus on its title, the data shows
+ * as a table, and Esc closes it and returns focus to the menu.
+ */
 export const InspectData: Story = {
   args: { url: '/dashboards/sales' },
   play: async () => {
     await chooseFromMenu('Revenue', 'Inspect');
     const drawer = await inspector();
-    await waitFor(() => expect(drawer.getByRole('tab', { name: 'Data' })).toHaveFocus());
+    await waitFor(() => expect(drawer.getByRole('heading', { name: 'Inspect Revenue' })).toHaveFocus());
     await expect(await drawer.findByRole('columnheader', { name: 'Revenue' }, WAIT)).toBeVisible();
     await expect(drawer.getByRole('button', { name: 'Download CSV' })).toBeVisible();
 
     await userEvent.keyboard('{Escape}');
-    await waitFor(() => expect(page.queryByRole('dialog', { name: 'Inspect Revenue' })).toBeNull());
+    await waitFor(() => expect(page.queryByRole('region', { name: 'Inspect' })).toBeNull());
     await waitFor(() =>
       expect(document.activeElement).toBe(page.getByRole('button', { name: 'Actions for Revenue' })),
     );
@@ -339,8 +342,8 @@ export const DuplicateRemoveAdd: Story = {
 
     await userEvent.click(controls().getByRole('button', { name: 'Add widget' }));
     const title = await page.findByRole('textbox', { name: 'Title' }, WAIT);
-    // The drawer once rendered 0px tall, clipping the form it holds.
-    const drawer = page.getByRole('dialog', { name: 'Add widget' });
+    // The pane once rendered 0px tall, clipping the form it holds.
+    const drawer = page.getByRole('region', { name: 'Add widget' });
     await expect(drawer.getBoundingClientRect().height).toBeGreaterThan(title.getBoundingClientRect().height);
     await userEvent.type(title, 'New widget');
     await userEvent.click(page.getByRole('button', { name: 'Add' }));

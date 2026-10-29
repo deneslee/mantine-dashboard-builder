@@ -173,6 +173,7 @@ Keep the lookup scoped to the current task and adapt findings to this app. Same 
 | `vercel-react-best-practices`                                   | Render and bundle performance; its Next.js and server rules don't apply   |
 | `web-design-guidelines`                                         | Reviewing a screen for accessibility, focus, forms and motion before a PR |
 | `mantine-custom-components`, `mantine-combobox`, `mantine-form` | Components on Mantine's Styles API, Combobox, forms                       |
+| `task-research`, then `task-plan`                               | Research a task against Grafana, EUI and other systems, then plan it      |
 
 Don't use `frontend-design` in this repo: it picks its own fonts and palettes, and ours come from the tokens.
 
@@ -182,7 +183,7 @@ Don't use `frontend-design` in this repo: it picks its own fonts and palettes, a
 
 Planning lives in `.agents/planning/` and covers only the current phase; `docs/` holds only human-facing docs about what is built. Finished plans, parked plans, the backlog and older research live in the project archive outside the repo, and links to them point at the last commit that had them.
 
-[tasks](../../planning/tasks.md) and [roadmap](../../planning/roadmap.md); their
+[tasks](.agents/planning/tasks.md) and [roadmap](.agents/planning/roadmap.md); their
 checklists are starting points, not final implementation designs. Separate locked
 decisions from details still open to evidence. Follow the repository's preferred
 code discovery tools for local source.
@@ -191,8 +192,9 @@ code discovery tools for local source.
 | -------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `.agents/planning/roadmap.md`          | The current phase: steps, locked decisions, open questions; the long-term plan is outside the repo  |
 | `.agents/planning/tasks.md`            | The checklist for the current phase, in order                                                       |
-| `.agents/planning/plans/NN-slug.md`    | One piece of work in the current phase, with its design and file-level tasks; `NN` is build order   |
-| `.agents/planning/research/<topic>.md` | Background for the current phase's plans; its second line links the plan it serves                  |
+| `.agents/planning/current.json`        | Each task's end result and parts, with links to its research and plan; `pnpm current` shows it      |
+| `.agents/planning/research/NN-slug.md` | A task's reference research and the user's decisions; its second line links the task and its plan   |
+| `.agents/planning/plans/NN-slug.md`    | One piece of work in the current phase, with its design and file-level tasks                        |
 | `apps/docs/`                           | The catalog: `catalog/catalog.yaml` and the pages generated from it ([README](apps/docs/README.md)) |
 | `docs/architecture.md`                 | Stack, layers, data flow, state owners, storage keys: how the app fits today                        |
 | `docs/ui/`, `docs/dashboard/`          | How the built parts work ([Read first](#read-first))                                                |
@@ -202,6 +204,7 @@ code discovery tools for local source.
 - **Plan layout:** `# NN Title`, then one line: `Status: open | done (date) · Step PN | Cross-cutting · Depends on: … · Research: …`. Sections: Goal, Design, Tasks, Decisions, Verification; add Out of scope, Open decisions or Risks when they help.
 - **Tasks:** `- [ ] **Title.** What to do. Done when …`. Tick `[x]` as you go; `[-]` for dropped or moved work, saying why or where to.
 - **Changing a plan:** edit it in place and add a dated line to Decisions. No version numbers in file names or headers; git keeps the history.
+- **Research, then plan:** `/task-research` writes `research/NN-slug.md` and asks the open decisions; `/task-plan NN` turns it into `plans/NN-slug.md`, and building waits for approval. Research and plan share `NN` (`pnpm current --number`, in the order work starts), and both are linked from the task in `current.json`. Files from before this rule keep their names.
 - **New work:** add a line to `.agents/planning/tasks.md`; write a plan when it needs a design or more than a few tasks. Work outside the current phase belongs in the project plan, not here.
 - **Finishing:** tick its line in `tasks.md`, move any tasks it leaves open there, and update the doc in `docs/` (and the README, if the repo map or the try-it URLs changed) that describes what was built. Then the plan moves out of the repo to the project archive, and links to it point at the last commit that had it.
 

@@ -276,10 +276,15 @@ const closeOnEscape = (close: () => void) => (event: KeyboardEvent) => {
   }
 };
 
+/** About a second of frames: long enough for a lazy pane chunk, short enough not to steal focus later. */
+const FOCUS_TRIES = 60;
+
 /**
  * Stays mounted while the pane is closed, so focus can go back to whatever opened it. Opening moves
  * focus to the pane's `[data-pane-focus]` element; compact and expand do too when focus was inside
- * the pane or lost, since the button that was pressed is gone.
+ * the pane or lost, since the button that was pressed is gone. The move waits a frame, so a menu
+ * that opened the pane has returned focus to its button first, and keeps looking for a few frames
+ * while lazy content loads.
  */
 function PaneBody({
   isShown,
@@ -300,9 +305,16 @@ function PaneBody({
     const active = document.activeElement;
     const isLost = !active || active === document.body;
     // Opening always takes focus; compact and expand only keep it if it was in the pane already.
-    if (previous === 'closed' || isLost || ref.current?.parentElement?.contains(active)) {
-      ref.current?.querySelector<HTMLElement>('[data-pane-focus]')?.focus();
-    }
+    if (!(previous === 'closed' || isLost || ref.current?.parentElement?.contains(active))) return;
+    let frame = 0;
+    let tries = 0;
+    const focusTarget = () => {
+      const target = ref.current?.querySelector<HTMLElement>('[data-pane-focus]');
+      if (target) target.focus({ preventScroll: true });
+      else if (++tries < FOCUS_TRIES) frame = requestAnimationFrame(focusTarget);
+    };
+    frame = requestAnimationFrame(focusTarget);
+    return () => cancelAnimationFrame(frame);
   }, [previous, state]);
 
   const content = isShown ? children : null;

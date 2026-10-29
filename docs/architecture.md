@@ -61,7 +61,7 @@ DashboardPage → isEditing = ?mode=edit; range = isEditing ? store range : URL 
         → DatasourcePlugin.query(spec, ctx) → DataFrame[], cached as { frames, durationMs }
         → combined in query order; a failed query's frames are left out and the header warns
       QueryBoundary → <plugin.component frames options timeZone />
-  InspectDrawer (?inspect) → the same cache entry per query, never refetched on open
+  InspectPane (?inspect) → the same cache entry per query, never refetched on open
 
 Save    store.save → saveDashboard (data/dashboardApi.ts) → localStorage saved copy → new baseline, draft cleared
         → setQueryData(['dashboards', id]) and the list invalidated

@@ -1,6 +1,7 @@
 import { Button, Code, DataList, Group, Select, Stack, Table, Tabs, Text } from '@mantine/core';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
+import { IconZoomCode } from '@tabler/icons-react';
 import { useState, type ReactNode } from 'react';
 import { frameToCsv, getFieldLabel, type DataFrame, type Field } from '@/core/data/DataFrame';
 import type { Widget } from '@/core/dashboard/dashboardSchema';
@@ -8,13 +9,11 @@ import { toAppError } from '@/core/errors/AppError';
 import { formatTime, resolveEffectiveTime, type TimeRange } from '@/core/time/timeRange';
 import type { Query } from '@/plugins/DatasourcePlugin';
 import { usePlugins } from '@/plugins/usePlugins';
-import { dimensions } from '@/ui/tokens/dimensions';
+import { SplitViewHeader } from '@/ui/components/SplitView/SplitViewHeader';
 import { downloadFile } from '@/utils/downloadFile';
 import type { InspectTab } from '../dashboardSearch';
 import { datasourceQuery } from '../data/dashboardQueries';
-import { focusWidgetMenu } from '../grid/focusWidgetMenu';
 import { formatRange, formatShift } from '../header/formatRange';
-import { PaneDrawer } from '../PaneDrawer';
 import { useDashboard, useReadNow, useWidget } from '../state/useDashboard';
 import { useEffectiveTime } from '../state/useEffectiveTime';
 
@@ -38,9 +37,9 @@ function formatValue(field: Field, value: unknown, timeZone: string): string {
 
 /**
  * One widget's queries, one at a time (`?inspect=<id>&inspectTab=…`): the data, what was asked, the
- * JSON and the request's stats. Beside the dashboard, non-modal; focus returns to the widget's menu.
+ * JSON and the request's stats. It fills the side pane; the page opens and closes it.
  */
-export function InspectDrawer({
+export function InspectPane({
   id,
   tab,
   range,
@@ -56,22 +55,11 @@ export function InspectDrawer({
   const { datasources } = usePlugins();
   const [index, setIndex] = useState(0);
   const query = widget?.queries[index] ?? widget?.queries[0];
-  const handleClose = () => {
-    void navigate({
-      search: (prev) => ({ ...prev, inspect: undefined, inspectTab: undefined }),
-      resetScroll: false,
-    });
-    focusWidgetMenu(id);
-  };
   return (
-    <PaneDrawer
-      opened
-      onClose={handleClose}
-      title={`Inspect ${widget?.title ?? ''}`}
-      size={dimensions.shell.contextBar.max}
-    >
+    <>
+      <SplitViewHeader title={`Inspect ${widget?.title ?? ''}`} icon={IconZoomCode} />
       {widget && query ? (
-        <Stack>
+        <Stack p="md">
           {widget.queries.length > 1 ? (
             <Select
               label="Query"
@@ -121,7 +109,7 @@ export function InspectDrawer({
           </Tabs>
         </Stack>
       ) : null}
-    </PaneDrawer>
+    </>
   );
 }
 

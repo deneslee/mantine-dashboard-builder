@@ -16,6 +16,8 @@
           "title": "Split view component",
           "where": "ui/components/SplitView, Storybook › ui › components › SplitView",
           "result": "One resizable-panes component for the editor pane, split widgets and multi-column pages, with stories you can drive from controls (plans/split-view.md).",
+          "research": "research/p1-ui-reference.md",
+          "plan": "plans/split-view.md",
           "parts": [
             {
               "id": "P1.0.1",
@@ -75,6 +77,7 @@
           "title": "Docked side pane",
           "where": "Dashboard page, right of the grid",
           "result": "Palette, widget editor and Inspect open in a resizable pane beside the grid instead of a drawer over it.",
+          "research": "research/p1-ui-reference.md",
           "parts": [
             {
               "id": "P1.1.1",
@@ -114,6 +117,7 @@
           "title": "Grouped page control bar",
           "where": "Dashboard page header (Page.ControlBar)",
           "result": "The header bar shows three separate groups and folds into an overflow menu when narrow.",
+          "research": "research/p1-ui-reference.md",
           "parts": [
             {
               "id": "P1.2.1",
@@ -143,6 +147,8 @@
           "title": "Edit bar",
           "where": "Dashboard header in edit mode (EditToolbar)",
           "result": "Edit mode has a clear bar: what is being edited, whether it's saved, and one obvious primary action.",
+          "research": "research/p1-ui-reference.md",
+          "plan": "plans/edit-bar-polish.md",
           "parts": [
             {
               "id": "P1.3.1",
@@ -202,6 +208,8 @@
           "title": "Draft and leave behaviour",
           "where": "Dashboard page, view mode and leaving edit mode",
           "result": "Unsaved work is visible and never lost by surprise.",
+          "research": "research/p1-ui-reference.md",
+          "plan": "plans/edit-bar-polish.md",
           "parts": [
             {
               "id": "P1.4.1",
@@ -226,6 +234,8 @@
           "title": "Empty and loading states",
           "where": "Dashboard page and editor",
           "result": "An empty or loading dashboard looks intentional.",
+          "research": "research/p1-ui-reference.md",
+          "plan": "plans/edit-bar-polish.md",
           "parts": [
             {
               "id": "P1.5.1",
@@ -331,6 +341,7 @@
           "title": "Inspect tabs",
           "where": "Inspect, in the side pane",
           "result": "Inspect has four tabs, each with populated, empty and error states.",
+          "research": "research/p1-ui-reference.md",
           "parts": [
             {
               "id": "P1.10.1",

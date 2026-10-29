@@ -123,6 +123,8 @@ Inside widgets, use `%` mins: px mins would fight the tile's own minimum size. A
 
 ## Decisions
 
+- Oct 28, P1.1: the dashboard page fills the main pane (`calc(100dvh - navbar)`); its header stays and the grid scrolls in its own SplitView pane, so the side pane stays in view beside a long grid (Grafana's `DashboardSidebarSplitter` model). The side pane is controlled by what already holds the state (palette in the store, `?widget` and `?inspect` in the URL); Close and Esc clear it.
+- Oct 28, P1.1: opening a pane focuses its title after a frame and keeps trying for about a second, because a menu returns focus to its button after the click and lazy pane content arrives later.
 - Oct 28: one `ui/` component on Mantine `Splitter`, not on `useSplitter` directly. It already has the Styles API, keyboard support and collapse; the hook is the fallback if `Splitter` can't render the rail.
 - Oct 28: compact is our own state: the pane shrinks to a fixed width with min = max = that width, and the same content switches to icons. Mantine only collapses to 0. No separate rail component.
 - Oct 28: built from Mantine parts, judged without regard to how Shell works today. `useElementSize` for the fallback, `useFocusReturn` for focus, `Toolbar` for the icon list (table above).

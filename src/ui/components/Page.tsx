@@ -2,6 +2,9 @@ import { Box, Group, Text, Title, type BoxProps } from '@mantine/core';
 import type { ComponentProps, ReactNode } from 'react';
 import classes from './Page.module.css';
 
+/** A caller's `className` adds to the part's own, so a page can size its root or body. */
+const mergeClass = (own: string | undefined, extra?: string) => (extra ? `${own} ${extra}` : own);
+
 /**
  * Content-area layout. `Page.Header` is a grid with named areas and each part places itself, so a
  * page writes only the parts it needs, in reading order: breadcrumbs, title, description, actions,
@@ -9,9 +12,9 @@ import classes from './Page.module.css';
  * depends on the side panels, not on the viewport.
  */
 
-export function PageRoot({ children, ...rest }: BoxProps & { children: ReactNode }) {
+export function PageRoot({ children, className, ...rest }: BoxProps & { children: ReactNode }) {
   return (
-    <Box className={classes.root} {...rest}>
+    <Box {...rest} className={mergeClass(classes.root, className)}>
       {children}
     </Box>
   );
@@ -70,9 +73,9 @@ export function PageControlBar({
   );
 }
 
-export function PageBody({ children, ...rest }: BoxProps & { children: ReactNode }) {
+export function PageBody({ children, className, ...rest }: BoxProps & { children: ReactNode }) {
   return (
-    <Box className={classes.body} {...rest}>
+    <Box {...rest} className={mergeClass(classes.body, className)}>
       {children}
     </Box>
   );

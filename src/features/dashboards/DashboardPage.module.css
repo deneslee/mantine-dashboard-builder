@@ -1,4 +1,25 @@
-/* One widget full screen: it fills what is left of the main pane. */
+/*
+ * The page fills the main pane exactly: the header stays, and the grid scrolls in its own pane
+ * beside the docked side pane (palette, widget editor, Inspect), as in Grafana's dashboard sidebar.
+ */
+.page {
+  height: calc(100dvh - var(--app-navbar-height));
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0;
+}
+
+/* The scrolling grid pane: the page's side and bottom padding moves in here. */
+.canvas {
+  min-height: 100%;
+  padding: 0 var(--mantine-spacing-lg) var(--mantine-spacing-lg);
+}
+
+/* One widget full screen: it fills what is left of the grid pane. */
 .full {
   height: 100%;
   min-height: var(--app-chart-height-default);

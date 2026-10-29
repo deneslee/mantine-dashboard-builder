@@ -5,6 +5,7 @@ import { IconArrowLeft } from '@tabler/icons-react';
 import { Activity, lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { RouteBreadcrumbs } from '@/shell/breadcrumbs/RouteBreadcrumbs';
 import { Page } from '@/ui/components/Page';
+import { SplitViewPane, SplitViewRoot } from '@/ui/components/SplitView/SplitViewRoot';
 import { dimensions } from '@/ui/tokens/dimensions';
 import { iconSize, iconStroke } from '@/ui/tokens/semantic';
 import { localTimeZone } from '@/core/time/timeRange';
@@ -28,13 +29,22 @@ import classes from './DashboardPage.module.css';
 /** The viewer's time zone, when neither the URL nor the dashboard sets one. */
 const LOCAL_TIME_ZONE = localTimeZone();
 
-const InspectDrawer = lazy(() =>
-  import('./inspect/InspectDrawer').then((module) => ({ default: module.InspectDrawer })),
+const InspectPane = lazy(() =>
+  import('./inspect/InspectPane').then((module) => ({ default: module.InspectPane })),
 );
 
-const EditDrawer = lazy(() =>
-  import('./editor/EditDrawer').then((module) => ({ default: module.EditDrawer })),
-);
+const EditPane = lazy(() => import('./editor/EditPane').then((module) => ({ default: module.EditPane })));
+
+const EditTools = lazy(() => import('./editor/EditTools').then((module) => ({ default: module.EditTools })));
+
+/** What the side pane shows; the palette, the widget form and Inspect never show together. */
+type Pane = 'inspect' | 'palette' | 'widget';
+
+const PANE_LABELS: Record<Pane, string> = {
+  inspect: 'Inspect',
+  palette: 'Add widget',
+  widget: 'Edit widget',
+};
 
 /** The edit store's screen-reader messages ("Moved Revenue to …"), in a leaf so they re-render nothing else. */
 function Announcer() {
@@ -63,6 +73,8 @@ export function DashboardPage() {
   const isQueryEditorOpen = useDashboard(
     (s) => search.editor === 'queries' && !!s.doc.widgets[search.widget ?? ''],
   );
+  const isPaletteOpen = useDashboard((s) => s.tool?.kind === 'palette');
+  const hasEditedWidget = useDashboard((s) => !!s.doc.widgets[search.widget ?? '']);
   const isWide = useMediaQuery(`(min-width: ${dimensions.grid.breakpoints.md}px)`, true);
   const isEditing = search.mode === 'edit';
   const [density] = useDensity();
@@ -75,6 +87,24 @@ export function DashboardPage() {
       ? search.inspect
       : undefined,
   );
+  const isEditorAvailable = isEditing && isWide && !isQueryEditorOpen;
+  const pane: Pane | null = inspectId
+    ? 'inspect'
+    : isEditorAvailable && isPaletteOpen
+      ? 'palette'
+      : isEditorAvailable && hasEditedWidget
+        ? 'widget'
+        : null;
+  // Close and Escape clear whatever opened the pane; focus goes back to the widget's menu.
+  const handleClosePane = () => {
+    if (pane === 'palette') actions.openTool(null);
+    else
+      void navigate({
+        search: (prev) => ({ ...prev, inspect: undefined, inspectTab: undefined, widget: undefined }),
+        resetScroll: false,
+      });
+    focusWidgetMenu(pane === 'inspect' ? inspectId : pane === 'widget' ? search.widget : undefined);
+  };
   const range = isEditing
     ? defaultRange
     : { from: search.from ?? defaultRange.from, to: search.to ?? defaultRange.to };
@@ -121,7 +151,7 @@ export function DashboardPage() {
       resetScroll: false,
     });
   return (
-    <Page.Root mod={{ density }}>
+    <Page.Root mod={{ density }} className={classes.page}>
       <Announcer />
       <Page.Header>
         <RouteBreadcrumbs />
@@ -160,88 +190,109 @@ export function DashboardPage() {
           {isEditing && <EditToolbar isWide={isWide} />}
         </Page.ControlBar>
       </Page.Header>
-      <Page.Body>
-        {draftError && (
-          <Alert color="danger" title="Draft storage">
-            {draftError}
-          </Alert>
-        )}
-        {isEditing && !isWide && (
-          <Alert color="info" title="Use a wider screen to edit">
-            Your draft is kept. Widen the window to edit the layout.
-          </Alert>
-        )}
-        {isEditing && isWide && (
-          <Suspense fallback={<Text c="dimmed">Opening editor…</Text>}>
-            <EditDrawer range={range} timeZone={timeZone} />
-          </Suspense>
-        )}
-        {inspectId ? (
-          <Suspense fallback={null}>
-            <InspectDrawer
-              key={inspectId}
-              id={inspectId}
-              tab={search.inspectTab ?? 'data'}
-              range={range}
-              timeZone={timeZone}
-            />
-          </Suspense>
-        ) : null}
-        {isEmpty ? (
-          <Group>
-            <Text>No widgets yet.</Text>
-            {!isEditing && isWide && (
-              <Button
-                renderRoot={(props) => (
-                  <Link to="/dashboards/$id" params={{ id }} search={{ mode: 'edit' }} {...props} />
-                )}
-              >
-                Add widget
-              </Button>
-            )}
-            <Button variant="default" renderRoot={(props) => <Link to="/templates" {...props} />}>
-              Start from a template
-            </Button>
-          </Group>
-        ) : (
-          !(isEditing && isWide && isQueryEditorOpen) && (
-            <>
-              {viewId ? (
-                <Stack className={classes.full} data-full-screen>
-                  <Group>
+      <Page.Body className={classes.body}>
+        <SplitViewRoot>
+          <SplitViewPane id="dashboard" label="Dashboard" defaultSize={100} min="360px">
+            <Stack gap="md" className={classes.canvas}>
+              {draftError && (
+                <Alert color="danger" title="Draft storage">
+                  {draftError}
+                </Alert>
+              )}
+              {isEditing && !isWide && (
+                <Alert color="info" title="Use a wider screen to edit">
+                  Your draft is kept. Widen the window to edit the layout.
+                </Alert>
+              )}
+              {isEditing && isWide && (
+                <Suspense fallback={<Text c="dimmed">Opening editor…</Text>}>
+                  <EditTools range={range} timeZone={timeZone} />
+                </Suspense>
+              )}
+              {isEmpty ? (
+                <Group>
+                  <Text>No widgets yet.</Text>
+                  {!isEditing && isWide && (
                     <Button
-                      variant="default"
-                      leftSection={<IconArrowLeft size={iconSize.sm} stroke={iconStroke} />}
                       renderRoot={(props) => (
-                        <Link
-                          to="/dashboards/$id"
-                          params={{ id }}
-                          search={(prev) => ({ ...prev, view: undefined })}
-                          resetScroll={false}
-                          {...props}
-                        />
+                        <Link to="/dashboards/$id" params={{ id }} search={{ mode: 'edit' }} {...props} />
                       )}
                     >
-                      Back to dashboard
+                      Add widget
                     </Button>
-                  </Group>
-                  <div className={classes.tile}>
-                    <WidgetTile id={viewId} range={range} timeZone={timeZone} />
-                  </div>
-                </Stack>
-              ) : null}
-              {/* Hidden, not unmounted: the tiles keep their state, and make no requests meanwhile. */}
-              <Activity mode={viewId ? 'hidden' : 'visible'}>
-                <DashboardGrid
+                  )}
+                  <Button variant="default" renderRoot={(props) => <Link to="/templates" {...props} />}>
+                    Start from a template
+                  </Button>
+                </Group>
+              ) : (
+                !(isEditing && isWide && isQueryEditorOpen) && (
+                  <>
+                    {viewId ? (
+                      <Stack className={classes.full} data-full-screen>
+                        <Group>
+                          <Button
+                            variant="default"
+                            leftSection={<IconArrowLeft size={iconSize.sm} stroke={iconStroke} />}
+                            renderRoot={(props) => (
+                              <Link
+                                to="/dashboards/$id"
+                                params={{ id }}
+                                search={(prev) => ({ ...prev, view: undefined })}
+                                resetScroll={false}
+                                {...props}
+                              />
+                            )}
+                          >
+                            Back to dashboard
+                          </Button>
+                        </Group>
+                        <div className={classes.tile}>
+                          <WidgetTile id={viewId} range={range} timeZone={timeZone} />
+                        </div>
+                      </Stack>
+                    ) : null}
+                    {/* Hidden, not unmounted: the tiles keep their state, and make no requests meanwhile. */}
+                    <Activity mode={viewId ? 'hidden' : 'visible'}>
+                      <DashboardGrid
+                        range={range}
+                        timeZone={timeZone}
+                        isEditing={isEditing}
+                        isDataActive={!viewId}
+                      />
+                    </Activity>
+                  </>
+                )
+              )}
+            </Stack>
+          </SplitViewPane>
+          <SplitViewPane
+            id="tools"
+            label={pane ? PANE_LABELS[pane] : undefined}
+            level="panel"
+            defaultSize={`${dimensions.shell.contextBar.default}px`}
+            min={`${dimensions.shell.contextBar.min}px`}
+            max={`${dimensions.shell.contextBar.max}px`}
+            canClose
+            fallback="drawer"
+            state={pane ? 'open' : 'closed'}
+            onStateChange={(next) => next === 'closed' && handleClosePane()}
+          >
+            <Suspense fallback={null}>
+              {pane === 'inspect' && inspectId ? (
+                <InspectPane
+                  key={inspectId}
+                  id={inspectId}
+                  tab={search.inspectTab ?? 'data'}
                   range={range}
                   timeZone={timeZone}
-                  isEditing={isEditing}
-                  isDataActive={!viewId}
                 />
-              </Activity>
-            </>
-          )
-        )}
+              ) : pane ? (
+                <EditPane />
+              ) : null}
+            </Suspense>
+          </SplitViewPane>
+        </SplitViewRoot>
       </Page.Body>
       <LeaveDialog />
       {isShortcutsOpen ? <ShortcutsDialog onClose={() => setShortcutsOpen(false)} /> : null}
