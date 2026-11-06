@@ -141,11 +141,12 @@
     --splitter-handle-color: var(--mantine-primary-color-filled);
   }
 
+  /* Quick fix (spike): keep the hidden separator 1px wide, so opening the context bar doesn't narrow
+     main by 1px before useMainLock measures it. */
   .pane[data-fixed] + &,
   &:has(+ .pane[data-fixed]) {
     pointer-events: none;
     visibility: hidden;
-    flex-basis: 0;
   }
 
   .sidebarPane[data-fixed]:not([data-collapsed]) + & {

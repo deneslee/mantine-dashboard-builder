@@ -17,10 +17,9 @@
   display: flex;
   flex-direction: column;
 
-  /* Animate open, compact and close; not while the user drags. Reduced motion zeroes the token. */
-  .frame:not([data-resizing]) & {
-    transition: flex-basis var(--app-motion-duration-base) var(--app-motion-easing-standard);
-  }
+  /* Quick fix (spike): no flex-basis transition on open, compact and close. Nothing froze the grid
+     beside the side panel, so it and every chart laid out on each frame of the slide; now they lay out
+     once. */
 
   /* Pane content can switch layout by its own width as it is dragged. */
   container-type: inline-size;
