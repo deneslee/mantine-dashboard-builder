@@ -10,6 +10,6 @@ export const chartWidget = defineWidget({
   minSize: { w: 2, h: 3 },
   isTimeAware: true,
   optionsSchema: chartOptions,
-  component: lazy(() => import('./TimeSeriesChart').then((m) => ({ default: m.TimeSeriesChart }))),
+  component: lazy(() => import('./TimeSeriesEChart').then((m) => ({ default: m.TimeSeriesEChart }))),
   skeleton: <ChartSkeleton />,
 });
