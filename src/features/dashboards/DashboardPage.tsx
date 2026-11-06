@@ -5,7 +5,7 @@ import { IconArrowLeft } from '@tabler/icons-react';
 import { Activity, lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { RouteBreadcrumbs } from '@/shell/breadcrumbs/RouteBreadcrumbs';
 import { Page } from '@/ui/components/Page';
-import { SplitViewPane, SplitViewRoot } from '@/ui/components/SplitView/SplitViewRoot';
+import { SidePanelSplit } from '@/ui/components/Panels/SidePanelSplit';
 import { dimensions } from '@/ui/tokens/dimensions';
 import { iconSize, iconStroke } from '@/ui/tokens/semantic';
 import { localTimeZone } from '@/core/time/timeRange';
@@ -191,8 +191,11 @@ export function DashboardPage() {
         </Page.ControlBar>
       </Page.Header>
       <Page.Body className={classes.body}>
-        <SplitViewRoot>
-          <SplitViewPane id="dashboard" label="Dashboard" defaultSize={100} min="360px">
+        <SidePanelSplit
+          isOpen={!!pane}
+          label={pane ? PANE_LABELS[pane] : undefined}
+          onClose={handleClosePane}
+          main={
             <Stack gap="md" className={classes.canvas}>
               {draftError && (
                 <Alert color="danger" title="Draft storage">
@@ -265,19 +268,8 @@ export function DashboardPage() {
                 )
               )}
             </Stack>
-          </SplitViewPane>
-          <SplitViewPane
-            id="tools"
-            label={pane ? PANE_LABELS[pane] : undefined}
-            level="panel"
-            defaultSize={`${dimensions.shell.contextBar.default}px`}
-            min={`${dimensions.shell.contextBar.min}px`}
-            max={`${dimensions.shell.contextBar.max}px`}
-            canClose
-            fallback="drawer"
-            state={pane ? 'open' : 'closed'}
-            onStateChange={(next) => next === 'closed' && handleClosePane()}
-          >
+          }
+          side={
             <Suspense fallback={null}>
               {pane === 'inspect' && inspectId ? (
                 <InspectPane
@@ -291,8 +283,8 @@ export function DashboardPage() {
                 <EditPane />
               ) : null}
             </Suspense>
-          </SplitViewPane>
-        </SplitViewRoot>
+          }
+        />
       </Page.Body>
       <LeaveDialog />
       {isShortcutsOpen ? <ShortcutsDialog onClose={() => setShortcutsOpen(false)} /> : null}

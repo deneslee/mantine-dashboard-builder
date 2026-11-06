@@ -1,0 +1,39 @@
+.group {
+  height: 100%;
+}
+
+/* Only while a toggle animates; drags commit on release without a transition. */
+.group[data-animating] > [data-panel] {
+  transition: flex-grow var(--app-motion-duration-base) var(--app-motion-easing-standard);
+}
+
+.panel {
+  height: 100%;
+  min-width: 0;
+}
+
+.mainContent {
+  height: 100%;
+  overflow: auto;
+}
+
+.sideContent {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  background: var(--app-elevation-surface-panel);
+}
+
+.separator {
+  position: relative;
+  width: 1px;
+  background: var(--app-color-border-default);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline: -3px;
+  }
+}
