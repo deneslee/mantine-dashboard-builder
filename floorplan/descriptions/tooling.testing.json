@@ -1,0 +1,24 @@
+{
+  "files": {
+    "src/testing/AppStory.tsx": {
+      "name": "Whole-app story",
+      "description": "Shows the real app at an address inside a story."
+    },
+    "src/testing/fixtures/dashboards.ts": {
+      "name": "Test dashboards",
+      "description": "Small sample dashboards for tests."
+    },
+    "src/testing/render.tsx": {
+      "name": "Test render",
+      "description": "Renders a screen with the app's shared setup for tests."
+    },
+    "src/testing/setup.ts": {
+      "name": "Test start-up",
+      "description": "Prepares each test run."
+    },
+    "src/testing/TestRouter.tsx": {
+      "name": "Test router",
+      "description": "A router for tests and stories that doesn't touch the browser's address."
+    }
+  }
+}

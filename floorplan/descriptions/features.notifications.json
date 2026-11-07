@@ -1,0 +1,20 @@
+{
+  "files": {
+    "src/features/notifications/InboxPanel.module.css": {
+      "name": "Inbox styles",
+      "description": "Layout of the inbox list."
+    },
+    "src/features/notifications/InboxPanel.stories.tsx": {
+      "name": "Inbox examples",
+      "description": "Shows the inbox empty and with each message level."
+    },
+    "src/features/notifications/InboxPanel.tsx": {
+      "name": "Notifications inbox",
+      "description": "Side-panel list of past warnings and errors, newest first."
+    },
+    "src/features/notifications/notificationsTab.ts": {
+      "name": "Inbox tab",
+      "description": "Adds the inbox tab to every page's side panel."
+    }
+  }
+}

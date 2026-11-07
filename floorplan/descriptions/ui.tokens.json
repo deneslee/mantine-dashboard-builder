@@ -1,0 +1,28 @@
+{
+  "files": {
+    "src/ui/tokens/dimensions.ts": {
+      "name": "Sizes",
+      "description": "Fixed sizes such as the number of grid columns."
+    },
+    "src/ui/tokens/primitives.test.ts": {
+      "name": "Raw colours tests",
+      "description": "Checks the raw colour scales are complete."
+    },
+    "src/ui/tokens/primitives.ts": {
+      "name": "Raw colours and sizes",
+      "description": "The raw colour scales, greys and sizes everything is built from."
+    },
+    "src/ui/tokens/semantic.test.ts": {
+      "name": "Named colours tests",
+      "description": "Checks named colours have enough contrast in light and dark."
+    },
+    "src/ui/tokens/semantic.ts": {
+      "name": "Named colours and layers",
+      "description": "Colours by role (status, surface, text) and layer depth, for light and dark."
+    },
+    "src/ui/tokens/Tokens.stories.tsx": {
+      "name": "Token gallery",
+      "description": "Shows every colour, size and shape token."
+    }
+  }
+}

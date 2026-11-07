@@ -1,0 +1,32 @@
+{
+  "files": {
+    "src/features/debug/DebugPage.tsx": {
+      "name": "Debug page",
+      "description": "Tries every message level, error and loading placeholder, for checking how they look."
+    },
+    "src/features/settings/AppearanceForm.module.css": {
+      "name": "Appearance styles",
+      "description": "Layout of the appearance form."
+    },
+    "src/features/settings/AppearanceForm.test.tsx": {
+      "name": "Appearance tests",
+      "description": "Checks appearance changes wait for Save and then apply."
+    },
+    "src/features/settings/AppearanceForm.tsx": {
+      "name": "Appearance settings",
+      "description": "Theme, sidebar behaviour, dashboard density and reduced motion, saved together."
+    },
+    "src/features/settings/SettingsPage.tsx": {
+      "name": "Settings page",
+      "description": "The settings page; the open tab is in the address so it can be shared."
+    },
+    "src/features/settings/settingsTabs.ts": {
+      "name": "Settings tabs",
+      "description": "Lists the settings tabs and falls back to the first for unknown ones."
+    },
+    "src/features/settings/useAppearanceForm.ts": {
+      "name": "Appearance form logic",
+      "description": "Keeps appearance changes as a draft until saved."
+    }
+  }
+}

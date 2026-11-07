@@ -1,0 +1,334 @@
+{
+  "$schema": "floorplan/architecture@1",
+  "project": {
+    "name": "Mantine Dashboard Builder",
+    "summary": "A dashboard builder that runs in the browser: an app frame around a canvas of charts, numbers and tables, fed by swappable data sources. A small helper server (the relay) runs the database queries a browser can't.",
+    "entrypoints": ["src/main.tsx", "relay/src/server.ts"]
+  },
+  "audience": "everyone",
+  "include": ["code"],
+  "ignore": [
+    "src/app/routeTree.gen.ts",
+    "lint/fixtures/**",
+    "_EXTRA/**",
+    "public/**",
+    "docs/**",
+    ".agents/planning/plans/**",
+    ".agents/planning/research/**"
+  ],
+  "nodes": [
+    {
+      "id": "app",
+      "label": "App and pages",
+      "kind": "ui",
+      "summary": "Starts the app, wires the shared pieces together and decides which page each web address shows; the only place features and plugins meet.",
+      "details": "Tests and stories stay next to the code they check, in every part of this map. There is no separate Tests part.",
+      "paths": ["src/main.tsx", "src/app"],
+      "tags": ["tests colocated"]
+    },
+    {
+      "id": "app.routes",
+      "parent": "app",
+      "label": "Pages by address",
+      "kind": "feature",
+      "summary": "One file per web address (dashboards, data sources, integrations, settings, debug); each loads its data and hands it to a feature screen.",
+      "paths": ["src/app/routes"]
+    },
+
+    {
+      "id": "shell",
+      "label": "App frame",
+      "kind": "ui",
+      "summary": "The frame around every page: top bar, docking sidebar, docking context bar, breadcrumbs and the offline banner.",
+      "paths": ["src/shell"],
+      "tags": ["tests colocated"]
+    },
+    {
+      "id": "shell.navbar",
+      "parent": "shell",
+      "label": "Top bar",
+      "kind": "ui",
+      "summary": "Search, the light/dark switch and the user menu along the top.",
+      "paths": ["src/shell/navbar"]
+    },
+    {
+      "id": "shell.sidebar",
+      "parent": "shell",
+      "label": "Sidebar",
+      "kind": "ui",
+      "summary": "The left menu of areas and pages, which can dock, collapse or float.",
+      "paths": ["src/shell/sidebar"]
+    },
+    {
+      "id": "shell.contextBar",
+      "parent": "shell",
+      "label": "Context bar",
+      "kind": "ui",
+      "summary": "The right-hand panel with tabs about the current view: details, inspect, notifications.",
+      "paths": ["src/shell/contextBar"]
+    },
+
+    {
+      "id": "features",
+      "label": "Screens",
+      "kind": "feature",
+      "summary": "What people actually work with: dashboards, data connections, integrations, notifications and settings. Screens never use each other directly.",
+      "paths": ["src/features"],
+      "tags": ["tests colocated"]
+    },
+    {
+      "id": "features.dashboards",
+      "parent": "features",
+      "label": "Dashboards",
+      "kind": "feature",
+      "summary": "The dashboard list and the dashboard page: viewing, searching and opening dashboards.",
+      "paths": ["src/features/dashboards"]
+    },
+    {
+      "id": "features.dashboards.data",
+      "parent": "features.dashboards",
+      "label": "Dashboard loading",
+      "kind": "data",
+      "summary": "Loads and saves dashboards and drafts, fetches each widget's data and refreshes it on a timer.",
+      "paths": ["src/features/dashboards/data"]
+    },
+    {
+      "id": "features.dashboards.state",
+      "parent": "features.dashboards",
+      "label": "Open dashboard memory",
+      "kind": "feature",
+      "summary": "Remembers the open dashboard while it's edited, with undo and redo, and works out the time range in use.",
+      "paths": ["src/features/dashboards/state", "src/features/dashboards/inspect"]
+    },
+    {
+      "id": "features.dashboards.grid",
+      "parent": "features.dashboards",
+      "label": "Widget canvas",
+      "kind": "ui",
+      "summary": "The drag-and-resize grid of widget tiles, each tile's header and menu, and the keyboard shortcuts.",
+      "paths": ["src/features/dashboards/grid"]
+    },
+    {
+      "id": "features.dashboards.header",
+      "parent": "features.dashboards",
+      "label": "Dashboard toolbar",
+      "kind": "ui",
+      "summary": "Time range, refresh, edit buttons and JSON import and export at the top of a dashboard.",
+      "paths": ["src/features/dashboards/header"]
+    },
+    {
+      "id": "features.dashboards.editor",
+      "parent": "features.dashboards",
+      "label": "Widget editor",
+      "kind": "ui",
+      "summary": "Adding and changing widgets: the widget form, the query editor, placement and the leave-without-saving check.",
+      "paths": ["src/features/dashboards/editor"]
+    },
+    {
+      "id": "features.datasources",
+      "parent": "features",
+      "label": "Data connections",
+      "kind": "feature",
+      "summary": "Adding and testing database connections, the locked box that keeps their passwords, and choosing which data plugins go into the build.",
+      "paths": ["src/features/datasources"]
+    },
+    {
+      "id": "features.integrations",
+      "parent": "features",
+      "label": "Integrations",
+      "kind": "feature",
+      "summary": "The integrations page and the Sentry error-reporting setup and checks.",
+      "paths": ["src/features/integrations"]
+    },
+    {
+      "id": "features.settings",
+      "parent": "features",
+      "label": "Settings and debug",
+      "kind": "feature",
+      "summary": "Appearance settings (theme, density, reduced motion) and a debug page that shows every message, error and loading state.",
+      "paths": ["src/features/settings", "src/features/debug"]
+    },
+    {
+      "id": "features.notifications",
+      "parent": "features",
+      "label": "Notifications inbox",
+      "kind": "feature",
+      "summary": "The inbox of past messages shown as a context-bar tab.",
+      "paths": ["src/features/notifications"]
+    },
+
+    {
+      "id": "plugins",
+      "label": "Plugins",
+      "kind": "library",
+      "summary": "The swappable parts: the rules every widget and data source follows, the built-in ones, and the optional database plugins chosen at build time.",
+      "paths": ["src/plugins", "plugins.config.ts", "plugins.config.test.ts"],
+      "tags": ["tests colocated"]
+    },
+    {
+      "id": "plugins.widgets",
+      "parent": "plugins",
+      "label": "Widgets",
+      "kind": "ui",
+      "summary": "The built-in widgets: time-series chart, KPI numbers and the large virtual table.",
+      "paths": ["src/plugins/widgets"]
+    },
+    {
+      "id": "plugins.datasources",
+      "parent": "plugins",
+      "label": "Built-in data sources",
+      "kind": "library",
+      "summary": "Sample data and local JSON files, available without any connection.",
+      "paths": ["src/plugins/datasources"]
+    },
+    {
+      "id": "plugins.optional",
+      "parent": "plugins",
+      "label": "Database plugins",
+      "kind": "library",
+      "summary": "Optional data sources for AWS, Google, Azure SQL and MongoDB; the last two go through the relay.",
+      "paths": ["src/plugins/optional"]
+    },
+
+    {
+      "id": "core",
+      "label": "Core rules",
+      "kind": "library",
+      "summary": "Plain logic with no screens: what a dashboard and its layout look like, time ranges, the data table every widget reads, errors, the relay's message format and password encryption.",
+      "paths": ["src/core"],
+      "tags": ["tests colocated", "shared with relay"]
+    },
+
+    {
+      "id": "ui",
+      "label": "Design system",
+      "kind": "library",
+      "summary": "The look of every screen: colour and size tokens, the Mantine theme, and shared building blocks such as pages, panels, split views and loading placeholders.",
+      "paths": ["src/ui"],
+      "tags": ["tests colocated"]
+    },
+    {
+      "id": "ui.components",
+      "parent": "ui",
+      "label": "Building blocks",
+      "kind": "ui",
+      "summary": "Shared pieces used across screens: page, section, surface, split view, error and loading states.",
+      "paths": ["src/ui/components"]
+    },
+    {
+      "id": "ui.theme",
+      "parent": "ui",
+      "label": "Theme",
+      "kind": "config",
+      "summary": "How each Mantine component looks by default here: buttons, inputs, menus, tabs, dialogs.",
+      "paths": ["src/ui/theme"]
+    },
+    {
+      "id": "ui.tokens",
+      "parent": "ui",
+      "label": "Tokens",
+      "kind": "config",
+      "summary": "The named colours, spacing and sizes everything else must use.",
+      "paths": ["src/ui/tokens"]
+    },
+
+    {
+      "id": "lib",
+      "label": "App services",
+      "kind": "library",
+      "summary": "Services every screen can use: messages and the inbox, Sentry error reporting, the password vault, saved preferences and small helpers.",
+      "paths": ["src/lib", "src/utils"],
+      "tags": ["tests colocated"]
+    },
+
+    {
+      "id": "relay",
+      "label": "Relay server",
+      "kind": "service",
+      "summary": "A small server that runs SQL Server and MongoDB queries for the browser; it keeps nothing, the connection details come with each request.",
+      "paths": ["relay"],
+      "tags": ["tests colocated"]
+    },
+
+    {
+      "id": "tooling",
+      "label": "Build and checks",
+      "kind": "infra",
+      "summary": "Everything that builds and checks the app rather than running in it: build and test settings, Storybook, lint rules, test helpers and the docs catalog.",
+      "paths": [
+        "vite.config.ts",
+        "vitest.config.ts",
+        "oxlint.config.ts",
+        "postcss.config.cjs",
+        "index.html",
+        ".storybook",
+        ".agents",
+        "apps/docs"
+      ]
+    },
+    {
+      "id": "tooling.lint",
+      "parent": "tooling",
+      "label": "Layer rules",
+      "kind": "test",
+      "summary": "Custom lint rules that keep each layer importing only the layers below it, with tests proving every rule fires.",
+      "paths": ["lint"]
+    },
+    {
+      "id": "tooling.testing",
+      "parent": "tooling",
+      "label": "Test helpers",
+      "kind": "test",
+      "summary": "Shared helpers for tests and stories: rendering with the app's providers, a test router and sample dashboards. Not the tests themselves, which sit beside their code.",
+      "paths": ["src/testing"]
+    },
+
+    { "id": "sentry", "label": "Sentry", "kind": "external", "summary": "Error and performance reporting.", "packages": ["npm:@sentry/*"], "hosts": ["sentry.io", "*.sentry.io"] },
+    { "id": "aws", "label": "AWS", "kind": "external", "summary": "Athena, Aurora, Redshift and DynamoDB, queried straight from the browser.", "packages": ["npm:@aws-sdk/*"] },
+    { "id": "google", "label": "Google Cloud", "kind": "external", "summary": "BigQuery and Firestore, plus Google sign-in.", "hosts": ["*.googleapis.com", "oauth2.googleapis.com"] },
+    { "id": "sqlserver", "label": "SQL Server / Azure SQL", "kind": "external", "summary": "Databases reached only through the relay.", "packages": ["mssql"] },
+    { "id": "mongodb", "label": "MongoDB", "kind": "external", "summary": "Document databases reached only through the relay.", "packages": ["mongodb", "mongodb-connection-string-url"] },
+    { "id": "github", "label": "GitHub", "kind": "external", "summary": "Where Add to build edits the plugin list on the deployed site.", "hosts": ["api.github.com", "github.com"] }
+  ],
+  "edges": [
+    { "from": "plugins.optional", "to": "relay", "kind": "http", "label": "query", "description": "Azure SQL and MongoDB plugins send each query, with its connection details, to the relay at a configured address." },
+    { "from": "relay", "to": "core", "kind": "import", "label": "shared contract", "description": "The relay uses only the core rules, so the browser and the relay agree on one message format." }
+  ],
+  "annotations": [
+    { "path": "src/app/plugins.ts", "note": "The single place built-in and optional plugins are registered.", "tags": ["hotspot"] },
+    { "path": "src/core/data/DataFrame.ts", "note": "The only contract between data sources and widgets.", "tags": ["hotspot"] }
+  ],
+  "flows": [
+    {
+      "id": "open-dashboard",
+      "title": "Open a dashboard",
+      "description": "From a web address to charts on screen.",
+      "steps": [
+        { "node": "app.routes", "note": "The dashboard address is read, including time range and edit mode." },
+        { "node": "features.dashboards.data", "note": "The dashboard is loaded: a saved copy in this browser, or the sample file." },
+        { "node": "core", "note": "It's checked against the dashboard rules before anything is shown." },
+        { "node": "features.dashboards.grid", "note": "Tiles are laid out on the canvas." },
+        { "node": "plugins.datasources", "note": "Each tile asks its data source for rows." },
+        { "node": "plugins.widgets", "note": "The chart, KPI or table draws the rows." }
+      ]
+    },
+    {
+      "id": "query-database",
+      "title": "Query a SQL Server database",
+      "steps": [
+        { "node": "features.datasources", "note": "Someone adds a connection; its password goes into the locked vault." },
+        { "node": "plugins.optional", "note": "A widget's query goes to the Azure SQL plugin." },
+        { "node": "relay", "note": "The relay runs the query, since browsers can't talk to SQL Server." },
+        { "node": "sqlserver", "note": "The database answers; rows come back as a data table." }
+      ]
+    }
+  ],
+  "tour": [
+    { "node": "app", "title": "What this is", "note": "A dashboard builder. This part starts it and picks the page for each address." },
+    { "node": "shell", "title": "The frame", "note": "Top bar, sidebar and context bar wrap every page." },
+    { "node": "features.dashboards", "title": "Dashboards", "note": "The main screen: a canvas of widgets you can view and edit." },
+    { "node": "plugins", "title": "Swappable parts", "note": "Widgets and data sources are plugins, so new ones slot in without touching the screens." },
+    { "node": "relay", "title": "The helper server", "note": "Runs the database queries a browser can't." },
+    { "node": "src/core/data/DataFrame.ts", "title": "The one shared shape", "note": "Every data source returns this table, and every widget reads it." }
+  ]
+}

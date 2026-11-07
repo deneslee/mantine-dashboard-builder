@@ -1,0 +1,86 @@
+{
+  "files": {
+    "src/app/routes/__root.tsx": {
+      "name": "Top-level page",
+      "description": "The page every other page sits inside: the app frame and its progress bar."
+    },
+    "src/app/routes/-PlaceholderPage.tsx": {
+      "name": "Coming soon page",
+      "description": "A temporary page for areas that aren't built yet."
+    },
+    "src/app/routes/dashboards/$id.tsx": {
+      "name": "Dashboard page address",
+      "description": "Opens one dashboard: reads time, edit mode and view from the address, loads the dashboard and restores drafts."
+    },
+    "src/app/routes/dashboards/index.tsx": {
+      "name": "Dashboard list address",
+      "description": "Shows the list of dashboards."
+    },
+    "src/app/routes/dashboards/route.tsx": {
+      "name": "Dashboards section",
+      "description": "Groups the dashboard pages so their trail starts with \"Dashboards\"."
+    },
+    "src/app/routes/datasources/$id.tsx": {
+      "name": "Connection page address",
+      "description": "Opens one saved data connection for editing."
+    },
+    "src/app/routes/datasources/index.tsx": {
+      "name": "Data sources address",
+      "description": "Shows the data sources page."
+    },
+    "src/app/routes/datasources/new.tsx": {
+      "name": "New connection address",
+      "description": "Opens the form for a new connection of the chosen type."
+    },
+    "src/app/routes/datasources/route.tsx": {
+      "name": "Data sources section",
+      "description": "Groups the data source pages so their trail starts with \"Data sources\"."
+    },
+    "src/app/routes/debug.tsx": {
+      "name": "Debug address",
+      "description": "A developer-only page to try every message, error and loading state."
+    },
+    "src/app/routes/explore.tsx": {
+      "name": "Explore address",
+      "description": "Placeholder for the future data explore area."
+    },
+    "src/app/routes/index.tsx": {
+      "name": "Home address",
+      "description": "Sends the home address on to the dashboards."
+    },
+    "src/app/routes/integrations/index.tsx": {
+      "name": "Integrations address",
+      "description": "Shows the integrations page."
+    },
+    "src/app/routes/integrations/route.tsx": {
+      "name": "Integrations section",
+      "description": "Groups the integration pages so their trail starts with \"Integrations\"."
+    },
+    "src/app/routes/integrations/sentry.tsx": {
+      "name": "Sentry setup address",
+      "description": "Opens the Sentry error-reporting setup page."
+    },
+    "src/app/routes/settings.tsx": {
+      "name": "Settings address",
+      "description": "Opens settings on the tab named in the address."
+    },
+    "src/app/routes/templates.tsx": {
+      "name": "Templates address",
+      "description": "Placeholder for the future dashboard templates area."
+    }
+  },
+  "routes": {
+    "ANY /routes/dashboards": {
+      "name": "Dashboards section",
+      "description": "The group every dashboard page sits in."
+    },
+    "ANY /routes/datasources": {
+      "name": "Data sources section",
+      "description": "The group every data source page sits in."
+    },
+    "ANY /routes/integrations": {
+      "name": "Integrations section",
+      "description": "The group every integration page sits in."
+    }
+  }
+}

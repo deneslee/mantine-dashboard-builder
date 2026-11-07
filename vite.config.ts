@@ -42,7 +42,7 @@ export default defineConfig(({ command, mode }) => {
       jsPlugins: [...lint.jsPlugins, { name: 'vite-plus', specifier: 'vite-plus/oxlint-plugin' }],
       rules: { ...lint.rules, 'vite-plus/prefer-vite-plus-imports': 'error' },
       options: { ...lint.options, typeCheck: true },
-      ignorePatterns: [...lint.ignorePatterns, 'lint/fixtures/**', '.qartez/**'],
+      ignorePatterns: [...lint.ignorePatterns, 'lint/fixtures/**', '.qartez/**', 'floorplan/**'],
     },
     fmt: {
       singleQuote: true,
@@ -63,6 +63,7 @@ export default defineConfig(({ command, mode }) => {
         'coverage/',
         '.kiro',
         '.qartez',
+        'floorplan',
         'public/assets',
       ],
     },

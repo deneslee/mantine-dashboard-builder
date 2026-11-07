@@ -1,0 +1,80 @@
+{
+  "files": {
+    "src/shell/breadcrumbs/RouteBreadcrumbs.test.tsx": {
+      "name": "Breadcrumbs tests",
+      "description": "Checks the trail matches the page."
+    },
+    "src/shell/breadcrumbs/RouteBreadcrumbs.tsx": {
+      "name": "Breadcrumbs",
+      "description": "The trail of pages above a page title."
+    },
+    "src/shell/breadcrumbs/useBreadcrumbs.ts": {
+      "name": "Breadcrumb trail",
+      "description": "Works out the trail from the pages that are open."
+    },
+    "src/shell/ContextTab.ts": {
+      "name": "Side tab shape",
+      "description": "Describes a side-panel tab and its counter."
+    },
+    "src/shell/createShellStore.test.ts": {
+      "name": "Frame memory tests",
+      "description": "Checks sidebar and side-panel positions change and are kept."
+    },
+    "src/shell/createShellStore.ts": {
+      "name": "Frame memory",
+      "description": "Remembers whether the sidebar and side panel are open, docked or compact, across reloads."
+    },
+    "src/shell/Nav.ts": {
+      "name": "Menu shape",
+      "description": "Describes menu groups and areas, so the frame needs no page knowledge."
+    },
+    "src/shell/OfflineBanner.tsx": {
+      "name": "Offline banner",
+      "description": "Shows a notice while the browser has no connection."
+    },
+    "src/shell/Panel.module.css": {
+      "name": "Panel styles",
+      "description": "How the side panels look."
+    },
+    "src/shell/Panel.tsx": {
+      "name": "Side panel parts",
+      "description": "The header, body, footer and dock button of a side panel."
+    },
+    "src/shell/RouteProgress.tsx": {
+      "name": "Page loading bar",
+      "description": "A thin bar at the top while the next page loads."
+    },
+    "src/shell/Shell.module.css": {
+      "name": "Frame styles",
+      "description": "Layout of the three-part frame."
+    },
+    "src/shell/Shell.stories.tsx": {
+      "name": "Frame examples",
+      "description": "Shows the frame with the sidebar and side panel in every position."
+    },
+    "src/shell/Shell.test.tsx": {
+      "name": "Frame tests",
+      "description": "Checks the frame opens, closes and docks its panels."
+    },
+    "src/shell/Shell.tsx": {
+      "name": "App frame",
+      "description": "The three-part frame: sidebar, main area and side panel."
+    },
+    "src/shell/ShellProvider.tsx": {
+      "name": "Frame hand-out",
+      "description": "Gives the frame's memory and the app's menus to the screens."
+    },
+    "src/shell/useMainLock.test.ts": {
+      "name": "Main area lock tests",
+      "description": "Checks the main area holds steady while panels move."
+    },
+    "src/shell/useMainLock.ts": {
+      "name": "Main area lock",
+      "description": "Holds the main area's width still while panels or the window resize, so the dashboard doesn't jump."
+    },
+    "src/shell/useShell.ts": {
+      "name": "Frame access",
+      "description": "Lets screens read the menus and open or close panels."
+    }
+  }
+}

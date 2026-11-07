@@ -1,0 +1,108 @@
+{
+  "files": {
+    "src/core/build/buildInfo.ts": {
+      "name": "Build details",
+      "description": "Describes the small file every build writes about itself, such as which plugins it holds."
+    },
+    "src/core/build/pluginsFile.ts": {
+      "name": "Plugin list file",
+      "description": "Reads and writes the root plugin list file exactly as the formatter would, so commits stay clean."
+    },
+    "src/core/crypto/passphraseCipher.test.ts": {
+      "name": "Password lock tests",
+      "description": "Checks secrets lock and unlock with the right passphrase and stay closed with a wrong one."
+    },
+    "src/core/crypto/passphraseCipher.ts": {
+      "name": "Password lock",
+      "description": "Turns a passphrase into a key and locks or unlocks saved secrets with it."
+    },
+    "src/core/dashboard/dashboardSchema.test.ts": {
+      "name": "Dashboard format tests",
+      "description": "Checks valid dashboards pass, broken ones are refused and old ones are upgraded."
+    },
+    "src/core/dashboard/dashboardSchema.ts": {
+      "name": "Dashboard format",
+      "description": "Defines what a saved, exported or loaded dashboard must look like, and upgrades older ones."
+    },
+    "src/core/dashboard/layout.test.ts": {
+      "name": "Tile layout tests",
+      "description": "Checks tile positions per screen size and reading order."
+    },
+    "src/core/dashboard/layout.ts": {
+      "name": "Tile layout",
+      "description": "Defines where tiles sit for each screen size, and the order a reader meets them."
+    },
+    "src/core/data/canonicalJson.test.ts": {
+      "name": "Stable text tests",
+      "description": "Checks equal data always gives the same text."
+    },
+    "src/core/data/canonicalJson.ts": {
+      "name": "Stable text",
+      "description": "Writes data as text with keys in a fixed order, so equal data compares equal."
+    },
+    "src/core/data/columnsToFrame.test.ts": {
+      "name": "Columns to table tests",
+      "description": "Checks database columns turn into a data table with the right types."
+    },
+    "src/core/data/columnsToFrame.ts": {
+      "name": "Columns to table",
+      "description": "Turns database result columns into the shared data table, guessing numbers, dates and text."
+    },
+    "src/core/data/DataFrame.test.ts": {
+      "name": "Data table tests",
+      "description": "Checks the shared data table converts to rows correctly."
+    },
+    "src/core/data/DataFrame.ts": {
+      "name": "Shared data table",
+      "description": "The one table shape every data source returns and every widget reads."
+    },
+    "src/core/data/dataFrameSchema.ts": {
+      "name": "Data table format",
+      "description": "Checks a data table read from a file or the relay has the right shape."
+    },
+    "src/core/data/maxRows.ts": {
+      "name": "Row limit",
+      "description": "Caps how many rows one query may return: 10,000 by default, never more than 100,000."
+    },
+    "src/core/data/timeMacros.test.ts": {
+      "name": "Time placeholder tests",
+      "description": "Checks time placeholders in queries are filled in correctly."
+    },
+    "src/core/data/timeMacros.ts": {
+      "name": "Time placeholders",
+      "description": "Fills the dashboard's time range into placeholders in a query's text."
+    },
+    "src/core/errors/AppError.test.ts": {
+      "name": "Error shape tests",
+      "description": "Checks anything thrown becomes one readable error."
+    },
+    "src/core/errors/AppError.ts": {
+      "name": "Error shape",
+      "description": "The one error shape screens understand, with a plain title for each kind of problem."
+    },
+    "src/core/relay/mongoOperators.test.ts": {
+      "name": "MongoDB safety list tests",
+      "description": "Checks refused MongoDB steps are caught anywhere in a query."
+    },
+    "src/core/relay/mongoOperators.ts": {
+      "name": "MongoDB safety list",
+      "description": "Lists MongoDB query steps the relay refuses because they write data or run code."
+    },
+    "src/core/relay/relayContract.test.ts": {
+      "name": "Relay message tests",
+      "description": "Checks requests and answers to the relay keep their agreed shape."
+    },
+    "src/core/relay/relayContract.ts": {
+      "name": "Relay message format",
+      "description": "The agreed shape of requests and answers between the browser and the relay."
+    },
+    "src/core/time/timeRange.test.ts": {
+      "name": "Time range tests",
+      "description": "Checks relative ranges like \"last 24 hours\" resolve to the right times in each time zone."
+    },
+    "src/core/time/timeRange.ts": {
+      "name": "Time ranges",
+      "description": "Reads ranges like \"now-24h\" or a date, turns them into real times, and handles a widget's own time."
+    }
+  }
+}

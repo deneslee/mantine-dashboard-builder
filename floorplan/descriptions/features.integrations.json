@@ -1,0 +1,48 @@
+{
+  "files": {
+    "src/features/integrations/getIntegrations.test.ts": {
+      "name": "Integrations list tests",
+      "description": "Checks which integrations are listed and their status."
+    },
+    "src/features/integrations/getIntegrations.ts": {
+      "name": "Integrations list",
+      "description": "Lists the available integrations and whether each is set up."
+    },
+    "src/features/integrations/IntegrationsPage.module.css": {
+      "name": "Integrations page styles",
+      "description": "Layout of the integrations cards."
+    },
+    "src/features/integrations/IntegrationsPage.tsx": {
+      "name": "Integrations page",
+      "description": "Cards for each integration and its status."
+    },
+    "src/features/integrations/sentry/SentryIcon.tsx": {
+      "name": "Sentry logo",
+      "description": "The Sentry mark used on its cards."
+    },
+    "src/features/integrations/sentry/SentrySettings.tsx": {
+      "name": "Sentry settings",
+      "description": "Edits the Sentry address, sampling and replay settings."
+    },
+    "src/features/integrations/sentry/SentryStatusCard.tsx": {
+      "name": "Sentry status",
+      "description": "Shows whether error reporting is running and how it's set."
+    },
+    "src/features/integrations/sentry/SentryVerificationCard.module.css": {
+      "name": "Sentry check styles",
+      "description": "Layout of the Sentry checks card."
+    },
+    "src/features/integrations/sentry/SentryVerificationCard.tsx": {
+      "name": "Sentry checks",
+      "description": "Sends test errors, messages and traces to Sentry to prove reporting works."
+    },
+    "src/features/integrations/SentryPage.tsx": {
+      "name": "Sentry page",
+      "description": "The Sentry setup page: status, settings and checks."
+    },
+    "src/features/integrations/types.ts": {
+      "name": "Integration shape",
+      "description": "Describes what an integration and its status look like."
+    }
+  }
+}

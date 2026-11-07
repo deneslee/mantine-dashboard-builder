@@ -1,0 +1,36 @@
+{
+  "files": {
+    "plugins.config.test.ts": {
+      "name": "Plugin build tests",
+      "description": "Checks the plugin list file is read, checked and written correctly at build time."
+    },
+    "plugins.config.ts": {
+      "name": "Plugin build setup",
+      "description": "Lists every optional plugin, reads the plugin list file at build time and lets the dev server rewrite it."
+    },
+    "src/plugins/connectionDatasource.test.ts": {
+      "name": "Connection source tests",
+      "description": "Checks a connection runs only with matching unlocked secrets."
+    },
+    "src/plugins/connectionDatasource.ts": {
+      "name": "Connection as source",
+      "description": "Turns a saved connection and its vault secrets into a data source."
+    },
+    "src/plugins/DatasourcePlugin.ts": {
+      "name": "Data source rules",
+      "description": "What every data source must do: take a query and return data tables."
+    },
+    "src/plugins/OptionalPlugin.ts": {
+      "name": "Optional plugin rules",
+      "description": "What an optional database plugin must provide: its form fields, checks and query code."
+    },
+    "src/plugins/usePlugins.ts": {
+      "name": "Plugin access",
+      "description": "Lets screens find widgets and data sources by type."
+    },
+    "src/plugins/WidgetPlugin.ts": {
+      "name": "Widget rules",
+      "description": "What every widget must provide, and a check that it does."
+    }
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "files": {
+    "src/lib/notify/ActionMessage.tsx": {
+      "name": "Message with action",
+      "description": "A pop-up message body with one button that also closes it."
+    },
+    "src/lib/notify/notify.test.tsx": {
+      "name": "Messages tests",
+      "description": "Checks messages show, merge duplicates and land in the inbox."
+    },
+    "src/lib/notify/notify.tsx": {
+      "name": "Messages",
+      "description": "The one way screens show pop-up messages, progress and errors."
+    },
+    "src/lib/notify/types.ts": {
+      "name": "Message shapes",
+      "description": "Describes message levels, actions and inbox entries."
+    },
+    "src/lib/notify/useInbox.ts": {
+      "name": "Inbox memory",
+      "description": "Keeps warnings and errors in an inbox that survives a reload."
+    },
+    "src/lib/sentry/client.ts": {
+      "name": "Sentry connection",
+      "description": "Starts and reconfigures Sentry error reporting and tests the connection."
+    },
+    "src/lib/sentry/router.ts": {
+      "name": "Sentry page tracking",
+      "description": "Reports page changes to Sentry so slow pages can be traced."
+    },
+    "src/lib/sentry/runtime.test.ts": {
+      "name": "Sentry start-up tests",
+      "description": "Checks Sentry loads only when configured and reports with context."
+    },
+    "src/lib/sentry/runtime.ts": {
+      "name": "Sentry start-up",
+      "description": "Loads Sentry only when it's configured and reports errors with where they happened."
+    },
+    "src/lib/sentry/sentry.test.ts": {
+      "name": "Sentry settings tests",
+      "description": "Checks Sentry settings save, load and reset."
+    },
+    "src/lib/sentry/sentryConfig.ts": {
+      "name": "Sentry settings",
+      "description": "Saves, loads and resets the Sentry settings in this browser."
+    },
+    "src/lib/sentry/telemetry.ts": {
+      "name": "Reporting helpers",
+      "description": "Simple ways to log, count and report errors to Sentry."
+    },
+    "src/lib/sentry/types.ts": {
+      "name": "Sentry status shape",
+      "description": "Describes the states error reporting can be in."
+    },
+    "src/lib/storage.test.ts": {
+      "name": "Browser storage tests",
+      "description": "Checks storage names and the move from old names."
+    },
+    "src/lib/storage.ts": {
+      "name": "Browser storage names",
+      "description": "Names everything the app saves in the browser and moves values from old names."
+    },
+    "src/lib/useCurrentUser.ts": {
+      "name": "Current user",
+      "description": "A stand-in user until sign-in exists."
+    },
+    "src/lib/useDensity.test.ts": {
+      "name": "Density tests",
+      "description": "Checks the density setting is kept."
+    },
+    "src/lib/useDensity.ts": {
+      "name": "Dashboard density",
+      "description": "How tightly dashboards pack their widgets, a personal setting."
+    },
+    "src/lib/useMotion.test.ts": {
+      "name": "Motion setting tests",
+      "description": "Checks the reduce-motion setting follows the system or the user."
+    },
+    "src/lib/useMotion.ts": {
+      "name": "Motion setting",
+      "description": "Whether animation is reduced: following the system, or always."
+    },
+    "src/lib/vault/createVaultStore.test.ts": {
+      "name": "Vault tests",
+      "description": "Checks secrets lock, unlock, change and stay safe on a wrong passphrase."
+    },
+    "src/lib/vault/createVaultStore.ts": {
+      "name": "Password vault",
+      "description": "Keeps connection secrets locked with a passphrase on this device."
+    },
+    "src/lib/vault/useVault.ts": {
+      "name": "Vault access",
+      "description": "Lets screens see whether secrets are ready, locked, missing or changed."
+    },
+    "src/lib/vault/VaultProvider.tsx": {
+      "name": "Vault hand-out",
+      "description": "Gives the vault to every screen."
+    },
+    "src/utils/downloadFile.ts": {
+      "name": "File download",
+      "description": "Saves text as a file through the browser's download."
+    },
+    "src/utils/slugify.test.ts": {
+      "name": "Short id tests",
+      "description": "Checks free text becomes a clean short id."
+    },
+    "src/utils/slugify.ts": {
+      "name": "Short ids",
+      "description": "Turns free text like \"Sales DB (EU)\" into a short id like \"sales-db-eu\"."
+    },
+    "src/utils/wait.test.ts": {
+      "name": "Wait tests",
+      "description": "Checks waiting can be cancelled."
+    },
+    "src/utils/wait.ts": {
+      "name": "Wait",
+      "description": "Waits a set time, and stops early if cancelled."
+    }
+  }
+}

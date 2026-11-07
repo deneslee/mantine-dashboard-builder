@@ -1,0 +1,24 @@
+{
+  "files": {
+    "lint/compiler.test.ts": {
+      "name": "Compiler check",
+      "description": "Checks the React compiler still handles every component."
+    },
+    "lint/docs.test.ts": {
+      "name": "Dead link check",
+      "description": "Checks no doc or plan links to a moved file."
+    },
+    "lint/plugin.js": {
+      "name": "Layer lint rules",
+      "description": "Custom lint rules, such as keeping each layer to the layers below it."
+    },
+    "lint/rules.test.ts": {
+      "name": "Lint rule tests",
+      "description": "Proves every lint rule fires on a bad example."
+    },
+    "lint/toolchain.test.ts": {
+      "name": "Toolchain check",
+      "description": "Checks the installed tool versions match the pins."
+    }
+  }
+}

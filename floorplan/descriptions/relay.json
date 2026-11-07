@@ -1,0 +1,60 @@
+{
+  "files": {
+    "relay/src/app.test.ts": {
+      "name": "Relay server tests",
+      "description": "Checks the relay's requests, pass check and refusals."
+    },
+    "relay/src/app.ts": {
+      "name": "Relay requests",
+      "description": "The relay's requests: run or test a SQL Server or MongoDB query, after checking the pass."
+    },
+    "relay/src/Driver.ts": {
+      "name": "Database driver shape",
+      "description": "What each database the relay reads must provide."
+    },
+    "relay/src/env.test.ts": {
+      "name": "Relay settings tests",
+      "description": "Checks the relay's settings are read and unsafe ones refused."
+    },
+    "relay/src/env.ts": {
+      "name": "Relay settings",
+      "description": "Reads the relay's port, pass, allowed hosts and allowed websites."
+    },
+    "relay/src/hosts.test.ts": {
+      "name": "Allowed hosts tests",
+      "description": "Checks only allowed database hosts get through."
+    },
+    "relay/src/hosts.ts": {
+      "name": "Allowed hosts",
+      "description": "Lets queries reach only allowed database hosts, and hides connection strings from errors."
+    },
+    "relay/src/mongo.test.ts": {
+      "name": "MongoDB relay tests",
+      "description": "Checks MongoDB queries, host checks and refused steps."
+    },
+    "relay/src/mongo.ts": {
+      "name": "MongoDB on the relay",
+      "description": "Runs MongoDB queries after checking the hosts and refusing steps that write or run code."
+    },
+    "relay/src/poolCache.test.ts": {
+      "name": "Connection reuse tests",
+      "description": "Checks open connections are reused and closed."
+    },
+    "relay/src/poolCache.ts": {
+      "name": "Connection reuse",
+      "description": "Keeps database connections open so each query doesn't sign in again."
+    },
+    "relay/src/server.ts": {
+      "name": "Relay start-up",
+      "description": "Starts the relay on its port."
+    },
+    "relay/src/sqlServer.test.ts": {
+      "name": "SQL Server relay tests",
+      "description": "Checks SQL Server queries, sign-in types and time values."
+    },
+    "relay/src/sqlServer.ts": {
+      "name": "SQL Server on the relay",
+      "description": "Runs SQL Server queries with the time range as values and returns a data table."
+    }
+  }
+}

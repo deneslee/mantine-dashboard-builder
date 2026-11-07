@@ -1,0 +1,40 @@
+{
+  "files": {
+    "src/features/dashboards/DashboardListPage.module.css": {
+      "name": "Dashboard list styles",
+      "description": "Layout of the dashboard list."
+    },
+    "src/features/dashboards/DashboardListPage.tsx": {
+      "name": "Dashboard list",
+      "description": "Shows every dashboard to open."
+    },
+    "src/features/dashboards/DashboardPage.module.css": {
+      "name": "Dashboard page styles",
+      "description": "Layout of the dashboard page and its side pane."
+    },
+    "src/features/dashboards/DashboardPage.stories.tsx": {
+      "name": "Dashboard page examples",
+      "description": "Shows viewing, editing, query editing, compact density and a widget's own time."
+    },
+    "src/features/dashboards/DashboardPage.tsx": {
+      "name": "Dashboard page",
+      "description": "One dashboard: title, time controls, the canvas, and the editing tools in edit mode."
+    },
+    "src/features/dashboards/dashboardSearch.test.ts": {
+      "name": "Dashboard address tests",
+      "description": "Checks the dashboard's address settings are read and bad ones ignored."
+    },
+    "src/features/dashboards/dashboardSearch.ts": {
+      "name": "Dashboard address settings",
+      "description": "Reads edit mode, time, time zone, full-screen widget and inspect from the address."
+    },
+    "src/features/dashboards/dashboardTabs.ts": {
+      "name": "Dashboard side tabs",
+      "description": "Declares which side-panel tabs a dashboard shows."
+    },
+    "src/features/dashboards/DetailsPanel.tsx": {
+      "name": "Dashboard details",
+      "description": "Side-panel tab saying what this dashboard is."
+    }
+  }
+}

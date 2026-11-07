@@ -1,0 +1,44 @@
+{
+  "files": {
+    "src/features/dashboards/header/controls.test.tsx": {
+      "name": "Toolbar tests",
+      "description": "Checks the time, refresh and edit controls work."
+    },
+    "src/features/dashboards/header/dashboardFile.test.ts": {
+      "name": "Import and export tests",
+      "description": "Checks exported files read top to bottom and bad files are refused."
+    },
+    "src/features/dashboards/header/dashboardFile.ts": {
+      "name": "Import and export",
+      "description": "Saves a dashboard as a file and reads one back in, checking it first."
+    },
+    "src/features/dashboards/header/EditToolbar.tsx": {
+      "name": "Edit toolbar",
+      "description": "Edit mode's controls: Save, Discard, Undo, Redo, Add widget, Import and Done."
+    },
+    "src/features/dashboards/header/formatRange.test.ts": {
+      "name": "Range wording tests",
+      "description": "Checks time ranges read as the right words."
+    },
+    "src/features/dashboards/header/formatRange.ts": {
+      "name": "Range wording",
+      "description": "Writes a time range as words, like \"Last 24 hours\" or two dates."
+    },
+    "src/features/dashboards/header/RefreshButton.tsx": {
+      "name": "Refresh button",
+      "description": "Reloads every widget with a new \"now\"."
+    },
+    "src/features/dashboards/header/RefreshPicker.tsx": {
+      "name": "Refresh interval",
+      "description": "Chooses how often the dashboard reloads by itself."
+    },
+    "src/features/dashboards/header/TimeRangePicker.stories.tsx": {
+      "name": "Time picker examples",
+      "description": "Shows the time picker with a preset and with chosen dates."
+    },
+    "src/features/dashboards/header/TimeRangePicker.tsx": {
+      "name": "Time picker",
+      "description": "Picks a preset range or whole days from a calendar."
+    }
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "files": {
+    "src/ui/theme/components/ActionIconTheme.module.css": {
+      "name": "Icon button styles",
+      "description": "How icon buttons look."
+    },
+    "src/ui/theme/components/ActionIconTheme.ts": {
+      "name": "Icon button defaults",
+      "description": "Default look of icon buttons."
+    },
+    "src/ui/theme/components/AlertTheme.ts": {
+      "name": "Alert defaults",
+      "description": "Default look of alerts."
+    },
+    "src/ui/theme/components/ButtonTheme.ts": {
+      "name": "Button defaults",
+      "description": "Default look of buttons."
+    },
+    "src/ui/theme/components/CardTheme.ts": {
+      "name": "Card defaults",
+      "description": "Default look of cards."
+    },
+    "src/ui/theme/components/DrawerTheme.ts": {
+      "name": "Drawer defaults",
+      "description": "Drawers get square corners, since they sit against the screen edge."
+    },
+    "src/ui/theme/components/InputTheme.ts": {
+      "name": "Input defaults",
+      "description": "Default look of text fields."
+    },
+    "src/ui/theme/components/MenuTheme.ts": {
+      "name": "Menu defaults",
+      "description": "Default look of menus."
+    },
+    "src/ui/theme/components/ModalTheme.ts": {
+      "name": "Dialog defaults",
+      "description": "Default look of dialogs."
+    },
+    "src/ui/theme/components/NavLinkTheme.module.css": {
+      "name": "Menu link styles",
+      "description": "How menu links look, including the current one."
+    },
+    "src/ui/theme/components/NavLinkTheme.ts": {
+      "name": "Menu link defaults",
+      "description": "Default look of menu links."
+    },
+    "src/ui/theme/components/NotificationTheme.ts": {
+      "name": "Message defaults",
+      "description": "Default look of pop-up messages."
+    },
+    "src/ui/theme/components/PaperTheme.module.css": {
+      "name": "Panel surface styles",
+      "description": "How plain panels look."
+    },
+    "src/ui/theme/components/PaperTheme.ts": {
+      "name": "Panel surface defaults",
+      "description": "Default look of plain panels."
+    },
+    "src/ui/theme/components/PopoverTheme.ts": {
+      "name": "Pop-over defaults",
+      "description": "Default look of pop-overs."
+    },
+    "src/ui/theme/components/ScrollAreaTheme.ts": {
+      "name": "Scroll area defaults",
+      "description": "Default look of scroll bars."
+    },
+    "src/ui/theme/components/SelectTheme.ts": {
+      "name": "Dropdown defaults",
+      "description": "Default look of dropdowns."
+    },
+    "src/ui/theme/components/SkeletonTheme.ts": {
+      "name": "Placeholder defaults",
+      "description": "Default look of loading placeholders."
+    },
+    "src/ui/theme/components/SpotlightTheme.ts": {
+      "name": "Quick search defaults",
+      "description": "Default look of the quick search window."
+    },
+    "src/ui/theme/components/TabsTheme.module.css": {
+      "name": "Tab styles",
+      "description": "How tabs look."
+    },
+    "src/ui/theme/components/TabsTheme.ts": {
+      "name": "Tab defaults",
+      "description": "Default look of tabs."
+    },
+    "src/ui/theme/components/TooltipTheme.ts": {
+      "name": "Tooltip defaults",
+      "description": "Tooltips wait once, then neighbouring ones open at once."
+    },
+    "src/ui/theme/mantine.d.ts": {
+      "name": "Theme types",
+      "description": "Tells the code about the app's own theme sizes and colours."
+    },
+    "src/ui/theme/theme.test.ts": {
+      "name": "Theme tests",
+      "description": "Checks the theme and its reduced-motion version."
+    },
+    "src/ui/theme/theme.ts": {
+      "name": "Theme",
+      "description": "The app's theme, a reduced-motion version, and the tokens as style variables."
+    }
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "files": {
+    "src/ui/components/ErrorState.module.css": {
+      "name": "Error state styles",
+      "description": "How error states look."
+    },
+    "src/ui/components/ErrorState.stories.tsx": {
+      "name": "Error state examples",
+      "description": "Shows full-page, inline and banner errors."
+    },
+    "src/ui/components/ErrorState.tsx": {
+      "name": "Error states",
+      "description": "Full-page, inline and banner ways to show an error."
+    },
+    "src/ui/components/Page.module.css": {
+      "name": "Page styles",
+      "description": "Layout of the page header and body."
+    },
+    "src/ui/components/Page.stories.tsx": {
+      "name": "Page examples",
+      "description": "Shows minimal, standard and full pages."
+    },
+    "src/ui/components/Page.test.tsx": {
+      "name": "Page tests",
+      "description": "Checks page parts and the single main title."
+    },
+    "src/ui/components/Page.tsx": {
+      "name": "Page layout",
+      "description": "The parts of a page: trail, title, description, actions and body."
+    },
+    "src/ui/components/QueryBoundary.test.tsx": {
+      "name": "Tile boundary tests",
+      "description": "Checks one broken widget stays contained."
+    },
+    "src/ui/components/QueryBoundary.tsx": {
+      "name": "Tile boundary",
+      "description": "Keeps one broken widget's error inside its tile while the rest keeps running."
+    },
+    "src/ui/components/Section.module.css": {
+      "name": "Section styles",
+      "description": "How sections and rows look."
+    },
+    "src/ui/components/Section.tsx": {
+      "name": "Sections",
+      "description": "A titled group of content, and rows with a label and a control."
+    },
+    "src/ui/components/Skeletons.module.css": {
+      "name": "Placeholder styles",
+      "description": "How loading placeholders look."
+    },
+    "src/ui/components/Skeletons.stories.tsx": {
+      "name": "Placeholder examples",
+      "description": "Shows widget, dashboard and list placeholders."
+    },
+    "src/ui/components/Skeletons.tsx": {
+      "name": "Loading placeholders",
+      "description": "Grey shapes for text, charts, tables and pages while they load."
+    },
+    "src/ui/components/SplitView/SplitView.module.css": {
+      "name": "Split view styles",
+      "description": "Layout of split panes."
+    },
+    "src/ui/components/SplitView/SplitView.stories.tsx": {
+      "name": "Split view examples",
+      "description": "Shows split panes in widgets, the editor and a three-column planner."
+    },
+    "src/ui/components/SplitView/SplitView.ts": {
+      "name": "Split view",
+      "description": "Side-by-side panes that can resize, compact or close."
+    },
+    "src/ui/components/SplitView/SplitViewHeader.tsx": {
+      "name": "Split pane header",
+      "description": "A pane's back, title, actions, compact and close buttons."
+    },
+    "src/ui/components/SplitView/splitViewLayout.test.ts": {
+      "name": "Pane sizes tests",
+      "description": "Checks pane sizes when panes open, compact or close."
+    },
+    "src/ui/components/SplitView/splitViewLayout.ts": {
+      "name": "Pane sizes",
+      "description": "Works out each pane's size from whether it's open, compact or closed."
+    },
+    "src/ui/components/SplitView/SplitViewRoot.tsx": {
+      "name": "Split view frame",
+      "description": "Lays out the panes and handles their resizing."
+    },
+    "src/ui/components/SplitView/useSplitView.ts": {
+      "name": "Pane controls",
+      "description": "Lets content open, compact or close a pane."
+    },
+    "src/ui/components/Surface/Surface.module.css": {
+      "name": "Surface styles",
+      "description": "Background, border and shadow per layer."
+    },
+    "src/ui/components/Surface/Surface.stories.tsx": {
+      "name": "Surface examples",
+      "description": "Shows every layer and how they nest."
+    },
+    "src/ui/components/Surface/Surface.tsx": {
+      "name": "Surface",
+      "description": "A layer of the screen whose look comes from how far forward it sits."
+    },
+    "src/ui/components/Surface/surfaceLevel.test.ts": {
+      "name": "Layer order tests",
+      "description": "Checks layers step forward correctly."
+    },
+    "src/ui/components/Surface/surfaceLevel.ts": {
+      "name": "Layer order",
+      "description": "The layers from page to pop-up, and which one comes next."
+    }
+  }
+}

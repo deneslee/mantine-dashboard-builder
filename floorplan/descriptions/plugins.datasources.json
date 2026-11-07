@@ -1,0 +1,20 @@
+{
+  "files": {
+    "src/plugins/datasources/localJson/localJsonDatasource.test.ts": {
+      "name": "Local file source tests",
+      "description": "Checks data tables load from local files."
+    },
+    "src/plugins/datasources/localJson/localJsonDatasource.ts": {
+      "name": "Local file source",
+      "description": "Reads a data table from a file shipped with the site."
+    },
+    "src/plugins/datasources/mock/mockDatasource.test.ts": {
+      "name": "Sample data tests",
+      "description": "Checks generated sample data has the expected shape."
+    },
+    "src/plugins/datasources/mock/mockDatasource.ts": {
+      "name": "Sample data source",
+      "description": "Generates demo data, with a short random delay so loading states show."
+    }
+  }
+}

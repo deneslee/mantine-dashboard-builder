@@ -1,0 +1,8 @@
+{
+  "files": {
+    "src/ui/global.css": {
+      "name": "Global styles",
+      "description": "Styles every page shares."
+    }
+  }
+}

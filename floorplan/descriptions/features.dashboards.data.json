@@ -1,0 +1,44 @@
+{
+  "files": {
+    "src/features/dashboards/data/dashboardApi.test.ts": {
+      "name": "Dashboard storage tests",
+      "description": "Checks saved copies win over the sample files."
+    },
+    "src/features/dashboards/data/dashboardApi.ts": {
+      "name": "Dashboard storage",
+      "description": "Lists, loads and saves dashboards: a saved copy in this browser, or the sample file."
+    },
+    "src/features/dashboards/data/dashboardQueries.test.ts": {
+      "name": "Dashboard loading tests",
+      "description": "Checks dashboards and widget data load and cache as expected."
+    },
+    "src/features/dashboards/data/dashboardQueries.ts": {
+      "name": "Dashboard loading",
+      "description": "Describes how dashboards and each widget query load and are kept, including how long each took."
+    },
+    "src/features/dashboards/data/demoDashboards.test.ts": {
+      "name": "Sample dashboard tests",
+      "description": "Checks every sample dashboard file is valid."
+    },
+    "src/features/dashboards/data/drafts.ts": {
+      "name": "Unsaved edits",
+      "description": "Keeps a dashboard's unsaved edits in the browser so a reload doesn't lose them."
+    },
+    "src/features/dashboards/data/useAutoRefresh.test.tsx": {
+      "name": "Auto refresh tests",
+      "description": "Checks the dashboard refreshes on its timer and stops when it should."
+    },
+    "src/features/dashboards/data/useAutoRefresh.ts": {
+      "name": "Auto refresh",
+      "description": "Runs one timer per dashboard that refreshes every widget at the chosen interval."
+    },
+    "src/features/dashboards/data/useRefreshAll.ts": {
+      "name": "Refresh everything",
+      "description": "Moves the dashboard's \"now\" forward and reloads every widget on screen."
+    },
+    "src/features/dashboards/data/useWidgetData.ts": {
+      "name": "Widget data",
+      "description": "Loads all of one widget's queries and combines them for the widget."
+    }
+  }
+}

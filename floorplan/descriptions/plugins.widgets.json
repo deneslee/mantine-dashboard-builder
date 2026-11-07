@@ -1,0 +1,52 @@
+{
+  "files": {
+    "src/plugins/widgets/chart/chartOptions.ts": {
+      "name": "Chart options",
+      "description": "The settings a chart widget accepts."
+    },
+    "src/plugins/widgets/chart/chartWidget.tsx": {
+      "name": "Chart widget",
+      "description": "Registers the time-series chart as a widget."
+    },
+    "src/plugins/widgets/chart/TimeSeriesChart.tsx": {
+      "name": "Time-series chart",
+      "description": "Draws numbers over time as an area, line or bar chart."
+    },
+    "src/plugins/widgets/kpi/kpiWidget.tsx": {
+      "name": "KPI widget",
+      "description": "Registers the big-number widget."
+    },
+    "src/plugins/widgets/kpi/Stats.module.css": {
+      "name": "KPI styles",
+      "description": "How the big numbers look."
+    },
+    "src/plugins/widgets/kpi/Stats.tsx": {
+      "name": "Big numbers",
+      "description": "Shows one big number per numeric column."
+    },
+    "src/plugins/widgets/table/FrameTable.module.css": {
+      "name": "Table styles",
+      "description": "How the table widget looks."
+    },
+    "src/plugins/widgets/table/FrameTable.test.tsx": {
+      "name": "Table tests",
+      "description": "Checks the table shows, sorts and scrolls large data."
+    },
+    "src/plugins/widgets/table/FrameTable.tsx": {
+      "name": "Data table view",
+      "description": "Shows data as a table that stays fast with thousands of rows."
+    },
+    "src/plugins/widgets/table/tableOptions.ts": {
+      "name": "Table options",
+      "description": "Per-column settings for the table widget."
+    },
+    "src/plugins/widgets/table/tableWidget.tsx": {
+      "name": "Table widget",
+      "description": "Registers the table as a widget."
+    },
+    "src/plugins/widgets/table/useAppTable.ts": {
+      "name": "Table setup",
+      "description": "The one table setup the app uses, with only the features needed."
+    }
+  }
+}

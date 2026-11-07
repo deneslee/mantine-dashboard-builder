@@ -1,0 +1,36 @@
+{
+  "files": {
+    "src/shell/sidebar/Brand.module.css": {
+      "name": "Logo styles",
+      "description": "How the logo looks."
+    },
+    "src/shell/sidebar/Brand.tsx": {
+      "name": "Logo",
+      "description": "The product mark: a small grid of tiles."
+    },
+    "src/shell/sidebar/Sidebar.module.css": {
+      "name": "Sidebar styles",
+      "description": "Layout of the sidebar."
+    },
+    "src/shell/sidebar/Sidebar.test.tsx": {
+      "name": "Sidebar tests",
+      "description": "Checks the sidebar's menu, compact mode and dock button."
+    },
+    "src/shell/sidebar/Sidebar.tsx": {
+      "name": "Sidebar",
+      "description": "The left menu: logo, page links and its footer."
+    },
+    "src/shell/sidebar/SidebarMenu.tsx": {
+      "name": "Sidebar footer menu",
+      "description": "App links and the sidebar's own layout options."
+    },
+    "src/shell/sidebar/SidebarNav.stories.tsx": {
+      "name": "Sidebar menu examples",
+      "description": "Shows the menu groups wide and compact."
+    },
+    "src/shell/sidebar/SidebarNav.tsx": {
+      "name": "Sidebar menu",
+      "description": "The grouped page links in the sidebar."
+    }
+  }
+}

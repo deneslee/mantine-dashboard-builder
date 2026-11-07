@@ -1,0 +1,112 @@
+{
+  "files": {
+    "src/plugins/optional/aws/athenaRuntime.test.ts": {
+      "name": "Athena tests",
+      "description": "Checks Athena queries run and their rows become tables."
+    },
+    "src/plugins/optional/aws/athenaRuntime.ts": {
+      "name": "Athena queries",
+      "description": "Runs queries on AWS Athena, waits for results and turns them into a data table."
+    },
+    "src/plugins/optional/aws/auroraRuntime.ts": {
+      "name": "Aurora queries",
+      "description": "Runs queries on AWS Aurora with the time range passed safely as values."
+    },
+    "src/plugins/optional/aws/awsErrors.ts": {
+      "name": "AWS sign-in and errors",
+      "description": "Builds AWS sign-in from a connection's secrets and turns AWS errors into readable ones."
+    },
+    "src/plugins/optional/aws/awsPlugin.ts": {
+      "name": "AWS plugin",
+      "description": "The AWS plugin: Athena, Aurora, Redshift and DynamoDB connection forms and checks."
+    },
+    "src/plugins/optional/aws/dataApiFrame.test.ts": {
+      "name": "AWS results tests",
+      "description": "Checks AWS results convert to tables with the right types."
+    },
+    "src/plugins/optional/aws/dataApiFrame.ts": {
+      "name": "AWS results to table",
+      "description": "Turns AWS database results into the shared data table."
+    },
+    "src/plugins/optional/aws/dynamodbRuntime.ts": {
+      "name": "DynamoDB queries",
+      "description": "Runs queries on AWS DynamoDB and turns items into a data table."
+    },
+    "src/plugins/optional/aws/redshiftRuntime.ts": {
+      "name": "Redshift queries",
+      "description": "Runs queries on AWS Redshift with the time range passed safely as values."
+    },
+    "src/plugins/optional/aws/sqlRuntimes.test.ts": {
+      "name": "Aurora and Redshift tests",
+      "description": "Checks Aurora and Redshift queries and their time values."
+    },
+    "src/plugins/optional/azureSql/azureSqlPlugin.ts": {
+      "name": "Azure SQL plugin",
+      "description": "The Azure SQL plugin: its connection form, secrets and query checks."
+    },
+    "src/plugins/optional/azureSql/azureSqlRuntime.test.ts": {
+      "name": "Azure SQL query tests",
+      "description": "Checks Azure SQL queries go to the relay correctly."
+    },
+    "src/plugins/optional/azureSql/azureSqlRuntime.ts": {
+      "name": "Azure SQL queries",
+      "description": "Sends Azure SQL queries through the relay."
+    },
+    "src/plugins/optional/google/bigqueryRuntime.test.ts": {
+      "name": "BigQuery tests",
+      "description": "Checks BigQuery queries run and results become tables."
+    },
+    "src/plugins/optional/google/bigqueryRuntime.ts": {
+      "name": "BigQuery queries",
+      "description": "Runs BigQuery queries with the time range as values and turns results into a data table."
+    },
+    "src/plugins/optional/google/firestoreRuntime.test.ts": {
+      "name": "Firestore tests",
+      "description": "Checks Firestore documents become tables."
+    },
+    "src/plugins/optional/google/firestoreRuntime.ts": {
+      "name": "Firestore queries",
+      "description": "Reads Firestore documents and turns them into a data table."
+    },
+    "src/plugins/optional/google/googleApi.ts": {
+      "name": "Google requests",
+      "description": "Sends signed requests to Google and turns its errors into readable ones."
+    },
+    "src/plugins/optional/google/googleAuth.test.ts": {
+      "name": "Google sign-in tests",
+      "description": "Checks Google sign-in passes are made and reused."
+    },
+    "src/plugins/optional/google/googleAuth.ts": {
+      "name": "Google sign-in",
+      "description": "Gets a Google sign-in pass from a service-account key and reuses it until it expires."
+    },
+    "src/plugins/optional/google/googlePlugin.ts": {
+      "name": "Google plugin",
+      "description": "The Google plugin: BigQuery and Firestore connection forms and checks."
+    },
+    "src/plugins/optional/mongodb/mongodbPlugin.ts": {
+      "name": "MongoDB plugin",
+      "description": "The MongoDB plugin: its connection form, secrets and query checks."
+    },
+    "src/plugins/optional/mongodb/mongodbRuntime.test.ts": {
+      "name": "MongoDB query tests",
+      "description": "Checks MongoDB queries fill in time and go to the relay."
+    },
+    "src/plugins/optional/mongodb/mongodbRuntime.ts": {
+      "name": "MongoDB queries",
+      "description": "Fills the time range into a MongoDB query and sends it through the relay."
+    },
+    "src/plugins/optional/relay/relayClient.test.ts": {
+      "name": "Relay requests tests",
+      "description": "Checks requests to the relay and its error answers."
+    },
+    "src/plugins/optional/relay/relayClient.ts": {
+      "name": "Relay requests",
+      "description": "Sends a query to the relay and checks the answer."
+    },
+    "src/plugins/optional/relay/relayFields.ts": {
+      "name": "Relay address fields",
+      "description": "The relay address and pass fields; only secure addresses, except on this machine."
+    }
+  }
+}

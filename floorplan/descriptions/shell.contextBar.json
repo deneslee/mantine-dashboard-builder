@@ -1,0 +1,24 @@
+{
+  "files": {
+    "src/shell/contextBar/ContextBar.module.css": {
+      "name": "Context bar styles",
+      "description": "Layout of the right-hand panel and its tabs."
+    },
+    "src/shell/contextBar/ContextBar.tsx": {
+      "name": "Context bar",
+      "description": "The right-hand panel: tabs from the current page plus the inbox."
+    },
+    "src/shell/contextBar/useBadgeCount.ts": {
+      "name": "Tab counters",
+      "description": "Live counts shown on the side-panel tabs."
+    },
+    "src/shell/contextBar/useContextTabs.test.tsx": {
+      "name": "Side tabs tests",
+      "description": "Checks page tabs and global tabs combine in order."
+    },
+    "src/shell/contextBar/useContextTabs.ts": {
+      "name": "Side tabs",
+      "description": "Collects the side-panel tabs from the current page and the app."
+    }
+  }
+}

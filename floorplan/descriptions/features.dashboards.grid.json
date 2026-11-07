@@ -1,0 +1,44 @@
+{
+  "files": {
+    "src/features/dashboards/grid/DashboardGrid.module.css": {
+      "name": "Canvas styles",
+      "description": "Spacing and layout of the widget canvas."
+    },
+    "src/features/dashboards/grid/DashboardGrid.stories.tsx": {
+      "name": "Canvas examples",
+      "description": "Shows the canvas with charts, a failing widget, 20 charts and edit mode."
+    },
+    "src/features/dashboards/grid/DashboardGrid.test.tsx": {
+      "name": "Canvas tests",
+      "description": "Checks drag, resize, keyboard moves and that one failing widget doesn't break the rest."
+    },
+    "src/features/dashboards/grid/DashboardGrid.tsx": {
+      "name": "Widget canvas",
+      "description": "Lays out widget tiles per screen size and saves each drag or resize as one undo step."
+    },
+    "src/features/dashboards/grid/focusWidgetMenu.ts": {
+      "name": "Focus return",
+      "description": "Puts keyboard focus back on a widget's menu after a dialog closes."
+    },
+    "src/features/dashboards/grid/ShortcutsDialog.tsx": {
+      "name": "Keyboard shortcuts list",
+      "description": "Lists the dashboard's keyboard shortcuts, opened with \"?\"."
+    },
+    "src/features/dashboards/grid/WidgetHeader.tsx": {
+      "name": "Widget header and menu",
+      "description": "A tile's title bar with its menu: view, inspect, time, edit, duplicate and remove."
+    },
+    "src/features/dashboards/grid/WidgetTile.module.css": {
+      "name": "Tile styles",
+      "description": "How a widget tile looks, including while dragged."
+    },
+    "src/features/dashboards/grid/WidgetTile.tsx": {
+      "name": "Widget tile",
+      "description": "One tile: loads its data only when near the screen and keeps its own errors inside it."
+    },
+    "src/features/dashboards/grid/WidgetTimeDialog.tsx": {
+      "name": "Widget time",
+      "description": "Sets a widget's own time range, or shifts the dashboard's back."
+    }
+  }
+}

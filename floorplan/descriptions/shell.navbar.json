@@ -1,0 +1,32 @@
+{
+  "files": {
+    "src/shell/navbar/ColorSchemeToggle.tsx": {
+      "name": "Light and dark switch",
+      "description": "Cycles light, dark and automatic."
+    },
+    "src/shell/navbar/Search.module.css": {
+      "name": "Search styles",
+      "description": "How the search box looks."
+    },
+    "src/shell/navbar/Search.tsx": {
+      "name": "Search",
+      "description": "The top-bar search, opening the quick search window."
+    },
+    "src/shell/navbar/TopNavbar.module.css": {
+      "name": "Top bar styles",
+      "description": "Layout of the top bar."
+    },
+    "src/shell/navbar/TopNavbar.tsx": {
+      "name": "Top bar",
+      "description": "The bar along the top: menu button, areas, search, theme and user menu."
+    },
+    "src/shell/navbar/UserMenu.module.css": {
+      "name": "User menu styles",
+      "description": "How the user menu looks."
+    },
+    "src/shell/navbar/UserMenu.tsx": {
+      "name": "User menu",
+      "description": "A stand-in user menu until sign-in exists."
+    }
+  }
+}

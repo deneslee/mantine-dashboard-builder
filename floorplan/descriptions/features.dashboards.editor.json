@@ -1,0 +1,36 @@
+{
+  "files": {
+    "src/features/dashboards/editor/AddWidgetForm.tsx": {
+      "name": "Add widget form",
+      "description": "Picks a widget type and title, adds it at the bottom and opens it for editing."
+    },
+    "src/features/dashboards/editor/EditPane.tsx": {
+      "name": "Edit side pane",
+      "description": "In edit mode, shows the widget palette or the selected widget's form in the side pane."
+    },
+    "src/features/dashboards/editor/EditTools.tsx": {
+      "name": "Edit tools",
+      "description": "Brings up the query editor and the move and resize dialogs when needed."
+    },
+    "src/features/dashboards/editor/LeaveDialog.tsx": {
+      "name": "Unsaved changes check",
+      "description": "Asks before leaving a dashboard or edit mode with unsaved changes."
+    },
+    "src/features/dashboards/editor/PlacementDialog.tsx": {
+      "name": "Move and resize by numbers",
+      "description": "Moves or resizes a widget with numbers: the keyboard and screen-reader way to drag."
+    },
+    "src/features/dashboards/editor/QueryEditor.module.css": {
+      "name": "Query editor styles",
+      "description": "Lays out the query editor and its preview."
+    },
+    "src/features/dashboards/editor/QueryEditor.tsx": {
+      "name": "Query editor",
+      "description": "Edits a widget's queries as text, with a live preview tile."
+    },
+    "src/features/dashboards/editor/WidgetForm.tsx": {
+      "name": "Widget settings form",
+      "description": "Edits a widget's title, description and options."
+    }
+  }
+}

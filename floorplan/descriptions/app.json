@@ -1,0 +1,76 @@
+{
+  "files": {
+    "src/app/App.tsx": {
+      "name": "App root",
+      "description": "Puts the router inside the shared providers; the top of the screen tree."
+    },
+    "src/app/AppCrash.tsx": {
+      "name": "Whole-app crash screen",
+      "description": "Catches a crash anywhere in the app and shows a last-resort error screen instead of a blank page."
+    },
+    "src/app/Devtools.tsx": {
+      "name": "Developer panels",
+      "description": "Adds the developer panels for data loading and page routing, only when asked for."
+    },
+    "src/app/nav.ts": {
+      "name": "Menu layout",
+      "description": "Lists the app's areas and pages as the sidebar and top bar show them."
+    },
+    "src/app/NotFound.tsx": {
+      "name": "Page not found",
+      "description": "Shows \"not found\" inside the frame, so the menus keep working."
+    },
+    "src/app/optionalPlugins.d.ts": {
+      "name": "Optional plugin list type",
+      "description": "Tells the code what shape the build's list of optional plugins has."
+    },
+    "src/app/plugins.ts": {
+      "name": "Plugin register",
+      "description": "The single list of every widget and data source the app ships with."
+    },
+    "src/app/PluginsProvider.tsx": {
+      "name": "Plugin hand-out",
+      "description": "Makes the plugins, plus one data source per saved connection, available to every screen."
+    },
+    "src/app/Providers.test.tsx": {
+      "name": "Shared setup tests",
+      "description": "Checks the shared setup wraps screens with everything they need."
+    },
+    "src/app/Providers.tsx": {
+      "name": "Shared setup",
+      "description": "Wraps every screen with theme, data loading, messages, vault and plugins; tests and stories use the same setup."
+    },
+    "src/app/queryClient.test.ts": {
+      "name": "Data loading rule tests",
+      "description": "Checks when loading errors show inline and when they pop up as a message."
+    },
+    "src/app/queryClient.ts": {
+      "name": "Data loading rules",
+      "description": "Sets how data is fetched and cached app-wide, and is the one place loading errors turn into messages."
+    },
+    "src/app/RouteError.tsx": {
+      "name": "Page error screen",
+      "description": "Shows a page's loading or display error inside the content area, with retry; the frame keeps working."
+    },
+    "src/app/router.test.ts": {
+      "name": "Page routing tests",
+      "description": "Checks the router finds the right page for an address."
+    },
+    "src/app/router.ts": {
+      "name": "Page routing",
+      "description": "Builds the router that maps web addresses to pages, under the site's base address."
+    },
+    "src/app/withConnections.test.ts": {
+      "name": "Connection data source tests",
+      "description": "Checks saved connections turn into usable data sources only when their type is in the build."
+    },
+    "src/app/withConnections.ts": {
+      "name": "Connections as data sources",
+      "description": "Adds one data source per saved connection whose plugin is in this build."
+    },
+    "src/main.tsx": {
+      "name": "Start-up",
+      "description": "Starts the app in the browser and turns on error reporting."
+    }
+  }
+}

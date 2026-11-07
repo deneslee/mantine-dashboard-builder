@@ -1,0 +1,28 @@
+{
+  "files": {
+    "src/features/dashboards/inspect/InspectPane.tsx": {
+      "name": "Inspect widget",
+      "description": "Shows one widget query's data, what was asked, the raw text and how long it took."
+    },
+    "src/features/dashboards/state/createDashboardStore.test.ts": {
+      "name": "Open dashboard tests",
+      "description": "Checks edits, undo, redo and drafts of the open dashboard."
+    },
+    "src/features/dashboards/state/createDashboardStore.ts": {
+      "name": "Open dashboard memory",
+      "description": "Holds the open dashboard while it's edited, with undo, redo and drafts."
+    },
+    "src/features/dashboards/state/DashboardProvider.tsx": {
+      "name": "Open dashboard hand-out",
+      "description": "Gives the open dashboard to its screens; a fresh one per dashboard."
+    },
+    "src/features/dashboards/state/useDashboard.ts": {
+      "name": "Open dashboard access",
+      "description": "Lets screens read and change the open dashboard and its undo state."
+    },
+    "src/features/dashboards/state/useEffectiveTime.ts": {
+      "name": "Widget time in use",
+      "description": "Works out the time a widget actually shows: its own settings over the dashboard's."
+    }
+  }
+}

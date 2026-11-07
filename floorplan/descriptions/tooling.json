@@ -1,0 +1,44 @@
+{
+  "files": {
+    ".agents/planning/current.mjs": {
+      "name": "Current task",
+      "description": "Prints the current task, or all tasks, from the planning file."
+    },
+    ".storybook/main.ts": {
+      "name": "Storybook setup",
+      "description": "Where Storybook finds stories and which add-ons it uses."
+    },
+    ".storybook/preview.tsx": {
+      "name": "Storybook preview",
+      "description": "Wraps every story in the app's shared setup."
+    },
+    "apps/docs/catalog/schema.mjs": {
+      "name": "Catalog format",
+      "description": "Defines the shape of the docs feature catalog."
+    },
+    "apps/docs/scripts/generate-catalog.mjs": {
+      "name": "Catalog generator",
+      "description": "Builds the docs feature catalog from its source file."
+    },
+    "index.html": {
+      "name": "Web page shell",
+      "description": "The page the app loads into."
+    },
+    "oxlint.config.ts": {
+      "name": "Lint settings",
+      "description": "Lint rules, including which layer may import which."
+    },
+    "postcss.config.cjs": {
+      "name": "Style processing",
+      "description": "How style files are processed for Mantine."
+    },
+    "vite.config.ts": {
+      "name": "Build settings",
+      "description": "How the app is built, served and checked, with the cached check tasks."
+    },
+    "vitest.config.ts": {
+      "name": "Test settings",
+      "description": "Runs node, browser-like and story tests as separate groups."
+    }
+  }
+}

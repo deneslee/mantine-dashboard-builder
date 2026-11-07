@@ -1,0 +1,104 @@
+{
+  "files": {
+    "src/features/datasources/buildList/AddToBuildDialog.stories.tsx": {
+      "name": "Add to build examples",
+      "description": "Shows each step of adding a plugin to the live site's build."
+    },
+    "src/features/datasources/buildList/AddToBuildDialog.tsx": {
+      "name": "Add to build",
+      "description": "On the live site, adds or removes a plugin by committing the plugin list to GitHub and waiting for the new build."
+    },
+    "src/features/datasources/buildList/buildTarget.test.ts": {
+      "name": "Build target tests",
+      "description": "Checks the repository and branch the site builds from are worked out right."
+    },
+    "src/features/datasources/buildList/buildTarget.ts": {
+      "name": "Build target",
+      "description": "Which GitHub repository and branch Add to build commits to."
+    },
+    "src/features/datasources/buildList/devBuildList.ts": {
+      "name": "Local build list",
+      "description": "While developing, asks the local server to rewrite the plugin list file."
+    },
+    "src/features/datasources/buildList/githubBuildList.test.ts": {
+      "name": "GitHub build list tests",
+      "description": "Checks plugin list commits to GitHub and the wait for the new build."
+    },
+    "src/features/datasources/buildList/githubBuildList.ts": {
+      "name": "GitHub build list",
+      "description": "Commits the new plugin list to GitHub and waits until the live site carries it."
+    },
+    "src/features/datasources/ConnectionForm.module.css": {
+      "name": "Connection form styles",
+      "description": "Layout of the connection form."
+    },
+    "src/features/datasources/ConnectionForm.tsx": {
+      "name": "Connection form",
+      "description": "A connection's name, settings and secrets, with a test and a save."
+    },
+    "src/features/datasources/ConnectionPage.tsx": {
+      "name": "Connection page",
+      "description": "The page for a new or a saved connection."
+    },
+    "src/features/datasources/connections/ConnectionsProvider.tsx": {
+      "name": "Connections hand-out",
+      "description": "Gives the saved connections to every screen."
+    },
+    "src/features/datasources/connections/createConnectionsStore.test.ts": {
+      "name": "Saved connections tests",
+      "description": "Checks connections are added, changed, removed and kept."
+    },
+    "src/features/datasources/connections/createConnectionsStore.ts": {
+      "name": "Saved connections",
+      "description": "Keeps the list of connections in this browser, without their secrets."
+    },
+    "src/features/datasources/connections/useConnections.ts": {
+      "name": "Connections access",
+      "description": "Lets screens read and change saved connections."
+    },
+    "src/features/datasources/DatasourcesPage.stories.tsx": {
+      "name": "Data sources examples",
+      "description": "Shows the page empty, with connections, locked, and with a failed test."
+    },
+    "src/features/datasources/DatasourcesPage.tsx": {
+      "name": "Data sources page",
+      "description": "Lists connections, built-in data sources and optional plugins."
+    },
+    "src/features/datasources/PluginsSection.stories.tsx": {
+      "name": "Plugins list examples",
+      "description": "Shows adding and removing plugins locally and on the live site."
+    },
+    "src/features/datasources/PluginsSection.tsx": {
+      "name": "Plugins list",
+      "description": "Shows which optional plugins are in this build, with Add to build or Remove."
+    },
+    "src/features/datasources/QueryExample.module.css": {
+      "name": "Query example styles",
+      "description": "Layout of the copyable query example."
+    },
+    "src/features/datasources/QueryExample.tsx": {
+      "name": "Query example",
+      "description": "A ready widget query for this connection, to paste into a widget."
+    },
+    "src/features/datasources/useConnectionForm.ts": {
+      "name": "Connection form logic",
+      "description": "Runs the connection form: splits secrets from settings, tests the connection and saves secrets to the vault."
+    },
+    "src/features/datasources/useConnectionStatus.ts": {
+      "name": "Connection status",
+      "description": "Says whether a connection can run: its plugin in the build and its secrets unlocked."
+    },
+    "src/features/datasources/vault/CreateVaultDialog.tsx": {
+      "name": "Create vault",
+      "description": "Sets the passphrase that locks secrets saved on this device."
+    },
+    "src/features/datasources/vault/UnlockVaultDialog.tsx": {
+      "name": "Unlock vault",
+      "description": "Asks for the passphrase that opens the saved secrets."
+    },
+    "src/features/datasources/vault/VaultStatus.tsx": {
+      "name": "Vault status",
+      "description": "Shows whether saved secrets are locked, with lock and unlock."
+    }
+  }
+}
