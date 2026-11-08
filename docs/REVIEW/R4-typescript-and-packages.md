@@ -63,7 +63,9 @@ The root `tsconfig.json` only holds references, without the alias. Tools that re
 
 `pnpm-workspace.yaml` sets `saveExact: true`, but about 40 entries in `package.json` use `^` ranges, even within one family (`@fontsource-variable/jetbrains-mono` has `^`, its three siblings are exact). The lockfile keeps installs stable, so this is about a clear policy for Renovate and `pnpm up`.
 
-**Look at:** one style for all, probably exact, since that's what the workspace asks for.
+Correction (R5, Nov 8): `.github/renovate.json5` sets `rangeStrategy: 'bump'` on purpose, so a `^` floor always moves with the version in use. The mix is a choice, not drift; what's missing is one written rule for which packages are exact (the toolchain, react-grid-layout) and which get ranges.
+
+**Look at:** writing that rule down next to `saveExact`, then making the outliers (`jetbrains-mono`) follow it.
 
 ### 5. The relay reaches into `../../src/core`
 
