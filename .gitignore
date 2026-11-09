@@ -10,6 +10,7 @@ coverage
 .agents/skills
 .kiro/skills
 .junie/skills
+floorplan/.cache
 
 .env
 .env.local
