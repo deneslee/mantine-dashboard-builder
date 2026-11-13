@@ -19,6 +19,8 @@ minimumReleaseAgeExclude:
   - '@oxfmt/*'
   - vitest
   - '@vitest/*'
+  # Renovate security update: hono@4.13.16
+  - hono@4.13.16
 
 # Explicitly allowed lifecycle scripts (replaces onlyBuiltDependencies)
 allowBuilds:
