@@ -19,6 +19,8 @@ minimumReleaseAgeExclude:
   - '@oxfmt/*'
   - vitest
   - '@vitest/*'
+  # Renovate security update: @hono/node-server@2.1.6
+  - "@hono/node-server@2.1.6"
 
 # Explicitly allowed lifecycle scripts (replaces onlyBuiltDependencies)
 allowBuilds:
