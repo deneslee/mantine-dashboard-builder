@@ -10,7 +10,7 @@
     "start": "node dist/server.mjs"
   },
   "dependencies": {
-    "@hono/node-server": "2.1.5",
+    "@hono/node-server": "2.1.6",
     "hono": "4.13.14",
     "mongodb": "7.7.0",
     "mongodb-connection-string-url": "7.0.2",
