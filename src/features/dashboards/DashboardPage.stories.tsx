@@ -311,7 +311,7 @@ export const WidgetTimeEdit: Story = {
     await chooseFromMenu('Revenue', 'Time range…');
     const dialog = await timeDialog();
     await userEvent.click(dialog.getByRole('radio', { name: 'Own range' }));
-    await userEvent.click(dialog.getByRole('button', { name: 'Time range' }));
+    await userEvent.click(dialog.getByRole('button', { name: /^Time range:/ }));
     await userEvent.click(await page.findByRole('option', { name: 'Today' }, WAIT));
     await userEvent.click(dialog.getByRole('button', { name: 'Apply' }));
     await expect(await page.findByRole('button', { name: 'Time: Today' }, WAIT)).toBeVisible();

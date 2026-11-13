@@ -52,7 +52,8 @@ export function TimeRangePicker({ value, onChange, timeZone }: Props) {
           type="button"
           size="xs"
           pointer
-          aria-label="Time range"
+          // The visible range is part of the name (WCAG 2.5.3), so "click Last 24 hours" works by voice.
+          aria-label={`Time range: ${formatRange(value, timeZone)}`}
           leftSection={<IconClock size={iconSize.xs} stroke={iconStroke} />}
           rightSection={<Combobox.Chevron />}
           rightSectionPointerEvents="none"

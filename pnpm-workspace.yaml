@@ -40,7 +40,17 @@ preferFrozenLockfile: true
 updateConfig:
   ignoreDependencies:
     - react-grid-layout
-# @mantine/hooks 9.7.4 imports react-dom (use-horizontal-collapse) without declaring it; the global
+    # Sentry stays on v10: v11's `dataCollection` defaults send HTTP bodies, and relay requests carry
+    # connection strings. Move both together once src/lib/sentry/client.ts sets `dataCollection`.
+    - '@sentry/react'
+    - '@sentry/vite-plugin'
+    # Matches the Chromium preinstalled in cloud sessions (/opt/pw-browsers); a newer one needs a download.
+    - playwright
+    # @vitejs/plugin-react 6.3 accepts only <0.157; move it when plugin-react widens its peer range.
+    - oxc-transform-react
+    # pnpm 12 treats devEngines.runtime as a dependency and `up -L` would pin the newest Node; keep the range.
+    - node
+# @mantine/hooks 9.8.0 imports react-dom (use-horizontal-collapse) without declaring it; the global
 # virtual store only links declared deps. Drop once Mantine declares it.
 packageExtensions:
   '@mantine/hooks@9':
@@ -49,16 +59,16 @@ packageExtensions:
   # storybook loads its framework and addon presets by name; same global-store linking gap.
   'storybook@10':
     peerDependencies:
-      '@storybook/react-vite': '^10.6.4'
-      '@storybook/addon-a11y': '^10.6.4'
-      '@storybook/addon-docs': '^10.6.4'
-      '@storybook/addon-mcp': '^10.6.4'
-      '@storybook/addon-vitest': '^10.6.4'
+      '@storybook/react-vite': '^10.6.7'
+      '@storybook/addon-a11y': '^10.6.7'
+      '@storybook/addon-docs': '^10.6.7'
+      '@storybook/addon-mcp': '^10.6.7'
+      '@storybook/addon-vitest': '^10.6.7'
 catalog:
-  vite: npm:@voidzero-dev/vite-plus-core@1.4.0
-  vitest: 5.0.5
-  vite-plus: 1.4.0
-  '@vitest/browser-playwright': 5.0.5
+  vite: npm:@voidzero-dev/vite-plus-core@1.6.0
+  vitest: 5.1.0
+  vite-plus: 1.6.0
+  '@vitest/browser-playwright': 5.1.0
 overrides:
   vite@*: 'catalog:'
   vitest@*: 'catalog:'

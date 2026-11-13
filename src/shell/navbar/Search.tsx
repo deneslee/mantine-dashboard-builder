@@ -49,7 +49,6 @@ export function Search() {
         size="sm"
         radius="md"
         onClick={spotlight.open}
-        aria-label="Search"
         classNames={{ wrapper: classes.wrapper, input: classes.input, section: classes.section }}
         leftSection={<IconSearch size={iconSize.sm} stroke={iconStroke} />}
         rightSectionWidth={72}

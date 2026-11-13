@@ -252,6 +252,7 @@ function FieldRow({
   onChange: (value: string) => void;
 }) {
   const labelId = useId();
+  const fileButtonId = useId();
   const [file, setFile] = useState<File | null>(null);
   const savedHint = isSaved ? 'Saved; leave blank to keep it' : undefined;
   const common = {
@@ -281,6 +282,9 @@ function FieldRow({
       ) : field.kind === 'secretFile' ? (
         <FileInput
           {...common}
+          // The button's own text ("Choose a file" or the saved hint) is part of its name (WCAG 2.5.3).
+          id={fileButtonId}
+          aria-labelledby={`${labelId} ${fileButtonId}`}
           accept={field.accept}
           clearable
           leftSection={<IconUpload size={iconSize.sm} stroke={iconStroke} />}

@@ -10,7 +10,7 @@ describe('TimeRangePicker', () => {
     const onChange = vi.fn();
     render(<TimeRangePicker value={{ from: 'now-24h', to: 'now' }} onChange={onChange} timeZone="UTC" />);
 
-    const trigger = screen.getByRole('button', { name: 'Time range' });
+    const trigger = screen.getByRole('button', { name: /^Time range:/ });
     expect(trigger).toHaveTextContent('Last 24 hours');
 
     await user.tab();
@@ -29,7 +29,9 @@ describe('TimeRangePicker', () => {
         timeZone="UTC"
       />,
     );
-    expect(screen.getByRole('button', { name: 'Time range' })).toHaveTextContent('20 Sep 2026 – 26 Sep 2026');
+    expect(screen.getByRole('button', { name: /^Time range:/ })).toHaveTextContent(
+      '20 Sep 2026 – 26 Sep 2026',
+    );
   });
 });
 

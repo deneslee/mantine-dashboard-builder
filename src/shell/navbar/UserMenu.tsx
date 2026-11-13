@@ -25,7 +25,8 @@ export function UserMenu() {
           radius="xl"
           color="brand"
           variant="filled"
-          aria-label={`Account: ${user.name}`}
+          // The visible initials are part of the name (WCAG 2.5.3), so voice users can say what they see.
+          aria-label={`${initials}, account: ${user.name}`}
           className={classes.avatar}
         >
           {initials}
