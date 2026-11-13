@@ -39,23 +39,20 @@ Rules for humans and coding agents working in this repo. Read before writing cod
 - `pnpm lint` and the tests for what you touched pass. Run `pnpm build` when types, imports or routes changed.
 - Every new component state has a story, and every behaviour a test.
 - Oxfmt has formatted the files, and the commit message follows Conventional Commits.
-- The plan is current ([Planning](#planning)).
+- `docs/target/` still matches what you built ([Planning](#planning)).
 
 ## Read first
 
-Versions are in `package.json`; the stack, the layers, the data flow and where state lives are in [architecture.md](docs/architecture.md).
+Versions are in `package.json`.
 
-| Working on                                        | Read                                                                                                 |
-| ------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| What to build next, and fixed decisions           | [roadmap.md](.agents/planning/roadmap.md), [tasks.md](.agents/planning/tasks.md)                     |
-| What's fixed, core or swappable, and the plugins  | [core.md](apps/docs/core.md), [potential.md](apps/docs/potential.md)                                 |
-| How the app fits together                         | [architecture.md](docs/architecture.md)                                                              |
-| Navbar, sidebar, context bar, panes               | [shell.md](docs/ui/shell.md)                                                                         |
-| Styles, tokens, the Mantine theme                 | [design-system.md](docs/ui/design-system.md)                                                         |
-| Toasts, errors, loading                           | [feedback.md](docs/ui/feedback.md)                                                                   |
-| Dashboards, widgets, datasources, charts          | [dashboard.md](docs/dashboard/dashboard.md), [grid-and-charts.md](docs/dashboard/grid-and-charts.md) |
-| Optional plugins, connections, secrets, the relay | [datasources.md](docs/dashboard/datasources.md)                                                      |
-| Planned work                                      | Its plan in `.agents/planning/plans/`                                                                |
+| Working on                                                  | Read                                                                                                   |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Where the app is going: the rules and the contracts         | [target/architecture.md](docs/target/architecture.md), [target/contracts.md](docs/target/contracts.md) |
+| How the app is built today (not the goal, goes out of date) | [current-state.md](docs/current-state.md)                                                              |
+| What's fixed, core or swappable, and the plugins            | [core.md](apps/docs/core.md), [potential.md](apps/docs/potential.md)                                   |
+| Where a module lives                                        | `node floorplan/query.mjs overview`, then `find` or `show`                                             |
+
+Older docs, plans and reviews are outside this repo, in the `builder-docs` folder. They are history, not guidance: do not read them unless asked.
 
 ## Mantine first
 
@@ -66,8 +63,6 @@ Versions are in `package.json`; the stack, the layers, the data flow and where s
 5. **Router links inside Mantine components** use `renderRoot={(props) => <Link to="…" {...props} />}`, so they stay real anchors with preloading.
 
 ## Styling and tokens
-
-How the tiers work and where a new value goes: [design-system.md](docs/ui/design-system.md).
 
 - **Outside `ui/tokens` and `ui/theme`, use semantic tokens only.**
   - CSS: `var(--app-*)`, or Mantine variables that aren't palette shades (`--mantine-spacing-*`, `--mantine-radius-*`, `--mantine-primary-color-filled`).
@@ -83,7 +78,7 @@ How the tiers work and where a new value goes: [design-system.md](docs/ui/design
 
 ## Structure
 
-Package-shaped folders, so each can move to `packages/` when the repo becomes a monorepo. The layers, data flow and state owners are drawn in [architecture.md](docs/architecture.md).
+Package-shaped folders, so each can move to `packages/` when the repo becomes a monorepo. The layers, data flow and state owners are drawn in [architecture.md](docs/current-state.md).
 
     src/
       app/          the only place features and built-in plugins meet: routes/ (thin TanStack file routes;
@@ -107,7 +102,7 @@ Package-shaped folders, so each can move to `packages/` when the repo becomes a 
   - A feature that needs something from another asks for it (props, context); `app/` passes it in, e.g. `ShellProvider nav` and `globalTabs`, `PluginsContext`.
   - Code both need moves down a layer.
 - **Optional plugins reach the app only through `virtual:optional-plugins`**, which only `app/` imports; everything else gets them from `usePlugins()`.
-  - Each one is an entry in `OPTIONAL_PLUGINS` (`plugins.config.ts`), and a build has it only when `plugins.json` lists it ([datasources.md](docs/dashboard/datasources.md)).
+  - Each one is an entry in `OPTIONAL_PLUGINS` (`plugins.config.ts`), and a build has it only when `plugins.json` lists it.
   - `relay/` imports only `src/core/`, and `src/` never imports a server package (`mssql`, `mongodb`, `hono`).
 - **No barrel files (`index.ts`).** Import the file that defines the name: `@/ui/components/ErrorState`, `@/lib/notify/notify`. Barrels defeat tree-shaking.
 - **Relative imports** inside a feature or folder; `@/…` across folders.
@@ -130,16 +125,14 @@ The skills below cover the general rules; these are this project's choices.
 
 - **Composition:** no boolean mode props; pick parts or variants (`ErrorState.Full | Inline | Banner`, `ChartSkeleton | TableSkeleton`). Compound components share context (`Panel.*`, `ErrorState.*`, `Page.*`) and export each part by name as well, for Fast Refresh. Children over render props.
 - **React 19:** `ref` as a prop and `use(Context)`; no `forwardRef`.
-- **One owner per kind of state:** server data in TanStack Query; shareable or back-button state in the URL; the dashboard being edited in its store; the frame in the shell store; static values (plugins, user) in a context set once in `app/Providers`; the rest in components ([architecture.md › Where state lives](docs/architecture.md#where-state-lives)).
+- **One owner per kind of state:** server data in TanStack Query; shareable or back-button state in the URL; the dashboard being edited in its store; the frame in the shell store; static values (plugins, user) in a context set once in `app/Providers`; the rest in components ([architecture.md › Where state lives](docs/current-state.md#where-state-lives)).
 - **Stores:** a `create*Store` factory, one `*Provider`, read only through `use*` hooks. Only `ShellProvider` knows the shell uses Zustand; consumers call `useSidebar`, `useContextBar`, `useShellActions`. Selectors return primitives or use `useShallow`; callbacks read state with `getState()`. Derived values (`isDirty`, `canUndo`) are computed, never stored.
-- **Performance:** lazy-load anything heavy or conditional (routes through the router's `autoCodeSplitting`, context-bar tabs, widgets, datasource adapters). One Suspense boundary per tile or tab, not per page. Drag and resize values stay out of React state and commit on release. The canvas has its own rules in [grid-and-charts.md](docs/dashboard/grid-and-charts.md).
+- **Performance:** lazy-load anything heavy or conditional (routes through the router's `autoCodeSplitting`, context-bar tabs, widgets, datasource adapters). One Suspense boundary per tile or tab, not per page. Drag and resize values stay out of React state and commit on release.
 - **react-grid-layout:** the v2 API only, never `react-grid-layout/legacy`.
 - **Secrets** (passwords, keys, tokens, connection strings) live only in the vault (`@/lib/vault`). Never in a store, the URL, a query key, a dashboard, an export, a toast or a log.
 - **localStorage:** keys come from `storageKey(name)` (`@/lib/storage`). The version lives in the value, not the key: zustand persist's `version`, with a `migrate` when a persisted field changes; dashboards carry `schemaVersion`. Never persist transient UI such as open drawers.
 
 ## Notifications, errors, loading
-
-Levels, timings and the full tables are in [feedback.md](docs/ui/feedback.md).
 
 - **Toasts** go through `notify.*` from `@/lib/notify/notify`, never `notifications.show`. The title says the outcome first, in under 60 characters.
 - **Mutations:** errors toast automatically; `meta.successMessage` opts into a success toast.
@@ -181,32 +174,10 @@ Don't use `frontend-design` in this repo: it picks its own fonts and palettes, a
 
 ## Planning
 
-Planning lives in `.agents/planning/` and covers only the current phase; `docs/` holds only human-facing docs about what is built. Finished plans, parked plans, the backlog and older research live in the project archive outside the repo, and links to them point at the last commit that had them.
-
-[tasks](.agents/planning/tasks.md) and [roadmap](.agents/planning/roadmap.md); their
-checklists are starting points, not final implementation designs. Separate locked
-decisions from details still open to evidence. Follow the repository's preferred
-code discovery tools for local source.
-
-| Where                                  | Holds                                                                                               |
-| -------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `.agents/planning/roadmap.md`          | The current phase: steps, locked decisions, open questions; the long-term plan is outside the repo  |
-| `.agents/planning/tasks.md`            | The checklist for the current phase, in order                                                       |
-| `.agents/planning/current.json`        | Each task's end result and parts, with links to its research and plan; `pnpm current` shows it      |
-| `.agents/planning/research/NN-slug.md` | A task's reference research and the user's decisions; its second line links the task and its plan   |
-| `.agents/planning/plans/NN-slug.md`    | One piece of work in the current phase, with its design and file-level tasks                        |
-| `apps/docs/`                           | The catalog: `catalog/catalog.yaml` and the pages generated from it ([README](apps/docs/README.md)) |
-| `docs/architecture.md`                 | Stack, layers, data flow, state owners, storage keys: how the app fits today                        |
-| `docs/ui/`, `docs/dashboard/`          | How the built parts work ([Read first](#read-first))                                                |
-| `README.md`                            | What the app is, how to run it, a map of the repo                                                   |
-
-- **One home per fact.** Link to the doc or plan that holds a fact instead of restating it. Relative links must resolve; `lint/docs.test.ts` checks them.
-- **Plan layout:** `# NN Title`, then one line: `Status: open | done (date) · Step PN | Cross-cutting · Depends on: … · Research: …`. Sections: Goal, Design, Tasks, Decisions, Verification; add Out of scope, Open decisions or Risks when they help.
-- **Tasks:** `- [ ] **Title.** What to do. Done when …`. Tick `[x]` as you go; `[-]` for dropped or moved work, saying why or where to.
-- **Changing a plan:** edit it in place and add a dated line to Decisions. No version numbers in file names or headers; git keeps the history.
-- **Research, then plan:** `/task-research` writes `research/NN-slug.md` and asks the open decisions; `/task-plan NN` turns it into `plans/NN-slug.md`, and building waits for approval. Research and plan share `NN` (`pnpm current --number`, in the order work starts), and both are linked from the task in `current.json`. Files from before this rule keep their names.
-- **New work:** add a line to `.agents/planning/tasks.md`; write a plan when it needs a design or more than a few tasks. Work outside the current phase belongs in the project plan, not here.
-- **Finishing:** tick its line in `tasks.md`, move any tasks it leaves open there, and update the doc in `docs/` (and the README, if the repo map or the try-it URLs changed) that describes what was built. Then the plan moves out of the repo to the project archive, and links to it point at the last commit that had it.
+- The target is `docs/target/`: the architecture page lists the rules and the areas to work through, in order; the contracts page says what each part promises.
+- This repo holds no plans, task lists or research. Steps for a piece of work are written right before the work, and removed when it is done.
+- When what is built changes, update `docs/target/` (if a rule or contract changed) and `README.md` (if the repo map or commands changed). Do not add other docs without being asked.
+- Relative links in Markdown must resolve; `lint/docs.test.ts` checks them.
 
 <!-- /Workflow instructions -->
 

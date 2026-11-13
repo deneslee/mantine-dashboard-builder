@@ -1,10 +1,12 @@
-# Architecture
+# Current state (not the goal)
 
-How the app is put together today: the stack, the layers, how a dashboard's data flows, and where each kind of state lives. The coding rules are in [AGENTS.md](../AGENTS.md); what comes next is in [.agents/planning/](../.agents/planning/roadmap.md).
+> This page describes the app as it was built up to November 2026. It is not the target. The target is in [target/architecture.md](target/architecture.md) and [target/contracts.md](target/contracts.md). Parts of this page go out of date as the restructure proceeds.
+
+How the app is put together today: the stack, the layers, how a dashboard's data flows, and where each kind of state lives. The coding rules are in [AGENTS.md](../AGENTS.md); what comes next is in .agents/planning/.
 
 ## Stack
 
-Mantine 9 needs React 19.2+, so all React 19 APIs (`ref` as prop, `use()`, `Activity`, `useEffectEvent`) are fair game. The React Compiler is on ([grid-and-charts.md › React Compiler](dashboard/grid-and-charts.md#react-compiler)).
+Mantine 9 needs React 19.2+, so all React 19 APIs (`ref` as prop, `use()`, `Activity`, `useEffectEvent`) are fair game. The React Compiler is on (grid-and-charts.md › React Compiler).
 
 | Area             | Package                                                                                                                           | Notes                                                                                                                                            |
 | ---------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -16,7 +18,7 @@ Mantine 9 needs React 19.2+, so all React 19 APIs (`ref` as prop, `use()`, `Acti
 | State            | `zustand` + `immer` + `zundo`                                                                                                     | Shell store (persisted) and one dashboard store per open dashboard (undo history)                                                                |
 | Grid             | `react-grid-layout` 2.x                                                                                                           | v2 API only, never `/legacy`                                                                                                                     |
 | Schemas          | `zod`                                                                                                                             | Dashboard document, widget options, datasource query specs, search params                                                                        |
-| Optional plugins | `@aws-sdk/client-athena`, `client-rds-data`, `client-redshift-data`, `client-dynamodb`, `util-dynamodb`; nothing extra for Google | In a build only when `plugins.json` lists them; each datasource type's code is a lazy chunk ([datasources.md](dashboard/datasources.md))         |
+| Optional plugins | `@aws-sdk/client-athena`, `client-rds-data`, `client-redshift-data`, `client-dynamodb`, `util-dynamodb`; nothing extra for Google | In a build only when `plugins.json` lists them; each datasource type's code is a lazy chunk (datasources.md)                                     |
 | Relay            | Hono, `@hono/node-server`, `mssql`, `mongodb`                                                                                     | `relay/`, a workspace package: the Node server that runs SQL Server and MongoDB queries, bundled with `vp pack`                                  |
 | Tables           | `@tanstack/react-table` v9 + `@tanstack/react-virtual`                                                                            | Rendered with Mantine `Table`                                                                                                                    |
 | Later            | `@xyflow/react`, `react-markdown`                                                                                                 | Each a lazy chunk                                                                                                                                |
@@ -69,7 +71,7 @@ Draft   every document change: isDirty ? write draft : clear draft
 Export  orderWidgets(dashboard) → <id>.json;  Import  JSON → storedDashboardSchema → plugin checks → importDocument
 ```
 
-Widget data is cached per datasource query (`['ds', datasource, spec, range]`, with a connection's `revision` after `datasource`), so two widgets asking the same query share one request; auto-refresh and the Refresh button invalidate `['ds']`. While new keys load, a widget keeps its last complete frames. How the canvas stays fast is in [grid-and-charts.md](dashboard/grid-and-charts.md); the document model is in [dashboard.md](dashboard/dashboard.md).
+Widget data is cached per datasource query (`['ds', datasource, spec, range]`, with a connection's `revision` after `datasource`), so two widgets asking the same query share one request; auto-refresh and the Refresh button invalidate `['ds']`. While new keys load, a widget keeps its last complete frames. How the canvas stays fast is in grid-and-charts.md; the document model is in dashboard.md.
 
 ## Datasource plugins and connections
 
@@ -86,7 +88,7 @@ Add to build   dev: POST /__plugins → plugins.json → reload
                live: commit through GitHub's API → the deploy → build-info.json → Reload
 ```
 
-The page is `/datasources` (`features/datasources`); what each type needs is in [datasources.md](dashboard/datasources.md).
+The page is `/datasources` (`features/datasources`); what each type needs is in datasources.md.
 
 ## Where state lives
 
