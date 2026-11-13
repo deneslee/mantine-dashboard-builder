@@ -3,7 +3,7 @@ import { dirname, join } from 'node:path';
 import { expect, it } from 'vite-plus/test';
 
 // Docs and plans move often; a moved file must not leave a dead link behind.
-const DOCS = ['*.md', 'docs/**/*.md', '.agents/planning/**/*.md', 'src/**/*.md', 'lint/**/*.md'];
+const DOCS = ['*.md', 'docs/**/*.md', 'apps/docs/**/*.md', 'src/**/*.md', 'lint/**/*.md'];
 const LINK = /\]\(([^)\s]+)\)/g;
 
 it('every relative link in the markdown docs points at an existing file', () => {
@@ -15,6 +15,6 @@ it('every relative link in the markdown docs points at an existing file', () => 
       .filter((target) => !existsSync(join(dirname(file), decodeURI(target))))
       .map((target) => `${file} → ${target}`),
   );
-  expect(files.length).toBeGreaterThan(10);
+  expect(files.length).toBeGreaterThan(5);
   expect(broken).toEqual([]);
 });

@@ -4,11 +4,8 @@ A dashboard builder on Mantine 9 and React 19. An app frame (top navbar, docking
 
 **Status:**
 
-- **Current phase** (Oct 26): data and the node builder, steps P1–P7 in the [roadmap](.agents/planning/roadmap.md): a cleanup, packages, switchable storage (browser, files, Convex), data you can show, edit and extend, navigation with record tabs and Studio, and a node builder; the table widget improves in parallel.
-- [11 Optional plugins](https://github.com/deneslee/mantine-dashboard-builder/blob/0e400dd/.agents/planning/plans/done/11-optional-plugins.md) is done (Oct 24). Azure SQL, MongoDB, AWS and Google are datasource plugins chosen at build time in `plugins.json`. Connections and their passphrase-protected secrets live on `/datasources`, and a relay in `relay/` runs SQL Server and MongoDB queries ([data sources](docs/dashboard/datasources.md)).
-- Phase 3. Reading dashboards is done. The edit MVP (edit mode, undo and redo, drag and resize, add, duplicate and remove widgets, a local save and draft, JSON export and import) is done (Oct 2): its acceptance checks run as play functions or were checked in the browser, and the drag and resize numbers are in [grid-and-charts.md](docs/dashboard/grid-and-charts.md#tile-drag-and-resize).
-- [08 Structure cleanup](https://github.com/deneslee/mantine-dashboard-builder/blob/0e400dd/.agents/planning/plans/done/08-structure-cleanup.md) is done (Oct 1): every story runs in Chromium with an a11y check and the edit flows are play functions; the code sits in package-shaped folders, one lint rule per layer.
-- The order of work is in [tasks.md](.agents/planning/tasks.md).
+- **Paused for a restructure** (Nov 2026). Dashboards, the shell and the datasource plugins work. The target and the order of work are in [docs/target/architecture.md](docs/target/architecture.md); the contracts are in [docs/target/contracts.md](docs/target/contracts.md).
+- Older docs, plans and reviews were moved out of the repo on Nov 13, 2026, to the `builder-docs` folder. They are history, not guidance.
 
 ## Run
 
@@ -29,7 +26,7 @@ Install [Vite+](https://viteplus.dev/guide/) first. The exact Node and pnpm vers
 
 Run commands from the workspace root. Direct `pnpm` commands also work when the pinned versions are active. Use `vp run build` and `vp run lint` for the repository scripts: they are cached by Vite Task, and the built-in `vp lint` omits Stylelint. Type errors come from `vp lint` (tsgolint with `typeCheck`); there is no separate `tsc` step. Formatting uses Oxfmt and the `fmt` block in `vite.config.ts`; lint rules are composed there from `oxlint.config.ts`. CI uses the same pins and commands.
 
-Dependencies update through [Renovate](.github/renovate.json5): grouped pull requests (Mantine, TanStack, React, the Vite+ toolchain and others) early on Mondays, once a release is 3 days old, each checked by CI before you merge. react-grid-layout stays on 2.2.4 ([why](docs/upgrades/RGL.md)).
+Dependencies update through [Renovate](.github/renovate.json5): grouped pull requests (Mantine, TanStack, React, the Vite+ toolchain and others) early on Mondays, once a release is 3 days old, each checked by CI before you merge. react-grid-layout stays on 2.2.4 (why).
 
 ## Try it
 
@@ -54,18 +51,18 @@ Saves and drafts stay in this browser's `localStorage`; the files in `public/dat
 
 ## Repo map
 
-| Where               | What                                                                                                                                                                                                                                                                                                                 |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/`              | The app: `app/` (routes, providers), `features/`, `shell/`, `plugins/`, `lib/`, `ui/`, `core/`, `utils/`, `testing/`. Layers, data flow and state are in [docs/architecture.md](docs/architecture.md)                                                                                                                |
-| `relay/`            | The relay: a small Node server (Hono) that runs SQL Server and MongoDB queries for the Azure SQL and MongoDB plugins ([how](docs/dashboard/datasources.md#relay))                                                                                                                                                    |
-| `plugins.json`      | The optional plugins in the build, `[]` by default; `plugins.config.ts` reads it ([how](docs/dashboard/datasources.md#choosing-whats-in-the-build))                                                                                                                                                                  |
-| `public/data/`      | Seed dashboards (`dashboards/*.json`) and data frames read by the `local-json` datasource                                                                                                                                                                                                                            |
-| `docs/`             | How the built parts work: [architecture](docs/architecture.md), [shell](docs/ui/shell.md), [design system](docs/ui/design-system.md), [feedback](docs/ui/feedback.md), [dashboard](docs/dashboard/dashboard.md), [grid and charts](docs/dashboard/grid-and-charts.md), [data sources](docs/dashboard/datasources.md) |
-| `.agents/planning/` | [Current phase](.agents/planning/roadmap.md), [tasks](.agents/planning/tasks.md), one plan per piece of work in `plans/`, and `research/`                                                                                                                                                                            |
-| `apps/docs/`        | The capability catalog: what's fixed, the core capabilities and their providers, and the plugins ([core](apps/docs/core.md), [potential](apps/docs/potential.md)); a docs site later                                                                                                                                 |
-| `AGENTS.md`         | Rules for anyone writing code here, people or agents                                                                                                                                                                                                                                                                 |
-| `lint/`             | The local oxlint plugin for the token and style rules, and the tests proving each rule fires                                                                                                                                                                                                                         |
-| `.storybook/`       | Storybook config; every chrome and dashboard state has a story, and `pnpm test` runs each one in Chromium                                                                                                                                                                                                            |
+| Where          | What                                                                                                                                                                                                    |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/`         | The app: `app/` (routes, providers), `features/`, `shell/`, `plugins/`, `lib/`, `ui/`, `core/`, `utils/`, `testing/`. Layers, data flow and state are in [docs/current-state.md](docs/current-state.md) |
+| `relay/`       | The relay: a small Node server (Hono) that runs SQL Server and MongoDB queries for the Azure SQL and MongoDB plugins                                                                                    |
+| `plugins.json` | The optional plugins in the build, `[]` by default; `plugins.config.ts` reads it                                                                                                                        |
+| `public/data/` | Seed dashboards (`dashboards/*.json`) and data frames read by the `local-json` datasource                                                                                                               |
+| `docs/`        | Two things only: `target/` (where the app is going: architecture and contracts) and [current-state.md](docs/current-state.md) (how it is built today; not the goal)                                     |
+| `floorplan/`   | A generated map of the code: `node floorplan/query.mjs overview`                                                                                                                                        |
+| `apps/docs/`   | The capability catalog: what's fixed, the core capabilities and their providers, and the plugins ([core](apps/docs/core.md), [potential](apps/docs/potential.md)); a docs site later                    |
+| `AGENTS.md`    | Rules for anyone writing code here, people or agents                                                                                                                                                    |
+| `lint/`        | The local oxlint plugin for the token and style rules, and the tests proving each rule fires                                                                                                            |
+| `.storybook/`  | Storybook config; every chrome and dashboard state has a story, and `pnpm test` runs each one in Chromium                                                                                               |
 
 ## Frame behaviour
 
@@ -78,7 +75,7 @@ Saves and drafts stay in this browser's `localStorage`; the files in `public/dat
 | Pane edges                 | Drag, arrow keys (Shift = 40 px), double-click resets    | –                         |
 | Search (`Ctrl+K` or `/`)   | Spotlight over navigation targets                        | same                      |
 
-Layout preferences persist in `localStorage`; open drawers never do, so nothing pops open on load. The keys are listed in [architecture.md › Browser storage](docs/architecture.md#browser-storage).
+Layout preferences persist in `localStorage`; open drawers never do, so nothing pops open on load. The keys are listed in [architecture.md › Browser storage](docs/current-state.md#browser-storage).
 
 ## Agent skills
 
