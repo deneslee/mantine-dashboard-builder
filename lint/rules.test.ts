@@ -38,21 +38,26 @@ function oxlint(path: string): Diagnostic[] {
 
 /** The token rules must fire, or `pnpm lint` passing proves nothing (docs/design-system.md). */
 describe('token lint rules', () => {
-  it('Stylelint reports raw colors, palette shades and raw values as errors', async () => {
-    const { results } = await stylelint.lint({
-      files: 'lint/fixtures/raw-values.css',
-      configFile: '.stylelintrc.json',
-    });
-    const reported = results[0]?.warnings.map((w) => `${w.line} ${w.rule} ${w.severity}`);
-    expect(reported).toEqual(
-      expect.arrayContaining([
-        '3 function-disallowed-list error',
-        '4 declaration-property-value-disallowed-list error',
-        '5 declaration-property-value-allowed-list error',
-        '6 declaration-property-value-allowed-list error',
-      ]),
-    );
-  });
+  // Stylelint's start-up can pass 5 s when the whole suite runs in parallel.
+  it(
+    'Stylelint reports raw colors, palette shades and raw values as errors',
+    { timeout: 20_000 },
+    async () => {
+      const { results } = await stylelint.lint({
+        files: 'lint/fixtures/raw-values.css',
+        configFile: '.stylelintrc.json',
+      });
+      const reported = results[0]?.warnings.map((w) => `${w.line} ${w.rule} ${w.severity}`);
+      expect(reported).toEqual(
+        expect.arrayContaining([
+          '3 function-disallowed-list error',
+          '4 declaration-property-value-disallowed-list error',
+          '5 declaration-property-value-allowed-list error',
+          '6 declaration-property-value-allowed-list error',
+        ]),
+      );
+    },
+  );
 
   // Vite+ config and JS plugin startup exceed 5s when the browser suite runs alongside these tests.
   it('oxlint reports raw style props and primitives imports as errors', { timeout: 20_000 }, () => {

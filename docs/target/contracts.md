@@ -35,13 +35,13 @@ The promises the parts of the builder make to each other. Each contract says who
 - The cache key is made in one place and covers: the datasource, its revision, the query, and the time for time-aware datasources.
 - A result is fresh until its key changes, the user refreshes, or the refresh timer fires. Nothing refetches on focus or on mount.
 - The route starts the queries of the widgets visible on load, without waiting. The rest start near the viewport.
-- A widget's code loads alongside its data.
+- Visible on load means: in the saved `lg` layout, the widget's top row is above `FIRST_SCREEN_ROWS`, about 900 px of the grid's row height. With a full-screen widget in the URL, only that one. Edit mode starts nothing from the route.
+- A widget's code loads alongside its data: the route and the tile call its `preload` when they start its queries.
 - While new data loads, the widget keeps showing its last complete result.
 - Every request can be cancelled.
 
 **Open**
 
-- How the route knows which widgets are on the first screen (from the saved layout, or a fixed number).
 - Whether per-widget refresh stays next to refresh-all.
 
 ---

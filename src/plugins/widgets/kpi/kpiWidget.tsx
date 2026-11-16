@@ -1,7 +1,6 @@
-import { lazy } from 'react';
 import { z } from 'zod';
 import { TextSkeleton } from '@/ui/components/Skeletons';
-import { defineWidget } from '@/plugins/WidgetPlugin';
+import { defineWidget, lazyWidget } from '@/plugins/WidgetPlugin';
 
 export const kpiWidget = defineWidget({
   type: 'kpi',
@@ -10,6 +9,6 @@ export const kpiWidget = defineWidget({
   minSize: { w: 2, h: 2 },
   isTimeAware: true,
   optionsSchema: z.object({}),
-  component: lazy(() => import('./Stats').then((m) => ({ default: m.Stats }))),
+  component: lazyWidget(() => import('./Stats').then((m) => ({ default: m.Stats }))),
   skeleton: <TextSkeleton lines={3} label="Loading key figures" />,
 });
