@@ -78,7 +78,7 @@ Older docs, plans and reviews are outside this repo, in the `builder-docs` folde
 
 ## Structure
 
-Package-shaped folders, so each can move to `packages/` when the repo becomes a monorepo. The layers, data flow and state owners are drawn in [architecture.md](docs/current-state.md).
+Package-shaped folders, so each can move to `packages/` when the repo becomes a monorepo. The layers, data flow and state owners are drawn in [current-state.md](docs/current-state.md).
 
     src/
       app/          the only place features and built-in plugins meet: routes/ (thin TanStack file routes;
@@ -125,7 +125,7 @@ The skills below cover the general rules; these are this project's choices.
 
 - **Composition:** no boolean mode props; pick parts or variants (`ErrorState.Full | Inline | Banner`, `ChartSkeleton | TableSkeleton`). Compound components share context (`Panel.*`, `ErrorState.*`, `Page.*`) and export each part by name as well, for Fast Refresh. Children over render props.
 - **React 19:** `ref` as a prop and `use(Context)`; no `forwardRef`.
-- **One owner per kind of state:** server data in TanStack Query; shareable or back-button state in the URL; the dashboard being edited in its store; the frame in the shell store; static values (plugins, user) in a context set once in `app/Providers`; the rest in components ([architecture.md › Where state lives](docs/current-state.md#where-state-lives)).
+- **One owner per kind of state:** server data in TanStack Query; shareable or back-button state in the URL; the dashboard being edited in its store; the frame in the shell store; static values (plugins, user) in a context set once in `app/Providers`; the rest in components ([current-state.md › Where state lives](docs/current-state.md#where-state-lives)).
 - **Stores:** a `create*Store` factory, one `*Provider`, read only through `use*` hooks. Only `ShellProvider` knows the shell uses Zustand; consumers call `useSidebar`, `useContextBar`, `useShellActions`. Selectors return primitives or use `useShallow`; callbacks read state with `getState()`. Derived values (`isDirty`, `canUndo`) are computed, never stored.
 - **Performance:** lazy-load anything heavy or conditional (routes through the router's `autoCodeSplitting`, context-bar tabs, widgets, datasource adapters). One Suspense boundary per tile or tab, not per page. Drag and resize values stay out of React state and commit on release.
 - **react-grid-layout:** the v2 API only, never `react-grid-layout/legacy`.
