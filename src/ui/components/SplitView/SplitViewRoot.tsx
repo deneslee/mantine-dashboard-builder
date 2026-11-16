@@ -310,8 +310,13 @@ function PaneBody({
     let tries = 0;
     const focusTarget = () => {
       const target = ref.current?.querySelector<HTMLElement>('[data-pane-focus]');
-      if (target) target.focus({ preventScroll: true });
-      else if (++tries < FOCUS_TRIES) frame = requestAnimationFrame(focusTarget);
+      if (target) {
+        target.focus({ preventScroll: true });
+        return;
+      }
+      // `tries += 1`, not `++tries`: the React Compiler skips a component that `++`s a captured variable.
+      tries += 1;
+      if (tries < FOCUS_TRIES) frame = requestAnimationFrame(focusTarget);
     };
     frame = requestAnimationFrame(focusTarget);
     return () => cancelAnimationFrame(frame);
