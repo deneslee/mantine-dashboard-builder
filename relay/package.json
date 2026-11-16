@@ -10,16 +10,16 @@
     "start": "node dist/server.mjs"
   },
   "dependencies": {
-    "@hono/node-server": "2.1.5",
-    "hono": "4.13.14",
-    "mongodb": "7.7.0",
+    "@hono/node-server": "2.1.8",
+    "hono": "4.13.18",
+    "mongodb": "7.9.0",
     "mongodb-connection-string-url": "7.0.2",
-    "mssql": "12.7.13",
+    "mssql": "12.7.14",
     "zod": "4.6.7"
   },
   "devDependencies": {
     "@types/mssql": "12.3.0",
-    "@types/node": "26.6.5",
+    "@types/node": "26.6.6",
     "vite-plus": "catalog:"
   }
 }

@@ -2,11 +2,15 @@ import { renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import { useMainLock } from './useMainLock';
 
-/** An element with a fixed layout width (jsdom has no layout). */
+/**
+ * An element with a fixed layout width (jsdom has no layout). It's attached to the document because
+ * detached elements have no computed style, as in a browser, so the hook would read no transition.
+ */
 function box(width: number, transition = '0.18s') {
   const el = document.createElement('div');
   el.getBoundingClientRect = () => ({ width }) as DOMRect;
   el.style.transitionDuration = transition;
+  document.body.append(el);
   return el;
 }
 
@@ -36,7 +40,10 @@ function setup({ main = 700, sidebar = 260, context = 0, transition = '0.18s' } 
 
 describe('useMainLock', () => {
   beforeEach(() => vi.useFakeTimers());
-  afterEach(() => vi.useRealTimers());
+  afterEach(() => {
+    vi.useRealTimers();
+    document.body.replaceChildren();
+  });
 
   it('keeps main at its current width while the panes move', () => {
     const { lock, pinned, moving } = setup({ main: 700, sidebar: 260 });
