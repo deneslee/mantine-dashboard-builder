@@ -155,10 +155,11 @@ The skills below cover the general rules; these are this project's choices.
 
 ## Skills
 
-When Grafana has a relevant analogue for the current work, use
-[`grafana-lookup`](.agents/skills/grafana-lookup/SKILL.md) to check its UI, React and
+When Grafana has a relevant analogue for the current work, use the
+`grafana-lookup` skill (`.agents/skills/grafana-lookup/SKILL.md`) to check its UI, React and
 data implementation through `grafana-ui-mcp` before settling an open design detail.
-Keep the lookup scoped to the current task and adapt findings to this app. Same for elastic ui: [`eui-lookup`](.agents/skills/eui-lookup/SKILL.md)
+Keep the lookup scoped to the current task and adapt findings to this app. Same for elastic ui: the `eui-lookup` skill (`.agents/skills/eui-lookup/SKILL.md`).
+Both are local skills: `.agents/skills` is gitignored, so these paths are not links.
 
 | Skill                                                           | Use it for                                                                |
 | --------------------------------------------------------------- | ------------------------------------------------------------------------- |

@@ -28,8 +28,8 @@ const header = (name: string) => screen.getByRole('columnheader', { name });
 describe('FrameTable', () => {
   // jsdom lays nothing out; the virtualizer reads the viewport's height to decide which rows to render.
   beforeEach(() => {
-    vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(400);
-    vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockReturnValue(600);
+    vi.spyOn(Element.prototype, 'clientHeight', 'get').mockReturnValue(400);
+    vi.spyOn(Element.prototype, 'clientWidth', 'get').mockReturnValue(600);
   });
   afterEach(() => vi.restoreAllMocks());
 

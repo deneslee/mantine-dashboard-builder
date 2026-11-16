@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Bash(git reset --hard *)",
+      "Bash(git reset * --hard *)",
+      "Bash(git reset * --hard)",
+      "Bash(git push --force *)",
+      "Bash(git push * --force *)",
+      "Bash(git push * --force)",
+      "Bash(git push -f *)",
+      "Bash(git push * -f *)",
+      "Bash(git push * -f)",
+      "Bash(git clean -f *)",
+      "Bash(git clean -f*)",
+      "Bash(git clean * -f*)",
+      "PowerShell(git reset --hard *)",
+      "PowerShell(git reset * --hard *)",
+      "PowerShell(git reset * --hard)",
+      "PowerShell(git push --force *)",
+      "PowerShell(git push * --force *)",
+      "PowerShell(git push * --force)",
+      "PowerShell(git push -f *)",
+      "PowerShell(git push * -f *)",
+      "PowerShell(git push * -f)",
+      "PowerShell(git clean -f *)",
+      "PowerShell(git clean -f*)",
+      "PowerShell(git clean * -f*)"
+    ],
+    "ask": ["Bash(gh pr merge *)", "PowerShell(gh pr merge *)"]
+  }
+}
