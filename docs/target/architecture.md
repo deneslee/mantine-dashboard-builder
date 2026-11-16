@@ -73,7 +73,7 @@ Each rule comes from one decision. The number in brackets is the decision.
 10. **The URL owns the time range**, in view mode and in edit mode. (D3.2)
 11. **No shared chart layer.** A chart library lives inside a widget plugin; another library is another widget. (D4.1, D4.2)
 12. **One storage path.** Dashboards and other saved definitions go through the record provider, like records. (D6.2)
-13. **Definitions follow a standard schema format**, not an ad-hoc one. Collection fields are stored as data and edited in Studio. (D6.3, D6.4)
+13. **Definitions follow a standard schema format**, JSON Schema draft 2020-12, not an ad-hoc one. Collection fields are stored as data and edited in Studio. (D6.3, D6.4)
 14. **Editors come from the schema.** A hand-written editor is the exception. (D6.1)
 15. **Layout is not animated.** Panels slide with their content frozen, so content lays out once. (D7.3)
 16. **A motion library is local to a feature**, never app-wide. (D7.1)
@@ -88,7 +88,6 @@ Each rule comes from one decision. The number in brackets is the decision.
 | Workspace tabs, several records open at once (D5.2)                 | Not in the restructure. An own tab strip when the rehab app's record views start; the URL must be able to name more than one open record |
 | The reduced-motion rule (D7.2)                                      | Opt-in per rule is the target, deferred; the first step is done with Motion                                                              |
 | Dashboard variables (D4.5), View Transitions (D7.4)                 | Deferred                                                                                                                                 |
-| Which standard the definition format follows (D6.4)                 | Open: a standard is required, the specific one is not picked                                                                             |
 | How panels behave until D5.3 is done (D7.3)                         | Open: the frozen slide came with the panel library in the spike                                                                          |
 | When TanStack DB sits behind the record contract                    | Open. The contract does not depend on it                                                                                                 |
 | Whether Convex's query adapter coexists with the datasource queries | To check before the Convex provider is built                                                                                             |
