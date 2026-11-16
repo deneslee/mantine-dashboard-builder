@@ -41,6 +41,12 @@ export interface DatasourceResult {
  * cancelled on its own. The range is resolved when the query runs, against the dashboard's `now`
  * (`getNow`), so a refresh moves the window and all widgets cover the same one. `source` names the
  * widget in error toasts.
+ *
+ * A result is fresh until its key changes, the user refreshes or the refresh timer fires (both
+ * invalidate `dashboardKeys.data`): nothing refetches on mount, focus or reconnect.
+ *
+ * The only caller of a datasource's `query` (lint: `app/no-datasource-query`); everything else reads
+ * widget data through `useWidgetData.ts`.
  */
 export const datasourceQuery = (
   query: Query,
@@ -72,6 +78,7 @@ export const datasourceQuery = (
       const frames = await datasource.query(query.spec, { range: resolved, raw: range, timeZone }, signal);
       return { frames, durationMs: Math.round(performance.now() - start) };
     },
+    staleTime: Infinity,
     meta: { source, datasource: query.datasource },
   });
 };

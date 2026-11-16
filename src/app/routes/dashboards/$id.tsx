@@ -25,7 +25,8 @@ export const Route = createFileRoute('/dashboards/$id')({
   },
   loader: async ({ context, params }) => {
     try {
-      return await context.queryClient.ensureQueryData(dashboardQuery(params.id));
+      // The cached document when there is one; `ensureQueryData` is deprecated for this.
+      return await context.queryClient.query({ ...dashboardQuery(params.id), staleTime: 'static' });
     } catch (e) {
       if (isAppError(e) && e.code === 'not_found') throw notFound();
       throw e;

@@ -1,4 +1,4 @@
-import { useQueries, type UseQueryResult } from '@tanstack/react-query';
+import { useQueries, useQuery, type UseQueryResult } from '@tanstack/react-query';
 import { useState } from 'react';
 import type { DataFrame } from '@/core/data/DataFrame';
 import type { EffectiveTime } from '@/core/time/timeRange';
@@ -61,4 +61,15 @@ export function useWidgetData(
   const [kept, setKept] = useState(data.frames);
   if (data.frames && data.frames !== kept) setKept(data.frames);
   return { ...data, frames: data.frames ?? (isLoading ? kept : undefined) };
+}
+
+/**
+ * One query's cache entry, the one the tile shows, and its key (Inspect). Reading it doesn't
+ * refetch: the entry stays fresh until a refresh.
+ */
+export function useDatasourceResult(query: Query, time: EffectiveTime, { source }: { source: string }) {
+  const { datasources } = usePlugins();
+  const getNow = useReadNow();
+  const options = datasourceQuery(query, time, { datasources, getNow, source });
+  return { result: useQuery(options), queryKey: options.queryKey };
 }

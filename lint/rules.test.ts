@@ -97,3 +97,18 @@ describe('layer lint rules', () => {
     expect(flagged).toEqual(Array(4).fill('error relay/imports.ts'));
   });
 });
+
+/** Only the widget data module calls a datasource's `query` (docs/target/contracts.md § 1). */
+describe('widget data lint rule', () => {
+  it(
+    "reports a datasource's query called outside the module, not the query client's",
+    { timeout: 20_000 },
+    () => {
+      const flagged = oxlint('lint/fixtures/src/features/datasourceQuery.ts')
+        .filter((d) => d.code === 'app(no-datasource-query)')
+        .map((d) => d.severity);
+      // `datasource.query(…)` and `datasources.mock?.query(…)`; the two `queryClient.query(…)` calls pass.
+      expect(flagged).toEqual(['error', 'error']);
+    },
+  );
+});

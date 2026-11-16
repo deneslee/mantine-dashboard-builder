@@ -151,6 +151,8 @@ export const lint = {
     'app/no-inline-style': 'error',
     // Token keys, not raw values, in Mantine props (docs/design-system.md).
     'app/no-raw-style-props': 'error',
+    // Only the widget data module calls a datasource's `query` (docs/target/contracts.md § 1).
+    'app/no-datasource-query': 'error',
 
     // No barrel files (bulletproof-react: they defeat tree-shaking); import the file that defines a name.
     'no-restricted-imports': ['error', { patterns: [barrels, primitives, serverPackages, virtualPlugins] }],
@@ -175,6 +177,18 @@ export const lint = {
     {
       files: ['src/features/integrations/**'],
       rules: { 'app/no-raw-style-props': 'off' },
+    },
+    // The widget data module, and the code behind a datasource's `query`: plugins and the relay's drivers.
+    {
+      files: [
+        'src/features/dashboards/data/dashboardQueries.ts',
+        'src/plugins/**',
+        'relay/**',
+        '**/*.test.{ts,tsx}',
+        '**/*.stories.tsx',
+        'src/testing/**',
+      ],
+      rules: { 'app/no-datasource-query': 'off' },
     },
     {
       files: ['src/app/routes/**/*.tsx'],
