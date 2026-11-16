@@ -1,4 +1,4 @@
-import type { ComponentType, LazyExoticComponent, ReactNode } from 'react';
+import { lazy, type ComponentType, type LazyExoticComponent, type ReactNode } from 'react';
 import type { z } from 'zod';
 import type { DataFrame } from '@/core/data/DataFrame';
 
@@ -20,10 +20,31 @@ export interface WidgetPlugin<Options = unknown> {
   /** It shows data over time, so a widget of this type can have its own time (when a query's datasource is time-aware too). */
   isTimeAware: boolean;
   optionsSchema: z.ZodType<Options>;
-  /** A lazy chunk: a dashboard loads only the widget code it shows. */
-  component: LazyExoticComponent<ComponentType<WidgetProps<Options>>>;
+  /** A lazy chunk (`lazyWidget`): a dashboard loads only the widget code it shows. */
+  component: LazyWidget<Options>;
   /** Shown while the tile waits to come into view, and while its chunk and data load. */
   skeleton: ReactNode;
+}
+
+/**
+ * A lazy widget component. With `preload` (`lazyWidget`) its chunk starts loading alongside the
+ * widget's data; a plain `lazy` one loads when it first renders, after the data.
+ */
+export type LazyWidget<Options> = LazyExoticComponent<ComponentType<WidgetProps<Options>>> & {
+  preload?: () => Promise<unknown>;
+};
+
+/**
+ * `lazy(load)` plus `preload`, sharing one import. The constraint is `lazy`'s own; the props are
+ * checked against the definition's options where it is used.
+ */
+// oxlint-disable-next-line typescript/no-explicit-any
+export function lazyWidget<Component extends ComponentType<any>>(
+  load: () => Promise<{ default: Component }>,
+): LazyExoticComponent<NoInfer<Component>> & { preload: () => Promise<unknown> } {
+  let loading: ReturnType<typeof load> | undefined;
+  const loadOnce = () => (loading ??= load());
+  return Object.assign(lazy(loadOnce), { preload: loadOnce });
 }
 
 /**

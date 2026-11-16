@@ -1,7 +1,8 @@
 import { Box } from '@mantine/core';
 import { Surface } from '@/ui/components/Surface/Surface';
 import { useIntersection } from '@mantine/hooks';
-import { Suspense, useId, useState } from 'react';
+import { noop } from '@tanstack/react-query';
+import { Suspense, useEffect, useId, useState } from 'react';
 import { QueryBoundary } from '@/ui/components/QueryBoundary';
 import { TextSkeleton } from '@/ui/components/Skeletons';
 import { AppError } from '@/core/errors/AppError';
@@ -82,11 +83,14 @@ function Tile({
     !!widgets[widget.type]?.isTimeAware &&
     widget.queries.some((query) => datasources[query.datasource]?.isTimeAware);
   const hasOwnTime = time.shifts.length > 0 || time.range.from !== range.from || time.range.to !== range.to;
-  const data = useWidgetData(widget.queries, time, {
-    isEnabled: hasBeenSeen && isDataActive,
-    source: widget.title,
-  });
-  const skeleton = widgets[widget.type]?.skeleton ?? unknownSkeleton;
+  const isEnabled = hasBeenSeen && isDataActive;
+  const data = useWidgetData(widget.queries, time, { isEnabled, source: widget.title });
+  const definition = widgets[widget.type];
+  // The widget's code loads alongside its data, not once the frames arrive (contracts § 1).
+  useEffect(() => {
+    if (isEnabled) void definition?.component.preload?.().catch(noop);
+  }, [isEnabled, definition]);
+  const skeleton = definition?.skeleton ?? unknownSkeleton;
   return (
     <Surface
       level="raised"

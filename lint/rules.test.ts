@@ -38,21 +38,26 @@ function oxlint(path: string): Diagnostic[] {
 
 /** The token rules must fire, or `pnpm lint` passing proves nothing (docs/design-system.md). */
 describe('token lint rules', () => {
-  it('Stylelint reports raw colors, palette shades and raw values as errors', async () => {
-    const { results } = await stylelint.lint({
-      files: 'lint/fixtures/raw-values.css',
-      configFile: '.stylelintrc.json',
-    });
-    const reported = results[0]?.warnings.map((w) => `${w.line} ${w.rule} ${w.severity}`);
-    expect(reported).toEqual(
-      expect.arrayContaining([
-        '3 function-disallowed-list error',
-        '4 declaration-property-value-disallowed-list error',
-        '5 declaration-property-value-allowed-list error',
-        '6 declaration-property-value-allowed-list error',
-      ]),
-    );
-  });
+  // Stylelint's start-up can pass 5 s when the whole suite runs in parallel.
+  it(
+    'Stylelint reports raw colors, palette shades and raw values as errors',
+    { timeout: 20_000 },
+    async () => {
+      const { results } = await stylelint.lint({
+        files: 'lint/fixtures/raw-values.css',
+        configFile: '.stylelintrc.json',
+      });
+      const reported = results[0]?.warnings.map((w) => `${w.line} ${w.rule} ${w.severity}`);
+      expect(reported).toEqual(
+        expect.arrayContaining([
+          '3 function-disallowed-list error',
+          '4 declaration-property-value-disallowed-list error',
+          '5 declaration-property-value-allowed-list error',
+          '6 declaration-property-value-allowed-list error',
+        ]),
+      );
+    },
+  );
 
   // Vite+ config and JS plugin startup exceed 5s when the browser suite runs alongside these tests.
   it('oxlint reports raw style props and primitives imports as errors', { timeout: 20_000 }, () => {
@@ -96,4 +101,19 @@ describe('layer lint rules', () => {
     // One per import line in relay/imports.ts; relay/allowed.ts must not appear.
     expect(flagged).toEqual(Array(4).fill('error relay/imports.ts'));
   });
+});
+
+/** Only the widget data module calls a datasource's `query` (docs/target/contracts.md § 1). */
+describe('widget data lint rule', () => {
+  it(
+    "reports a datasource's query called outside the module, not the query client's",
+    { timeout: 20_000 },
+    () => {
+      const flagged = oxlint('lint/fixtures/src/features/datasourceQuery.ts')
+        .filter((d) => d.code === 'app(no-datasource-query)')
+        .map((d) => d.severity);
+      // `datasource.query(…)` and `datasources.mock?.query(…)`; the two `queryClient.query(…)` calls pass.
+      expect(flagged).toEqual(['error', 'error']);
+    },
+  );
 });

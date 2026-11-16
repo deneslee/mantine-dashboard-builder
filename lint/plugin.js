@@ -93,7 +93,52 @@ const noRawStyleProps = {
   },
 };
 
+/** `queryClient.query(…)` and `context.queryClient.query(…)`: TanStack Query, not a datasource. */
+function isQueryClient(node) {
+  if (node.type === 'Identifier') return node.name === 'queryClient';
+  return (
+    node.type === 'MemberExpression' &&
+    !node.computed &&
+    node.property.type === 'Identifier' &&
+    node.property.name === 'queryClient'
+  );
+}
+
+/**
+ * Widget data rule (docs/target/contracts.md § 1): only the widget data module calls a datasource's
+ * `query`. By name, since a JS plugin sees no types: any `x.query(…)` call that isn't the query client's.
+ */
+const noDatasourceQuery = {
+  meta: {
+    type: 'problem',
+    messages: {
+      datasourceQuery:
+        "Only the widget data module calls a datasource's `query`: read data through useWidgetData (features/dashboards/data).",
+    },
+  },
+  create(context) {
+    return {
+      CallExpression(node) {
+        const callee = node.callee;
+        if (
+          callee.type === 'MemberExpression' &&
+          !callee.computed &&
+          callee.property.type === 'Identifier' &&
+          callee.property.name === 'query' &&
+          !isQueryClient(callee.object)
+        ) {
+          context.report({ node, messageId: 'datasourceQuery' });
+        }
+      },
+    };
+  },
+};
+
 export default {
   meta: { name: 'app' },
-  rules: { 'no-inline-style': noInlineStyle, 'no-raw-style-props': noRawStyleProps },
+  rules: {
+    'no-inline-style': noInlineStyle,
+    'no-raw-style-props': noRawStyleProps,
+    'no-datasource-query': noDatasourceQuery,
+  },
 };

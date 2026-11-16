@@ -62,7 +62,7 @@ flowchart LR
 Each rule comes from one decision. The number in brackets is the decision.
 
 1. **One way to get widget data.** Widgets and features never call a datasource themselves; they go through the widget data module. A lint rule and tests keep it that way. (D1.1)
-2. **The route starts the first screen.** It starts the queries for the widgets visible on load and does not wait for them. Widgets further down start when they come near the viewport. (D1.2)
+2. **The route starts the first screen.** It starts the queries for the widgets visible on load (their top is in the first screen of rows of the saved layout) and does not wait for them. Widgets further down start when they come near the viewport. (D1.2)
 3. **Code and data load side by side.** A widget's code does not wait for its data. (D1.2)
 4. **Fresh until asked.** Dashboard query results change only when the query changes, the user refreshes, or the refresh timer fires. (D1.3)
 5. **Records go through a provider.** No feature talks to Convex or browser storage directly. (D1.4)

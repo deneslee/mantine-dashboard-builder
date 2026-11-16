@@ -1,6 +1,5 @@
-import { lazy } from 'react';
 import { TableSkeleton } from '@/ui/components/Skeletons';
-import { defineWidget } from '@/plugins/WidgetPlugin';
+import { defineWidget, lazyWidget } from '@/plugins/WidgetPlugin';
 import { tableOptions } from './tableOptions';
 
 export const tableWidget = defineWidget({
@@ -10,6 +9,6 @@ export const tableWidget = defineWidget({
   minSize: { w: 2, h: 3 },
   isTimeAware: true,
   optionsSchema: tableOptions,
-  component: lazy(() => import('./FrameTable').then((m) => ({ default: m.FrameTable }))),
+  component: lazyWidget(() => import('./FrameTable').then((m) => ({ default: m.FrameTable }))),
   skeleton: <TableSkeleton rows={5} columns={3} label="Loading table" />,
 });

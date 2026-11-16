@@ -1,5 +1,4 @@
 import { Button, Code, DataList, Group, Select, Stack, Table, Tabs, Text } from '@mantine/core';
-import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { IconZoomCode } from '@tabler/icons-react';
 import { useState, type ReactNode } from 'react';
@@ -12,9 +11,9 @@ import { usePlugins } from '@/plugins/usePlugins';
 import { SplitViewHeader } from '@/ui/components/SplitView/SplitViewHeader';
 import { downloadFile } from '@/utils/downloadFile';
 import type { InspectTab } from '../dashboardSearch';
-import { datasourceQuery } from '../data/dashboardQueries';
+import { useDatasourceResult } from '../data/useWidgetData';
 import { formatRange, formatShift } from '../header/formatRange';
-import { useDashboard, useReadNow, useWidget } from '../state/useDashboard';
+import { useDashboard, useWidget } from '../state/useDashboard';
 import { useEffectiveTime } from '../state/useEffectiveTime';
 
 const TABS: { value: InspectTab; label: string }[] = [
@@ -130,13 +129,11 @@ function QueryPanels({
   timeZone: string;
 }) {
   const { datasources } = usePlugins();
-  const getNow = useReadNow();
   const now = useDashboard((s) => s.now);
   const time = useEffectiveTime(id, range, timeZone, { isEditing: false });
   const datasource = datasources[query.datasource];
-  const options = datasourceQuery(query, time, { datasources, getNow, source: widget.title });
   // What the widget shows: opening Inspect doesn't refetch.
-  const result = useQuery({ ...options, refetchOnMount: false });
+  const { result, queryKey } = useDatasourceResult(query, time, { source: widget.title });
   const frames = result.data?.frames ?? [];
   const resolved = resolveEffectiveTime(time, now);
   const response = result.error
@@ -217,7 +214,7 @@ function QueryPanels({
           <Text size="sm" c="dimmed">
             Widgets whose queries have the same key share one request.
           </Text>
-          <Code block>{JSON.stringify(options.queryKey, null, 2)}</Code>
+          <Code block>{JSON.stringify(queryKey, null, 2)}</Code>
         </Stack>
       </Tabs.Panel>
     </>

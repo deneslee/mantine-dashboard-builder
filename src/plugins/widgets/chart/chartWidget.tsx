@@ -1,6 +1,5 @@
-import { lazy } from 'react';
 import { ChartSkeleton } from '@/ui/components/Skeletons';
-import { defineWidget } from '@/plugins/WidgetPlugin';
+import { defineWidget, lazyWidget } from '@/plugins/WidgetPlugin';
 import { chartOptions } from './chartOptions';
 
 export const chartWidget = defineWidget({
@@ -10,6 +9,6 @@ export const chartWidget = defineWidget({
   minSize: { w: 2, h: 3 },
   isTimeAware: true,
   optionsSchema: chartOptions,
-  component: lazy(() => import('./TimeSeriesChart').then((m) => ({ default: m.TimeSeriesChart }))),
+  component: lazyWidget(() => import('./TimeSeriesChart').then((m) => ({ default: m.TimeSeriesChart }))),
   skeleton: <ChartSkeleton />,
 });
