@@ -9,13 +9,13 @@ decided-in: '10-decisions-data-plugins-state.md, decided 2026-11-13'
 
 The promises the parts of the builder make to each other. Each contract says who owns it, what goes in and out, the rules, and what is still open. Names are working names; exact types are settled when the work is done. Overview: [architecture.md](architecture.md).
 
-| Contract             | In one line                                                           | Exists today              |
-| -------------------- | --------------------------------------------------------------------- | ------------------------- |
-| 1. Widget data       | The only way a widget gets its frames                                 | Mostly; the rules are new |
-| 2. Datasource        | Runs one query and returns frames                                     | Yes, unchanged            |
-| 3. Record provider   | Reads and writes editable rows                                        | No                        |
-| 4. Plugin definition | How widgets, datasources and the new kinds are declared and collected | Partly                    |
-| 5. State ownership   | Which place owns which state                                          | Mostly; one change        |
+| Contract             | In one line                                                           | Exists today                                                 |
+| -------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------ |
+| 1. Widget data       | The only way a widget gets its frames                                 | Mostly; the rules are new                                    |
+| 2. Datasource        | Runs one query and returns frames                                     | Yes, unchanged                                               |
+| 3. Record provider   | Reads and writes editable rows                                        | The contract and browser storage; not registered or used yet |
+| 4. Plugin definition | How widgets, datasources and the new kinds are declared and collected | Partly                                                       |
+| 5. State ownership   | Which place owns which state                                          | Mostly; one change                                           |
 
 ---
 
@@ -88,13 +88,23 @@ The promises the parts of the builder make to each other. Each contract says who
 - The engine behind the contract is the query cache today. TanStack DB may replace it later without changing what features see.
 
 - Dashboards and other saved definitions are stored through the same provider. (D6.2)
-- A collection's fields are described as stored data, edited in Studio, in a standard schema format. (D6.3, D6.4)
+- A collection's fields are described as stored data, edited in Studio, in a standard schema format: JSON Schema, draft 2020-12. A definition is itself a record, in the `collections` collection. Records are not yet checked against it. (D6.3, D6.4)
+- A list request (`ListQuery`) has four optional parts: search text, filters that must all match (a field, an operator, a value), sorting by several fields in order with ties broken by id, and a page (a size and the cursor of the previous page). The result has the records, the next cursor unless it is the last page, and the total when the provider can count.
+- Every record has a revision that goes up on each write. An update or delete can name the revision it was based on; when the record has changed since, the later edit is refused and the result carries the record as it is now. Without a revision the write overwrites.
+- The outcomes a caller must handle are returned, not thrown: not supported, not found, conflict.
+
+**Where it lives**
+
+| Part                                     | File                                                                   |
+| ---------------------------------------- | ---------------------------------------------------------------------- |
+| The contract and its types               | `src/core/records/RecordProvider.ts`                                   |
+| Query keys, and what a write makes stale | `src/core/records/recordKeys.ts`                                       |
+| The plugin definition                    | `src/plugins/RecordProviderPlugin.ts`                                  |
+| The browser-storage provider             | `src/plugins/recordProviders/browserStorage/browserStorageProvider.ts` |
+| The suite every provider passes          | `src/testing/recordProviderSuite.ts`                                   |
 
 **Open**
 
-- The exact shape of a list request (the earlier plans call it `ListQuery`).
-- What happens when two edits collide: refuse the later one, or check it again.
-- Which standard the field and definition format follows. A standard is required; the specific one is not picked.
 - How the first collections are defined before the Studio screens exist.
 - Whether sign-in is needed for the Convex provider in the hosted demo.
 
