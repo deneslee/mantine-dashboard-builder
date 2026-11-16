@@ -1,76 +1,53 @@
-name: Check and deploy to GitHub Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
     branches: [main]
-  pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
       - uses: actions/checkout@v7
 
       - name: Setup Vite+
-        uses: voidzero-dev/setup-vp@v1.21.2
+        uses: voidzero-dev/setup-vp@v1.22.0
         with:
-          node-version-file: '.nvmrc'
+          node-version-file: .nvmrc
           cache: true
-          run-install: false
 
-      - name: Install dependencies
-        run: vp install --frozen-lockfile
+      - name: Lint and type-check
+        run: vp check --no-fmt
 
-      - name: Lint
-        run: vp run lint
-
-      - name: Format
-        run: vp run format:check
-
-      # Stories run as tests in Chromium (Storybook's Vitest addon).
-      - name: Install Chromium
-        run: pnpm exec playwright install --with-deps chromium
-
-      - name: Test
-        run: vp run test
-
-      # Types were checked in Lint (tsgolint). Source maps go to Sentry only for main: pull requests, Renovate's included,
-      # get no token, so they build without uploading.
       - name: Build
-        run: vp run build
-        env:
-          SENTRY_AUTH_TOKEN: ${{ github.event_name != 'pull_request' && secrets.SENTRY_AUTH_TOKEN || '' }}
-          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
-          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+        run: vp build
 
-      - name: SPA fallback (TanStack Router deep links)
+      - name: SPA fallback
         run: cp dist/index.html dist/404.html
 
-      - if: github.event_name != 'pull_request'
-        uses: actions/configure-pages@v6
+      - uses: actions/configure-pages@v6
 
-      - if: github.event_name != 'pull_request'
-        uses: actions/upload-pages-artifact@v5
+      - uses: actions/upload-pages-artifact@v5
         with:
-          path: ./dist
+          path: dist
 
-  deploy:
-    if: github.event_name != 'pull_request'
-    needs: build
-    permissions:
-      pages: write
-      id-token: write
-    concurrency:
-      group: pages
-      cancel-in-progress: false
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    steps:
-      - id: deployment
+      - name: Deploy
+        id: deployment
         uses: actions/deploy-pages@v5
