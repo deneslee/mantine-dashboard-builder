@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { ReactNode } from 'react';
 import { expect, fn, userEvent, within } from 'storybook/test';
 import { AppError } from '@/core/errors/AppError';
+import { PluginsContext, usePlugins } from '@/plugins/usePlugins';
 import { AddToBuildDialog } from './AddToBuildDialog';
 import { BUILD_TARGET_KEY } from './buildTarget';
 
@@ -10,8 +12,28 @@ const COMMIT = {
   url: 'https://github.com/deneslee/mantine-dashboard-builder/commit/c0ffee1234567890',
 };
 
+/**
+ * A build that doesn't know its repository. On GitHub Actions the test build does (`GITHUB_REPOSITORY`),
+ * which would prefill the form these stories fill in.
+ */
+function UnknownRepository({ children }: { children: ReactNode }) {
+  const plugins = usePlugins();
+  return (
+    <PluginsContext value={{ ...plugins, build: { catalog: plugins.build.catalog } }}>
+      {children}
+    </PluginsContext>
+  );
+}
+
 const meta = {
   component: AddToBuildDialog,
+  decorators: [
+    (Story) => (
+      <UnknownRepository>
+        <Story />
+      </UnknownRepository>
+    ),
+  ],
   args: {
     entry: {
       id: 'aws',

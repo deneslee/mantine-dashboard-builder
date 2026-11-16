@@ -56,9 +56,12 @@ describe('Sidebar active states', () => {
 
     await act(() => router.navigate({ to: '/dashboards/$id', params: { id: 'ops' } }));
     expect(parent).toHaveAttribute('aria-expanded', 'true');
-    // A disclosure, not a menu button, while expanded.
+    // A disclosure, not a menu button, while expanded: it controls its own child links (Mantine's
+    // NavLink points `aria-controls` at its collapse since 9.7.4), and no flyout menu exists.
     expect(parent).not.toHaveAttribute('aria-haspopup');
-    expect(parent).not.toHaveAttribute('aria-controls');
+    const controlled = document.getElementById(parent.getAttribute('aria-controls') ?? '');
+    expect(controlled).toContainElement(await screen.findByRole('link', { name: 'Operations' }));
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
   });
 });
 
