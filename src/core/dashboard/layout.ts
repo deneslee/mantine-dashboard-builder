@@ -58,3 +58,17 @@ export function resolveLayouts({ lg, md, sm }: Layouts): Record<Breakpoint, Layo
     sm: sm ?? reflow(readingOrder, GRID_COLUMNS.sm, () => GRID_COLUMNS.sm),
   };
 }
+
+/**
+ * The breakpoint for a container width: the widest one the width is strictly greater than, else the
+ * narrowest. This is react-grid-layout's own rule (`getBreakpointFromWidth`), so a width exactly on a
+ * breakpoint still belongs to the smaller one.
+ */
+export function breakpointForWidth(width: number, breakpoints: Record<Breakpoint, number>): Breakpoint {
+  const [narrowest, ...wider] = (Object.keys(breakpoints) as Breakpoint[]).toSorted(
+    (a, b) => breakpoints[a] - breakpoints[b],
+  );
+  let matching = narrowest!;
+  for (const name of wider) if (width > breakpoints[name]) matching = name;
+  return matching;
+}
