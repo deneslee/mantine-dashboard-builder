@@ -1,9 +1,9 @@
 import { createContext, use } from 'react';
-import type { ActionPlugin } from '@/plugins/ActionPlugin';
-import type { ContextPanelPlugin } from '@/plugins/ContextPanelPlugin';
+import type { ActionPlugin } from './ActionPlugin';
+import type { ContextPanelPlugin } from './ContextPanelPlugin';
 import type { DatasourcePlugin } from '@/plugins/DatasourcePlugin';
 import type { DatasourceType, PluginCatalogEntry } from '@/plugins/OptionalPlugin';
-import type { RecordProviderPlugin } from '@/plugins/RecordProviderPlugin';
+import type { RecordProviderPlugin } from './RecordProviderPlugin';
 import type { WidgetPlugin } from '@/plugins/WidgetPlugin';
 
 /** The optional plugins as this build knows them: what it has, and where it was built from. */
