@@ -5,6 +5,7 @@ import { AppCrash } from '@/app/AppCrash';
 import { reportError } from '@/lib/sentry/runtime';
 import { Providers } from './Providers';
 import { createQueryClient } from './queryClient';
+import { startRecordSync } from './recordSync';
 import { createAppRouter } from './router';
 
 // `pnpm dev:devtools` only. Both checks are static, so every other build drops the import entirely.
@@ -14,7 +15,12 @@ const Devtools =
     : null;
 
 export function App() {
-  const [queryClient] = useState(createQueryClient);
+  const [queryClient] = useState(() => {
+    const client = createQueryClient();
+    // Before the first route loads, so no dashboard is read while an old save is being moved.
+    startRecordSync(client);
+    return client;
+  });
   const [router] = useState(() => createAppRouter(queryClient));
 
   return (

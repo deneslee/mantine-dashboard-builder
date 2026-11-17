@@ -13,7 +13,7 @@ import type { DatasourcePlugin, QueryContext } from '@/plugins/DatasourcePlugin'
 import { defineWidget, type WidgetProps } from '@/plugins/WidgetPlugin';
 import type { TimeRange } from '@/core/time/timeRange';
 import type { Dashboard } from '@/core/dashboard/dashboardSchema';
-import { testDashboard } from '@/testing/fixtures/dashboards';
+import { testDashboard, testLoaded } from '@/testing/fixtures/dashboards';
 import { createTestRouter } from '@/testing/TestRouter';
 import { PluginsContext, type Plugins } from '@/plugins/usePlugins';
 import { DashboardProvider } from '../state/DashboardProvider';
@@ -158,7 +158,7 @@ function Page({ plugins, store }: { plugins: Plugins; store: DashboardStore }) {
   const isDataActive = useSearch({ strict: false, select: (search) => search.view === undefined });
   return (
     <PluginsContext value={plugins}>
-      <DashboardProvider dashboard={dashboard} store={store}>
+      <DashboardProvider dashboard={testLoaded(dashboard)} store={store}>
         <DashboardGrid
           range={{ from, to: 'now' }}
           timeZone="UTC"
@@ -181,7 +181,7 @@ function renderGrid() {
     actions: {},
     build: { catalog: [] },
   };
-  const store = createDashboardStore(dashboard, { shouldPersist: false });
+  const store = createDashboardStore(testLoaded(dashboard), { shouldPersist: false });
   const router = createTestRouter({ page: <Page plugins={plugins} store={store} /> });
   render(<RouterProvider router={router} />);
   /** Opens the dashboard at these search params, as a link or back and forward would. */

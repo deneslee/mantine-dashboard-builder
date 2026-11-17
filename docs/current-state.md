@@ -33,7 +33,7 @@ Imports go one way, from the bottom up; oxlint enforces it ([AGENTS.md › Struc
 ```text
 app/        routes  Providers  router  queryClient  plugins.ts  nav.ts
   │         the only place features and the built-in plugins meet; only it reads virtual:optional-plugins
-features/   dashboards  datasources  settings  notifications  integrations  debug
+features/   dashboards  datasources  storage  settings  notifications  integrations  debug
   │         never import each other; widgets and datasources come from usePlugins()
 shell/      the app frame: Shell, ShellProvider, useShell, navbar, sidebar, context bar
 plugins/    WidgetPlugin, DatasourcePlugin, OptionalPlugin, RecordProviderPlugin, ContextPanelPlugin and ActionPlugin contracts (one registry per kind, keyed by id; the last two are empty), usePlugins; widgets/*, datasources/*, optional/*
@@ -51,10 +51,11 @@ Each top-level folder is shaped like a package, so it can move to `packages/` wh
 ```text
 URL /dashboards/$id?mode&from&to&refresh&tz&wt&view&inspect ── validateSearch (zod)
   beforeLoad: on entry, a stored draft and no ?mode=edit → redirect to ?mode=edit
-  loader: ensureQueryData(dashboardQuery(id))
-    dashboardApi: saved copy (localStorage) ?? fetch public/data/dashboards/<id>.json
-      → storedDashboardSchema (migrateDashboard → dashboardSchema) → Dashboard → Query cache ['dashboards', id]
-DashboardProvider key=id → createDashboardStore(dashboard)      restores a draft if there is one
+  loader: takes the place in use, then query(dashboardQuery(place, id))
+    dashboardApi.getDashboard: the place's record ?? fetch public/data/dashboards/<id>.json (only when the place has no such record)
+      → storedDashboardSchema (migrateDashboard → dashboardSchema) → { document, source: { record | seed, placeId, revision } }
+      → Query cache ['dashboards', 'detail', placeId, id]
+DashboardProvider key=placeId:id → createDashboardStore(loaded)      restores the draft of that place and dashboard if there is one
 DashboardPage → isEditing = ?mode=edit; range, refresh, tz = URL ?? document default (both modes; editing replaces history)
   DashboardGrid → layouts per breakpoint; drag or resize stop → commitLayout (one undo step)
     WidgetTile(id) → widget from the store, plugin from usePlugins()
@@ -65,8 +66,9 @@ DashboardPage → isEditing = ?mode=edit; range, refresh, tz = URL ?? document d
       QueryBoundary → <plugin.component frames options timeZone />
   InspectPane (?inspect) → the same cache entry per query, never refetched on open
 
-Save    store.save → saveDashboard (data/dashboardApi.ts) → localStorage saved copy → new baseline, draft cleared
-        → setQueryData(['dashboards', id]) and the list invalidated
+Save    store.save → saveDashboard(document, source) → the source's place: update at source.revision, or create for a seed
+        → new baseline and source, draft cleared; a conflict keeps the draft; a write not confirmed in 10 s shows "waiting" and keeps waiting
+        → setQueryData(['dashboards', 'detail', placeId, id]) and that place's list invalidated
 Draft   every document change: isDirty ? write draft : clear draft
 Export  orderWidgets(dashboard) → <id>.json;  Import  JSON → storedDashboardSchema → plugin checks → importDocument
 ```
@@ -118,8 +120,8 @@ Every key is `storageKey(name)` from `lib/storage.ts`: `dashboard-builder:<name>
 | `motion`                       | Reduced-motion preference                                                                |
 | `density`                      | Dashboard density: compact, comfortable or spacious                                      |
 | `color-scheme`                 | Light, dark or auto; also read by the pre-paint script in `index.html`                   |
-| `saved:<id>`                   | A saved dashboard (with `schemaVersion`), which overrides the file                       |
-| `draft:<id>`                   | Unsaved edits and the baseline they started from                                         |
+| `saved:<id>`                   | An old browser-only save; moved into `records:dashboards` at startup, then removed       |
+| `draft:<placeId>:<id>`         | Unsaved edits, their baseline and source (`{ version: 2, source, baseline, document }`)  |
 | `sentry`                       | Sentry prototype settings (plan 06 deletes them)                                         |
 | `connections`                  | Connections: type, name and settings, never secrets (zustand persist, `version` 1)       |
 | `vault`                        | Secrets saved on this device, encrypted with the passphrase (`{ version, keys, box }`)   |

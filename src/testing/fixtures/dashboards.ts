@@ -1,4 +1,5 @@
 import { storedDashboardSchema, type Dashboard } from '@/core/dashboard/dashboardSchema';
+import type { LoadedDashboard } from '@/features/dashboards/data/dashboardSource';
 
 /** Two widgets side by side on lg, `a` (chart) and `b` (kpi), with no queries. A fresh copy each call. */
 export const testDashboard = (): Dashboard => ({
@@ -21,6 +22,12 @@ export const testDashboard = (): Dashboard => ({
       { i: 'b', x: 6, y: 0, w: 6, h: 3 },
     ],
   },
+});
+
+/** A dashboard as the editor gets it: a record in the browser place, at revision 1. */
+export const testLoaded = (document: Dashboard = testDashboard()): LoadedDashboard => ({
+  document,
+  source: { kind: 'record', placeId: 'browser', revision: 1 },
 });
 
 /** A demo dashboard from `public/data/dashboards/`, read as the app reads it. Stories only: Storybook serves `public/`. */

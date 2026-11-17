@@ -31,24 +31,25 @@ Dependencies update through [Renovate](.github/renovate.json5): grouped pull req
 
 ## Try it
 
-| URL                                                  | Shows                                                                                                                                |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `/dashboards`                                        | The dashboard list                                                                                                                   |
-| `/dashboards/sales`                                  | A dashboard with live mock data, context-bar tabs from the route, one widget failing inside its own boundary                         |
-| `/dashboards/sales?mode=edit`                        | Edit mode: Save, Discard, Undo, Redo, drag and resize, widget menu, Add widget, Import and Export JSON                               |
-| `/dashboards/sales?from=now-7d&to=now&refresh=1m`    | Time range and auto-refresh from the URL                                                                                             |
-| `/dashboards/sales?tz=America/New_York`              | The dashboard in New York time: ranges, axes and table times                                                                         |
-| `/dashboards/sales?view=revenue`                     | One widget full screen; Esc returns. A widget's menu also sets its own time range (the clock icon); `?` lists the keyboard shortcuts |
-| `/dashboards/sales?inspect=revenue&inspectTab=query` | Inspect: a widget query's data, request, JSON and stats                                                                              |
-| `/dashboards/perf`                                   | 20 charts; tiles below the fold mount when scrolled near                                                                             |
-| `/dashboards/infra`                                  | A virtualized 10k-row table                                                                                                          |
-| `/dashboards/broken`                                 | A document that fails validation: route error with retry                                                                             |
-| `/dashboards/missing`, `/anything`                   | 404 inside the frame                                                                                                                 |
-| `/settings`                                          | Storage (where records are saved, export and import) and Appearance: theme, burger behaviour, dashboard density, reduced motion      |
-| `/datasources`                                       | Connections, the vault, the built-in datasources, and Plugins with Add to build (in `vp run dev` it edits `plugins.json`)            |
-| `/debug`                                             | Every toast level, dedupe, progress, mutation error, a throwing widget, all skeletons                                                |
+| URL                                                  | Shows                                                                                                                                       |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/dashboards`                                        | The dashboard list                                                                                                                          |
+| `/dashboards/sales`                                  | A dashboard with live mock data, context-bar tabs from the route, one widget failing inside its own boundary                                |
+| `/dashboards/sales?mode=edit`                        | Edit mode: Save, Discard, Undo, Redo, drag and resize, widget menu, Add widget, Import and Export JSON                                      |
+| `/dashboards/sales?from=now-7d&to=now&refresh=1m`    | Time range and auto-refresh from the URL                                                                                                    |
+| `/dashboards/sales?tz=America/New_York`              | The dashboard in New York time: ranges, axes and table times                                                                                |
+| `/dashboards/sales?view=revenue`                     | One widget full screen; Esc returns. A widget's menu also sets its own time range (the clock icon); `?` lists the keyboard shortcuts        |
+| `/dashboards/sales?inspect=revenue&inspectTab=query` | Inspect: a widget query's data, request, JSON and stats                                                                                     |
+| `/dashboards/perf`                                   | 20 charts; tiles below the fold mount when scrolled near                                                                                    |
+| `/dashboards/infra`                                  | A virtualized 10k-row table                                                                                                                 |
+| `/dashboards/broken`                                 | A document that fails validation: route error with retry                                                                                    |
+| `/dashboards/missing`, `/anything`                   | 404 inside the frame                                                                                                                        |
+| `/settings`                                          | Appearance: theme, burger behaviour, dashboard density, reduced motion                                                                      |
+| `/storage`                                           | Where dashboards are saved: This browser and Convex, each with a live status; a page per place with Use for saving, export, import and copy |
+| `/datasources`                                       | Connections, the vault, the built-in datasources, and Plugins with Add to build (in `vp run dev` it edits `plugins.json`)                   |
+| `/debug`                                             | Every toast level, dedupe, progress, mutation error, a throwing widget, all skeletons                                                       |
 
-Saves and drafts stay in this browser's `localStorage`; the files in `public/data/` are never changed.
+Dashboards are saved in the place Storage names: this browser's `localStorage` by default, or your Convex deployment (run `npx convex dev` once, set `VITE_CONVEX_URL` in `.env.local`, then Use for saving on the Storage page). Drafts stay in this browser; the files in `public/data/` are never changed.
 
 ## Repo map
 

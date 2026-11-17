@@ -5,7 +5,7 @@ import type { DataFrame } from '@/core/data/DataFrame';
 import type { DatasourcePlugin } from '@/plugins/DatasourcePlugin';
 import { PluginsContext, type Plugins } from '@/plugins/usePlugins';
 import { defineWidget, lazyWidget } from '@/plugins/WidgetPlugin';
-import { testDashboard } from '@/testing/fixtures/dashboards';
+import { testDashboard, testLoaded } from '@/testing/fixtures/dashboards';
 import { render, screen, waitFor } from '@/testing/render';
 import { TestRouter } from '@/testing/TestRouter';
 import { DashboardProvider } from '../state/DashboardProvider';
@@ -66,7 +66,7 @@ describe('WidgetTile', () => {
       <TestRouter
         page={
           <PluginsContext value={plugins}>
-            <DashboardProvider dashboard={dashboard}>
+            <DashboardProvider dashboard={testLoaded(dashboard)}>
               <WidgetTile id="a" range={range} timeZone="UTC" />
             </DashboardProvider>
           </PluginsContext>

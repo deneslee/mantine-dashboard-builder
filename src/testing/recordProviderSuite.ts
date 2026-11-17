@@ -81,6 +81,10 @@ export function describeRecordProvider(
       });
     });
 
+    it('is ready when asked for its status', async () => {
+      expect(await provider.checkStatus()).toMatchObject({ state: 'ready', message: expect.any(String) });
+    });
+
     it('lists an empty collection and misses an unknown record', async () => {
       expect(valueOf(await provider.list(COLLECTION)).records).toEqual([]);
       expect(await provider.get(COLLECTION, 'nobody')).toEqual({ ok: false, reason: 'notFound' });
@@ -275,6 +279,34 @@ export function describeRecordProvider(
         valueOf(await provider.create(COLLECTION, { name: 'Late Arrival', ward: 'south', age: 30 }));
         valueOf(await provider.importCollection(exported));
         expect(valueOf(await provider.list(COLLECTION)).records).toHaveLength(PATIENTS.length);
+      });
+
+      itWhen(canWrite, 'raises every revision above the old maximum when it replaces records', async () => {
+        await seed();
+        valueOf(await provider.update<Patient>(COLLECTION, 'p1', { age: 72 }));
+        valueOf(await provider.update<Patient>(COLLECTION, 'p1', { age: 73 }));
+        const exported = valueOf(await provider.exportCollection(COLLECTION));
+        const previousMax = Math.max(...exported.records.map((record) => record.revision));
+        expect(previousMax).toBe(3);
+
+        valueOf(await provider.importCollection(exported));
+        const after = valueOf(await provider.list(COLLECTION)).records;
+        expect(after.map((record) => record.id).toSorted()).toEqual(
+          exported.records.map((r) => r.id).toSorted(),
+        );
+        for (const record of after) {
+          const original = exported.records.find((r) => r.id === record.id);
+          expect(record.data).toEqual(original?.data);
+          expect(record.revision).toBe(previousMax + (original?.revision ?? 0));
+        }
+      });
+
+      itWhen(canWrite, 'leaves the collection as it was when an import is refused', async () => {
+        await seed();
+        const before = valueOf(await provider.exportCollection(COLLECTION));
+        const twice = { ...before, records: [before.records[0]!, before.records[0]!] };
+        await expect(provider.importCollection(twice)).rejects.toMatchObject({ code: 'validation' });
+        expect(valueOf(await provider.exportCollection(COLLECTION))).toEqual(before);
       });
 
       itWhen(canWrite, 'stores a collection definition as a record', async () => {

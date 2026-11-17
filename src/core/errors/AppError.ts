@@ -5,6 +5,8 @@ export const APP_ERROR_CODES = [
   'validation',
   'datasource',
   'forbidden',
+  /** A write refused because the record changed since it was read. */
+  'conflict',
   'unknown',
 ] as const;
 
@@ -56,5 +58,6 @@ export const ERROR_TITLES: Record<AppErrorCode, string> = {
   validation: 'Invalid data',
   datasource: 'Data source error',
   forbidden: 'No access',
+  conflict: 'Changed elsewhere',
   unknown: 'Something went wrong',
 };

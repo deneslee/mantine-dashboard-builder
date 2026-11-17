@@ -3,26 +3,30 @@ import { AppError } from '@/core/errors/AppError';
 import type { DataFrame } from '@/core/data/DataFrame';
 import type { DatasourcePlugin, Query } from '@/plugins/DatasourcePlugin';
 import { resolveEffectiveTime, type EffectiveTime } from '@/core/time/timeRange';
-import { getDashboard, listDashboards } from './dashboardApi';
+import { getDashboard, listDashboards, type PlaceRef } from './dashboardApi';
 
+/** The place is in every key: the same dashboard id in two places is two entries. */
 export const dashboardKeys = {
   all: ['dashboards'] as const,
-  detail: (id: string) => ['dashboards', id] as const,
+  list: (placeId: string) => ['dashboards', 'list', placeId] as const,
+  /** Every cached dashboard of a place. */
+  details: (placeId: string) => ['dashboards', 'detail', placeId] as const,
+  detail: (placeId: string, id: string) => ['dashboards', 'detail', placeId, id] as const,
   /** Every datasource query; auto-refresh and the Refresh button invalidate this. */
   data: ['ds'] as const,
 };
 
-export const dashboardListQuery = () =>
+export const dashboardListQuery = (place: PlaceRef) =>
   queryOptions({
-    queryKey: dashboardKeys.all,
-    queryFn: ({ signal }) => listDashboards(signal),
+    queryKey: dashboardKeys.list(place.id),
+    queryFn: ({ signal }) => listDashboards(place, signal),
     meta: { source: 'Dashboards' },
   });
 
-export const dashboardQuery = (id: string) =>
+export const dashboardQuery = (place: PlaceRef, id: string) =>
   queryOptions({
-    queryKey: dashboardKeys.detail(id),
-    queryFn: ({ signal }) => getDashboard(id, signal),
+    queryKey: dashboardKeys.detail(place.id, id),
+    queryFn: ({ signal }) => getDashboard(id, place, signal),
     meta: { source: 'Dashboards' },
     retry: false,
   });

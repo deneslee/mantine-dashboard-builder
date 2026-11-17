@@ -150,11 +150,31 @@ export interface RecordProvider {
   subscribe(collection: string, onChange: (change: RecordChange) => void): RecordResult<() => void>;
   exportCollection(collection: string, signal?: AbortSignal): Promise<RecordResult<CollectionExport>>;
   /**
-   * Replaces the collection named in `data` with its records, ids and revisions kept, so an export
-   * followed by an import gives the same records.
+   * Replaces the collection named in `data` with its records, all or nothing. Ids and data are kept.
+   * Each record's revision becomes `previousMax + record.revision`, where `previousMax` is the highest
+   * revision the collection held before (0 when empty). So every revision after an import is above
+   * every revision before it and an open editor's save is a conflict, and an export followed by an
+   * import into an empty collection gives the same revisions.
    */
   importCollection(data: CollectionExport): Promise<RecordResult<{ count: number }>>;
+  /**
+   * Whether the place can be used right now, within one 10 s budget. Names no collection and counts
+   * nothing. Resolves with a state; it does not throw.
+   */
+  checkStatus(signal?: AbortSignal): Promise<RecordProviderStatus>;
 }
+
+export interface RecordProviderStatus {
+  /** `unreachable`: no answer in time. `notDeployed`: the place answers but lacks the record functions. */
+  state: 'ready' | 'unreachable' | 'notDeployed' | 'failed';
+  message: string;
+}
+
+/**
+ * A write that has not resolved after this long is shown as "waiting for the place to confirm". It is
+ * never cancelled or timed out: only the notice appears. Reads give up at their own limit.
+ */
+export const WRITE_NOTICE_MS = 10_000;
 
 export function notSupported(operation: RecordOperation): RecordFailure {
   return { ok: false, reason: 'notSupported', operation };

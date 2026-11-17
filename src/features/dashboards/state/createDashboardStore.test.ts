@@ -1,16 +1,24 @@
-import { describe, expect, it, vi } from 'vite-plus/test';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 import { dashboardSchema, orderWidgets } from '@/core/dashboard/dashboardSchema';
-import { testDashboard } from '@/testing/fixtures/dashboards';
-import { getDashboard } from '../data/dashboardApi';
+import { AppError } from '@/core/errors/AppError';
+import { configureRecordProviders, setActiveRecordProviderId } from '@/lib/records/activeRecordProvider';
+import { testDashboard, testLoaded } from '@/testing/fixtures/dashboards';
+import type { DashboardSource } from '../data/dashboardSource';
 import { draftKey, hasDraft } from '../data/drafts';
 import { createDashboardStore, selectDashboard } from './createDashboardStore';
 
 const readingOrder = (store: ReturnType<typeof createDashboardStore>) =>
   Object.keys(orderWidgets(selectDashboard(store.getState())).widgets);
 
+const record = (placeId: string, revision = 1): DashboardSource => ({ kind: 'record', placeId, revision });
+const savedAs = (revision: number) =>
+  vi.fn(async (): Promise<DashboardSource> => record('browser', revision));
+
+afterEach(() => vi.useRealTimers());
+
 describe('dashboard editing', () => {
   it('keeps one step per drag/resize or field blur and ignores identical updates', () => {
-    const store = createDashboardStore(testDashboard(), { shouldPersist: false });
+    const store = createDashboardStore(testLoaded(), { shouldPersist: false });
     const actions = store.getState().actions;
     actions.commitLayout(
       'lg',
@@ -34,14 +42,23 @@ describe('dashboard editing', () => {
     expect(store.getState().doc.widgets.a?.title).toBe('First');
   });
 
-  it('saves a new baseline, keeps undo, and makes the dashboard dirty again on undo after Save', async () => {
-    const store = createDashboardStore(testDashboard());
+  it('saves a new baseline and source, keeps undo, and makes the dashboard dirty again on undo after Save', async () => {
+    const save = savedAs(2);
+    const store = createDashboardStore(testLoaded(), { save });
     const actions = store.getState().actions;
     actions.editWidget('a', { title: 'Saved title' });
     await actions.save();
     expect(store.getState().isDirty).toBe(false);
-    expect((await getDashboard('test')).widgets.a?.title).toBe('Saved title');
-    expect(localStorage.getItem(draftKey('test'))).toBeNull();
+    // Save sent the source the dashboard was loaded from, and the store keeps what came back.
+    expect(save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        widgets: expect.objectContaining({ a: expect.objectContaining({ title: 'Saved title' }) }),
+      }),
+      record('browser', 1),
+    );
+    expect(store.getState().source).toEqual(record('browser', 2));
+    expect(store.getState().saveState).toBe('idle');
+    expect(localStorage.getItem(draftKey('browser', 'test'))).toBeNull();
     expect(store.temporal.getState().pastStates).toHaveLength(1);
     actions.undo();
     expect(store.getState().isDirty).toBe(true);
@@ -53,10 +70,10 @@ describe('dashboard editing', () => {
   it('preserves edits made while Save is pending', async () => {
     let finish!: () => void;
     const save = () =>
-      new Promise<void>((resolve) => {
-        finish = resolve;
+      new Promise<DashboardSource>((resolve) => {
+        finish = () => resolve(record('browser', 2));
       });
-    const store = createDashboardStore(testDashboard(), { save });
+    const store = createDashboardStore(testLoaded(), { save });
     const actions = store.getState().actions;
     actions.editWidget('a', { title: 'Snapshot' });
     const saving = actions.save();
@@ -69,10 +86,10 @@ describe('dashboard editing', () => {
   });
 
   it('restores a per-dashboard draft; Discard restores baseline and clears draft/history', () => {
-    const first = createDashboardStore(testDashboard());
+    const first = createDashboardStore(testLoaded());
     first.getState().actions.editWidget('a', { title: 'Draft' });
-    const reloaded = createDashboardStore(testDashboard());
-    expect(hasDraft('test')).toBe(true);
+    const reloaded = createDashboardStore(testLoaded());
+    expect(hasDraft('browser', 'test')).toBe(true);
     expect(reloaded.getState().doc.widgets.a?.title).toBe('Draft');
     reloaded.getState().actions.editWidget('b', { description: 'Another change' });
     reloaded.getState().actions.discard();
@@ -80,27 +97,29 @@ describe('dashboard editing', () => {
     expect(reloaded.getState().isDirty).toBe(false);
     expect(reloaded.temporal.getState().pastStates).toHaveLength(0);
     expect(reloaded.temporal.getState().futureStates).toHaveLength(0);
-    expect(localStorage.getItem(draftKey('test'))).toBeNull();
+    expect(localStorage.getItem(draftKey('browser', 'test'))).toBeNull();
   });
 
   it('leaves the dashboard dirty after a failed Save and preserves an unreadable draft', async () => {
-    const save = async () => {
+    const save = async (): Promise<DashboardSource> => {
       throw new Error('Disk full');
     };
-    const store = createDashboardStore(testDashboard(), { save });
+    const store = createDashboardStore(testLoaded(), { save });
     store.getState().actions.editWidget('a', { title: 'Keep me' });
     await expect(store.getState().actions.save()).rejects.toThrow('Disk full');
     expect(store.getState().isDirty).toBe(true);
-    expect(localStorage.getItem(draftKey('test'))).toContain('Keep me');
-    localStorage.setItem(draftKey('test'), 'broken');
-    const recovered = createDashboardStore(testDashboard(), { save });
+    expect(localStorage.getItem(draftKey('browser', 'test'))).toContain('Keep me');
+    localStorage.setItem(draftKey('browser', 'test'), 'broken');
+    const recovered = createDashboardStore(testLoaded(), { save });
     expect(recovered.getState().draftError).toContain('kept');
-    expect(localStorage.getItem(draftKey('test'))).toBe('broken');
+    expect(localStorage.getItem(draftKey('browser', 'test'))).toBe('broken');
   });
 
   it('isolates providers and keeps selection, breakpoint and now out of undo', () => {
-    const one = createDashboardStore(testDashboard(), { shouldPersist: false });
-    const two = createDashboardStore({ ...testDashboard(), id: 'other' }, { shouldPersist: false });
+    const one = createDashboardStore(testLoaded(), { shouldPersist: false });
+    const two = createDashboardStore(testLoaded({ ...testDashboard(), id: 'other' }), {
+      shouldPersist: false,
+    });
     const actions = one.getState().actions;
     actions.openTool({ kind: 'palette' });
     actions.setBreakpoint('md');
@@ -114,8 +133,8 @@ describe('dashboard editing', () => {
   });
 
   it('sets the default time as one undoable document step that Save keeps', async () => {
-    const save = vi.fn().mockResolvedValue(undefined);
-    const store = createDashboardStore(testDashboard(), { shouldPersist: false, save });
+    const save = savedAs(2);
+    const store = createDashboardStore(testLoaded(), { shouldPersist: false, save });
     const actions = store.getState().actions;
     actions.setDefaultTime({ from: 'now-7d', to: 'now' }, '5m');
     actions.setDefaultTime({ from: 'now-7d', to: 'now' }, '5m');
@@ -126,6 +145,7 @@ describe('dashboard editing', () => {
     await actions.save();
     expect(save).toHaveBeenCalledWith(
       expect.objectContaining({ timeRange: { from: 'now-7d', to: 'now' }, refresh: '5m' }),
+      expect.anything(),
     );
     actions.undo();
     expect(store.getState().doc.timeRange).toEqual(testDashboard().timeRange);
@@ -133,7 +153,7 @@ describe('dashboard editing', () => {
   });
 
   it('adds and duplicates at the bottom, removes with one step, and exports/imports identical documents', () => {
-    const store = createDashboardStore(testDashboard(), { shouldPersist: false });
+    const store = createDashboardStore(testLoaded(), { shouldPersist: false });
     const actions = store.getState().actions;
     const copy = actions.duplicate('a');
     expect(store.getState().doc.layouts.lg.at(-1)?.i).toBe(copy);
@@ -163,5 +183,88 @@ describe('dashboard editing', () => {
         layouts: { lg: dashboard.layouts.lg.map((item) => ({ ...item, w: 13 })) },
       }).success,
     ).toBe(false);
+  });
+});
+
+describe('saving', () => {
+  const deferred = () => {
+    let resolve!: (source: DashboardSource) => void;
+    const promise = new Promise<DashboardSource>((res) => {
+      resolve = res;
+    });
+    return { promise, resolve };
+  };
+
+  it('sends the place it was loaded from, even when the place in use changes during the save', async () => {
+    const load = async () => ({}) as never;
+    configureRecordProviders({ browser: { name: 'This browser', load }, convex: { name: 'Convex', load } });
+    setActiveRecordProviderId('convex');
+    const pending = deferred();
+    const save = vi.fn(() => pending.promise);
+    const store = createDashboardStore(
+      { ...testLoaded(), source: record('browser') },
+      { shouldPersist: false, save },
+    );
+    store.getState().actions.editWidget('a', { title: 'Edited' });
+    const saving = store.getState().actions.save();
+
+    setActiveRecordProviderId('browser');
+    setActiveRecordProviderId('convex');
+    pending.resolve(record('browser', 2));
+    await saving;
+
+    expect(save).toHaveBeenCalledWith(expect.anything(), record('browser'));
+    expect(store.getState().source).toEqual(record('browser', 2));
+  });
+
+  it('says it is waiting after ten seconds, keeps waiting, and ends idle when the result arrives', async () => {
+    vi.useFakeTimers();
+    const pending = deferred();
+    const store = createDashboardStore(testLoaded(), { shouldPersist: false, save: () => pending.promise });
+    store.getState().actions.editWidget('a', { title: 'Edited' });
+    const saving = store.getState().actions.save();
+    expect(store.getState().saveState).toBe('saving');
+
+    await vi.advanceTimersByTimeAsync(10_000);
+    expect(store.getState().saveState).toBe('waiting');
+    await vi.advanceTimersByTimeAsync(60_000);
+    expect(store.getState().saveState).toBe('waiting');
+
+    pending.resolve(record('browser', 2));
+    await saving;
+    expect(store.getState().saveState).toBe('idle');
+    expect(store.getState().isDirty).toBe(false);
+  });
+
+  it('refuses a second Save, and Discard and Import, while a write is pending', async () => {
+    const pending = deferred();
+    const save = vi.fn(() => pending.promise);
+    const store = createDashboardStore(testLoaded(), { shouldPersist: false, save });
+    const actions = store.getState().actions;
+    actions.editWidget('a', { title: 'Edited' });
+    const saving = actions.save();
+    await actions.save();
+    actions.discard();
+    expect(() => actions.importDocument(testDashboard())).toThrow('Wait for the save');
+    expect(save).toHaveBeenCalledTimes(1);
+    expect(store.getState().doc.widgets.a?.title).toBe('Edited');
+    pending.resolve(record('browser', 2));
+    await saving;
+  });
+
+  it('keeps the draft and the edits on a conflict, and lets the user try again', async () => {
+    const save = vi
+      .fn<() => Promise<DashboardSource>>()
+      .mockRejectedValueOnce(new AppError('conflict', 'This dashboard was changed elsewhere.'))
+      .mockResolvedValueOnce(record('browser', 5));
+    const store = createDashboardStore(testLoaded(), { save });
+    const actions = store.getState().actions;
+    actions.editWidget('a', { title: 'Mine' });
+    await expect(actions.save()).rejects.toMatchObject({ code: 'conflict' });
+    expect(store.getState()).toMatchObject({ saveState: 'failed', isDirty: true });
+    expect(localStorage.getItem(draftKey('browser', 'test'))).toContain('Mine');
+
+    await actions.save();
+    expect(store.getState()).toMatchObject({ saveState: 'idle', isDirty: false });
   });
 });

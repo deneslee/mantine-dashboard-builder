@@ -1,8 +1,10 @@
 import { Alert, Button, Group, Stack, Text, VisuallyHidden } from '@mantine/core';
 import { useHotkeys, useMediaQuery, useWindowEvent } from '@mantine/hooks';
-import { Link, useNavigate, useParams, useSearch } from '@tanstack/react-router';
+import { Link, useNavigate, useParams, useRouter, useSearch } from '@tanstack/react-router';
 import { IconArrowLeft } from '@tabler/icons-react';
 import { Activity, lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useActivePlace } from '@/lib/records/activeRecordProvider';
+import { usePlugins } from '@/plugins/usePlugins';
 import { RouteBreadcrumbs } from '@/shell/breadcrumbs/RouteBreadcrumbs';
 import { Page } from '@/ui/components/Page';
 import { SplitViewPane, SplitViewRoot } from '@/ui/components/SplitView/SplitViewRoot';
@@ -49,6 +51,30 @@ function Announcer() {
     <VisuallyHidden role="status" aria-live="polite">
       {announcement}
     </VisuallyHidden>
+  );
+}
+
+/**
+ * Shown when the place in use is no longer the one this dashboard was opened from (storage was switched
+ * here or in another tab). The editor stays where it is and Save goes to its own place; the button
+ * reloads the route, which opens the dashboard from the place in use.
+ */
+function OpenedFromBanner() {
+  const sourcePlaceId = useDashboard((s) => s.source.placeId);
+  const active = useActivePlace();
+  const { recordProviders } = usePlugins();
+  const router = useRouter();
+  if (sourcePlaceId === active.id) return null;
+  const sourceName = recordProviders[sourcePlaceId]?.name ?? sourcePlaceId;
+  return (
+    <Alert color="info" title={`Opened from ${sourceName}`}>
+      <Group gap="sm">
+        <Text size="sm">Save goes there.</Text>
+        <Button size="xs" variant="default" onClick={() => void router.invalidate()}>
+          {`Open ${active.name}'s version`}
+        </Button>
+      </Group>
+    </Alert>
   );
 }
 
@@ -180,6 +206,7 @@ export function DashboardPage() {
         <SplitViewRoot>
           <SplitViewPane id="dashboard" label="Dashboard" defaultSize={100} min="360px">
             <Stack gap="md" className={classes.canvas}>
+              <OpenedFromBanner />
               {draftError && (
                 <Alert color="danger" title="Draft storage">
                   {draftError}

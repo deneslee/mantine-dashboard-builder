@@ -1,6 +1,7 @@
 import { createContext, use } from 'react';
 import { useStore } from 'zustand';
 import { useShallow } from 'zustand/shallow';
+import type { LoadedDashboard } from '../data/dashboardSource';
 import { resolveDashboardTime, type DashboardSearch, type DashboardTime } from '../dashboardSearch';
 import { selectDashboard, type DashboardState, type DashboardStore } from './createDashboardStore';
 
@@ -43,4 +44,10 @@ export function useReadNow() {
 export function useReadDashboard() {
   const store = useDashboardStore();
   return () => selectDashboard(store.getState());
+}
+
+/** What Save last stored (the baseline and its source), read when needed: for updating the query cache. */
+export function useReadSaved() {
+  const store = useDashboardStore();
+  return (): LoadedDashboard => ({ document: store.getState().baseline, source: store.getState().source });
 }

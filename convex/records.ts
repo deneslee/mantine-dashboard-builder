@@ -94,7 +94,11 @@ export const remove = mutation({
   },
 });
 
-/** Replaces the collection with the given records, ids and revisions kept, in one transaction. */
+/**
+ * Replaces the collection with the given records, in one transaction. Ids and data are kept; each
+ * revision becomes the highest one the collection held before plus the record's own, so every
+ * revision after an import is above every revision before it (an open editor's save is a conflict).
+ */
 export const importCollection = mutation({
   args: { collection: v.string(), records: v.array(recordArg) },
   handler: async (ctx, { collection, records }) => {
@@ -111,12 +115,15 @@ export const importCollection = mutation({
       throw new Error(
         `The "${collection}" collection holds more than ${MAX_RECORDS} records; it cannot be replaced.`,
       );
+    if (new Set(records.map((record) => record.id)).size !== records.length)
+      throw new Error('The import holds the same record id twice.');
+    const previousMax = existing.reduce((max, doc) => Math.max(max, doc.revision), 0);
     for (const doc of existing) await ctx.db.delete('records', doc._id);
     for (const record of records)
       await ctx.db.insert('records', {
         collection,
         recordId: record.id,
-        revision: record.revision,
+        revision: previousMax + record.revision,
         data: record.data,
       });
     return { count: records.length };

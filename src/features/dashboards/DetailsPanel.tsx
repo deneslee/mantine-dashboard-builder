@@ -1,6 +1,6 @@
 import { Badge, DataList, Group, Stack, Text } from '@mantine/core';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { useParams } from '@tanstack/react-router';
+import { useLoaderData, useParams } from '@tanstack/react-router';
 import dayjs from 'dayjs';
 import { fontWeight } from '@/ui/tokens/semantic';
 import { dashboardQuery } from './data/dashboardQueries';
@@ -8,7 +8,9 @@ import { dashboardQuery } from './data/dashboardQueries';
 /** Context-bar tab on a dashboard route: what this dashboard is. */
 export function DetailsPanel() {
   const { id } = useParams({ from: '/dashboards/$id' });
-  const { data } = useSuspenseQuery(dashboardQuery(id));
+  const { place } = useLoaderData({ from: '/dashboards/$id' });
+  const { data: loaded } = useSuspenseQuery(dashboardQuery(place, id));
+  const data = loaded.document;
   return (
     <Stack p="md" gap="md">
       <Stack gap="3xs">
