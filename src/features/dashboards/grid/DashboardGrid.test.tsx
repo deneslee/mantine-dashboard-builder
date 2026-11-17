@@ -1,3 +1,4 @@
+import { IconChartLine } from '@tabler/icons-react';
 import userEvent from '@testing-library/user-event';
 import { RouterProvider, useSearch } from '@tanstack/react-router';
 import { lazy } from 'react';
@@ -67,6 +68,9 @@ function FrameName({ frames }: WidgetProps<unknown>) {
 const fieldWidget = defineWidget({
   type: 'field',
   name: 'Field',
+  description: '',
+  icon: IconChartLine,
+  queryTypes: 'any',
   defaultSize: { w: 6, h: 3 },
   isTimeAware: false,
   optionsSchema: z.object({}),
@@ -77,6 +81,9 @@ const fieldWidget = defineWidget({
 const nameWidget = defineWidget({
   type: 'name',
   name: 'Name',
+  description: '',
+  icon: IconChartLine,
+  queryTypes: 'any',
   defaultSize: { w: 6, h: 3 },
   isTimeAware: true,
   optionsSchema: z.object({}),
@@ -169,6 +176,9 @@ function renderGrid() {
     widgets: { name: nameWidget, field: fieldWidget },
     datasources: { deferred: datasource, broken: brokenDatasource },
     types: {},
+    recordProviders: {},
+    panels: {},
+    actions: {},
     build: { catalog: [] },
   };
   const store = createDashboardStore(dashboard, { shouldPersist: false });

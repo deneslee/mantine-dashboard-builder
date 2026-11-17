@@ -116,38 +116,36 @@ The promises the parts of the builder make to each other. Each contract says who
 
 **Kinds**
 
-| Kind                                      | Today                   | Target                               |
-| ----------------------------------------- | ----------------------- | ------------------------------------ |
-| Widgets                                   | Yes                     | Extended, see below                  |
-| Datasources and optional datasource types | Yes                     | Unchanged                            |
-| Record providers                          | No                      | New                                  |
-| Context-bar panels                        | Declared per route only | Also contributed by plugins          |
-| Actions                                   | No                      | New                                  |
-| Pages, shared services                    | No                      | Later, when the rehab app needs them |
+| Kind                                      | Today                                      | Target                               |
+| ----------------------------------------- | ------------------------------------------ | ------------------------------------ |
+| Widgets                                   | Yes                                        | Extended, see below                  |
+| Datasources and optional datasource types | Yes                                        | Unchanged                            |
+| Record providers                          | Registry, empty                            | Plugins add providers                |
+| Context-bar panels                        | Declared per route; plugin registry, empty | Also contributed by plugins          |
+| Actions                                   | Registry, empty                            | Plugins add actions                  |
+| Pages, shared services                    | No                                         | Later, when the rehab app needs them |
 
 **What a widget declares**
 
-| Field                                | Today                          | Target                                                                                         |
-| ------------------------------------ | ------------------------------ | ---------------------------------------------------------------------------------------------- |
-| Type, name, sizes, time-awareness    | Yes                            | Kept; part of the metadata                                                                     |
-| Options schema                       | Yes                            | Kept                                                                                           |
-| Component (lazy) and skeleton        | Yes                            | Kept; loading is retried on failure                                                            |
-| Options editor                       | No, options are edited as JSON | New, lazy. Generated from the options schema by field type; a widget can supply its own (D6.1) |
-| Accepted query types                 | No                             | New; the editor offers only matching datasources                                               |
-| Metadata usable without loading code | Mixed into the definition      | Separated: name, description, icon, sizes                                                      |
+| Field                                | Today                                                                | Target                                                                                         |
+| ------------------------------------ | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Type, name, sizes, time-awareness    | Yes                                                                  | Kept; part of the metadata                                                                     |
+| Options schema                       | Yes                                                                  | Kept                                                                                           |
+| Component (lazy) and skeleton        | Yes, loading retried on failure                                      | Kept; loading is retried on failure                                                            |
+| Options editor                       | Declared (optional lazy slot); options are edited as JSON until D6.1 | New, lazy. Generated from the options schema by field type; a widget can supply its own (D6.1) |
+| Accepted query types                 | Declared (`queryTypes`)                                              | New; the editor offers only matching datasources                                               |
+| Metadata usable without loading code | Declared (`WidgetMeta`, `listWidgetMeta`)                            | Separated: name, description, icon, sizes                                                      |
 
 **Rules**
 
 - Plugins are chosen at build time through static lists. No runtime installation.
 - A plugin is one definition object listing everything it contributes, so setup and start steps can be added later without reshaping plugins.
-- Each kind has one registry keyed by id. A duplicate id is an error at startup.
+- Each kind has one registry keyed by id. A duplicate id is an error at startup (`toRegistry`).
+- `queryTypes` names datasource kinds: a built-in datasource's id or an optional plugin's `DatasourceType.type`, or `'any'`.
+- An action is `{ id, label, icon, placements, load }`. `placements` is `'dashboard.header'` and/or `'widget.menu'`. Menus render one item per action whose placement matches and load its code on click; `run` receives an `ActionContext` of ids only (`dashboardId`, `widgetId`).
+- A context-bar panel names the TanStack route ids it applies to in `routes` (such as `/dashboards/$id`); `app/` adds the panel to the tabs of those routes.
 - Definitions are light and always loaded; components, editors and runtimes are lazy.
 - Isolation is an error boundary per tile plus schema checks on options and queries. No sandbox.
-
-**Open**
-
-- What an action is (its inputs, where it can appear).
-- How a context-bar panel says when it applies.
 
 ---
 

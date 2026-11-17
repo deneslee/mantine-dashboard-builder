@@ -1,3 +1,4 @@
+import { IconChartLine } from '@tabler/icons-react';
 import { ChartSkeleton } from '@/ui/components/Skeletons';
 import { defineWidget, lazyWidget } from '@/plugins/WidgetPlugin';
 import { chartOptions } from './chartOptions';
@@ -5,6 +6,9 @@ import { chartOptions } from './chartOptions';
 export const chartWidget = defineWidget({
   type: 'chart',
   name: 'Chart',
+  description: 'Values over time, as lines.',
+  icon: IconChartLine,
+  queryTypes: 'any',
   defaultSize: { w: 6, h: 6 },
   minSize: { w: 2, h: 3 },
   isTimeAware: true,
