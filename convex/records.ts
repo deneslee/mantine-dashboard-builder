@@ -102,10 +102,16 @@ export const importCollection = mutation({
       throw new Error(
         `A collection holds at most ${MAX_RECORDS} records; this import has ${records.length}.`,
       );
-    const existing = ctx.db
+    // Bounded read: `create` does not enforce the cap, so refuse to replace a collection that grew past it.
+    const existing = await ctx.db
       .query('records')
-      .withIndex('by_collection_and_recordId', (q) => q.eq('collection', collection));
-    for await (const doc of existing) await ctx.db.delete('records', doc._id);
+      .withIndex('by_collection_and_recordId', (q) => q.eq('collection', collection))
+      .take(MAX_RECORDS + 1);
+    if (existing.length > MAX_RECORDS)
+      throw new Error(
+        `The "${collection}" collection holds more than ${MAX_RECORDS} records; it cannot be replaced.`,
+      );
+    for (const doc of existing) await ctx.db.delete('records', doc._id);
     for (const record of records)
       await ctx.db.insert('records', {
         collection,

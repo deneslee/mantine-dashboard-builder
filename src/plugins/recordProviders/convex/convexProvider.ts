@@ -16,6 +16,9 @@ import {
 import { runListQuery } from '@/core/records/runListQuery';
 import { CONVEX_CAPABILITIES } from './convexCapabilities';
 
+/** The server's cap per collection (`MAX_RECORDS` in convex/records.ts); checked here so the user sees why. */
+const MAX_RECORDS = 2000;
+
 /** The three `ConvexClient` methods the provider uses, so a test can pass a fake. */
 export interface ConvexRecordClient {
   query<Query extends FunctionReference<'query'>>(
@@ -137,6 +140,7 @@ export function createConvexProvider({ client, id = 'convex' }: ConvexProviderOp
 
     subscribe(collection, onChange: (change: RecordChange) => void) {
       let known: Map<string, number> | undefined;
+      // Errors of the watched query are logged by the Convex client; a change feed has no error channel.
       const stop = client.onUpdate(api.records.listCollection, { collection }, ({ records }) => {
         const next = new Map(records.map((record) => [record.id, record.revision]));
         const before = known;
@@ -162,6 +166,11 @@ export function createConvexProvider({ client, id = 'convex' }: ConvexProviderOp
     async importCollection(data) {
       if (data.formatVersion !== COLLECTION_EXPORT_VERSION || !Array.isArray(data.records))
         throw new AppError('validation', 'This is not a collection export this version can read.');
+      if (data.records.length > MAX_RECORDS)
+        throw new AppError(
+          'validation',
+          `A collection holds at most ${MAX_RECORDS} records; this import has ${data.records.length}.`,
+        );
       const { count } = await call(() =>
         client.mutation(api.records.importCollection, {
           collection: data.collection,

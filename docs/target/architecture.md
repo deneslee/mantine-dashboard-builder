@@ -77,6 +77,7 @@ Each rule comes from one decision. The number in brackets is the decision.
 14. **Editors come from the schema.** A hand-written editor is the exception. (D6.1)
 15. **Layout is not animated.** Panels slide with their content frozen, so content lays out once. (D7.3)
 16. **A motion library is local to a feature**, never app-wide. (D7.1)
+17. **Convex's TanStack Query adapter is not used.** The Convex provider calls `ConvexClient` directly and keeps the contract's record query keys. (D4)
 
 ## Not decided
 
