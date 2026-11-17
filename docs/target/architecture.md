@@ -27,7 +27,7 @@ How the builder should be put together after the restructure. [current-state.md]
 | Plugins           | Static lists chosen at build time                                     | New kinds: context-bar panels, actions, record providers. A widget declares its options editor, accepted query types and metadata                          |
 | Isolation         | An error boundary per tile and schema checks                          | Loading a widget's code is retried on failure                                                                                                              |
 | State             | One store per open dashboard; undo and drafts                         | The URL always owns the time range                                                                                                                         |
-| Charts            | The chart library is chosen inside each widget plugin                 | ECharts becomes the default; the Recharts widget stays as a second renderer                                                                                |
+| Charts            | The chart library is chosen inside each widget plugin                 | Done: the `chart` widget draws with ECharts; Recharts is the `chart-recharts` widget                                                                       |
 | Dashboard layout  | One flat grid, same column counts                                     | The double layout at a breakpoint is fixed. Rows, tabs or sections come right after the restructure                                                        |
 | Saving dashboards | Version number, upgrade step by step on read                          | Dashboards are saved through the record provider, so they follow the storage setting                                                                       |
 | Context bar       | Route-declared tabs                                                   | A page can also render live content into it                                                                                                                |
@@ -105,7 +105,7 @@ Areas to review and rethink, in this order. Concrete steps are written next to t
 7. The record provider contract, then the browser-storage provider, then the Convex provider.
 8. The storage setting, with export and import.
 9. Dashboards saved through the record provider.
-10. The chart widget: ECharts as the default renderer, Recharts kept as a second one.
+10. The chart widget: ECharts as the default renderer, Recharts kept as a second one. Done: `chart` is ECharts, `chart-recharts` is Recharts.
 11. The grid's double layout at a breakpoint.
 12. Option editors generated from the schema.
 13. Live content in the context bar.
