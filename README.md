@@ -60,11 +60,13 @@ Saves and drafts stay in this browser's `localStorage`; the files in `public/dat
 | `plugins.json` | The optional plugins in the build, `[]` by default; `plugins.config.ts` reads it                                                                                                                        |
 | `public/data/` | Seed dashboards (`dashboards/*.json`) and data frames read by the `local-json` datasource                                                                                                               |
 | `docs/`        | Two things only: `target/` (where the app is going: architecture and contracts) and [current-state.md](docs/current-state.md) (how it is built today; not the goal)                                     |
-| `floorplan/`   | A generated map of the code: `node floorplan/query.mjs overview`                                                                                                                                        |
-| `apps/docs/`   | The capability catalog: what's fixed, the core capabilities and their providers, and the plugins ([core](apps/docs/core.md), [potential](apps/docs/potential.md)); a docs site later                    |
-| `AGENTS.md`    | Rules for anyone writing code here, people or agents                                                                                                                                                    |
-| `lint/`        | The local oxlint plugin for the token and style rules, and the tests proving each rule fires                                                                                                            |
-| `.storybook/`  | Storybook config; every chrome and dashboard state has a story, and `pnpm test` runs each one in Chromium                                                                                               |
+
+                                          |
+
+| `apps/docs/` | The capability catalog: what's fixed, the core capabilities and their providers, and the plugins ([core](apps/docs/core.md), [potential](apps/docs/potential.md)); a docs site later |
+| `AGENTS.md` | Rules for anyone writing code here, people or agents |
+| `lint/` | The local oxlint plugin for the token and style rules, and the tests proving each rule fires |
+| `.storybook/` | Storybook config; every chrome and dashboard state has a story |
 
 ## Frame behaviour
 

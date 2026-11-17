@@ -1,63 +1,36 @@
-<!-- intent-skills:start -->
-
-## Skill Loading
-
-Use the repository’s installed Intent. If it is unavailable, report the missing dependency instead of downloading a replacement.
-Before editing files for a substantial task:
-
-- Run `pnpm exec intent list` from the workspace root to see available local skills.
-- If a listed skill matches the task, run `pnpm exec intent load <package>#<skill>` before changing files.
-- Use the loaded `SKILL.md` guidance while making the change.
-- Monorepos: when working across packages, run the skill check from the workspace root and prefer the local skill for the package being changed.
-- Multiple matches: prefer the most specific local skill for the package or concern you are changing; load additional skills only when the task spans multiple packages or concerns.
-
-<!-- intent-skills:end -->
-
 # AGENTS.md
-
-Rules for humans and coding agents working in this repo. Read before writing code. This file holds the rules; the reasons and details live in the docs each section links to, so don't copy them here.
 
 ## Commands
 
-    pnpm dev              # http://localhost:5173
     pnpm dev:devtools     # same, plus TanStack Devtools, Vite DevTools and click-to-source (hold Alt+Shift, click)
     pnpm build            # production build
-    pnpm build:analyze    # production build, then Vite DevTools (chunks, modules, plugins) on http://localhost:9999
     pnpm lint             # oxlint + type check (tsgolint) + Stylelint; `pnpm typecheck` is the same lint run
-    pnpm test             # Vitest: node + jsdom tests and every story in Chromium; `vp test run <path>` runs one file
+    `vp test run <path>` runs one file, NEVER use pnpm test
     pnpm test:unit        # node + jsdom only (fast)
-    pnpm test:stories     # stories only (needs `pnpm exec playwright install chromium` once)
     pnpm test:changed     # only tests affected by uncommitted changes: the check while working
-    pnpm storybook        # http://localhost:6006
     pnpm relay            # the relay for Azure SQL and MongoDB, on http://127.0.0.1:8787
     pnpm deps             # outdated packages; `deps:up` picks interactively, `deps:mantine` etc. move a group together
 
-`build`, `typecheck`, `lint`, `format:check` and `test*` are cached by Vite Task (the `check:*` tasks in `vite.config.ts`): a rerun with no input changed replays the last result in seconds. Don't rerun them to reread output; save it once and search it. `vp cache clean` resets the cache.
-
 **Before you call a change done:**
 
-- `pnpm lint` and the tests for what you touched pass. Run `pnpm build` when types, imports or routes changed.
-- Every new component state has a story, and every behaviour a test.
-- Oxfmt has formatted the files, and the commit message follows Conventional Commits.
 - `docs/target/` still matches what you built ([Planning](#planning)).
 
 ## Read first
-
-Versions are in `package.json`.
 
 | Working on                                                  | Read                                                                                                   |
 | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | Where the app is going: the rules and the contracts         | [target/architecture.md](docs/target/architecture.md), [target/contracts.md](docs/target/contracts.md) |
 | How the app is built today (not the goal, goes out of date) | [current-state.md](docs/current-state.md)                                                              |
 | What's fixed, core or swappable, and the plugins            | [core.md](apps/docs/core.md), [potential.md](apps/docs/potential.md)                                   |
-| Where a module lives                                        | `node floorplan/query.mjs overview`, then `find` or `show`                                             |
 
 Older docs, plans and reviews are outside this repo, in the `builder-docs` folder. They are history, not guidance: do not read them unless asked.
 
+For code exploring use qartez-mcp, `qartez` cli is also avaible
+
 ## Mantine first
 
-1. **Read the docs for the installed Mantine version** before using or replacing a component or hook: its Styles API (selectors, CSS variables, data attributes) and the theming pages (`createTheme`, `Component.extend`, `vars`, `classNames`, variants). [mantine.dev/llms.txt](https://mantine.dev/llms.txt) indexes every page as markdown.
-2. **Check the `@mantine/core` and `@mantine/hooks` exports before writing a component or hook.** Several custom ones here turned out to exist (`useTimeout`, `VisuallyHidden`, `EmptyState`, `Tooltip.Group`, `Splitter` / `useSplitter`). So do `DataList`, `Menubar`, `ComboboxPopover`, `Scroller`, `OverflowList`, `FloatingWindow`, `useNetwork` and `useHotkeys`.
+1. Always use **mantine-mcp** when working on Ui
+2. **Check the `@mantine/core` and `@mantine/hooks` exports before writing a component or hook.** Several custom ones here turned out to exist (`useTimeout`, `VisuallyHidden`, `EmptyState`, `Tooltip.Group`, `Splitter` / `useSplitter`). So do `DataList`, `Menubar`, `ComboboxPopover`, `Scroller`, `OverflowList`, `FloatingWindow`, `useNetwork` and `useHotkeys` and others.
 3. **Icon buttons** are `ActionIcon` + `Tooltip` + `aria-label`, never a custom button or `UnstyledButton`.
 4. **Dropdowns, selects and searchable lists** use `Combobox`, or `Select` / `Autocomplete` / `MultiSelect`, which wrap it.
 5. **Router links inside Mantine components** use `renderRoot={(props) => <Link to="…" {...props} />}`, so they stay real anchors with preloading.
@@ -139,20 +112,6 @@ The skills below cover the general rules; these are this project's choices.
 - **Errors:** throw or map to `AppError` (`@/core/errors/AppError`). Routes use `RouteError` / `NotFound`; widgets sit in `QueryBoundary`. First-load errors render inline, never as a toast.
 - **Loading:** a skeleton shaped like the content, from `@/ui/components/Skeletons`. Refetches keep the old data and show no skeleton.
 
-## Testing
-
-| Code                                           | Tested with                                                                                                                          | Vitest project      |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------- |
-| `core/`, `utils/`, datasource plugins, `lint/` | a unit test for every function with branching logic                                                                                  | `node`              |
-| stores (`create*Store`)                        | action semantics: undo steps, save, discard, draft, persisted migrations                                                             | `dom`               |
-| hooks with timers or DOM                       | `renderHook` from `@/testing/render`                                                                                                 | `dom`               |
-| components                                     | a story per visual state (render and a11y in Chromium), play functions for user flows, an RTL test only for logic a story can't show | `storybook` / `dom` |
-| thin routes, layout wrappers, generated code   | not tested                                                                                                                           | –                   |
-
-- **Tests sit next to their code** (`DataFrame.test.ts` beside `DataFrame.ts`). A test that imports no product code is deleted.
-- **One provider stack:** `render` and `renderHook` from `@/testing/render`, and every story, run inside `app/Providers`. Routers come from `createTestRouter` / `TestRouter`; page stories render the real app with `<AppStory url="…" />`. Don't build a `QueryClient` or a router by hand.
-- **Stories** have no `title:` (the sidebar mirrors `src/`), are named after states (`Default`, `Empty`, `Error`, `Editing`), and fail on any a11y violation; `color-contrast` is off until the light-scheme tokens pass.
-
 ## Skills
 
 When Grafana has a relevant analogue for the current work, use the
@@ -169,8 +128,6 @@ Both are local skills: `.agents/skills` is gitignored, so these paths are not li
 | `mantine-custom-components`, `mantine-combobox`, `mantine-form` | Components on Mantine's Styles API, Combobox, forms                       |
 | `task-research`, then `task-plan`                               | Research a task against Grafana, EUI and other systems, then plan it      |
 
-Don't use `frontend-design` in this repo: it picks its own fonts and palettes, and ours come from the tokens.
-
 <!-- Workflow instructions -->
 
 ## Planning
@@ -184,38 +141,6 @@ Don't use `frontend-design` in this repo: it picks its own fonts and palettes, a
 
 <!--VITE PLUS START-->
 
-# Using Vite+, the Unified Toolchain for the Web
-
-This project is using Vite+, a unified toolchain built on top of Vite, Rolldown, Vitest, tsdown, Oxlint, Oxfmt, and Vite Task. Vite+ wraps runtime management, package management, and frontend tooling in a single global CLI called `vp`. Vite+ is distinct from Vite, and it invokes Vite through `vp dev` and `vp build`. Run `vp help` to print a list of commands and `vp <command> --help` for information about a specific command.
-
-Docs are local at `node_modules/vite-plus/docs` or online at https://viteplus.dev/guide/.
-
-## Built-in Commands vs Scripts
-
-`vp <name>` runs a built-in command. `vp run <name>` runs a `package.json` script or a `vite.config.ts` task. Scripts cannot overwrite built-ins, so `vp dev` and `vp run dev` may do different things. Check `package.json` and `vite.config.ts` first, and run `vp run <name>` when the project defines a script or task with that name.
-
-## Running Scripts
-
-Run TypeScript and JavaScript files with `vpx <file>`, for example `vpx ./scripts/seed.ts --dry-run`. It handles enums, decorators, JSX, and tsconfig `paths`, so do not add `tsx` or `ts-node` to run scripts. `vpx --watch <file>` reruns the file when a file it uses changes, in place of `tsx watch`. `vp node <file>` runs plain Node.js.
-
-## Tool Versions
-
-Run `vp toolchain` to show versions and relationships in the active Vite+
-release. Add a tool name to select part of the graph. For example, run
-`vp toolchain vite`. Use `--global` to ignore the local `vite-plus` package. Use
-`vp why <package>` to show the package-manager dependency graph.
-
-## Review Checklist
-
-- [ ] Run `vp install` after pulling remote changes and before getting started.
-- [ ] Run `vp check` and `vp test` to format, lint, type check and test changes.
-- [ ] Check if there are `vite.config.ts` tasks or `package.json` scripts necessary for validation, run via `vp run <script>`.
-- [ ] If setup, runtime, or package-manager behavior looks wrong, run `vp env doctor` and include its output when asking for help.
-
-<!--VITE PLUS END-->
-
-<!-- convex-ai-start -->
-
 This project uses [Convex](https://convex.dev) as its backend.
 
 When working on Convex code, **always read
@@ -224,6 +149,6 @@ how to correctly use Convex APIs and patterns. The file contains rules that
 override what you may have learned about Convex from training data.
 
 Convex agent skills for common tasks can be installed by running
-`npx convex ai-files install`.
+`pnpm dlx convex ai-files install`.
 
 <!-- convex-ai-end -->
