@@ -1,0 +1,23 @@
+schema_version = 1
+
+[pipeline]
+name = "mantine-dashboard-builder"
+
+[task.digest-checks]
+kind = "digest"
+upstream = "deepseek"
+context = true
+temperature = 0.1
+instructions = "If all checks passed, reply in one short line with counts. If anything failed, list only the failing test/rule names, exact error messages, file paths, and line numbers."
+
+# Matches:
+# - pnpm lint / test / test:changed / build / typecheck
+# - vp run check:* / vp test / vp build / vp lint
+# - pnpm exec vp test / lint / build
+# Both at command start and after `cd <worktree> &&` or `;`
+[[hook.before_tool.shell]]
+name = "delegate-vp-checks"
+when = { command_matches = "(?:^|&&|;|\\()\\s*(?:pnpm\\s+(?:exec\\s+)?vp\\s+(?:run\\s+check:|test|build|lint)|pnpm\\s+(?:lint|test|build|typecheck)|vp\\s+(?:run\\s+check:|test|build|lint))" }
+action = "route"
+task = "digest-checks"
+mode = "swap"
