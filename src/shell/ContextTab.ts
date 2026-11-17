@@ -24,3 +24,20 @@ declare module '@tanstack/react-router' {
     contextTabs?: ContextTab[];
   }
 }
+
+/**
+ * A tab a mounted page adds to the context bar while it is mounted. The page renders its content
+ * (see `ContextBarPanel`), so there is no `component`. Keep `icon` and `badge` stable (module constants
+ * or memoized), like route tabs.
+ */
+export interface PageTab {
+  id: string;
+  label: string;
+  icon: Icon;
+  badge?: TabBadge;
+}
+
+/** A page tab as the bar holds it: the tab plus the detached element its content is portalled into. */
+export interface PageTabEntry extends PageTab {
+  host: HTMLElement;
+}

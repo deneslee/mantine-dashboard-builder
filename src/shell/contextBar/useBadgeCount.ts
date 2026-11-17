@@ -1,5 +1,5 @@
 import { useMemo, useSyncExternalStore } from 'react';
-import type { ContextTab, TabBadge } from '../ContextTab';
+import type { TabBadge } from '../ContextTab';
 
 const none = () => () => {};
 const zero = () => 0;
@@ -10,7 +10,7 @@ export function useBadgeCount(badge: TabBadge | undefined): number {
 }
 
 /** Live sum across all tabs; one subscription regardless of how many tabs the route declares. */
-export function useTotalBadgeCount(tabs: ContextTab[]): number {
+export function useTotalBadgeCount(tabs: ReadonlyArray<{ badge?: TabBadge }>): number {
   const combined = useMemo(() => {
     const badges = tabs.flatMap((t) => (t.badge ? [t.badge] : []));
     return {

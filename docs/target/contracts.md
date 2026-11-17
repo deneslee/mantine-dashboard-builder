@@ -125,6 +125,8 @@ The promises the parts of the builder make to each other. Each contract says who
 | Actions                                   | No                      | New                                  |
 | Pages, shared services                    | No                      | Later, when the rehab app needs them |
 
+A mounted page can add a context-bar tab with live content (`ContextBarPanel`); it lasts while the page is mounted.
+
 **What a widget declares**
 
 | Field                                | Today                          | Target                                                                                         |

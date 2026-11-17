@@ -1,9 +1,11 @@
 import { IconBell, IconInfoCircle } from '@tabler/icons-react';
+import { useState, type ReactNode } from 'react';
 import { describe, expect, it } from 'vite-plus/test';
-import { render, screen } from '@/testing/render';
+import { fireEvent, render, screen } from '@/testing/render';
 import { TestRouter } from '@/testing/TestRouter';
 import { ShellProvider } from '../ShellProvider';
-import type { ContextTab } from '../ContextTab';
+import type { ContextTab, PageTab } from '../ContextTab';
+import { ContextBarPanel } from './ContextBarPanel';
 import { useContextTabs } from './useContextTabs';
 
 const tab = (id: string, icon = IconInfoCircle): ContextTab => ({
@@ -14,6 +16,7 @@ const tab = (id: string, icon = IconInfoCircle): ContextTab => ({
 });
 const details = tab('details');
 const inbox = tab('notifications', IconBell);
+const pageTab = (id: string, icon = IconInfoCircle): PageTab => ({ id, label: id, icon });
 
 function TabIds() {
   return (
@@ -25,10 +28,34 @@ function TabIds() {
   );
 }
 
-function renderTabs(routeTabs: ContextTab[], globalTabs?: ContextTab[]) {
+function PageTabs({ tabs }: { tabs: PageTab[] }) {
+  return tabs.map((t) => (
+    <ContextBarPanel key={t.id} {...t}>
+      x
+    </ContextBarPanel>
+  ));
+}
+
+function HidablePage({ tabs }: { tabs: PageTab[] }) {
+  const [isShown, setShown] = useState(true);
+  return (
+    <>
+      <button onClick={() => setShown(false)}>Hide</button>
+      {isShown ? <PageTabs tabs={tabs} /> : null}
+    </>
+  );
+}
+
+function renderTabs(
+  routeTabs: ContextTab[],
+  globalTabs?: ContextTab[],
+  pageTabs: PageTab[] = [],
+  page: ReactNode = <PageTabs tabs={pageTabs} />,
+) {
   render(
     <TestRouter
       contextTabs={routeTabs}
+      page={page}
       wrap={(outlet) => (
         <ShellProvider globalTabs={globalTabs}>
           <TabIds />
@@ -53,5 +80,22 @@ describe('useContextTabs', () => {
   it('has no global tabs unless the app passes them', async () => {
     renderTabs([details]);
     expect(await screen.findByRole('status')).toHaveTextContent('details');
+  });
+
+  it('puts page tabs between route and global tabs', async () => {
+    renderTabs([tab('a')], [tab('g')], [pageTab('p')]);
+    expect(await screen.findByText('a,p,g')).toBeInTheDocument();
+  });
+
+  it('a route tab wins over a page tab with the same id', async () => {
+    renderTabs([tab('a')], undefined, [pageTab('a', IconBell)]);
+    expect(await screen.findByText('a')).toBeInTheDocument();
+  });
+
+  it('removes a page tab when its page unmounts', async () => {
+    renderTabs([tab('a')], undefined, [], <HidablePage tabs={[pageTab('p')]} />);
+    expect(await screen.findByText('a,p')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Hide' }));
+    expect(await screen.findByText('a')).toBeInTheDocument();
   });
 });

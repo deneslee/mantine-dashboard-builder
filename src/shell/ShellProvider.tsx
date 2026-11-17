@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react';
 import type { ContextTab } from './ContextTab';
 import { createShellStore, type ShellInit, type ShellStoreApi } from './createShellStore';
 import type { Nav } from './Nav';
+import { PageTabsProvider } from './contextBar/PageTabsProvider';
 import { ShellContext } from './useShell';
 
 const noTabs: ContextTab[] = [];
@@ -30,5 +31,9 @@ export function ShellProvider({
   globalTabs = noTabs,
 }: ShellProviderProps) {
   const [shellStore] = useState(() => store ?? createShellStore(initialState));
-  return <ShellContext value={{ store: shellStore, nav, globalTabs }}>{children}</ShellContext>;
+  return (
+    <ShellContext value={{ store: shellStore, nav, globalTabs }}>
+      <PageTabsProvider>{children}</PageTabsProvider>
+    </ShellContext>
+  );
 }
