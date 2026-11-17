@@ -9,13 +9,13 @@ decided-in: '10-decisions-data-plugins-state.md, decided 2026-11-13'
 
 The promises the parts of the builder make to each other. Each contract says who owns it, what goes in and out, the rules, and what is still open. Names are working names; exact types are settled when the work is done. Overview: [architecture.md](architecture.md).
 
-| Contract             | In one line                                                           | Exists today                                                 |
-| -------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------ |
-| 1. Widget data       | The only way a widget gets its frames                                 | Mostly; the rules are new                                    |
-| 2. Datasource        | Runs one query and returns frames                                     | Yes, unchanged                                               |
-| 3. Record provider   | Reads and writes editable rows                                        | The contract and browser storage; not registered or used yet |
-| 4. Plugin definition | How widgets, datasources and the new kinds are declared and collected | Partly                                                       |
-| 5. State ownership   | Which place owns which state                                          | Mostly; one change                                           |
+| Contract             | In one line                                                           | Exists today                                                                            |
+| -------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| 1. Widget data       | The only way a widget gets its frames                                 | Mostly; the rules are new                                                               |
+| 2. Datasource        | Runs one query and returns frames                                     | Yes, unchanged                                                                          |
+| 3. Record provider   | Reads and writes editable rows                                        | The contract, browser storage and Convex, both registered; nothing saves through it yet |
+| 4. Plugin definition | How widgets, datasources and the new kinds are declared and collected | Partly                                                                                  |
+| 5. State ownership   | Which place owns which state                                          | Mostly; one change                                                                      |
 
 ---
 
@@ -92,21 +92,28 @@ The promises the parts of the builder make to each other. Each contract says who
 - A list request (`ListQuery`) has four optional parts: search text, filters that must all match (a field, an operator, a value), sorting by several fields in order with ties broken by id, and a page (a size and the cursor of the previous page). The result has the records, the next cursor unless it is the last page, and the total when the provider can count.
 - Every record has a revision that goes up on each write. An update or delete can name the revision it was based on; when the record has changed since, the later edit is refused and the result carries the record as it is now. Without a revision the write overwrites.
 - The outcomes a caller must handle are returned, not thrown: not supported, not found, conflict.
+- The Convex provider keeps one table and one live query per collection, and filters, sorts and pages on the client. A collection reads at most 2000 records; above that the provider throws an error that says so. A record's fields are stored as a JSON string.
+- The Convex functions are public and there is no sign-in: anyone with the deployment URL can read and write every record. This must be closed before real data.
 
 **Where it lives**
 
-| Part                                     | File                                                                   |
-| ---------------------------------------- | ---------------------------------------------------------------------- |
-| The contract and its types               | `src/core/records/RecordProvider.ts`                                   |
-| Query keys, and what a write makes stale | `src/core/records/recordKeys.ts`                                       |
-| The plugin definition                    | `src/plugins/RecordProviderPlugin.ts`                                  |
-| The browser-storage provider             | `src/plugins/recordProviders/browserStorage/browserStorageProvider.ts` |
-| The suite every provider passes          | `src/testing/recordProviderSuite.ts`                                   |
+| Part                                     | File                                                                    |
+| ---------------------------------------- | ----------------------------------------------------------------------- |
+| The contract and its types               | `src/core/records/RecordProvider.ts`                                    |
+| Query keys, and what a write makes stale | `src/core/records/recordKeys.ts`                                        |
+| The plugin definition                    | `src/plugins/RecordProviderPlugin.ts`                                   |
+| The browser-storage provider             | `src/plugins/recordProviders/browserStorage/browserStorageProvider.ts`  |
+| Filter, sort and page a collection       | `src/core/records/runListQuery.ts`, used by both providers              |
+| The Convex provider and its plugin       | `src/plugins/recordProviders/convex/`                                   |
+| The Convex functions and table           | `convex/schema.ts`, `convex/records.ts`                                 |
+| The active-provider setting and service  | `src/lib/records/activeRecordProvider.ts`, `watchRecords.ts`            |
+| Registration                             | `src/app/recordProviders.ts`; Convex only when `VITE_CONVEX_URL` is set |
+| The suite every provider passes          | `src/testing/recordProviderSuite.ts`                                    |
 
 **Open**
 
 - How the first collections are defined before the Studio screens exist.
-- Whether sign-in is needed for the Convex provider in the hosted demo.
+- Sign-in for the Convex provider: none yet, see the rule above.
 
 ---
 
@@ -116,14 +123,14 @@ The promises the parts of the builder make to each other. Each contract says who
 
 **Kinds**
 
-| Kind                                      | Today                                      | Target                               |
-| ----------------------------------------- | ------------------------------------------ | ------------------------------------ |
-| Widgets                                   | Yes                                        | Extended, see below                  |
-| Datasources and optional datasource types | Yes                                        | Unchanged                            |
-| Record providers                          | Registry, empty                            | Plugins add providers                |
-| Context-bar panels                        | Declared per route; plugin registry, empty | Also contributed by plugins          |
-| Actions                                   | Registry, empty                            | Plugins add actions                  |
-| Pages, shared services                    | No                                         | Later, when the rehab app needs them |
+| Kind                                      | Today                                                               | Target                               |
+| ----------------------------------------- | ------------------------------------------------------------------- | ------------------------------------ |
+| Widgets                                   | Yes                                                                 | Extended, see below                  |
+| Datasources and optional datasource types | Yes                                                                 | Unchanged                            |
+| Record providers                          | Registry: browser storage, and Convex when `VITE_CONVEX_URL` is set | Plugins add providers                |
+| Context-bar panels                        | Declared per route; plugin registry, empty                          | Also contributed by plugins          |
+| Actions                                   | Registry, empty                                                     | Plugins add actions                  |
+| Pages, shared services                    | No                                                                  | Later, when the rehab app needs them |
 
 A mounted page can add a context-bar tab with live content (`ContextBarPanel`); it lasts while the page is mounted.
 
@@ -153,14 +160,14 @@ A mounted page can add a context-bar tab with live content (`ContextBarPanel`); 
 
 ## 5. State ownership
 
-| State                                                             | Owner                             | Change from today                                                                     |
-| ----------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------- |
-| Time range, refresh interval, time zone                           | The URL, always                   | None. The document keeps only its saved default, set with Use current time as default |
-| Which pane, widget or tab is open                                 | The URL                           | None                                                                                  |
-| Query results and records                                         | The query cache                   | Records are new                                                                       |
-| The dashboard document while it is open, edit state, undo history | One store per open dashboard      | None                                                                                  |
-| Drafts, shell layout, connections, user settings                  | Browser storage                   | None                                                                                  |
-| The active record provider                                        | A user setting in browser storage | New                                                                                   |
+| State                                                             | Owner                                                                                                | Change from today                                                                     |
+| ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Time range, refresh interval, time zone                           | The URL, always                                                                                      | None. The document keeps only its saved default, set with Use current time as default |
+| Which pane, widget or tab is open                                 | The URL                                                                                              | None                                                                                  |
+| Query results and records                                         | The query cache                                                                                      | Records are new                                                                       |
+| The dashboard document while it is open, edit state, undo history | One store per open dashboard                                                                         | None                                                                                  |
+| Drafts, shell layout, connections, user settings                  | Browser storage                                                                                      | None                                                                                  |
+| The active record provider                                        | A user setting in browser storage (`record-provider`), read by `lib/records/activeRecordProvider.ts` | Done                                                                                  |
 
 **Rules**
 

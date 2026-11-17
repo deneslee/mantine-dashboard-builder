@@ -95,6 +95,7 @@
     "zustand": "^5.1.0"
   },
   "devDependencies": {
+    "@edge-runtime/vm": "5.0.0",
     "@sentry/vite-plugin": "5.4.1",
     "@storybook/addon-a11y": "^10.6.7",
     "@storybook/addon-docs": "^10.6.7",
@@ -120,6 +121,7 @@
     "@vitejs/plugin-react": "^6.3.0",
     "@vitest/browser-playwright": "catalog:",
     "code-inspector-plugin": "2.0.9",
+    "convex-test": "0.0.71",
     "jsdom": "^31.0.0",
     "msw": "^3.0.5",
     "oxc-transform-react": "0.156.0",

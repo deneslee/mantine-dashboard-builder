@@ -80,17 +80,16 @@ Each rule comes from one decision. The number in brackets is the decision.
 
 ## Not decided
 
-| Item                                                                | State                                                                                                                                    |
-| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| Memoization policy (D3.3)                                           | Deferred until renders are measured                                                                                                      |
-| A server-side result cache (D1.5)                                   | Deferred                                                                                                                                 |
-| What resizable panels are built on (D5.3)                           | Deferred; work starts only after everything else is done                                                                                 |
-| Workspace tabs, several records open at once (D5.2)                 | Not in the restructure. An own tab strip when the rehab app's record views start; the URL must be able to name more than one open record |
-| The reduced-motion rule (D7.2)                                      | Opt-in per rule is the target, deferred; the first step is done with Motion                                                              |
-| Dashboard variables (D4.5), View Transitions (D7.4)                 | Deferred                                                                                                                                 |
-| How panels behave until D5.3 is done (D7.3)                         | Open: the frozen slide came with the panel library in the spike                                                                          |
-| When TanStack DB sits behind the record contract                    | Open. The contract does not depend on it                                                                                                 |
-| Whether Convex's query adapter coexists with the datasource queries | To check before the Convex provider is built                                                                                             |
+| Item                                                | State                                                                                                                                    |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Memoization policy (D3.3)                           | Deferred until renders are measured                                                                                                      |
+| A server-side result cache (D1.5)                   | Deferred                                                                                                                                 |
+| What resizable panels are built on (D5.3)           | Deferred; work starts only after everything else is done                                                                                 |
+| Workspace tabs, several records open at once (D5.2) | Not in the restructure. An own tab strip when the rehab app's record views start; the URL must be able to name more than one open record |
+| The reduced-motion rule (D7.2)                      | Opt-in per rule is the target, deferred; the first step is done with Motion                                                              |
+| Dashboard variables (D4.5), View Transitions (D7.4) | Deferred                                                                                                                                 |
+| How panels behave until D5.3 is done (D7.3)         | Open: the frozen slide came with the panel library in the spike                                                                          |
+| When TanStack DB sits behind the record contract    | Open. The contract does not depend on it                                                                                                 |
 
 ## What the restructure has to look at
 

@@ -39,6 +39,17 @@ export default defineConfig({
           css: { modules: { classNameStrategy: 'non-scoped' } },
         },
       },
+      // Convex functions on convex-test, which needs the edge runtime. Files under convex/ with two dots
+      // are not deployed (the Convex CLI skips them).
+      {
+        extends: true,
+        test: {
+          name: 'convex',
+          environment: 'edge-runtime',
+          include: ['convex/**/*.test.ts'],
+          server: { deps: { inline: ['convex-test'] } },
+        },
+      },
       // Every story renders (and passes its a11y check) in real Chromium; play functions test flows.
       {
         extends: true,

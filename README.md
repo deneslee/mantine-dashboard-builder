@@ -15,6 +15,7 @@ vp run dev          # http://localhost:5173/mantine-dashboard-builder/
 vp run dev:devtools # the same, with TanStack Devtools, Vite DevTools and click-to-source
 vp run storybook    # http://localhost:6006
 vp run relay        # the relay for Azure SQL and MongoDB, on http://127.0.0.1:8787
+npx convex dev      # pushes `convex/` to your Convex deployment (needed once, and after changes there)
 vp run test         # node + jsdom tests and every story in Chromium
 vp run test:unit    # node + jsdom only
 vp check            # Oxfmt, Oxlint and type checks
@@ -43,7 +44,7 @@ Dependencies update through [Renovate](.github/renovate.json5): grouped pull req
 | `/dashboards/infra`                                  | A virtualized 10k-row table                                                                                                          |
 | `/dashboards/broken`                                 | A document that fails validation: route error with retry                                                                             |
 | `/dashboards/missing`, `/anything`                   | 404 inside the frame                                                                                                                 |
-| `/settings`                                          | Appearance: theme, burger behaviour, dashboard density, reduced motion                                                               |
+| `/settings`                                          | Storage (where records are saved, export and import) and Appearance: theme, burger behaviour, dashboard density, reduced motion      |
 | `/datasources`                                       | Connections, the vault, the built-in datasources, and Plugins with Add to build (in `vp run dev` it edits `plugins.json`)            |
 | `/debug`                                             | Every toast level, dedupe, progress, mutation error, a throwing widget, all skeletons                                                |
 
@@ -54,6 +55,7 @@ Saves and drafts stay in this browser's `localStorage`; the files in `public/dat
 | Where          | What                                                                                                                                                                                                    |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `src/`         | The app: `app/` (routes, providers), `features/`, `shell/`, `plugins/`, `lib/`, `ui/`, `core/`, `utils/`, `testing/`. Layers, data flow and state are in [docs/current-state.md](docs/current-state.md) |
+| `convex/`      | The Convex functions and table behind the Convex record provider; the provider is registered only when `VITE_CONVEX_URL` is set in `.env.local`. Tests run in the `convex` Vitest project               |
 | `relay/`       | The relay: a small Node server (Hono) that runs SQL Server and MongoDB queries for the Azure SQL and MongoDB plugins                                                                                    |
 | `plugins.json` | The optional plugins in the build, `[]` by default; `plugins.config.ts` reads it                                                                                                                        |
 | `public/data/` | Seed dashboards (`dashboards/*.json`) and data frames read by the `local-json` datasource                                                                                                               |
