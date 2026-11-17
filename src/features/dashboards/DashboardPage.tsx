@@ -8,7 +8,6 @@ import { Page } from '@/ui/components/Page';
 import { SplitViewPane, SplitViewRoot } from '@/ui/components/SplitView/SplitViewRoot';
 import { dimensions } from '@/ui/tokens/dimensions';
 import { iconSize, iconStroke } from '@/ui/tokens/semantic';
-import { localTimeZone } from '@/core/time/timeRange';
 import { useDensity } from '@/lib/useDensity';
 import type { DashboardSearch } from './dashboardSearch';
 import { useAutoRefresh } from './data/useAutoRefresh';
@@ -23,11 +22,8 @@ import { EditToolbar } from './header/EditToolbar';
 import { RefreshButton } from './header/RefreshButton';
 import { RefreshPicker } from './header/RefreshPicker';
 import { TimeRangePicker } from './header/TimeRangePicker';
-import { useDashboard, useDashboardActions, useReadDashboard } from './state/useDashboard';
+import { useDashboard, useDashboardActions, useDashboardTime, useReadDashboard } from './state/useDashboard';
 import classes from './DashboardPage.module.css';
-
-/** The viewer's time zone, when neither the URL nor the dashboard sets one. */
-const LOCAL_TIME_ZONE = localTimeZone();
 
 const InspectPane = lazy(() =>
   import('./inspect/InspectPane').then((module) => ({ default: module.InspectPane })),
@@ -65,9 +61,8 @@ export function DashboardPage() {
   const read = useReadDashboard();
   const title = useDashboard((s) => s.doc.title);
   const description = useDashboard((s) => s.doc.description);
-  const defaultRange = useDashboard((s) => s.timeRange);
-  const defaultRefresh = useDashboard((s) => s.refresh);
-  const savedTimeZone = useDashboard((s) => s.doc.timeZone);
+  const defaultRange = useDashboard((s) => s.doc.timeRange);
+  const defaultRefresh = useDashboard((s) => s.doc.refresh);
   const draftError = useDashboard((s) => s.draftError);
   const isEmpty = useDashboard((s) => s.doc.layouts.lg.length === 0);
   const isQueryEditorOpen = useDashboard(
@@ -105,11 +100,7 @@ export function DashboardPage() {
       });
     focusWidgetMenu(pane === 'inspect' ? inspectId : pane === 'widget' ? search.widget : undefined);
   };
-  const range = isEditing
-    ? defaultRange
-    : { from: search.from ?? defaultRange.from, to: search.to ?? defaultRange.to };
-  const refresh = isEditing ? defaultRefresh : (search.refresh ?? defaultRefresh);
-  const timeZone = (!isEditing && search.tz) || savedTimeZone || LOCAL_TIME_ZONE;
+  const { range, refresh, timeZone } = useDashboardTime(search);
   const refreshAll = useRefreshAll();
   useAutoRefresh(refresh, refreshAll);
   // A new dashboard range or time zone gets a new `now`. A layout effect, so it lands before the
@@ -137,7 +128,8 @@ export function DashboardPage() {
     )
       void navigate({ search: (prev) => ({ ...prev, view: undefined }), resetScroll: false });
   });
-  // The URL holds only what differs from the dashboard's own defaults.
+  // The URL holds only what differs from the dashboard's own defaults. While editing, a time change
+  // replaces the history entry, so Back does not step through it.
   const setSearch = (next: DashboardSearch) =>
     void navigate({
       search: (prev) => ({
@@ -149,6 +141,7 @@ export function DashboardPage() {
           (next.refresh ?? prev.refresh) === defaultRefresh ? undefined : (next.refresh ?? prev.refresh),
       }),
       resetScroll: false,
+      replace: isEditing,
     });
   return (
     <Page.Root mod={{ density }} className={classes.page}>
@@ -178,16 +171,9 @@ export function DashboardPage() {
           <RefreshButton />
         </Page.Actions>
         <Page.ControlBar aria-label="Dashboard controls">
-          <TimeRangePicker
-            value={range}
-            onChange={isEditing ? actions.setRange : setSearch}
-            timeZone={timeZone}
-          />
-          <RefreshPicker
-            value={refresh}
-            onChange={isEditing ? actions.setRefresh : (next) => setSearch({ refresh: next })}
-          />
-          {isEditing && <EditToolbar isWide={isWide} />}
+          <TimeRangePicker value={range} onChange={setSearch} timeZone={timeZone} />
+          <RefreshPicker value={refresh} onChange={(next) => setSearch({ refresh: next })} />
+          {isEditing && <EditToolbar isWide={isWide} range={range} refresh={refresh} />}
         </Page.ControlBar>
       </Page.Header>
       <Page.Body className={classes.body}>

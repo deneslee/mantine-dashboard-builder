@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vite-plus/test';
+import { describe, expect, it, vi } from 'vite-plus/test';
 import { dashboardSchema, orderWidgets } from '@/core/dashboard/dashboardSchema';
 import { testDashboard } from '@/testing/fixtures/dashboards';
 import { getDashboard } from '../data/dashboardApi';
@@ -98,18 +98,38 @@ describe('dashboard editing', () => {
     expect(localStorage.getItem(draftKey('test'))).toBe('broken');
   });
 
-  it('isolates providers and excludes selection and time from undo', () => {
+  it('isolates providers and keeps selection, breakpoint and now out of undo', () => {
     const one = createDashboardStore(testDashboard(), { shouldPersist: false });
     const two = createDashboardStore({ ...testDashboard(), id: 'other' }, { shouldPersist: false });
     const actions = one.getState().actions;
-    actions.setRange({ from: 'now-7d', to: 'now' });
     actions.openTool({ kind: 'palette' });
+    actions.setBreakpoint('md');
+    actions.takeNow();
     expect(one.temporal.getState().pastStates).toHaveLength(0);
     actions.editWidget('a', { title: 'One only' });
     actions.undo();
-    expect(one.getState().timeRange.from).toBe('now-7d');
     expect(one.getState().tool?.kind).toBe('palette');
+    expect(one.getState().breakpoint).toBe('md');
     expect(two.getState().doc.widgets.a?.title).toBe('First');
+  });
+
+  it('sets the default time as one undoable document step that Save keeps', async () => {
+    const save = vi.fn().mockResolvedValue(undefined);
+    const store = createDashboardStore(testDashboard(), { shouldPersist: false, save });
+    const actions = store.getState().actions;
+    actions.setDefaultTime({ from: 'now-7d', to: 'now' }, '5m');
+    actions.setDefaultTime({ from: 'now-7d', to: 'now' }, '5m');
+    expect(store.temporal.getState().pastStates).toHaveLength(1);
+    expect(store.getState().doc.timeRange).toEqual({ from: 'now-7d', to: 'now' });
+    expect(store.getState().doc.refresh).toBe('5m');
+    expect(store.getState().isDirty).toBe(true);
+    await actions.save();
+    expect(save).toHaveBeenCalledWith(
+      expect.objectContaining({ timeRange: { from: 'now-7d', to: 'now' }, refresh: '5m' }),
+    );
+    actions.undo();
+    expect(store.getState().doc.timeRange).toEqual(testDashboard().timeRange);
+    expect(store.getState().doc.refresh).toBe(testDashboard().refresh);
   });
 
   it('adds and duplicates at the bottom, removes with one step, and exports/imports identical documents', () => {

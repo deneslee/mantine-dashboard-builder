@@ -1,6 +1,7 @@
 import { createContext, use } from 'react';
 import { useStore } from 'zustand';
 import { useShallow } from 'zustand/shallow';
+import { resolveDashboardTime, type DashboardSearch, type DashboardTime } from '../dashboardSearch';
 import { selectDashboard, type DashboardState, type DashboardStore } from './createDashboardStore';
 
 /** Set by `DashboardProvider`; read only through the hooks below. */
@@ -22,6 +23,15 @@ export function useUndoState() {
     useDashboardStore().temporal,
     useShallow((state) => ({ canUndo: state.pastStates.length > 0, canRedo: state.futureStates.length > 0 })),
   );
+}
+/** The dashboard's effective time: the URL's `from`/`to`/`refresh`/`tz`, else the document's defaults. */
+export function useDashboardTime(
+  search: Pick<DashboardSearch, 'from' | 'to' | 'refresh' | 'tz'>,
+): DashboardTime {
+  const timeRange = useDashboard((s) => s.doc.timeRange);
+  const refresh = useDashboard((s) => s.doc.refresh);
+  const timeZone = useDashboard((s) => s.doc.timeZone);
+  return resolveDashboardTime({ timeRange, refresh, timeZone }, search);
 }
 /** Event callbacks read the latest document without subscribing the whole page. */
 /** Reads the dashboard's current `now` without subscribing: for query functions, which run later. */

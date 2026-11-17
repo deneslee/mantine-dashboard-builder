@@ -1,5 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useQueryClient } from '@tanstack/react-query';
+import { RouterProvider, createMemoryHistory, type RouterHistory } from '@tanstack/react-router';
+import { useState } from 'react';
 import { expect, spyOn, userEvent, waitFor, within } from 'storybook/test';
+import { createAppRouter } from '@/app/router';
 import { DENSITY_STORAGE_KEY } from '@/lib/useDensity';
 import { AppStory } from '@/testing/AppStory';
 import { loadDemoDashboard } from '@/testing/fixtures/dashboards';
@@ -512,5 +516,86 @@ export const LeaveGuard: Story = {
     await userEvent.click(page.getByRole('button', { name: 'Keep editing' }));
     await expect(page.getByRole('heading', { level: 1, name: 'Sales overview' })).toBeVisible();
     await expect(page.getByText('Unsaved changes')).toBeVisible();
+  },
+};
+
+/** Like AppStory, on a history the play function holds: it reads the URL and presses Back. */
+function AppAtHistory({ history }: { history: RouterHistory }) {
+  const queryClient = useQueryClient();
+  const [router] = useState(() => createAppRouter(queryClient, { history, basepath: '/' }));
+  return <RouterProvider router={router} />;
+}
+const withHistory = (url: string) => ({
+  loaders: [() => ({ history: createMemoryHistory({ initialEntries: ['/dashboards', url] }) })],
+  render: (_args: unknown, { loaded }: { loaded: Record<string, unknown> }) => (
+    <AppAtHistory history={loaded.history as RouterHistory} />
+  ),
+});
+const searchOf = (history: RouterHistory) => new URLSearchParams(history.location.search);
+const timeTrigger = () => controls().getByRole('button', { name: /^Time range:/ });
+async function pickRange(label: string) {
+  await userEvent.click(timeTrigger());
+  await userEvent.click(await page.findByRole('option', { name: label }, WAIT));
+}
+
+/** Editing: the URL owns the time, the store and undo stay untouched, and Back leaves instead of stepping through it. */
+export const EditTimeInUrl: Story = {
+  args: { url: EDIT },
+  ...withHistory(EDIT),
+  play: async ({ loaded }) => {
+    const history = loaded.history as RouterHistory;
+    await page.findByText('Saved locally', {}, WAIT);
+    await expect(timeTrigger()).toHaveTextContent('Last 24 hours');
+    const length = history.length;
+    await pickRange('Last 7 days');
+    await waitFor(() => expect(searchOf(history).get('from')).toBe('now-7d'));
+    await userEvent.click(controls().getByRole('combobox', { name: 'Auto-refresh' }));
+    await userEvent.click(await page.findByRole('option', { name: 'Every 5 minutes' }, WAIT));
+    await waitFor(() => expect(searchOf(history).get('refresh')).toBe('5m'));
+    await expect(history.length).toBe(length);
+    await expect(page.getByText('Saved locally')).toBeVisible();
+    await expect(controls().getByRole('button', { name: 'Undo' })).toBeDisabled();
+    history.back();
+    await waitFor(() => expect(history.location.pathname).toBe('/dashboards'));
+  },
+};
+
+/** Viewing: each time change is a history entry, as before. */
+export const ViewTimeAddsHistory: Story = {
+  args: { url: '/dashboards/sales' },
+  ...withHistory('/dashboards/sales'),
+  play: async ({ loaded }) => {
+    const history = loaded.history as RouterHistory;
+    await page.findByRole('button', { name: /^Time range:/ }, WAIT);
+    const length = history.length;
+    await pickRange('Last 7 days');
+    await waitFor(() => expect(searchOf(history).get('from')).toBe('now-7d'));
+    await expect(history.length).toBe(length + 1);
+    history.back();
+    await waitFor(() => expect(searchOf(history).get('from')).toBeNull());
+    await waitFor(() => expect(timeTrigger()).toHaveTextContent('Last 24 hours'));
+  },
+};
+
+/** "Use current time as default" writes the URL's time into the document as one undo step. */
+export const SetDefaultTime: Story = {
+  args: { url: EDIT },
+  ...withHistory(EDIT),
+  play: async ({ loaded }) => {
+    const history = loaded.history as RouterHistory;
+    await page.findByText('Saved locally', {}, WAIT);
+    const button = () => controls().getByRole('button', { name: 'Use current time as default' });
+    await expect(button()).toBeDisabled();
+    await pickRange('Last 7 days');
+    await waitFor(() => expect(button()).toBeEnabled());
+    await userEvent.click(button());
+    await expect(await page.findByText('Unsaved changes')).toBeVisible();
+    await expect(controls().getByRole('button', { name: 'Undo' })).toBeEnabled();
+    await expect(button()).toBeDisabled();
+    await userEvent.click(controls().getByRole('button', { name: 'Undo' }));
+    await expect(await page.findByText('Saved locally')).toBeVisible();
+    await waitFor(() => expect(button()).toBeEnabled());
+    await expect(searchOf(history).get('from')).toBe('now-7d');
+    await expect(timeTrigger()).toHaveTextContent('Last 7 days');
   },
 };
