@@ -1,6 +1,6 @@
 import { ActionIcon, Badge, Group, Tabs, Tooltip } from '@mantine/core';
 import { IconX } from '@tabler/icons-react';
-import { Suspense, useEffect } from 'react';
+import { Suspense, useCallback, useEffect } from 'react';
 import { PanelSkeleton } from '@/ui/components/Skeletons';
 import { iconSize, iconStroke } from '@/ui/tokens/semantic';
 import { useBadgeCount } from './useBadgeCount';
@@ -12,8 +12,9 @@ import classes from './ContextBar.module.css';
 
 /**
  * Context bar. Tabs come from the matched routes (`staticData.contextTabs`), from pages through
- * `ContextBarPanel`, then the global tabs (notifications), and sit in the header row. Inactive panels stay mounted: Mantine Tabs
- * hides them with React `Activity`, so their state survives switching.
+ * `ContextBarPanel`, then the global tabs (notifications), and sit in the header row. Inactive
+ * panels stay mounted: Mantine Tabs hides them with React `Activity`, so their state survives
+ * switching.
  */
 export function ContextBar() {
   const tabs = useContextTabs();
@@ -84,17 +85,18 @@ export function ContextBar() {
 
 /** Attaches the page's portal host while this panel is rendered; detaching keeps the page's content mounted. */
 function PageTabSlot({ host }: { host: HTMLElement }) {
-  return (
-    <div
-      ref={(slot) => {
-        if (!slot) return;
-        slot.appendChild(host);
-        return () => {
-          if (host.parentNode === slot) slot.removeChild(host);
-        };
-      }}
-    />
+  // Stable callback: a new ref function per render would detach and re-append the host each commit.
+  const attach = useCallback(
+    (slot: HTMLDivElement | null) => {
+      if (!slot) return;
+      slot.appendChild(host);
+      return () => {
+        if (host.parentNode === slot) slot.removeChild(host);
+      };
+    },
+    [host],
   );
+  return <div ref={attach} />;
 }
 
 function TabCount({ badge }: { badge?: TabBadge }) {
