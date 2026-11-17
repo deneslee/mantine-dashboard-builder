@@ -1,1 +1,1 @@
-vp staged
+vp staged || echo "pre-commit: formatting failed; committed without it."

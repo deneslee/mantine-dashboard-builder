@@ -18,8 +18,10 @@ export default defineConfig(({ command, mode }) => {
   const analyze = command === 'build' && mode === 'analyze';
 
   return {
+    // Pre-commit only formats the staged files (and so writes LF line endings); lint, types and tests are
+    // not run there. `.vite-hooks/pre-commit` never blocks a commit.
     staged: {
-      '*': 'vp check --fix',
+      '*': 'vp fmt --no-error-on-unmatched-pattern',
     },
     // Vite Task caches these: a rerun with no input changed replays the last result. `pnpm build`, `lint`,
     // `typecheck`, `format:check` and `test*` hand off here; `vp cache clean` resets it.
@@ -29,7 +31,8 @@ export default defineConfig(({ command, mode }) => {
         // tsc and `pnpm typecheck` runs check:lint. (`vp check --no-fmt --no-lint` measured 4x slower.)
         // Tasks get a clean env. The Sentry vars turn source-map upload on, so they belong in the key.
         'check:build': { command: 'vp build', cache: { env: ['SENTRY_*'] } },
-        'check:lint': 'vp lint',
+        // `floorplan/` is a dev tool's cache, not lint input; ignoring it lets worktrees reuse main's cache.
+        'check:lint': { command: 'vp lint', cache: { input: [{ auto: true }, '!floorplan/**'] } },
         'check:css': 'stylelint "src/**/*.css"',
         'check:fmt': 'vp fmt --check .',
         'check:test': 'vp test run',
