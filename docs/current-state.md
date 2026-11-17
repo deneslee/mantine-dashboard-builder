@@ -55,7 +55,7 @@ URL /dashboards/$id?mode&from&to&refresh&tz&wt&view&inspect ── validateSearc
     dashboardApi: saved copy (localStorage) ?? fetch public/data/dashboards/<id>.json
       → storedDashboardSchema (migrateDashboard → dashboardSchema) → Dashboard → Query cache ['dashboards', id]
 DashboardProvider key=id → createDashboardStore(dashboard)      restores a draft if there is one
-DashboardPage → isEditing = ?mode=edit; range = isEditing ? store range : URL ?? document range
+DashboardPage → isEditing = ?mode=edit; range, refresh, tz = URL ?? document default (both modes; editing replaces history)
   DashboardGrid → layouts per breakpoint; drag or resize stop → commitLayout (one undo step)
     WidgetTile(id) → widget from the store, plugin from usePlugins()
       useEffectiveTime(id) → useWidgetData(queries, time) once the tile is near the viewport and active
