@@ -52,7 +52,7 @@ export function DashboardGrid({
   );
   const plugins = usePlugins();
   const actions = useDashboardActions();
-  // Derived from the measured width in the same render, so the grid never lays out twice on a change.
+  // Derived from the measured width in the same render, so columns and tile widths change together. Tile positions still settle one commit later (GridLayout syncs its layout prop in an effect).
   const breakpoint = breakpointForWidth(width, grid.breakpoints);
   const setBreakpoint = actions.setBreakpoint;
   useEffect(() => {
@@ -92,7 +92,7 @@ export function DashboardGrid({
     [ids, range, timeZone, isEditing, isDataActive],
   );
   // Below md the grid is a single reading-order column: no dragging, even in edit mode.
-  const canEditLayout = isEditing && width >= grid.breakpoints.md;
+  const canEditLayout = isEditing && breakpoint !== 'sm';
   const gridConfig = useMemo(
     () => ({
       cols: grid.cols[breakpoint],
