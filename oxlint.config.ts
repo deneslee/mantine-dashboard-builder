@@ -184,6 +184,8 @@ export const lint = {
         'src/features/dashboards/data/dashboardQueries.ts',
         'src/plugins/**',
         'relay/**',
+        // Convex functions read their own tables with `ctx.db.query`.
+        'convex/**',
         '**/*.test.{ts,tsx}',
         '**/*.stories.tsx',
         'src/testing/**',

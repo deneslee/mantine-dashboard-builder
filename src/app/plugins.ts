@@ -1,8 +1,9 @@
 import { build, optionalPlugins } from 'virtual:optional-plugins';
 import type { ActionPlugin } from '@/plugins/ActionPlugin';
 import type { ContextPanelPlugin } from '@/plugins/ContextPanelPlugin';
-import type { RecordProviderPlugin } from '@/plugins/RecordProviderPlugin';
+import { configureRecordProviders } from '@/lib/records/activeRecordProvider';
 import { toRegistry, type Plugins } from '@/plugins/usePlugins';
+import { createRecordProviders } from './recordProviders';
 import { localJsonDatasource } from '@/plugins/datasources/localJson/localJsonDatasource';
 import { mockDatasource } from '@/plugins/datasources/mock/mockDatasource';
 import { chartWidget } from '@/plugins/widgets/chart/chartWidget';
@@ -10,9 +11,12 @@ import { rechartsChartWidget } from '@/plugins/widgets/chart/rechartsChartWidget
 import { kpiWidget } from '@/plugins/widgets/kpi/kpiWidget';
 import { tableWidget } from '@/plugins/widgets/table/tableWidget';
 
-const RECORD_PROVIDERS: RecordProviderPlugin[] = [];
 const PANELS: ContextPanelPlugin[] = [];
 const ACTIONS: ActionPlugin[] = [];
+
+const recordProviders = toRegistry('record provider', createRecordProviders(), (p) => p.id);
+// The active-provider setting (lib/) loads providers by id, without knowing `plugins/`.
+configureRecordProviders(recordProviders);
 
 /**
  * Every plugin the app ships. Each kind is one registry keyed by id; a duplicate id throws when
@@ -30,7 +34,7 @@ export const plugins: Plugins = {
     optionalPlugins.flatMap((p) => p.types),
     (t) => t.type,
   ),
-  recordProviders: toRegistry('record provider', RECORD_PROVIDERS, (p) => p.id),
+  recordProviders,
   panels: toRegistry('context-bar panel', PANELS, (p) => p.id),
   actions: toRegistry('action', ACTIONS, (a) => a.id),
   build,

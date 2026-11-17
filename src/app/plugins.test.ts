@@ -22,6 +22,7 @@ afterEach(() => {
   vi.doUnmock('@/plugins/widgets/chart/chartWidget');
   vi.doUnmock('@/plugins/widgets/chart/rechartsChartWidget');
   vi.doUnmock('@/plugins/widgets/table/tableWidget');
+  vi.unstubAllEnvs();
   vi.resetModules();
 });
 
@@ -29,9 +30,10 @@ describe('plugins', () => {
   it('builds every registry at startup', async () => {
     vi.resetModules();
     stubWidgets();
+    vi.stubEnv('VITE_CONVEX_URL', '');
     const { plugins } = await import('./plugins');
     expect(Object.keys(plugins.widgets)).toEqual(['kpi', 'chart', 'chart-recharts', 'table']);
-    expect(plugins.recordProviders).toEqual({});
+    expect(Object.keys(plugins.recordProviders)).toEqual(['browser']);
     expect(plugins.panels).toEqual({});
     expect(plugins.actions).toEqual({});
   });

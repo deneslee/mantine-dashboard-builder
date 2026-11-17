@@ -1,11 +1,10 @@
-import { EmptyState, Tabs } from '@mantine/core';
-import { IconAdjustments } from '@tabler/icons-react';
+import { Tabs } from '@mantine/core';
 import { Link } from '@tanstack/react-router';
 import { RouteBreadcrumbs } from '@/shell/breadcrumbs/RouteBreadcrumbs';
 import { Page } from '@/ui/components/Page';
-import { iconSize, iconStroke } from '@/ui/tokens/semantic';
 import { settingsTabs, type SettingsTab } from './settingsTabs';
 import { AppearanceForm } from './AppearanceForm';
+import { StorageForm } from './StorageForm';
 
 /** Settings page. The active tab lives in the URL (`?tab=`), so tabs are real, shareable links. */
 export function SettingsPage({ tab }: { tab: SettingsTab }) {
@@ -14,7 +13,7 @@ export function SettingsPage({ tab }: { tab: SettingsTab }) {
       <Page.Header>
         <RouteBreadcrumbs />
         <Page.Title>Settings</Page.Title>
-        <Page.Description>Workspace and appearance preferences.</Page.Description>
+        <Page.Description>Storage and appearance preferences.</Page.Description>
       </Page.Header>
       <Page.Body>
         <Tabs value={tab}>
@@ -31,13 +30,7 @@ export function SettingsPage({ tab }: { tab: SettingsTab }) {
           </Tabs.List>
 
           <Tabs.Panel value="general">
-            <EmptyState
-              variant="light"
-              color="neutral"
-              icon={<IconAdjustments size={iconSize.lg} stroke={iconStroke} />}
-              title="No general settings yet"
-              description="Workspace and member settings will live here."
-            />
+            <StorageForm />
           </Tabs.Panel>
 
           <Tabs.Panel value="appearance">
