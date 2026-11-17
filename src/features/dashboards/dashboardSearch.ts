@@ -1,9 +1,12 @@
 import { z } from 'zod';
+import type { Dashboard } from '@/core/dashboard/dashboardSchema';
 import {
   isValidTime,
+  localTimeZone,
   isValidTimeZone,
   parseRefreshInterval,
   timeOverrideSchema,
+  type TimeRange,
 } from '@/core/time/timeRange';
 
 /**
@@ -31,5 +34,24 @@ export const dashboardSearchSchema = z.object({
 });
 
 export type DashboardSearch = Partial<z.output<typeof dashboardSearchSchema>>;
+
+/** The time a dashboard shows: the URL's values, else the document's saved defaults (contracts §5). */
+export interface DashboardTime {
+  range: TimeRange;
+  refresh: string;
+  timeZone: string;
+}
+
+/** The URL's time over the dashboard's defaults. The same rule in view and edit mode, page and route. */
+export function resolveDashboardTime(
+  dashboard: Pick<Dashboard, 'timeRange' | 'refresh' | 'timeZone'>,
+  search: Pick<DashboardSearch, 'from' | 'to' | 'refresh' | 'tz'>,
+): DashboardTime {
+  return {
+    range: { from: search.from ?? dashboard.timeRange.from, to: search.to ?? dashboard.timeRange.to },
+    refresh: search.refresh ?? dashboard.refresh,
+    timeZone: search.tz || dashboard.timeZone || localTimeZone(),
+  };
+}
 
 export type InspectTab = NonNullable<DashboardSearch['inspectTab']>;

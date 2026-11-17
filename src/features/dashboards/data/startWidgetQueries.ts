@@ -1,10 +1,10 @@
 import { noop, type QueryClient } from '@tanstack/react-query';
 import type { Dashboard } from '@/core/dashboard/dashboardSchema';
 import { compareReadingOrder, type LayoutItem } from '@/core/dashboard/layout';
-import { localTimeZone, resolveWidgetTime } from '@/core/time/timeRange';
+import { resolveWidgetTime } from '@/core/time/timeRange';
 import type { Plugins } from '@/plugins/usePlugins';
 import { dimensions } from '@/ui/tokens/dimensions';
-import type { DashboardSearch } from '../dashboardSearch';
+import { resolveDashboardTime, type DashboardSearch } from '../dashboardSearch';
 import { datasourceQuery } from './dashboardQueries';
 
 /** The grid rows on the first screen: about 900 px of it, in the grid's row height. */
@@ -32,8 +32,7 @@ export function startWidgetQueries(
   { widgets, datasources }: Pick<Plugins, 'widgets' | 'datasources'>,
 ): void {
   if (search.mode === 'edit') return;
-  const range = { from: search.from ?? dashboard.timeRange.from, to: search.to ?? dashboard.timeRange.to };
-  const timeZone = search.tz || dashboard.timeZone || localTimeZone();
+  const { range, timeZone } = resolveDashboardTime(dashboard, search);
   const ids = search.view ? [search.view] : getVisibleOnLoad(dashboard.layouts.lg);
   for (const id of ids) {
     const widget = dashboard.widgets[id];

@@ -8,12 +8,9 @@ import { saveDashboard } from '../data/dashboardApi';
 import { GRID_COLUMNS, resolveLayouts, type Breakpoint, type LayoutItem } from '@/core/dashboard/layout';
 import type { TimeRange } from '@/core/time/timeRange';
 
-type Content = Omit<Dashboard, 'timeRange' | 'refresh'>;
 export type EditorTool = { kind: 'palette' } | { kind: 'move' | 'resize'; id: string } | null;
 export interface DashboardState {
-  doc: Content;
-  timeRange: TimeRange;
-  refresh: string;
+  doc: Dashboard;
   baseline: Dashboard;
   isDirty: boolean;
   draftError: string | null;
@@ -29,8 +26,8 @@ export interface DashboardState {
     setBreakpoint(this: void, breakpoint: Breakpoint): void;
     takeNow(this: void): void;
     openTool(this: void, tool: EditorTool): void;
-    setRange(this: void, range: TimeRange): void;
-    setRefresh(this: void, refresh: string): void;
+    /** Writes the time the viewer sees into the document as its saved default: one undo step. */
+    setDefaultTime(this: void, timeRange: TimeRange, refresh: string): void;
     editWidget(
       this: void,
       id: string,
@@ -55,12 +52,7 @@ export interface DashboardState {
   };
 }
 
-const split = ({ timeRange, refresh, ...doc }: Dashboard) => ({ doc, timeRange, refresh });
-export const selectDashboard = (state: Pick<DashboardState, 'doc' | 'timeRange' | 'refresh'>): Dashboard => ({
-  ...state.doc,
-  timeRange: state.timeRange,
-  refresh: state.refresh,
-});
+export const selectDashboard = (state: Pick<DashboardState, 'doc'>): Dashboard => state.doc;
 /** For comparing with the baseline: parsing fixes the key order, `orderWidgets` the widget order. */
 const serialized = (dashboard: Dashboard) => JSON.stringify(orderWidgets(dashboardSchema.parse(dashboard)));
 const bottom = (items: readonly LayoutItem[]) => Math.max(0, ...items.map((item) => item.y + item.h));
@@ -92,7 +84,7 @@ export function createDashboardStore(
   const store = createStore<DashboardState>()(
     temporal(
       immer((set, get) => ({
-        ...split(initial),
+        doc: initial,
         baseline: saved,
         isDirty: serialized(initial) !== serialized(saved),
         draftError,
@@ -104,8 +96,20 @@ export function createDashboardStore(
           setBreakpoint: (breakpoint) => set({ breakpoint }),
           takeNow: () => set({ now: Date.now() }),
           openTool: (tool) => set({ tool }),
-          setRange: (timeRange) => set({ timeRange }),
-          setRefresh: (refresh) => set({ refresh }),
+          setDefaultTime: (timeRange, refresh) => {
+            const { doc } = get();
+            if (
+              doc.refresh === refresh &&
+              doc.timeRange.from === timeRange.from &&
+              doc.timeRange.to === timeRange.to
+            )
+              return;
+            set((s) => {
+              s.doc.timeRange = { ...timeRange };
+              s.doc.refresh = refresh;
+              s.announcement = 'Set the current time as the dashboard default.';
+            });
+          },
           editWidget: (id, patch) => {
             const widget = get().doc.widgets[id];
             if (
@@ -122,7 +126,7 @@ export function createDashboardStore(
           commitLayout: (breakpoint, layout, id, action) => {
             const cleaned = cleanLayout(layout);
             dashboardSchema.parse({
-              ...selectDashboard(get()),
+              ...get().doc,
               layouts: { ...get().doc.layouts, [breakpoint]: cleaned },
             });
             const previous = resolveLayouts(get().doc.layouts)[breakpoint];
@@ -189,11 +193,11 @@ export function createDashboardStore(
           importDocument: (document) => {
             if (document.id !== get().doc.id)
               throw new Error('Import a document with the same dashboard id.');
-            set({ ...split(document), announcement: 'Imported dashboard.' });
+            set({ doc: document, announcement: 'Imported dashboard.' });
           },
           save: async () => {
             const state = get();
-            const document = { ...selectDashboard(state), updatedAt: new Date().toISOString() };
+            const document = { ...state.doc, updatedAt: new Date().toISOString() };
             await save(document);
             const isUnchanged = get().doc === state.doc;
             const history = store.temporal.getState();
@@ -208,7 +212,7 @@ export function createDashboardStore(
           discard: () => {
             const history = store.temporal.getState();
             history.pause();
-            set({ ...split(get().baseline), tool: null, announcement: 'Discarded changes.' });
+            set({ doc: get().baseline, tool: null, announcement: 'Discarded changes.' });
             history.clear();
             history.resume();
             if (shouldPersist) clearDraft(get().doc.id);
@@ -227,14 +231,8 @@ export function createDashboardStore(
     ),
   );
   store.subscribe((state, previous) => {
-    if (
-      state.doc === previous.doc &&
-      state.timeRange === previous.timeRange &&
-      state.refresh === previous.refresh &&
-      state.baseline === previous.baseline
-    )
-      return;
-    const document = selectDashboard(state);
+    if (state.doc === previous.doc && state.baseline === previous.baseline) return;
+    const document = state.doc;
     const isDirty = serialized(document) !== serialized(state.baseline);
     if (isDirty !== state.isDirty) store.setState({ isDirty });
     if (!shouldPersist) return;

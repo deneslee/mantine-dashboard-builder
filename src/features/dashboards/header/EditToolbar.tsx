@@ -1,6 +1,7 @@
 import { Button, FileButton, Text } from '@mantine/core';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
+import type { TimeRange } from '@/core/time/timeRange';
 import { toAppError } from '@/core/errors/AppError';
 import { notify } from '@/lib/notify/notify';
 import { usePlugins } from '@/plugins/usePlugins';
@@ -9,16 +10,28 @@ import { useDashboard, useDashboardActions, useReadDashboard, useUndoState } fro
 import { parseDashboardFile } from './dashboardFile';
 
 /**
- * Edit mode's controls: status, Save, Discard, Undo, Redo, Add widget, Import JSON and Done. It
+ * Edit mode's controls: status, Save, Discard, Undo, Redo, Use current time as default, Add widget, Import JSON and Done. It
  * owns the dirty and undo state, so an edit re-renders this bar, not the page.
  */
-export function EditToolbar({ isWide }: { isWide: boolean }) {
+export function EditToolbar({
+  isWide,
+  range,
+  refresh,
+}: {
+  isWide: boolean;
+  range: TimeRange;
+  refresh: string;
+}) {
   const { id } = useParams({ from: '/dashboards/$id' });
   const queryClient = useQueryClient();
   const plugins = usePlugins();
   const actions = useDashboardActions();
   const read = useReadDashboard();
   const isDirty = useDashboard((s) => s.isDirty);
+  const isDefaultTime = useDashboard(
+    (s) =>
+      s.doc.timeRange.from === range.from && s.doc.timeRange.to === range.to && s.doc.refresh === refresh,
+  );
   const { canUndo, canRedo } = useUndoState();
   const save = useMutation({
     mutationFn: actions.save,
@@ -58,6 +71,13 @@ export function EditToolbar({ isWide }: { isWide: boolean }) {
       </Button>
       <Button variant="default" onClick={actions.redo} disabled={!canRedo}>
         Redo
+      </Button>
+      <Button
+        variant="default"
+        onClick={() => actions.setDefaultTime(range, refresh)}
+        disabled={isDefaultTime}
+      >
+        Use current time as default
       </Button>
       {isWide && (
         <Button id="add-widget" variant="default" onClick={() => actions.openTool({ kind: 'palette' })}>

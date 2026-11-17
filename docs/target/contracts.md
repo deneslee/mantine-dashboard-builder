@@ -153,22 +153,23 @@ A mounted page can add a context-bar tab with live content (`ContextBarPanel`); 
 
 ## 5. State ownership
 
-| State                                                             | Owner                             | Change from today                      |
-| ----------------------------------------------------------------- | --------------------------------- | -------------------------------------- |
-| Time range, refresh interval, time zone                           | The URL, always                   | Today the store owns them in edit mode |
-| Which pane, widget or tab is open                                 | The URL                           | None                                   |
-| Query results and records                                         | The query cache                   | Records are new                        |
-| The dashboard document while it is open, edit state, undo history | One store per open dashboard      | None                                   |
-| Drafts, shell layout, connections, user settings                  | Browser storage                   | None                                   |
-| The active record provider                                        | A user setting in browser storage | New                                    |
+| State                                                             | Owner                             | Change from today                                                                     |
+| ----------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------- |
+| Time range, refresh interval, time zone                           | The URL, always                   | None. The document keeps only its saved default, set with Use current time as default |
+| Which pane, widget or tab is open                                 | The URL                           | None                                                                                  |
+| Query results and records                                         | The query cache                   | Records are new                                                                       |
+| The dashboard document while it is open, edit state, undo history | One store per open dashboard      | None                                                                                  |
+| Drafts, shell layout, connections, user settings                  | Browser storage                   | None                                                                                  |
+| The active record provider                                        | A user setting in browser storage | New                                                                                   |
 
 **Rules**
 
 - Every piece of state has one owner. Other places read it; they do not keep a copy.
 - A tile subscribes only to its own widget and its own time overrides.
 - Undo covers the dashboard document, 50 steps, as today.
+- The URL's time wins; without it, the dashboard's saved default applies, in view and edit mode.
+- While editing, a time change replaces the current history entry, so Back does not step through time changes; in view mode each change is a history entry. The saved default changes only through Use current time as default, one undo step.
 
 **Open**
 
 - Memoization policy, deferred until renders are measured.
-- How editing the time range in edit mode avoids filling the browser history.
