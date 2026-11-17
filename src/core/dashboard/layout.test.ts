@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vite-plus/test';
-import { resolveLayouts, type LayoutItem } from './layout';
+import { breakpointForWidth, resolveLayouts, type LayoutItem } from './layout';
 
 const cells = (items: LayoutItem[]) => items.map(({ i, x, y, w }) => `${i}@${x},${y}:${w}`);
 
@@ -55,5 +55,23 @@ describe('resolveLayouts', () => {
     const layouts = resolveLayouts({ lg: sales, md });
     expect(layouts.md).toBe(md);
     expect(layouts.sm.map((l) => l.w)).toEqual([4, 4, 4, 4, 4]);
+  });
+});
+
+describe('breakpointForWidth', () => {
+  // Same answer as react-grid-layout's getBreakpointFromWidth: a width exactly on a breakpoint
+  // belongs to the smaller one.
+  const breakpoints = { lg: 1100, md: 640, sm: 0 };
+  it.each([
+    [0, 'sm'],
+    [639, 'sm'],
+    [640, 'sm'],
+    [641, 'md'],
+    [1099, 'md'],
+    [1100, 'md'],
+    [1101, 'lg'],
+    [5000, 'lg'],
+  ] as const)('%d px is %s', (width, expected) => {
+    expect(breakpointForWidth(width, breakpoints)).toBe(expected);
   });
 });

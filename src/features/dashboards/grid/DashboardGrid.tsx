@@ -1,13 +1,18 @@
-import { useMemo, useRef } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useShallow } from 'zustand/shallow';
-import { ResponsiveGridLayout, useContainerWidth, type EventCallback } from 'react-grid-layout';
+import { GridLayout, useContainerWidth, type EventCallback } from 'react-grid-layout';
 import { gridBounds, minMaxSize } from 'react-grid-layout/core';
 import { fastVerticalCompactor } from 'react-grid-layout/extras';
 import 'react-grid-layout/css/styles.css';
 import { dimensions } from '@/ui/tokens/dimensions';
 import { useDensity } from '@/lib/useDensity';
 import { useDashboardActions, useDashboard } from '../state/useDashboard';
-import { compareReadingOrder, resolveLayouts, type Breakpoint } from '@/core/dashboard/layout';
+import {
+  breakpointForWidth,
+  compareReadingOrder,
+  resolveLayouts,
+  type Breakpoint,
+} from '@/core/dashboard/layout';
 import type { TimeRange } from '@/core/time/timeRange';
 import { usePlugins } from '@/plugins/usePlugins';
 import { WidgetTile } from './WidgetTile';
@@ -47,7 +52,12 @@ export function DashboardGrid({
   );
   const plugins = usePlugins();
   const actions = useDashboardActions();
-  const breakpoint = useRef<Breakpoint>('lg');
+  // Derived from the measured width in the same render, so the grid never lays out twice on a change.
+  const breakpoint = breakpointForWidth(width, grid.breakpoints);
+  const setBreakpoint = actions.setBreakpoint;
+  useEffect(() => {
+    if (isMounted) setBreakpoint(breakpoint);
+  }, [isMounted, breakpoint, setBreakpoint]);
   const layouts = useMemo(
     () =>
       Object.fromEntries(
@@ -83,35 +93,36 @@ export function DashboardGrid({
   );
   // Below md the grid is a single reading-order column: no dragging, even in edit mode.
   const canEditLayout = isEditing && width >= grid.breakpoints.md;
+  const gridConfig = useMemo(
+    () => ({
+      cols: grid.cols[breakpoint],
+      rowHeight: grid.rowHeight,
+      margin: [gap, gap] as const,
+      containerPadding: noPadding,
+    }),
+    [breakpoint, gap],
+  );
   const commit =
     (action: 'Moved' | 'Resized'): EventCallback =>
     (layout, _old, item) => {
-      if (canEditLayout && item) actions.commitLayout(breakpoint.current, layout, item.i, action);
+      if (canEditLayout && item) actions.commitLayout(breakpoint, layout, item.i, action);
     };
   return (
     <div ref={containerRef} className={classes.root} data-editing={canEditLayout || undefined}>
       {isMounted ? (
-        <ResponsiveGridLayout<Breakpoint>
+        <GridLayout
           width={width}
-          breakpoints={grid.breakpoints}
-          cols={grid.cols}
-          layouts={layouts}
-          rowHeight={grid.rowHeight}
-          margin={[gap, gap]}
-          containerPadding={noPadding}
+          gridConfig={gridConfig}
+          layout={layouts[breakpoint]}
           dragConfig={canEditLayout ? drag : disabled}
           resizeConfig={canEditLayout ? resize : disabled}
           constraints={constraints}
           compactor={ids.length > 100 ? fastVerticalCompactor : undefined}
-          onBreakpointChange={(next) => {
-            breakpoint.current = next;
-            actions.setBreakpoint(next);
-          }}
           onDragStop={commit('Moved')}
           onResizeStop={commit('Resized')}
         >
           {children}
-        </ResponsiveGridLayout>
+        </GridLayout>
       ) : null}
     </div>
   );
