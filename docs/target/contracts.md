@@ -70,13 +70,14 @@ The promises the parts of the builder make to each other. Each contract says who
 
 **Operations**
 
-| Operation                      | Required                    | Notes                                                 |
-| ------------------------------ | --------------------------- | ----------------------------------------------------- |
-| List records of a collection   | Yes                         | With search text, filters, sorting and paging         |
-| Get one record                 | Yes                         |                                                       |
-| Create, update, delete         | Yes for a writable provider | A read-only provider says so                          |
-| Subscribe to changes           | Optional                    | Convex pushes changes; browser storage does not       |
-| Export and import a collection | Yes                         | This is how data moves when the user switches storage |
+| Operation                      | Required                    | Notes                                                                                              |
+| ------------------------------ | --------------------------- | -------------------------------------------------------------------------------------------------- |
+| List records of a collection   | Yes                         | With search text, filters, sorting and paging                                                      |
+| Get one record                 | Yes                         |                                                                                                    |
+| Create, update, delete         | Yes for a writable provider | A read-only provider says so                                                                       |
+| Subscribe to changes           | Optional                    | Convex pushes changes; browser storage does not                                                    |
+| Export and import a collection | Yes                         | This is how data moves when the user switches storage                                              |
+| Check status                   | Yes                         | Whether the place can be used now: ready, unreachable, not deployed or failed. Names no collection |
 
 **Rules**
 
@@ -84,10 +85,12 @@ The promises the parts of the builder make to each other. Each contract says who
 - A provider reports what it supports. Calling something it does not support gives a clear "not supported" result.
 - Records live in the same query cache as widget data. Keys are ordered from general to specific: provider, collection, kind of read (list or one), parameters. That makes "refresh every list of this collection" a single step.
 - Each write declares what it makes stale. A provider that pushes changes updates the cache itself.
-- The active provider is a user setting. Switching it does not move data; export and import do.
+- The active provider is a user setting. Switching it does not move data; export, import and copy do (the Storage page).
+- An import replaces a collection all or nothing. Ids and data are kept; each revision becomes the highest one the collection held before plus the record's own, so every revision after an import is above every one before it and an editor that was open on the old records gets a conflict on its next save. An export imported into an empty collection keeps its revisions.
+- A read that gets no answer in 10 s fails. A write is never timed out: the UI shows that it is waiting and keeps waiting, and Convex retries it until it is confirmed, running it once.
 - The engine behind the contract is the query cache today. TanStack DB may replace it later without changing what features see.
 
-- Dashboards and other saved definitions are stored through the same provider. (D6.2)
+- Dashboards and other saved definitions are stored through the same provider. (D6.2) Exists today for dashboards: a dashboard is a record of the `dashboards` collection (its `data` is the dashboard document). A loaded dashboard carries its place and revision (`source`); the editor, its draft and its Save keep them, so a save goes to the place it was opened from, against that revision, whatever the setting says later. Without a record the built-in file is used and the first save creates the record.
 - A collection's fields are described as stored data, edited in Studio, in a standard schema format: JSON Schema, draft 2020-12. A definition is itself a record, in the `collections` collection. Records are not yet checked against it. (D6.3, D6.4)
 - A list request (`ListQuery`) has four optional parts: search text, filters that must all match (a field, an operator, a value), sorting by several fields in order with ties broken by id, and a page (a size and the cursor of the previous page). The result has the records, the next cursor unless it is the last page, and the total when the provider can count.
 - Every record has a revision that goes up on each write. An update or delete can name the revision it was based on; when the record has changed since, the later edit is refused and the result carries the record as it is now. Without a revision the write overwrites.
@@ -97,18 +100,20 @@ The promises the parts of the builder make to each other. Each contract says who
 
 **Where it lives**
 
-| Part                                     | File                                                                    |
-| ---------------------------------------- | ----------------------------------------------------------------------- |
-| The contract and its types               | `src/core/records/RecordProvider.ts`                                    |
-| Query keys, and what a write makes stale | `src/core/records/recordKeys.ts`                                        |
-| The plugin definition                    | `src/plugins/RecordProviderPlugin.ts`                                   |
-| The browser-storage provider             | `src/plugins/recordProviders/browserStorage/browserStorageProvider.ts`  |
-| Filter, sort and page a collection       | `src/core/records/runListQuery.ts`, used by both providers              |
-| The Convex provider and its plugin       | `src/plugins/recordProviders/convex/`                                   |
-| The Convex functions and table           | `convex/schema.ts`, `convex/records.ts`                                 |
-| The active-provider setting and service  | `src/lib/records/activeRecordProvider.ts`, `watchRecords.ts`            |
-| Registration                             | `src/app/recordProviders.ts`; Convex only when `VITE_CONVEX_URL` is set |
-| The suite every provider passes          | `src/testing/recordProviderSuite.ts`                                    |
+| Part                                     | File                                                                              |
+| ---------------------------------------- | --------------------------------------------------------------------------------- |
+| The contract and its types               | `src/core/records/RecordProvider.ts`                                              |
+| Query keys, and what a write makes stale | `src/core/records/recordKeys.ts`                                                  |
+| The plugin definition                    | `src/plugins/RecordProviderPlugin.ts`                                             |
+| The browser-storage provider             | `src/plugins/recordProviders/browserStorage/browserStorageProvider.ts`            |
+| Filter, sort and page a collection       | `src/core/records/runListQuery.ts`, used by both providers                        |
+| The Convex provider and its plugin       | `src/plugins/recordProviders/convex/`                                             |
+| The Convex functions and table           | `convex/schema.ts`, `convex/records.ts`                                           |
+| The active-provider setting and service  | `src/lib/records/activeRecordProvider.ts`, `watchRecords.ts`                      |
+| Dashboards through a place               | `src/features/dashboards/data/dashboardApi.ts`, `dashboardSource.ts`, `drafts.ts` |
+| The Storage pages, export, import, copy  | `src/features/storage/`; routes in `src/app/routes/storage/`                      |
+| Registration                             | `src/app/recordProviders.ts`; Convex only when `VITE_CONVEX_URL` is set           |
+| The suite every provider passes          | `src/testing/recordProviderSuite.ts`                                              |
 
 **Open**
 

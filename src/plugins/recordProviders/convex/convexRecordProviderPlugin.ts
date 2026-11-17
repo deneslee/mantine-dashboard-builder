@@ -6,14 +6,15 @@ export function createConvexRecordProviderPlugin(url: string): RecordProviderPlu
   return {
     id: 'convex',
     name: 'Convex',
-    description: 'Saves records on your Convex deployment, so they are shared across browsers and devices.',
+    description: 'Shared across browsers and devices.',
+    note: 'No sign-in yet: anyone with the deployment URL can read and write.',
     capabilities: CONVEX_CAPABILITIES,
     async load() {
       const [{ ConvexClient }, { createConvexProvider }] = await Promise.all([
         import('convex/browser'),
         import('./convexProvider'),
       ]);
-      return createConvexProvider({ client: new ConvexClient(url) });
+      return createConvexProvider({ client: new ConvexClient(url), url });
     },
   };
 }

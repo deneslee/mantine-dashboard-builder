@@ -37,7 +37,7 @@ Rules for humans and coding agents working in this repo. Read before writing cod
 **Before you call a change done:**
 
 - `pnpm lint` and the tests for what you touched pass. Run `pnpm build` when types, imports or routes changed.
-- Every new component state has a story, and every behaviour a test.
+- Tests only where they protect real behaviour: logic with branches, data that is stored or moved, flows a user can lose work in. A story per visual state that matters, with its play function when a flow is the point. No test for what the types, the lint or a story already show. Run only the files you touched, never the whole suite.
 - Oxfmt has formatted the files, and the commit message follows Conventional Commits.
 - `docs/target/` still matches what you built ([Planning](#planning)).
 

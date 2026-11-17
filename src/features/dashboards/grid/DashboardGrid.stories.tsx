@@ -2,7 +2,7 @@ import { Box } from '@mantine/core';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import { TestRouter } from '@/testing/TestRouter';
-import { loadDemoDashboard } from '@/testing/fixtures/dashboards';
+import { loadDemoDashboard, testLoaded } from '@/testing/fixtures/dashboards';
 import type { Dashboard } from '@/core/dashboard/dashboardSchema';
 import { DashboardProvider } from '../state/DashboardProvider';
 import { createDashboardStore } from '../state/createDashboardStore';
@@ -15,12 +15,13 @@ interface Args {
 }
 
 function Grid({ dashboard, mode }: { dashboard: Dashboard; mode: 'view' | 'edit' }) {
-  const [store] = useState(() => createDashboardStore(dashboard, { shouldPersist: false }));
+  const loaded = testLoaded(dashboard);
+  const [store] = useState(() => createDashboardStore(loaded, { shouldPersist: false }));
   return (
     <TestRouter
       page={
         <Box p="lg">
-          <DashboardProvider dashboard={dashboard} store={store}>
+          <DashboardProvider dashboard={loaded} store={store}>
             <DashboardGrid
               range={{ from: 'now-24h', to: 'now' }}
               timeZone="UTC"

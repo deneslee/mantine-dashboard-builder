@@ -16,6 +16,7 @@ import { Route as DebugRouteImport } from './routes/debug'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as IntegrationsRouteRouteImport } from './routes/integrations/route'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as StorageRouteRouteImport } from './routes/storage/route'
 import { Route as TemplatesRouteImport } from './routes/templates'
 import { Route as DashboardsIndexRouteImport } from './routes/dashboards/index'
 import { Route as DashboardsIdRouteImport } from './routes/dashboards/$id'
@@ -24,6 +25,8 @@ import { Route as DatasourcesIdRouteImport } from './routes/datasources/$id'
 import { Route as DatasourcesNewRouteImport } from './routes/datasources/new'
 import { Route as IntegrationsIndexRouteImport } from './routes/integrations/index'
 import { Route as IntegrationsSentryRouteImport } from './routes/integrations/sentry'
+import { Route as StorageIndexRouteImport } from './routes/storage/index'
+import { Route as StorageIdRouteImport } from './routes/storage/$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -58,6 +61,11 @@ const IntegrationsRouteRoute = IntegrationsRouteRouteImport.update({
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StorageRouteRoute = StorageRouteRouteImport.update({
+  id: '/storage',
+  path: '/storage',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TemplatesRoute = TemplatesRouteImport.update({
@@ -100,12 +108,23 @@ const IntegrationsSentryRoute = IntegrationsSentryRouteImport.update({
   path: '/sentry',
   getParentRoute: () => IntegrationsRouteRoute,
 } as any)
+const StorageIndexRoute = StorageIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => StorageRouteRoute,
+} as any)
+const StorageIdRoute = StorageIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => StorageRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboards': typeof DashboardsRouteRouteWithChildren
   '/datasources': typeof DatasourcesRouteRouteWithChildren
   '/integrations': typeof IntegrationsRouteRouteWithChildren
+  '/storage': typeof StorageRouteRouteWithChildren
   '/debug': typeof DebugRoute
   '/explore': typeof ExploreRoute
   '/settings': typeof SettingsRoute
@@ -114,9 +133,11 @@ export interface FileRoutesByFullPath {
   '/datasources/$id': typeof DatasourcesIdRoute
   '/datasources/new': typeof DatasourcesNewRoute
   '/integrations/sentry': typeof IntegrationsSentryRoute
+  '/storage/$id': typeof StorageIdRoute
   '/dashboards/': typeof DashboardsIndexRoute
   '/datasources/': typeof DatasourcesIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
+  '/storage/': typeof StorageIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -128,9 +149,11 @@ export interface FileRoutesByTo {
   '/datasources/$id': typeof DatasourcesIdRoute
   '/datasources/new': typeof DatasourcesNewRoute
   '/integrations/sentry': typeof IntegrationsSentryRoute
+  '/storage/$id': typeof StorageIdRoute
   '/dashboards': typeof DashboardsIndexRoute
   '/datasources': typeof DatasourcesIndexRoute
   '/integrations': typeof IntegrationsIndexRoute
+  '/storage': typeof StorageIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -138,6 +161,7 @@ export interface FileRoutesById {
   '/dashboards': typeof DashboardsRouteRouteWithChildren
   '/datasources': typeof DatasourcesRouteRouteWithChildren
   '/integrations': typeof IntegrationsRouteRouteWithChildren
+  '/storage': typeof StorageRouteRouteWithChildren
   '/debug': typeof DebugRoute
   '/explore': typeof ExploreRoute
   '/settings': typeof SettingsRoute
@@ -146,9 +170,11 @@ export interface FileRoutesById {
   '/datasources/$id': typeof DatasourcesIdRoute
   '/datasources/new': typeof DatasourcesNewRoute
   '/integrations/sentry': typeof IntegrationsSentryRoute
+  '/storage/$id': typeof StorageIdRoute
   '/dashboards/': typeof DashboardsIndexRoute
   '/datasources/': typeof DatasourcesIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
+  '/storage/': typeof StorageIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -157,6 +183,7 @@ export interface FileRouteTypes {
     | '/dashboards'
     | '/datasources'
     | '/integrations'
+    | '/storage'
     | '/debug'
     | '/explore'
     | '/settings'
@@ -165,9 +192,11 @@ export interface FileRouteTypes {
     | '/datasources/$id'
     | '/datasources/new'
     | '/integrations/sentry'
+    | '/storage/$id'
     | '/dashboards/'
     | '/datasources/'
     | '/integrations/'
+    | '/storage/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -179,15 +208,18 @@ export interface FileRouteTypes {
     | '/datasources/$id'
     | '/datasources/new'
     | '/integrations/sentry'
+    | '/storage/$id'
     | '/dashboards'
     | '/datasources'
     | '/integrations'
+    | '/storage'
   id:
     | '__root__'
     | '/'
     | '/dashboards'
     | '/datasources'
     | '/integrations'
+    | '/storage'
     | '/debug'
     | '/explore'
     | '/settings'
@@ -196,9 +228,11 @@ export interface FileRouteTypes {
     | '/datasources/$id'
     | '/datasources/new'
     | '/integrations/sentry'
+    | '/storage/$id'
     | '/dashboards/'
     | '/datasources/'
     | '/integrations/'
+    | '/storage/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -206,6 +240,7 @@ export interface RootRouteChildren {
   DashboardsRouteRoute: typeof DashboardsRouteRouteWithChildren
   DatasourcesRouteRoute: typeof DatasourcesRouteRouteWithChildren
   IntegrationsRouteRoute: typeof IntegrationsRouteRouteWithChildren
+  StorageRouteRoute: typeof StorageRouteRouteWithChildren
   DebugRoute: typeof DebugRoute
   ExploreRoute: typeof ExploreRoute
   SettingsRoute: typeof SettingsRoute
@@ -261,6 +296,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/storage': {
+      id: '/storage'
+      path: '/storage'
+      fullPath: '/storage'
+      preLoaderRoute: typeof StorageRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/templates': {
@@ -319,6 +361,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IntegrationsSentryRouteImport
       parentRoute: typeof IntegrationsRouteRoute
     }
+    '/storage/': {
+      id: '/storage/'
+      path: '/'
+      fullPath: '/storage/'
+      preLoaderRoute: typeof StorageIndexRouteImport
+      parentRoute: typeof StorageRouteRoute
+    }
+    '/storage/$id': {
+      id: '/storage/$id'
+      path: '/$id'
+      fullPath: '/storage/$id'
+      preLoaderRoute: typeof StorageIdRouteImport
+      parentRoute: typeof StorageRouteRoute
+    }
   }
 }
 
@@ -364,11 +420,26 @@ const IntegrationsRouteRouteChildren: IntegrationsRouteRouteChildren = {
 const IntegrationsRouteRouteWithChildren =
   IntegrationsRouteRoute._addFileChildren(IntegrationsRouteRouteChildren)
 
+interface StorageRouteRouteChildren {
+  StorageIdRoute: typeof StorageIdRoute
+  StorageIndexRoute: typeof StorageIndexRoute
+}
+
+const StorageRouteRouteChildren: StorageRouteRouteChildren = {
+  StorageIdRoute: StorageIdRoute,
+  StorageIndexRoute: StorageIndexRoute,
+}
+
+const StorageRouteRouteWithChildren = StorageRouteRoute._addFileChildren(
+  StorageRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardsRouteRoute: DashboardsRouteRouteWithChildren,
   DatasourcesRouteRoute: DatasourcesRouteRouteWithChildren,
   IntegrationsRouteRoute: IntegrationsRouteRouteWithChildren,
+  StorageRouteRoute: StorageRouteRouteWithChildren,
   DebugRoute: DebugRoute,
   ExploreRoute: ExploreRoute,
   SettingsRoute: SettingsRoute,

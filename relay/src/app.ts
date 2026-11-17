@@ -31,6 +31,7 @@ export interface Drivers {
 
 const STATUS: Record<AppErrorCode, ContentfulStatusCode> = {
   validation: 400,
+  conflict: 409,
   forbidden: 403,
   not_found: 404,
   timeout: 504,

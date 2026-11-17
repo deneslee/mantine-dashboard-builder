@@ -6,7 +6,6 @@ import {
   type CollectionExport,
   type ListQuery,
   type ListResult,
-  type RecordCapabilities,
   type RecordData,
   type RecordFailure,
   type RecordProvider,
@@ -14,14 +13,7 @@ import {
   type StoredRecord,
   type WriteOptions,
 } from '@/core/records/RecordProvider';
-
-export const BROWSER_STORAGE_CAPABILITIES: RecordCapabilities = {
-  canWrite: true,
-  // Nothing pushes changes: writes from another tab show up on the next read.
-  canSubscribe: false,
-  canSearchText: true,
-  canCount: true,
-};
+import { BROWSER_STORAGE_CAPABILITIES } from './browserStorageCapabilities';
 
 export interface BrowserStorageProviderOptions {
   /** Where the records go: `localStorage` in the app. */
@@ -153,8 +145,35 @@ export function createBrowserStorageProvider({
     async importCollection(data) {
       if (data.formatVersion !== COLLECTION_EXPORT_VERSION || !Array.isArray(data.records))
         throw new AppError('validation', 'This is not a collection export this version can read.');
-      write(data.collection, data.records);
+      if (new Set(data.records.map((record) => record.id)).size !== data.records.length)
+        throw new AppError('validation', 'The export holds the same record id twice.');
+      // A collection that cannot be read counts as empty: the import replaces it.
+      let previousMax = 0;
+      try {
+        previousMax = Math.max(0, ...read(data.collection).map((record) => record.revision));
+      } catch {
+        previousMax = 0;
+      }
+      // One key per collection, so this is one `setItem`: it lands whole or, when the storage refuses,
+      // not at all and the collection stays as it was.
+      write(
+        data.collection,
+        data.records.map((record) => ({ ...record, revision: previousMax + record.revision })),
+      );
       return ok({ count: data.records.length });
+    },
+
+    async checkStatus() {
+      const key = keyFor('records-probe');
+      try {
+        storage.setItem(key, 'probe');
+        const isReadable = storage.getItem(key) === 'probe';
+        storage.removeItem(key);
+        if (!isReadable) return { state: 'failed', message: 'This browser did not keep what was written.' };
+        return { state: 'ready', message: 'Saving in this browser works.' };
+      } catch {
+        return { state: 'failed', message: 'Browser storage is full or unavailable.' };
+      }
     },
   };
 }

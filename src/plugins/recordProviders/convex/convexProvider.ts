@@ -9,6 +9,7 @@ import {
   type RecordChange,
   type RecordData,
   type RecordProvider,
+  type RecordProviderStatus,
   type RecordResult,
   type StoredRecord,
   type WriteOptions,
@@ -19,7 +20,16 @@ import { CONVEX_CAPABILITIES } from './convexCapabilities';
 /** The server's cap per collection (`MAX_RECORDS` in convex/records.ts); checked here so the user sees why. */
 const MAX_RECORDS = 2000;
 
-/** The three `ConvexClient` methods the provider uses, so a test can pass a fake. */
+/** A read that gets no answer in this long fails. Writes never time out: Convex queues and retries them. */
+export const READ_TIMEOUT_MS = 10_000;
+
+/** The one budget of a status check: connecting and the probe read together. */
+export const STATUS_BUDGET_MS = 10_000;
+
+/** A collection name no one uses: the probe read of a status check. */
+const STATUS_COLLECTION = '__status';
+
+/** The `ConvexClient` methods the provider uses, so a test can pass a fake. */
 export interface ConvexRecordClient {
   query<Query extends FunctionReference<'query'>>(
     query: Query,
@@ -35,11 +45,15 @@ export interface ConvexRecordClient {
     callback: (result: FunctionReturnType<Query>) => unknown,
     onError?: (error: Error) => unknown,
   ): () => void;
+  connectionState(): { isWebSocketConnected: boolean };
+  subscribeToConnectionState(callback: (state: { isWebSocketConnected: boolean }) => void): () => void;
 }
 
 export interface ConvexProviderOptions {
   client: ConvexRecordClient;
   id?: string;
+  /** The deployment's URL, named in messages. */
+  url?: string;
 }
 
 interface WireRecord {
@@ -66,14 +80,44 @@ async function call<T>(run: () => Promise<T>): Promise<T> {
   }
 }
 
+/** What the server says about a function that is not deployed. */
+const isMissingFunction = (error: unknown) =>
+  error instanceof Error && /could not find public function|did you forget to run/i.test(error.message);
+
 /**
  * Records on Convex: one live query per collection, and the contract's filters, sort and paging run
  * here on that result, with the same function the browser provider uses. Writes check revisions inside
- * the mutation. Needs only a client with `query`, `mutation` and `onUpdate`.
+ * the mutation. Needs only a client with `query`, `mutation`, `onUpdate` and its connection state.
  */
-export function createConvexProvider({ client, id = 'convex' }: ConvexProviderOptions): RecordProvider {
+export function createConvexProvider({
+  client,
+  id = 'convex',
+  url = 'Convex',
+}: ConvexProviderOptions): RecordProvider {
+  /** A read, given up on after `READ_TIMEOUT_MS`: a client that never connects would wait for ever. */
+  function read<T>(run: () => Promise<T>): Promise<T> {
+    return call(
+      () =>
+        new Promise<T>((resolve, reject) => {
+          const timer = setTimeout(
+            () =>
+              reject(
+                new AppError(
+                  'network',
+                  `Could not reach Convex at ${url}. Check your connection and that the deployment is running.`,
+                ),
+              ),
+            READ_TIMEOUT_MS,
+          );
+          run()
+            .then(resolve, reject)
+            .finally(() => clearTimeout(timer));
+        }),
+    );
+  }
+
   async function readAll(collection: string): Promise<StoredRecord[]> {
-    const { records, isTruncated } = await call(() =>
+    const { records, isTruncated } = await read(() =>
       client.query(api.records.listCollection, { collection }),
     );
     if (isTruncated)
@@ -90,7 +134,7 @@ export function createConvexProvider({ client, id = 'convex' }: ConvexProviderOp
     },
 
     async get<T extends RecordData>(collection: string, recordId: string) {
-      const record = await call(() => client.query(api.records.get, { collection, recordId }));
+      const record = await read(() => client.query(api.records.get, { collection, recordId }));
       return record ? ok(fromWire(record) as StoredRecord<T>) : { ok: false, reason: 'notFound' };
     },
 
@@ -171,6 +215,9 @@ export function createConvexProvider({ client, id = 'convex' }: ConvexProviderOp
           'validation',
           `A collection holds at most ${MAX_RECORDS} records; this import has ${data.records.length}.`,
         );
+      if (new Set(data.records.map((record) => record.id)).size !== data.records.length)
+        throw new AppError('validation', 'The export holds the same record id twice.');
+      // One mutation, so one transaction: all of it or none.
       const { count } = await call(() =>
         client.mutation(api.records.importCollection, {
           collection: data.collection,
@@ -182,6 +229,53 @@ export function createConvexProvider({ client, id = 'convex' }: ConvexProviderOp
         }),
       );
       return ok({ count });
+    },
+
+    async checkStatus(signal): Promise<RecordProviderStatus> {
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      let stopWaiting: (() => void) | undefined;
+      const unreachable: RecordProviderStatus = {
+        state: 'unreachable',
+        message: `No answer from ${url} in ${STATUS_BUDGET_MS / 1000} s. Check the deployment URL and your connection.`,
+      };
+      const timedOut = new Promise<RecordProviderStatus>((resolve) => {
+        timer = setTimeout(() => resolve(unreachable), STATUS_BUDGET_MS);
+      });
+      const aborted = new Promise<never>((_, reject) => {
+        signal?.addEventListener('abort', () => reject(signal.reason), { once: true });
+      });
+      const probe = (async (): Promise<RecordProviderStatus> => {
+        await new Promise<void>((resolve) => {
+          if (client.connectionState().isWebSocketConnected) return resolve();
+          const subscription = { stop: () => {} };
+          subscription.stop = client.subscribeToConnectionState((state) => {
+            if (!state.isWebSocketConnected) return;
+            subscription.stop();
+            resolve();
+          });
+          stopWaiting = () => subscription.stop();
+        });
+        try {
+          await client.query(api.records.listCollection, { collection: STATUS_COLLECTION });
+        } catch (error) {
+          if (isMissingFunction(error))
+            return {
+              state: 'notDeployed',
+              message: `${url} answers, but has no record functions. Run \`npx convex dev\` in the project folder, then check again.`,
+            };
+          return { state: 'failed', message: error instanceof Error ? error.message : 'The check failed.' };
+        }
+        return { state: 'ready', message: `Connected to ${url}.` };
+      })();
+      try {
+        return await Promise.race([probe, timedOut, aborted]);
+      } catch (error) {
+        if (signal?.aborted) throw error;
+        return { state: 'failed', message: error instanceof Error ? error.message : 'The check failed.' };
+      } finally {
+        clearTimeout(timer);
+        stopWaiting?.();
+      }
     },
   };
 }

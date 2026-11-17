@@ -3,7 +3,7 @@ import { createQueryClient } from '@/app/queryClient';
 import type { DataFrame } from '@/core/data/DataFrame';
 import type { DatasourcePlugin, Query } from '@/plugins/DatasourcePlugin';
 import { PluginsContext, type Plugins } from '@/plugins/usePlugins';
-import { testDashboard } from '@/testing/fixtures/dashboards';
+import { testLoaded } from '@/testing/fixtures/dashboards';
 import { act, render, screen } from '@/testing/render';
 import { DashboardProvider } from '../state/DashboardProvider';
 import { dashboardKeys } from './dashboardQueries';
@@ -39,7 +39,7 @@ function setup() {
   const queryClient = createQueryClient();
   const tree = (hasInspect: boolean) => (
     <PluginsContext value={plugins}>
-      <DashboardProvider dashboard={testDashboard()}>
+      <DashboardProvider dashboard={testLoaded()}>
         <Tile name="First" />
         <Tile name="Second" />
         {hasInspect ? <Inspect /> : null}

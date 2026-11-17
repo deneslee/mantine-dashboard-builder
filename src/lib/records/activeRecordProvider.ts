@@ -4,7 +4,17 @@ import type { RecordProvider } from '@/core/records/RecordProvider';
 import { storageKey } from '../storage';
 
 /** What the setting needs of a registered provider; `lib/` cannot import `plugins/`, so this is structural. */
-export type RecordProviderEntries = Record<string, { load(): Promise<RecordProvider> }>;
+export type RecordProviderEntries = Record<string, { name: string; load(): Promise<RecordProvider> }>;
+
+/**
+ * The place the setting resolves to. One value is used for loading, labels, query keys and save results,
+ * so they cannot disagree. `isFallback`: the stored id is not registered in this build.
+ */
+export interface ResolvedPlace {
+  id: string;
+  name: string;
+  isFallback: boolean;
+}
 
 const STORAGE_KEY = storageKey('record-provider');
 /** Always registered by `app/`, and what an unknown or missing setting falls back to. */
@@ -32,16 +42,35 @@ export function getActiveRecordProviderId(): string {
   }
 }
 
-export function setActiveRecordProviderId(id: string) {
+let lastPlace: ResolvedPlace | undefined;
+
+/** The place in use. The same object while it does not change, so it can be a snapshot for React. */
+export function getActivePlace(): ResolvedPlace {
+  const wanted = getActiveRecordProviderId();
+  const id = Object.hasOwn(entries, wanted) ? wanted : DEFAULT_ID;
+  const name = entries[id]?.name ?? id;
+  const isFallback = id !== wanted;
+  if (lastPlace?.id !== id || lastPlace.name !== name || lastPlace.isFallback !== isFallback)
+    lastPlace = { id, name, isFallback };
+  return lastPlace;
+}
+
+/**
+ * Changes the place in use. It says whether that worked, so the caller can show the outcome. Only a
+ * registered place can be chosen.
+ */
+export function setActiveRecordProviderId(id: string): { ok: true } | { ok: false; message: string } {
+  if (!Object.hasOwn(entries, id)) return { ok: false, message: `"${id}" is not available in this build.` };
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 1, id }));
   } catch {
-    // Unavailable storage: the setting stays as it was.
-    return;
+    return { ok: false, message: 'Browser storage is unavailable, so the setting was not changed.' };
   }
   for (const listener of listeners) listener();
+  return { ok: true };
 }
 
+/** `listener` runs when the setting changes in this tab, or in another one (the `storage` event). */
 function subscribe(listener: () => void) {
   listeners.add(listener);
   const onStorage = (event: StorageEvent) => {
@@ -54,25 +83,33 @@ function subscribe(listener: () => void) {
   };
 }
 
-export function useActiveRecordProviderId() {
-  return useSyncExternalStore(subscribe, getActiveRecordProviderId, () => DEFAULT_ID);
+export function useActivePlace(): ResolvedPlace {
+  return useSyncExternalStore(subscribe, getActivePlace, getActivePlace);
 }
 
-/**
- * The provider the setting names, loaded once. An id that is not registered (a build without Convex,
- * after the setting named it) falls back to `browser`. Takes no argument, so plain functions can call it.
- */
-export function loadActiveRecordProvider(): Promise<RecordProvider> {
-  const wanted = getActiveRecordProviderId();
-  const id = Object.hasOwn(entries, wanted) ? wanted : DEFAULT_ID;
-  const entry = entries[id];
-  if (!entry) return Promise.reject(new AppError('unknown', 'No record provider is registered.'));
+/** `listener` gets the new place each time the place in use changes (not when the same one is set again). */
+export function onActivePlaceChange(listener: (place: ResolvedPlace) => void): () => void {
+  let known = getActivePlace();
+  return subscribe(() => {
+    const next = getActivePlace();
+    if (next === known) return;
+    known = next;
+    listener(next);
+  });
+}
+
+/** A registered place's provider, loaded once. A failed load is tried again next time. */
+export function loadRecordProvider(id: string): Promise<RecordProvider> {
+  const entry = Object.hasOwn(entries, id) ? entries[id] : undefined;
+  if (!entry) return Promise.reject(new AppError('unknown', `"${id}" is not available in this build.`));
   let provider = loading.get(id);
   if (!provider) {
     provider = entry.load();
     loading.set(id, provider);
-    // A failed load is tried again next time.
     provider.catch(() => loading.delete(id));
   }
   return provider;
 }
+
+/** The provider of the place in use. Takes no argument, so plain functions can call it. */
+export const loadActiveRecordProvider = () => loadRecordProvider(getActivePlace().id);

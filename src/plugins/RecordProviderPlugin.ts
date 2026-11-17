@@ -9,6 +9,8 @@ export interface RecordProviderPlugin {
   id: string;
   name: string;
   description: string;
+  /** A caution shown on the place's page, e.g. that nothing signs readers in yet. */
+  note?: string;
   /** The same as the loaded provider's `capabilities`, readable without loading it. */
   capabilities: RecordCapabilities;
   load: () => Promise<RecordProvider>;

@@ -2,17 +2,30 @@ import { verticalCompactor } from 'react-grid-layout/core';
 import { createStore } from 'zustand/vanilla';
 import { immer } from 'zustand/middleware/immer';
 import { temporal } from 'zundo';
+import { toAppError } from '@/core/errors/AppError';
+import { WRITE_NOTICE_MS } from '@/core/records/RecordProvider';
 import { clearDraft, readDraft, writeDraft } from '../data/drafts';
 import { dashboardSchema, orderWidgets, type Dashboard, type Widget } from '@/core/dashboard/dashboardSchema';
 import { saveDashboard } from '../data/dashboardApi';
+import type { DashboardSource, LoadedDashboard } from '../data/dashboardSource';
 import { GRID_COLUMNS, resolveLayouts, type Breakpoint, type LayoutItem } from '@/core/dashboard/layout';
 import type { TimeRange } from '@/core/time/timeRange';
 
 export type EditorTool = { kind: 'palette' } | { kind: 'move' | 'resize'; id: string } | null;
+
+/**
+ * `saving`: a write is in flight. `waiting`: it has not resolved after `WRITE_NOTICE_MS`; nothing is
+ * cancelled, the store keeps waiting. `failed`: the last save was refused or errored (the draft is kept).
+ */
+export type SaveState = 'idle' | 'saving' | 'waiting' | 'failed';
+
 export interface DashboardState {
   doc: Dashboard;
   baseline: Dashboard;
+  /** Where the baseline came from, and so where Save goes and against which revision. */
+  source: DashboardSource;
   isDirty: boolean;
+  saveState: SaveState;
   draftError: string | null;
   breakpoint: Breakpoint;
   /**
@@ -53,6 +66,9 @@ export interface DashboardState {
 }
 
 export const selectDashboard = (state: Pick<DashboardState, 'doc'>): Dashboard => state.doc;
+/** Whether a write is still unresolved: Save, Import and Discard wait for it. */
+export const selectIsSavePending = (state: Pick<DashboardState, 'saveState'>) =>
+  state.saveState === 'saving' || state.saveState === 'waiting';
 /** For comparing with the baseline: parsing fixes the key order, `orderWidgets` the widget order. */
 const serialized = (dashboard: Dashboard) => JSON.stringify(orderWidgets(dashboardSchema.parse(dashboard)));
 const bottom = (items: readonly LayoutItem[]) => Math.max(0, ...items.map((item) => item.y + item.h));
@@ -62,19 +78,22 @@ const cleanLayout = (items: readonly LayoutItem[]): LayoutItem[] =>
 export interface DashboardStoreOptions {
   /** Off in stories and tests that must not read or write a draft. */
   shouldPersist?: boolean;
-  /** Where Save goes; tests pass a fake. */
-  save?: (dashboard: Dashboard) => Promise<void>;
+  /** Where Save goes; tests pass a fake. It gets the source the dashboard was loaded from. */
+  save?: (dashboard: Dashboard, source: DashboardSource) => Promise<DashboardSource>;
+  /** How long a write may be pending before the store says it is waiting. */
+  noticeMs?: number;
 }
 
 export function createDashboardStore(
-  baseline: Dashboard,
-  { shouldPersist = true, save = saveDashboard }: DashboardStoreOptions = {},
+  loaded: LoadedDashboard,
+  { shouldPersist = true, save = saveDashboard, noticeMs = WRITE_NOTICE_MS }: DashboardStoreOptions = {},
 ) {
+  const baseline = loaded.document;
   let restored: ReturnType<typeof readDraft> = undefined;
   let draftError: string | null = null;
   if (shouldPersist) {
     try {
-      restored = readDraft(baseline.id);
+      restored = readDraft(loaded.source.placeId, baseline.id);
     } catch {
       draftError = 'The draft could not be restored. Its stored copy was kept.';
     }
@@ -86,7 +105,9 @@ export function createDashboardStore(
       immer((set, get) => ({
         doc: initial,
         baseline: saved,
+        source: restored?.source ?? loaded.source,
         isDirty: serialized(initial) !== serialized(saved),
+        saveState: 'idle',
         draftError,
         breakpoint: 'lg',
         now: Date.now(),
@@ -191,31 +212,50 @@ export function createDashboardStore(
               s.announcement = `Removed ${title}.`;
             }),
           importDocument: (document) => {
+            if (selectIsSavePending(get())) throw new Error('Wait for the save to finish, then import.');
             if (document.id !== get().doc.id)
               throw new Error('Import a document with the same dashboard id.');
             set({ doc: document, announcement: 'Imported dashboard.' });
           },
           save: async () => {
             const state = get();
+            // One write at a time: a second Save while one is unresolved does nothing.
+            if (selectIsSavePending(state)) return;
             const document = { ...state.doc, updatedAt: new Date().toISOString() };
-            await save(document);
-            const isUnchanged = get().doc === state.doc;
-            const history = store.temporal.getState();
-            history.pause();
-            set((s) => {
-              s.baseline = document;
-              if (isUnchanged) s.doc.updatedAt = document.updatedAt;
-              s.announcement = 'Dashboard saved locally.';
-            });
-            history.resume();
+            set({ saveState: 'saving' });
+            const timer = setTimeout(() => {
+              if (get().saveState === 'saving') set({ saveState: 'waiting' });
+            }, noticeMs);
+            try {
+              // The source is the one loaded or last saved: its place and revision, never the place now in use.
+              const source = await save(document, state.source);
+              const isUnchanged = get().doc === state.doc;
+              const history = store.temporal.getState();
+              history.pause();
+              set((s) => {
+                s.baseline = document;
+                s.source = source;
+                s.saveState = 'idle';
+                if (isUnchanged) s.doc.updatedAt = document.updatedAt;
+                s.announcement = 'Dashboard saved.';
+              });
+              history.resume();
+            } catch (error) {
+              // The draft is kept; the caller shows the message (a conflict says to export the JSON).
+              set({ saveState: 'failed', announcement: toAppError(error).message });
+              throw error;
+            } finally {
+              clearTimeout(timer);
+            }
           },
           discard: () => {
+            if (selectIsSavePending(get())) return;
             const history = store.temporal.getState();
             history.pause();
             set({ doc: get().baseline, tool: null, announcement: 'Discarded changes.' });
             history.clear();
             history.resume();
-            if (shouldPersist) clearDraft(get().doc.id);
+            if (shouldPersist) clearDraft(get().source.placeId, get().doc.id);
           },
           undo: () => {
             store.temporal.getState().undo();
@@ -231,14 +271,19 @@ export function createDashboardStore(
     ),
   );
   store.subscribe((state, previous) => {
-    if (state.doc === previous.doc && state.baseline === previous.baseline) return;
+    if (
+      state.doc === previous.doc &&
+      state.baseline === previous.baseline &&
+      state.source === previous.source
+    )
+      return;
     const document = state.doc;
     const isDirty = serialized(document) !== serialized(state.baseline);
     if (isDirty !== state.isDirty) store.setState({ isDirty });
     if (!shouldPersist) return;
     try {
-      if (isDirty) writeDraft(state.baseline, document);
-      else clearDraft(document.id);
+      if (isDirty) writeDraft({ source: state.source, baseline: state.baseline, document });
+      else clearDraft(state.source.placeId, document.id);
       if (state.draftError) store.setState({ draftError: null });
     } catch {
       store.setState({ draftError: 'The draft could not be stored. Export JSON before leaving.' });

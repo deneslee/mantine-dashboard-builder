@@ -3,6 +3,7 @@ import {
   IconDatabase,
   IconLayoutDashboard,
   IconPlugConnected,
+  IconServer,
   IconSettings,
   IconTemplate,
 } from '@tabler/icons-react';
@@ -27,6 +28,7 @@ export const nav: Nav = {
         },
         { id: 'templates', label: 'Templates', icon: IconTemplate, to: '/templates' },
         { id: 'datasources', label: 'Data sources', icon: IconDatabase, to: '/datasources' },
+        { id: 'storage', label: 'Storage', icon: IconServer, to: '/storage' },
         { id: 'explore', label: 'Explore', icon: IconChartDots3, to: '/explore' },
         { id: 'integrations', label: 'Integrations', icon: IconPlugConnected, to: '/integrations' },
       ],
@@ -41,6 +43,7 @@ export const nav: Nav = {
   areas: [
     { value: 'dashboards', label: 'Dashboards', to: '/dashboards' },
     { value: 'datasources', label: 'Data sources', to: '/datasources' },
+    { value: 'storage', label: 'Storage', to: '/storage' },
     { value: 'integrations', label: 'Integrations', to: '/integrations' },
     { value: 'settings', label: 'Settings', to: '/settings' },
   ],

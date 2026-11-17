@@ -7,7 +7,10 @@ import { createAppRouter } from '@/app/router';
 import { DENSITY_STORAGE_KEY } from '@/lib/useDensity';
 import { AppStory } from '@/testing/AppStory';
 import { loadDemoDashboard } from '@/testing/fixtures/dashboards';
-import { saveDashboard } from './data/dashboardApi';
+import { orderWidgets, type Dashboard } from '@/core/dashboard/dashboardSchema';
+import { storageKey } from '@/lib/storage';
+import { createBrowserStorageProvider } from '@/plugins/recordProviders/browserStorage/browserStorageProvider';
+import { DASHBOARDS_COLLECTION } from './data/dashboardSource';
 import { draftKey, writeDraft } from './data/drafts';
 
 /**
@@ -24,6 +27,11 @@ type Story = StoryObj<typeof meta>;
 // Mantine renders menus, drawers and dialogs in portals, outside the story root.
 const page = within(document.body);
 const WAIT = { timeout: 5000 };
+/** What an earlier save left: a dashboard record in the browser place, as the app reads it. */
+async function saveInBrowser(dashboard: Dashboard) {
+  const provider = createBrowserStorageProvider({ storage: localStorage, keyFor: storageKey });
+  await provider.create(DASHBOARDS_COLLECTION, orderWidgets(dashboard), { id: dashboard.id });
+}
 const controls = () => within(page.getByRole('group', { name: 'Dashboard controls' }));
 
 async function chooseFromMenu(widget: string, item: string) {
@@ -65,7 +73,7 @@ export const WidgetTime: Story = {
 export const Empty: Story = {
   args: { url: EDIT },
   beforeEach: async () =>
-    saveDashboard({ ...(await loadDemoDashboard('sales')), widgets: {}, layouts: { lg: [] } }),
+    saveInBrowser({ ...(await loadDemoDashboard('sales')), widgets: {}, layouts: { lg: [] } }),
   play: async () => {
     await expect(await page.findByText('No widgets yet.', {}, WAIT)).toBeVisible();
   },
@@ -76,7 +84,8 @@ export const StorageError: Story = {
   beforeEach: () => {
     const setItem = localStorage.setItem.bind(localStorage);
     spyOn(Storage.prototype, 'setItem').mockImplementation((key, value) => {
-      if (key.startsWith(draftKey(''))) throw new DOMException('Quota exceeded', 'QuotaExceededError');
+      if (key.startsWith(draftKey('browser', '')))
+        throw new DOMException('Quota exceeded', 'QuotaExceededError');
       setItem(key, value);
     });
   },
@@ -92,7 +101,7 @@ export const RestoresDraft: Story = {
     const saved = await loadDemoDashboard('sales');
     const draft = structuredClone(saved);
     draft.widgets.revenue!.title = 'Draft revenue';
-    writeDraft(saved, draft);
+    writeDraft({ source: { kind: 'seed', placeId: 'browser' }, baseline: saved, document: draft });
   },
   play: async () => {
     await expect(await page.findByText('Unsaved changes', {}, WAIT)).toBeVisible();
@@ -106,7 +115,7 @@ export const BlurCommitUndo: Story = {
     await renameRevenue('Edited revenue');
     await userEvent.click(controls().getByRole('button', { name: 'Undo' }));
     await waitFor(() => expect(page.getByRole('textbox', { name: 'Title' })).toHaveValue('Revenue'));
-    await expect(page.getByText('Saved locally')).toBeVisible();
+    await expect(page.getByText('Saved in This browser')).toBeVisible();
     await expect(controls().getByRole('button', { name: 'Undo' })).toBeDisabled();
   },
 };
@@ -116,11 +125,11 @@ export const SaveThenUndo: Story = {
   play: async () => {
     await renameRevenue('Saved revenue');
     await userEvent.click(controls().getByRole('button', { name: 'Save' }));
-    await expect(await page.findByText('Saved locally', {}, WAIT)).toBeVisible();
+    await expect(await page.findByText('Saved in This browser', {}, WAIT)).toBeVisible();
     await userEvent.click(controls().getByRole('button', { name: 'Undo' }));
     await expect(await page.findByText('Unsaved changes')).toBeVisible();
     await userEvent.click(controls().getByRole('button', { name: 'Redo' }));
-    await expect(await page.findByText('Saved locally')).toBeVisible();
+    await expect(await page.findByText('Saved in This browser')).toBeVisible();
   },
 };
 
@@ -147,7 +156,7 @@ export const QueryApplyUndo: Story = {
     // The editor follows the dashboard: Undo brings the old queries back, with nothing left to apply.
     await waitFor(() => expect(editor).toHaveValue(original));
     await expect(page.getByRole('button', { name: 'Apply queries' })).toBeDisabled();
-    await expect(page.getByText('Saved locally')).toBeVisible();
+    await expect(page.getByText('Saved in This browser')).toBeVisible();
   },
 };
 
@@ -269,7 +278,7 @@ export const InspectQueries: Story = {
       ...revenue.queries[0]!,
       spec: { ...(revenue.queries[0]!.spec as object), seed: 'second' },
     };
-    await saveDashboard({
+    await saveInBrowser({
       ...sales,
       widgets: { ...sales.widgets, revenue: { ...revenue, queries: [...revenue.queries, second] } },
     });
@@ -323,7 +332,7 @@ export const WidgetTimeEdit: Story = {
 
     await userEvent.click(controls().getByRole('button', { name: 'Undo' }));
     await waitFor(() => expect(clock()).toBeNull());
-    await expect(page.getByText('Saved locally')).toBeVisible();
+    await expect(page.getByText('Saved in This browser')).toBeVisible();
   },
 };
 
@@ -378,7 +387,7 @@ export const MoveResizeDialogs: Story = {
 
     await userEvent.click(controls().getByRole('button', { name: 'Undo' }));
     await userEvent.click(controls().getByRole('button', { name: 'Undo' }));
-    await expect(await page.findByText('Saved locally')).toBeVisible();
+    await expect(await page.findByText('Saved in This browser')).toBeVisible();
   },
 };
 
@@ -445,7 +454,7 @@ async function undoOnceWithKeyboard() {
   await expect(await page.findByText('Unsaved changes')).toBeVisible();
   controls().getByRole('button', { name: 'Undo' }).focus();
   await userEvent.keyboard('{Enter}');
-  await expect(await page.findByText('Saved locally')).toBeVisible();
+  await expect(await page.findByText('Saved in This browser')).toBeVisible();
   await expect(controls().getByRole('button', { name: 'Undo' })).toBeDisabled();
 }
 
@@ -544,7 +553,7 @@ export const EditTimeInUrl: Story = {
   ...withHistory(EDIT),
   play: async ({ loaded }) => {
     const history = loaded.history as RouterHistory;
-    await page.findByText('Saved locally', {}, WAIT);
+    await page.findByText('Saved in This browser', {}, WAIT);
     await expect(timeTrigger()).toHaveTextContent('Last 24 hours');
     const length = history.length;
     await pickRange('Last 7 days');
@@ -553,7 +562,7 @@ export const EditTimeInUrl: Story = {
     await userEvent.click(await page.findByRole('option', { name: 'Every 5 minutes' }, WAIT));
     await waitFor(() => expect(searchOf(history).get('refresh')).toBe('5m'));
     await expect(history.length).toBe(length);
-    await expect(page.getByText('Saved locally')).toBeVisible();
+    await expect(page.getByText('Saved in This browser')).toBeVisible();
     await expect(controls().getByRole('button', { name: 'Undo' })).toBeDisabled();
     history.back();
     await waitFor(() => expect(history.location.pathname).toBe('/dashboards'));
@@ -583,7 +592,7 @@ export const SetDefaultTime: Story = {
   ...withHistory(EDIT),
   play: async ({ loaded }) => {
     const history = loaded.history as RouterHistory;
-    await page.findByText('Saved locally', {}, WAIT);
+    await page.findByText('Saved in This browser', {}, WAIT);
     const button = () => controls().getByRole('button', { name: 'Use current time as default' });
     await expect(button()).toBeDisabled();
     await pickRange('Last 7 days');
@@ -593,7 +602,7 @@ export const SetDefaultTime: Story = {
     await expect(controls().getByRole('button', { name: 'Undo' })).toBeEnabled();
     await expect(button()).toBeDisabled();
     await userEvent.click(controls().getByRole('button', { name: 'Undo' }));
-    await expect(await page.findByText('Saved locally')).toBeVisible();
+    await expect(await page.findByText('Saved in This browser')).toBeVisible();
     await waitFor(() => expect(button()).toBeEnabled());
     await expect(searchOf(history).get('from')).toBe('now-7d');
     await expect(timeTrigger()).toHaveTextContent('Last 7 days');

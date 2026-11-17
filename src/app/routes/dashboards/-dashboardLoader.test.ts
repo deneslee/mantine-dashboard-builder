@@ -4,7 +4,8 @@ import { dashboardKeys } from '@/features/dashboards/data/dashboardQueries';
 import { mockDatasource } from '@/plugins/datasources/mock/mockDatasource';
 import { chartWidget } from '@/plugins/widgets/chart/chartWidget';
 import { kpiWidget } from '@/plugins/widgets/kpi/kpiWidget';
-import { testDashboard } from '@/testing/fixtures/dashboards';
+import { getActivePlace } from '@/lib/records/activeRecordProvider';
+import { testDashboard, testLoaded } from '@/testing/fixtures/dashboards';
 import { Route } from './$id';
 
 type Loader = (context: unknown) => Promise<unknown>;
@@ -14,7 +15,7 @@ function setup() {
   dashboard.widgets.a!.queries = [{ datasource: 'mock', spec: { n: 1 } }];
   dashboard.widgets.b!.queries = [{ datasource: 'mock', spec: { n: 2 } }];
   const queryClient = createQueryClient();
-  queryClient.setQueryData(dashboardKeys.detail(dashboard.id), dashboard);
+  queryClient.setQueryData(dashboardKeys.detail(getActivePlace().id, dashboard.id), testLoaded(dashboard));
   // Never settles: the loader resolving proves it didn't wait.
   const runQuery = vi.spyOn(mockDatasource, 'query').mockImplementation(() => new Promise<never>(() => {}));
   const preloads = [chartWidget, kpiWidget].map((widget) =>
@@ -35,7 +36,10 @@ describe('/dashboards/$id loader', () => {
 
   it("starts the first screen's widget queries and code on entry, without awaiting them", async () => {
     const { dashboard, runQuery, preloads, load } = setup();
-    await expect(load('enter')).resolves.toBe(dashboard);
+    await expect(load('enter')).resolves.toMatchObject({
+      place: getActivePlace(),
+      loaded: { document: dashboard, source: { kind: 'record', placeId: 'browser' } },
+    });
     expect(runQuery).toHaveBeenCalledTimes(2);
     for (const preload of preloads) expect(preload).toHaveBeenCalledOnce();
   });
