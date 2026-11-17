@@ -27,7 +27,15 @@ function Inspect() {
 function setup() {
   const runQuery = vi.fn(async () => [frame]);
   const datasource: DatasourcePlugin = { id: 'x', name: 'X', isTimeAware: true, query: runQuery };
-  const plugins: Plugins = { widgets: {}, datasources: { x: datasource }, types: {}, build: { catalog: [] } };
+  const plugins: Plugins = {
+    widgets: {},
+    datasources: { x: datasource },
+    types: {},
+    recordProviders: {},
+    panels: {},
+    actions: {},
+    build: { catalog: [] },
+  };
   const queryClient = createQueryClient();
   const tree = (hasInspect: boolean) => (
     <PluginsContext value={plugins}>

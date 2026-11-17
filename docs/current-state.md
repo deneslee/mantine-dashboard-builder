@@ -36,7 +36,7 @@ app/        routes  Providers  router  queryClient  plugins.ts  nav.ts
 features/   dashboards  datasources  settings  notifications  integrations  debug
   │         never import each other; widgets and datasources come from usePlugins()
 shell/      the app frame: Shell, ShellProvider, useShell, navbar, sidebar, context bar
-plugins/    WidgetPlugin, DatasourcePlugin and OptionalPlugin contracts, usePlugins; widgets/*, datasources/*, optional/*
+plugins/    WidgetPlugin, DatasourcePlugin, OptionalPlugin, RecordProviderPlugin, ContextPanelPlugin and ActionPlugin contracts (one registry per kind, keyed by id; the last three are empty), usePlugins; widgets/*, datasources/*, optional/*
 lib/        notify (toasts and the inbox), sentry, vault (secrets), useMotion, useCurrentUser
 ui/         tokens, the Mantine theme, generic components (Page, ErrorState, QueryBoundary, Skeletons)
 core/       plain TypeScript: dashboard schema and layout, time ranges, DataFrame, AppError, the relay contract, the vault's cipher

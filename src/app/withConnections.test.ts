@@ -30,6 +30,9 @@ const base: Plugins = {
   widgets: {},
   datasources: { mock: { id: 'mock', name: 'Mock', isTimeAware: true, query: async () => [] } },
   types: { 'fixture-sql': type! },
+  recordProviders: {},
+  panels: {},
+  actions: {},
   build: { catalog: [] },
 };
 

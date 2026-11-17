@@ -1,3 +1,4 @@
+import { IconChartLine } from '@tabler/icons-react';
 import { lazy } from 'react';
 import { describe, expect, it } from 'vite-plus/test';
 import { z } from 'zod';
@@ -10,6 +11,9 @@ const widget = (type: string) =>
   defineWidget({
     type,
     name: type,
+    description: '',
+    icon: IconChartLine,
+    queryTypes: 'any',
     defaultSize: { w: 6, h: 3 },
     isTimeAware: true,
     optionsSchema: z.object({}),
@@ -29,6 +33,9 @@ const plugins: Plugins = {
     },
   },
   types: {},
+  recordProviders: {},
+  panels: {},
+  actions: {},
   build: { catalog: [] },
 };
 

@@ -1,3 +1,4 @@
+import { IconChartLine } from '@tabler/icons-react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 import { z } from 'zod';
 import type { DataFrame } from '@/core/data/DataFrame';
@@ -40,6 +41,9 @@ describe('WidgetTile', () => {
     const widget = defineWidget({
       type: 'chart',
       name: 'Chart',
+      description: '',
+      icon: IconChartLine,
+      queryTypes: 'any',
       defaultSize: { w: 6, h: 3 },
       isTimeAware: true,
       optionsSchema: z.object({}),
@@ -50,6 +54,9 @@ describe('WidgetTile', () => {
       widgets: { chart: widget },
       datasources: { x: datasource },
       types: {},
+      recordProviders: {},
+      panels: {},
+      actions: {},
       build: { catalog: [] },
     };
     const dashboard = testDashboard();
