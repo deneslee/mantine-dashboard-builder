@@ -6,6 +6,7 @@ import { toRegistry, type Plugins } from '@/plugins/usePlugins';
 import { localJsonDatasource } from '@/plugins/datasources/localJson/localJsonDatasource';
 import { mockDatasource } from '@/plugins/datasources/mock/mockDatasource';
 import { chartWidget } from '@/plugins/widgets/chart/chartWidget';
+import { rechartsChartWidget } from '@/plugins/widgets/chart/rechartsChartWidget';
 import { kpiWidget } from '@/plugins/widgets/kpi/kpiWidget';
 import { tableWidget } from '@/plugins/widgets/table/tableWidget';
 
@@ -22,7 +23,7 @@ const ACTIONS: ActionPlugin[] = [];
  * `plugins.json` lists (plugins.config.ts); `useAppPlugins` adds a datasource per connection.
  */
 export const plugins: Plugins = {
-  widgets: toRegistry('widget', [kpiWidget, chartWidget, tableWidget], (w) => w.type),
+  widgets: toRegistry('widget', [kpiWidget, chartWidget, rechartsChartWidget, tableWidget], (w) => w.type),
   datasources: toRegistry('datasource', [mockDatasource, localJsonDatasource], (d) => d.id),
   types: toRegistry(
     'datasource type',
