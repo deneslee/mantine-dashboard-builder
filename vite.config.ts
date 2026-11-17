@@ -9,6 +9,31 @@ import { optionalPlugins } from './plugins.config';
 
 const uploadSourcemaps = Boolean(process.env.SENTRY_AUTH_TOKEN);
 
+/**
+ * Local-only paths the check tasks may list but never depend on: agent and IDE folders, tool caches,
+ * build output, and `.git` (a folder in the main checkout, a file in a worktree). Left out of the cache
+ * key so a worktree made by `scripts/new-worktree.ps1` replays main's cache.
+ */
+const cacheInput = [
+  { auto: true },
+  '!.git',
+  '!.git/**',
+  '!.agents/**',
+  '!.claude/**',
+  '!.codex/**',
+  '!.idea/**',
+  '!.junie/**',
+  '!.kiro/**',
+  '!.playwright-cli/**',
+  '!.qartez/**',
+  '!floorplan/**',
+  '!storybook-static/**',
+  '!node_modules/.cache',
+  '!node_modules/.cache/**',
+  '!node_modules/.pnpm-store',
+  '!node_modules/.pnpm-store/**',
+];
+
 export default defineConfig(({ command, mode }) => {
   // `pnpm dev:devtools` (`vite --mode devtools`): the dev server with TanStack Devtools, Vite DevTools
   // and click-to-source. `pnpm dev`, builds, Storybook and tests load none of them.
@@ -30,14 +55,17 @@ export default defineConfig(({ command, mode }) => {
         // Type errors come from tsgolint (`typeCheck` above): `vp lint` reports them, so there's no separate
         // tsc and `pnpm typecheck` runs check:lint. (`vp check --no-fmt --no-lint` measured 4x slower.)
         // Tasks get a clean env. The Sentry vars turn source-map upload on, so they belong in the key.
-        'check:build': { command: 'vp build', cache: { env: ['SENTRY_*'] } },
-        // `floorplan/` is a dev tool's cache, not lint input; ignoring it lets worktrees reuse main's cache.
-        'check:lint': { command: 'vp lint', cache: { input: [{ auto: true }, '!floorplan/**'] } },
-        'check:css': 'stylelint "src/**/*.css"',
-        'check:fmt': 'vp fmt --check .',
-        'check:test': 'vp test run',
-        'check:unit': 'vp test run --project node --project dom',
-        'check:stories': 'vp test run --project storybook',
+        'check:build': { command: 'vp build', cache: { env: ['SENTRY_*'], input: cacheInput } },
+        'check:lint': { command: 'vp lint', cache: { input: cacheInput } },
+        // Stylelint lists node_modules, which differs per checkout; its real inputs are these.
+        'check:css': {
+          command: 'stylelint "src/**/*.css"',
+          cache: { input: ['src/**/*.css', '.stylelintrc.json', 'package.json'] },
+        },
+        'check:fmt': { command: 'vp fmt --check .', cache: { input: cacheInput } },
+        'check:test': { command: 'vp test run', cache: { input: cacheInput } },
+        'check:unit': { command: 'vp test run --project node --project dom', cache: { input: cacheInput } },
+        'check:stories': { command: 'vp test run --project storybook', cache: { input: cacheInput } },
       },
     },
     lint: {
