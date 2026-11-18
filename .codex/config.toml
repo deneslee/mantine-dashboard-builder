@@ -1,6 +1,3 @@
-# Listed entries inherit their settings from ~/.codex/config.toml.
-# Only values explicitly set below override the global configuration.
-
-
-[mcp_servers."mantine"]
-enabled = true
+[mcp_servers.mantine]
+command = "pnx"
+args = ["-y", "@mantine/mcp-server"]

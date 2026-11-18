@@ -11,7 +11,7 @@ Start Codex in the feature checkout and give it [the kickoff prompt](KICKOFF.md)
 
 ## First milestone
 
-1. Confirm the branch and inspect existing changes. The lead adds `@xyflow/react` to the app package if missing (`pnpm add -w @xyflow/react` from this repo root). Keep package and lockfile edits under one owner.
+1. done already
 2. Add a thin route at `src/app/routes/node-studio.tsx` following local lazy-loading conventions. Let TanStack Router generate the route tree. The existing root outlet supplies the shell. Use the direct URL for review.
 3. In `src/features/node-studio/`, define a small in-memory schema with stable table, field and relationship IDs. Seed Customers.id, Orders.id, Orders.customerId and Orders.billingCustomerId. Start with Orders.customerId pointing to Customers.id. The spare billing field makes adding a second valid relationship easy to test.
 4. Render one simple card per table with named field handles. Use built-in dragging, selection, pan, zoom and fit view. Import React Flow CSS from the feature. Give the graph container a definite height inside the shell.

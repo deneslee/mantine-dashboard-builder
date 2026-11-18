@@ -15,6 +15,7 @@ import { Route as DatasourcesRouteRouteImport } from './routes/datasources/route
 import { Route as DebugRouteImport } from './routes/debug'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as IntegrationsRouteRouteImport } from './routes/integrations/route'
+import { Route as NodeStudioRouteImport } from './routes/node-studio'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as StorageRouteRouteImport } from './routes/storage/route'
 import { Route as TemplatesRouteImport } from './routes/templates'
@@ -56,6 +57,11 @@ const ExploreRoute = ExploreRouteImport.update({
 const IntegrationsRouteRoute = IntegrationsRouteRouteImport.update({
   id: '/integrations',
   path: '/integrations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NodeStudioRoute = NodeStudioRouteImport.update({
+  id: '/node-studio',
+  path: '/node-studio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsRoute = SettingsRouteImport.update({
@@ -127,6 +133,7 @@ export interface FileRoutesByFullPath {
   '/storage': typeof StorageRouteRouteWithChildren
   '/debug': typeof DebugRoute
   '/explore': typeof ExploreRoute
+  '/node-studio': typeof NodeStudioRoute
   '/settings': typeof SettingsRoute
   '/templates': typeof TemplatesRoute
   '/dashboards/$id': typeof DashboardsIdRoute
@@ -143,6 +150,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/debug': typeof DebugRoute
   '/explore': typeof ExploreRoute
+  '/node-studio': typeof NodeStudioRoute
   '/settings': typeof SettingsRoute
   '/templates': typeof TemplatesRoute
   '/dashboards/$id': typeof DashboardsIdRoute
@@ -164,6 +172,7 @@ export interface FileRoutesById {
   '/storage': typeof StorageRouteRouteWithChildren
   '/debug': typeof DebugRoute
   '/explore': typeof ExploreRoute
+  '/node-studio': typeof NodeStudioRoute
   '/settings': typeof SettingsRoute
   '/templates': typeof TemplatesRoute
   '/dashboards/$id': typeof DashboardsIdRoute
@@ -186,6 +195,7 @@ export interface FileRouteTypes {
     | '/storage'
     | '/debug'
     | '/explore'
+    | '/node-studio'
     | '/settings'
     | '/templates'
     | '/dashboards/$id'
@@ -202,6 +212,7 @@ export interface FileRouteTypes {
     | '/'
     | '/debug'
     | '/explore'
+    | '/node-studio'
     | '/settings'
     | '/templates'
     | '/dashboards/$id'
@@ -222,6 +233,7 @@ export interface FileRouteTypes {
     | '/storage'
     | '/debug'
     | '/explore'
+    | '/node-studio'
     | '/settings'
     | '/templates'
     | '/dashboards/$id'
@@ -243,6 +255,7 @@ export interface RootRouteChildren {
   StorageRouteRoute: typeof StorageRouteRouteWithChildren
   DebugRoute: typeof DebugRoute
   ExploreRoute: typeof ExploreRoute
+  NodeStudioRoute: typeof NodeStudioRoute
   SettingsRoute: typeof SettingsRoute
   TemplatesRoute: typeof TemplatesRoute
 }
@@ -289,6 +302,13 @@ declare module '@tanstack/react-router' {
       path: '/integrations'
       fullPath: '/integrations'
       preLoaderRoute: typeof IntegrationsRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/node-studio': {
+      id: '/node-studio'
+      path: '/node-studio'
+      fullPath: '/node-studio'
+      preLoaderRoute: typeof NodeStudioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -442,6 +462,7 @@ const rootRouteChildren: RootRouteChildren = {
   StorageRouteRoute: StorageRouteRouteWithChildren,
   DebugRoute: DebugRoute,
   ExploreRoute: ExploreRoute,
+  NodeStudioRoute: NodeStudioRoute,
   SettingsRoute: SettingsRoute,
   TemplatesRoute: TemplatesRoute,
 }
