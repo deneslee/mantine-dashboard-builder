@@ -1,11 +1,4 @@
 import { createContext } from 'react';
+import type { FieldEndpoint } from './model/schema';
 
-export interface FieldSelection {
-  tableId: string;
-  fieldId: string;
-}
-
-export const FieldSelectionContext = createContext<{
-  selection: FieldSelection | null;
-  select: (field: FieldSelection) => void;
-} | null>(null);
+export const SelectFieldContext = createContext<((field: FieldEndpoint) => void) | null>(null);

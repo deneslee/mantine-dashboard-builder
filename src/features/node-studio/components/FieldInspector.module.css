@@ -1,0 +1,23 @@
+.inspector,
+.form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--mantine-spacing-sm);
+}
+
+.inspector {
+  padding: var(--mantine-spacing-md);
+  border-inline-start: 1px solid var(--mantine-color-default-border);
+}
+
+.form button {
+  align-self: flex-start;
+}
+
+@container (max-width: 49rem) {
+  .inspector {
+    border-top: 1px solid var(--mantine-color-default-border);
+    border-inline-start: 0;
+  }
+}

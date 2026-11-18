@@ -1,0 +1,65 @@
+.card {
+  width: 13.5rem;
+  padding-bottom: 0.35rem;
+  border: 1px solid var(--mantine-color-default-border);
+  background: var(--mantine-color-body);
+  border-radius: var(--mantine-radius-md);
+  box-shadow: var(--mantine-shadow-xs);
+}
+
+.card[data-selected] {
+  border-color: var(--mantine-primary-color-filled);
+}
+
+.cardHeader,
+.field {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-xs);
+  padding-inline: var(--mantine-spacing-sm);
+}
+
+.cardHeader {
+  padding-block: var(--mantine-spacing-xs);
+  border-bottom: 1px solid var(--mantine-color-default-border);
+  font-weight: 600;
+}
+
+.row {
+  position: relative;
+}
+
+.field {
+  width: 100%;
+  font-family: var(--mantine-font-family-monospace);
+  font-size: var(--mantine-font-size-xs);
+  line-height: 2rem;
+}
+
+.field:hover,
+.field[aria-pressed='true'] {
+  background: var(--mantine-primary-color-light);
+}
+
+.field svg,
+.field small {
+  flex-shrink: 0;
+  color: var(--mantine-color-dimmed);
+}
+
+.field small {
+  margin-inline-start: auto;
+}
+
+.name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row .handle {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-color: var(--mantine-color-body);
+  background: var(--mantine-primary-color-filled);
+}

@@ -1,0 +1,7 @@
+.canvas {
+  height: 30rem;
+  max-height: 55dvh;
+  overflow: hidden;
+  border: 1px solid var(--app-color-border-default);
+  border-radius: var(--mantine-radius-default);
+}

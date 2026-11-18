@@ -1,155 +1,70 @@
-import { useState, type FormEvent } from 'react';
-import { Button, Group, Text, TextInput, Title, useComputedColorScheme } from '@mantine/core';
-import {
-  Background,
-  Controls,
-  ReactFlow,
-  ReactFlowProvider,
-  addEdge,
-  reconnectEdge,
-  useEdgesState,
-  useNodesData,
-  useReactFlow,
-  type Connection,
-  type Edge,
-} from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
-import { TableCard } from '../components/TableCard';
-import { FieldSelectionContext, type FieldSelection } from '../fieldSelection';
-import { TABLES, RELATIONSHIPS, type TableNode, type SchemaField } from '../schema';
+import { lazy, Suspense, useState } from 'react';
+import { Group, Select, Skeleton, Tabs, Text, Title } from '@mantine/core';
+import { BuildSchema } from '../BuildSchema';
+import { LARGE_SCHEMA, SMALL_SCHEMA } from '../fixtures/sampleSchemas';
+import { applySchemaEdit, type SchemaEdit } from '../model/schemaEdits';
 import classes from './NodeStudio.module.css';
 
-const NODE_TYPES = { table: TableCard };
-const FIT_OPTIONS = { padding: 0.15, maxZoom: 1.25 };
+const ExploreSchema = lazy(async () => {
+  const module = await import('../ExploreSchema');
+  return { default: module.ExploreSchema };
+});
 
-function RenameField({ field, onRename }: { field: SchemaField; onRename: (name: string) => void }) {
-  const [name, setName] = useState(field.name);
-  function handleSubmit(event: FormEvent) {
-    event.preventDefault();
-    if (name.trim()) onRename(name.trim());
-  }
-  return (
-    <form onSubmit={handleSubmit} className={classes.form}>
-      <TextInput
-        label="Field name"
-        value={name}
-        onChange={(event) => setName(event.currentTarget.value)}
-        required
-      />
-      <Button type="submit" size="xs" disabled={!name.trim() || name.trim() === field.name}>
-        Rename field
-      </Button>
-    </form>
-  );
-}
+const SAMPLES = [
+  { value: 'compact', label: 'Compact schema' },
+  { value: 'expanded', label: 'Expanded schema' },
+];
 
-function SchemaEditor() {
-  const scheme = useComputedColorScheme();
-  const [edges, setEdges, handleEdgesChange] = useEdgesState(RELATIONSHIPS);
-  const [selection, select] = useState<FieldSelection | null>(null);
-  const [message, setMessage] = useState('');
-  const { updateNodeData } = useReactFlow<TableNode>();
-  const table = useNodesData<TableNode>(selection?.tableId ?? '');
-  const field = table?.data.fields.find((item) => item.id === selection?.fieldId);
+export function NodeStudioPage() {
+  const [view, setView] = useState('build');
+  const [sample, setSample] = useState<'compact' | 'expanded'>('compact');
+  const [sessions, setSessions] = useState({
+    compact: { schema: SMALL_SCHEMA, message: '' },
+    expanded: { schema: LARGE_SCHEMA, message: '' },
+  });
+  const { schema, message } = sessions[sample];
 
-  function handleConnection(connection: Connection, previous?: Edge) {
-    const isDuplicate = edges.some(
-      (edge) =>
-        edge.id !== previous?.id &&
-        edge.source === connection.source &&
-        edge.target === connection.target &&
-        edge.sourceHandle === connection.sourceHandle &&
-        edge.targetHandle === connection.targetHandle,
-    );
-    if (isDuplicate) {
-      setMessage('These fields are already connected.');
-      return;
-    }
-    if (previous) {
-      setEdges((current) => reconnectEdge(previous, connection, current, { shouldReplaceId: false }));
-      setMessage('Relationship reconnected.');
-    } else {
-      setEdges((current) => addEdge({ ...connection, id: crypto.randomUUID() }, current));
-      setMessage('Relationship added.');
-    }
-  }
-
-  function handleRename(name: string) {
-    if (!table || !field) return;
-    updateNodeData(table.id, {
-      fields: table.data.fields.map((item) => (item.id === field.id ? { ...item, name } : item)),
-    });
-    setMessage('Field renamed.');
+  function handleEdit(edit: SchemaEdit) {
+    setSessions((current) => ({
+      ...current,
+      [sample]: applySchemaEdit(current[sample].schema, edit),
+    }));
   }
 
   return (
     <section className={classes.studio} aria-label="Node Studio">
-      <div className={classes.heading}>
+      <Group className={classes.heading} justify="space-between">
         <Title order={1}>Node Studio</Title>
-        <Text size="sm" c="dimmed">
-          Select a field to inspect it. Drag between field handles to connect them.
-        </Text>
-      </div>
-      <div className={classes.workspace}>
-        <div className={classes.canvas}>
-          <FieldSelectionContext value={{ selection, select }}>
-            <ReactFlow<TableNode>
-              defaultNodes={TABLES}
-              edges={edges}
-              onEdgesChange={handleEdgesChange}
-              nodeTypes={NODE_TYPES}
-              onConnect={(connection) => handleConnection(connection)}
-              onReconnect={(edge, connection) => handleConnection(connection, edge)}
-              onPaneClick={() => select(null)}
-              deleteKeyCode={null}
-              forceColorMode={scheme}
-              fitView
-              fitViewOptions={FIT_OPTIONS}
-            >
-              <Background />
-              <Controls />
-            </ReactFlow>
-          </FieldSelectionContext>
-        </div>
-        <aside className={classes.inspector} aria-label="Field inspector">
-          <Title order={2} size="h5">
-            Field inspector
-          </Title>
-          {field && table ? (
-            <>
-              <Text size="sm" c="dimmed">
-                {table.data.name} · {field.type}
-                {field.isPrimary && ' · Primary key'}
-              </Text>
-              <RenameField
-                key={`${table.id}/${field.id}/${field.name}`}
-                field={field}
-                onRename={handleRename}
-              />
-            </>
-          ) : (
-            <Text size="sm" c="dimmed">
-              Choose a field on the canvas.
-            </Text>
+        <Select
+          aria-label="Schema sample"
+          data={SAMPLES}
+          value={sample}
+          allowDeselect={false}
+          onChange={(value) => {
+            if (value === 'compact' || value === 'expanded') setSample(value);
+          }}
+        />
+      </Group>
+      {/* React Flow keeps the authored viewport and positions in its mounted store. */}
+      <Tabs keepMountedMode="display-none" value={view} onChange={(value) => value && setView(value)}>
+        <Tabs.List aria-label="Schema view">
+          <Tabs.Tab value="build">Build</Tabs.Tab>
+          <Tabs.Tab value="explore">Explore</Tabs.Tab>
+        </Tabs.List>
+        <Tabs.Panel value="build" pt="sm">
+          <Text size="sm" c="dimmed" mb="sm">
+            Select a field to inspect it. Drag between field handles to connect them.
+          </Text>
+          <BuildSchema key={sample} schema={schema} message={message} onEdit={handleEdit} />
+        </Tabs.Panel>
+        <Tabs.Panel value="explore" pt="sm">
+          {view === 'explore' && (
+            <Suspense fallback={<Skeleton className={classes.canvas} aria-label="Loading schema graph" />}>
+              <ExploreSchema key={sample} schema={schema} />
+            </Suspense>
           )}
-        </aside>
-        <Group className={classes.footer} justify="space-between">
-          <Text size="xs">
-            {TABLES.length} tables · {edges.length} {edges.length === 1 ? 'relationship' : 'relationships'}
-          </Text>
-          <Text size="xs" role="status">
-            {message}
-          </Text>
-        </Group>
-      </div>
+        </Tabs.Panel>
+      </Tabs>
     </section>
-  );
-}
-
-export function NodeStudioPage() {
-  return (
-    <ReactFlowProvider>
-      <SchemaEditor />
-    </ReactFlowProvider>
   );
 }

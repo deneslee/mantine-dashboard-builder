@@ -1,0 +1,24 @@
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 15rem;
+  overflow: hidden;
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: var(--mantine-radius-md);
+}
+
+.canvas {
+  height: clamp(23rem, 65dvh, 52rem);
+  min-width: 0;
+}
+
+.footer {
+  grid-column: 1 / -1;
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
+  border-top: 1px solid var(--mantine-color-default-border);
+}
+
+@container (max-width: 49rem) {
+  .workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
