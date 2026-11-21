@@ -1,5 +1,5 @@
-// Dependency updates, as grouped pull requests that CI checks (github-pages.yaml runs on every pull
-// request and deploys only from main). A group is packages that release together or must move together.
+// Dependency updates, as grouped pull requests that CI checks (ci.yaml runs on every pull request;
+// github-pages.yaml deploys only from main). A group is packages that release together or must move together.
 {
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
   extends: [
@@ -17,7 +17,7 @@
     { groupName: 'TanStack', matchPackageNames: ['@tanstack/**'] },
     { groupName: 'React', matchPackageNames: ['react', 'react-dom', '@types/react', '@types/react-dom'] },
     { groupName: 'Storybook', matchPackageNames: ['storybook', '@storybook/**'] },
-    { groupName: 'Testing', matchPackageNames: ['@testing-library/**', 'jsdom', 'msw', 'playwright'] },
+    { groupName: 'Testing', matchPackageNames: ['@testing-library/**', 'jsdom', 'playwright'] },
     { groupName: 'Sentry', matchPackageNames: ['@sentry/**'] },
     { groupName: 'Fontsource', matchPackageNames: ['@fontsource-variable/**'] },
     { groupName: 'Stylelint', matchPackageNames: ['stylelint', 'stylelint-config-*'] },

@@ -1,0 +1,48 @@
+name: CI
+
+# Checks every pull request, and main after a merge. github-pages.yaml deploys main.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A new push to a pull request stops the run for the old commit.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # Node from .nvmrc, pnpm from package.json `packageManager`, then install from the lockfile.
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@v1.22.0
+        with:
+          node-version-file: .nvmrc
+          cache: true
+
+      # The same tasks as `pnpm lint`, `pnpm format:check`, `pnpm test:unit` and `pnpm build`.
+      # No SENTRY_* variables: the build must work without them.
+      - name: Lint and type-check
+        run: vp run check:lint
+
+      - name: Stylelint
+        run: vp run check:css
+
+      - name: Format check
+        run: vp run check:fmt
+
+      - name: Unit tests
+        run: vp run check:unit
+
+      - name: Build
+        run: vp run check:build

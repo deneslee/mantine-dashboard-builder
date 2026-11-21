@@ -4,7 +4,7 @@
 #   docker run -p 8787:8787 -e RELAY_TOKEN=… -e RELAY_ALLOWED_ORIGINS=https://… dashboard-relay
 
 FROM node:24.22.1-alpine AS build
-RUN npm install --global pnpm@12.15.0
+RUN npm install --global pnpm@12.18.0
 WORKDIR /repo
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY relay relay
