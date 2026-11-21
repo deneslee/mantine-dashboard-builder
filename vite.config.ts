@@ -96,6 +96,7 @@ export default defineConfig(({ command, mode }) => {
         '.qartez',
         'floorplan',
         'public/assets',
+        'convex/_generated',
       ],
     },
     base: '/mantine-dashboard-builder/',
@@ -115,14 +116,15 @@ export default defineConfig(({ command, mode }) => {
       react({ compiler: true }),
       // Only the optional plugins plugins.json lists are built in; the rest aren't in dist at all.
       optionalPlugins(),
-      sentryVitePlugin({
-        org: process.env.SENTRY_ORG,
-        project: process.env.SENTRY_PROJECT,
-        authToken: process.env.SENTRY_AUTH_TOKEN,
-        disable: !uploadSourcemaps,
-        // Uploaded to Sentry, then removed so the deployed site never serves them.
-        sourcemaps: { filesToDeleteAfterUpload: ['./dist/**/*.map'] },
-      }),
+      // Optional: only a build with SENTRY_AUTH_TOKEN uploads source maps. No SENTRY_* var is needed.
+      uploadSourcemaps &&
+        sentryVitePlugin({
+          org: process.env.SENTRY_ORG,
+          project: process.env.SENTRY_PROJECT,
+          authToken: process.env.SENTRY_AUTH_TOKEN,
+          // Uploaded to Sentry, then removed so the deployed site never serves them.
+          sourcemaps: { filesToDeleteAfterUpload: ['./dist/**/*.map'] },
+        }),
     ]),
     // Also turns on Rolldown's build data (node_modules/.rolldown/) for analyze builds only.
     devtools: withDevtools || analyze,

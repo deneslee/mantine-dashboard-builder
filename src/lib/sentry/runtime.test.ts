@@ -7,7 +7,9 @@ const captureException = vi.fn();
 const addBreadcrumb = vi.fn();
 const bindRouterToSentry = vi.fn();
 vi.mock('./client', () => ({ initSentry }));
-vi.mock('./telemetry', () => ({ captureException, addBreadcrumb }));
+const captureMessage = vi.fn(() => 'event-1');
+const flushSdk = vi.fn(async () => true);
+vi.mock('./telemetry', () => ({ captureException, addBreadcrumb, captureMessage, flush: flushSdk }));
 vi.mock('./router', () => ({ bindRouterToSentry }));
 
 const DSN = 'https://key@o1.ingest.sentry.io/1';
@@ -169,5 +171,43 @@ describe('sentry runtime', () => {
       early,
       expect.objectContaining({ tags: { code: 'unknown', boundary: 'global' } }),
     );
+  });
+
+  it('reports Sentry as off and loads no SDK without a DSN', async () => {
+    const { getSentryStatus, getSentryTools, testSentryConnection } = await runtime('');
+    expect(getSentryStatus()).toMatchObject({ isConfigured: false, isRunning: false, needsReload: false });
+    expect(await getSentryTools()).toBeNull();
+    expect(await testSentryConnection()).toMatchObject({ ok: false });
+    expect(initSentry).not.toHaveBeenCalled();
+  });
+
+  it('starts Sentry once when a DSN is saved, and asks for a reload on the next change', async () => {
+    const r = await runtime('');
+    r.connectRouter({} as never);
+    const config = { ...r.getSentryConfig(), dsn: DSN };
+
+    expect(r.applySentryConfig(config)).toBe('started');
+    await vi.dynamicImportSettled();
+    expect(r.applySentryConfig({ ...config, tracesSampleRate: 0.2 })).toBe('reload');
+    expect(r.resetSentry().result).toBe('reload');
+    await vi.dynamicImportSettled();
+
+    expect(initSentry).toHaveBeenCalledTimes(1);
+    // The router connected before the start still gets tracing.
+    expect(bindRouterToSentry).toHaveBeenCalledTimes(1);
+    expect(r.getSentryStatus()).toMatchObject({ isRunning: true, needsReload: true });
+  });
+
+  it('keeps Sentry off when the saved config has no DSN', async () => {
+    const r = await runtime('');
+    expect(r.applySentryConfig({ ...r.getSentryConfig(), dsn: '  ' })).toBe('off');
+    await vi.dynamicImportSettled();
+    expect(initSentry).not.toHaveBeenCalled();
+  });
+
+  it('pings Sentry through the loaded SDK', async () => {
+    const { testSentryConnection } = await started();
+    expect(await testSentryConnection()).toMatchObject({ ok: true, eventId: 'event-1' });
+    expect(flushSdk).toHaveBeenCalledOnce();
   });
 });

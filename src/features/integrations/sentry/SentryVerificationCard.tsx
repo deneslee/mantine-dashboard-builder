@@ -29,14 +29,13 @@ import {
   IconWifi,
 } from '@tabler/icons-react';
 import { useState } from 'react';
-import * as Sentry from '@sentry/react';
 import { notify } from '@/lib/notify/notify';
 import {
-  getReplaySessionId,
   getSentryStatus,
+  getSentryTools,
   testSentryConnection,
   type ConnectionTestResult,
-} from '@/lib/sentry/client';
+} from '@/lib/sentry/runtime';
 import classes from './SentryVerificationCard.module.css';
 
 interface ActivityLogItem {
@@ -63,13 +62,16 @@ export function SentryVerificationCard({ onGoToSettings }: { onGoToSettings?: ()
   const [connectionResult, setConnectionResult] = useState<ConnectionTestResult | null>(null);
   const [delivering, setDelivering] = useState(false);
   const [receipt, setReceipt] = useState<DeliveryReceipt | null>(null);
+  const [currentReplayId, setCurrentReplayId] = useState<string | null>(null);
   const [logs, setLogs] = useState<ActivityLogItem[]>(() => [
     {
       id: 'init',
       time: new Date().toLocaleTimeString(),
       type: 'ping',
       badgeColor: 'blue',
-      message: 'Verification console ready. Sentry client initialized.',
+      message: status.isRunning
+        ? 'Verification console ready. Sentry is running.'
+        : 'Sentry is off (no DSN). Test actions are disabled.',
       details: status.isConfigured ? `DSN: ${status.dsn}` : 'DSN: Not configured',
     },
   ]);
@@ -116,40 +118,43 @@ export function SentryVerificationCard({ onGoToSettings }: { onGoToSettings?: ()
   };
 
   const handleBreakTheWorld = async () => {
+    const tools = await getSentryTools();
+    if (!tools) return;
     setDelivering(true);
     const start = performance.now();
     const ts = new Date().toLocaleTimeString();
 
     // 1. Send structured log
-    Sentry.logger.info('User triggered test error', {
+    tools.logger.info('User triggered test error', {
       action: 'test_error_button_click',
       timestamp: new Date().toISOString(),
     });
     addLog(
       'log',
       'blue',
-      'Sentry.logger.info: "User triggered test error"',
+      'tools.logger.info: "User triggered test error"',
       'action: test_error_button_click',
     );
 
     // 2. Send test metric
-    Sentry.metrics.count('test_counter', 1, {
+    tools.metrics.count('test_counter', 1, {
       attributes: { source: 'verification_break_the_world' },
     });
-    addLog('metric', 'grape', 'Sentry.metrics.count: "test_counter" +1');
+    addLog('metric', 'grape', 'tools.metrics.count: "test_counter" +1');
 
     // 3. Capture exception (without crashing out of the page so the user sees immediate feedback!).
     // Not thrown: `new Error()` already records the stack, and the React Compiler can't compile a
     // `throw` inside `try`.
-    const eventId = Sentry.captureException(new Error('This is your first error!'), {
+    const eventId = tools.captureException(new Error('This is your first error!'), {
       tags: { verification: 'break_the_world' },
     });
     addLog('error', 'red', 'Sentry.captureException: "This is your first error!"', `Event ID: ${eventId}`);
 
     // 4. Flush transport to ensure transmission
-    await Sentry.flush(2500);
+    await tools.flush(2500);
     const durationMs = Math.round(performance.now() - start);
-    const replayId = getReplaySessionId();
+    const replayId = tools.getReplayId();
+    setCurrentReplayId(replayId);
 
     addLog('flush', 'teal', `Envelope delivered to Sentry Ingest (${durationMs}ms)`, `Event ID: ${eventId}`);
 
@@ -171,17 +176,19 @@ export function SentryVerificationCard({ onGoToSettings }: { onGoToSettings?: ()
   };
 
   const handleSendLog = async () => {
+    const tools = await getSentryTools();
+    if (!tools) return;
     setDelivering(true);
     const start = performance.now();
     const msg = `Dashboard structured log verification @ ${new Date().toLocaleTimeString()}`;
 
-    Sentry.logger.info(msg, {
+    tools.logger.info(msg, {
       source: 'live_verification',
       environment: status.environment,
     });
-    addLog('log', 'blue', `Sentry.logger.info: "${msg}"`);
+    addLog('log', 'blue', `tools.logger.info: "${msg}"`);
 
-    await Sentry.flush(2000);
+    await tools.flush(2000);
     const durationMs = Math.round(performance.now() - start);
 
     addLog('flush', 'teal', `Log envelope delivered (${durationMs}ms)`);
@@ -189,7 +196,7 @@ export function SentryVerificationCard({ onGoToSettings }: { onGoToSettings?: ()
       actionName: 'Send Structured Log',
       durationMs,
       timestamp: new Date().toLocaleTimeString(),
-      summary: `Dispatched Sentry.logger.info with environment=${status.environment}`,
+      summary: `Dispatched tools.logger.info with environment=${status.environment}`,
     });
 
     notify.success({
@@ -200,15 +207,17 @@ export function SentryVerificationCard({ onGoToSettings }: { onGoToSettings?: ()
   };
 
   const handleSendMetric = async () => {
+    const tools = await getSentryTools();
+    if (!tools) return;
     setDelivering(true);
     const start = performance.now();
 
-    Sentry.metrics.count('dashboard_manual_test_metric', 1, {
+    tools.metrics.count('dashboard_manual_test_metric', 1, {
       attributes: { source: 'live_verification' },
     });
-    addLog('metric', 'grape', 'Sentry.metrics.count: "dashboard_manual_test_metric" +1');
+    addLog('metric', 'grape', 'tools.metrics.count: "dashboard_manual_test_metric" +1');
 
-    await Sentry.flush(2000);
+    await tools.flush(2000);
     const durationMs = Math.round(performance.now() - start);
 
     addLog('flush', 'teal', `Metric envelope delivered (${durationMs}ms)`);
@@ -227,10 +236,12 @@ export function SentryVerificationCard({ onGoToSettings }: { onGoToSettings?: ()
   };
 
   const handleHandledError = async () => {
+    const tools = await getSentryTools();
+    if (!tools) return;
     setDelivering(true);
     const start = performance.now();
 
-    const eventId = Sentry.captureException(new Error('Handled verification error test'), {
+    const eventId = tools.captureException(new Error('Handled verification error test'), {
       tags: { type: 'handled_test' },
     });
     addLog(
@@ -240,9 +251,10 @@ export function SentryVerificationCard({ onGoToSettings }: { onGoToSettings?: ()
       `Event ID: ${eventId}`,
     );
 
-    await Sentry.flush(2000);
+    await tools.flush(2000);
     const durationMs = Math.round(performance.now() - start);
-    const replayId = getReplaySessionId();
+    const replayId = tools.getReplayId();
+    setCurrentReplayId(replayId);
 
     addLog('flush', 'teal', `Error envelope delivered (${durationMs}ms)`, `Event ID: ${eventId}`);
     setReceipt({
@@ -261,7 +273,7 @@ export function SentryVerificationCard({ onGoToSettings }: { onGoToSettings?: ()
     setDelivering(false);
   };
 
-  const currentReplayId = getReplaySessionId();
+  const isOff = !status.isRunning;
 
   return (
     <Paper withBorder p="lg" radius="md">
@@ -295,6 +307,7 @@ export function SentryVerificationCard({ onGoToSettings }: { onGoToSettings?: ()
               size="xs"
               leftSection={<IconWifi size={14} />}
               loading={testingConnection}
+              disabled={isOff}
               onClick={handleTestConnection}
             >
               Ping Sentry Connection
@@ -329,12 +342,15 @@ export function SentryVerificationCard({ onGoToSettings }: { onGoToSettings?: ()
               <Text size="xs" fw={500}>
                 Session Replay Recorder
               </Text>
-              <Badge size="xs" variant="dot" color="teal">
-                Active
+              <Badge size="xs" variant="dot" color={status.features.replay ? 'teal' : 'gray'}>
+                {status.features.replay ? 'Active' : 'Off'}
               </Badge>
             </Group>
             <Text size="xs" c="dimmed">
-              Session ID: <Code>{currentReplayId || 'Active (buffering segments)'}</Code>
+              Session ID:{' '}
+              <Code>
+                {currentReplayId || (status.features.replay ? 'Buffering segments' : 'Not recording')}
+              </Code>
             </Text>
           </Group>
         </Paper>
@@ -347,8 +363,9 @@ export function SentryVerificationCard({ onGoToSettings }: { onGoToSettings?: ()
             Test & Verification Triggers
           </Text>
           <Text size="xs" c="dimmed" mb="sm">
-            Trigger events below to view real-time delivery receipts and verify transmission directly on this
-            page:
+            {isOff
+              ? 'Sentry is off (no DSN), so these actions are disabled. Add a DSN in Settings to use them.'
+              : 'Trigger events below to view real-time delivery receipts and verify transmission directly on this page:'}
           </Text>
 
           <Group gap="sm" wrap="wrap">
@@ -358,6 +375,7 @@ export function SentryVerificationCard({ onGoToSettings }: { onGoToSettings?: ()
                 size="sm"
                 leftSection={<IconFlame size={16} />}
                 loading={delivering}
+                disabled={isOff}
                 onClick={handleBreakTheWorld}
               >
                 Break the world
@@ -369,6 +387,7 @@ export function SentryVerificationCard({ onGoToSettings }: { onGoToSettings?: ()
               size="sm"
               leftSection={<IconFileText size={16} />}
               loading={delivering}
+              disabled={isOff}
               onClick={handleSendLog}
             >
               Send Test Log
@@ -379,6 +398,7 @@ export function SentryVerificationCard({ onGoToSettings }: { onGoToSettings?: ()
               size="sm"
               leftSection={<IconActivity size={16} />}
               loading={delivering}
+              disabled={isOff}
               onClick={handleSendMetric}
             >
               Emit App Metric
@@ -389,6 +409,7 @@ export function SentryVerificationCard({ onGoToSettings }: { onGoToSettings?: ()
               size="sm"
               leftSection={<IconPlayerPlay size={16} />}
               loading={delivering}
+              disabled={isOff}
               onClick={handleHandledError}
             >
               Capture Handled Error

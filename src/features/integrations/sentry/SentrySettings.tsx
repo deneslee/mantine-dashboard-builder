@@ -24,32 +24,35 @@ import {
 } from '@tabler/icons-react';
 import { useState } from 'react';
 import { notify } from '@/lib/notify/notify';
-import { getActiveSentryConfig, reconfigureSentry } from '@/lib/sentry/client';
-import { resetSentryConfig, saveSentryConfig, type SentryConfig } from '@/lib/sentry/sentryConfig';
+import { applySentryConfig, getSentryConfig, resetSentry, type ApplyResult } from '@/lib/sentry/runtime';
+import type { SentryConfig } from '@/lib/sentry/sentryConfig';
+
+/** What the user sees after a save or reset, per outcome. */
+const RESULT_MESSAGES: Record<ApplyResult, { title: string; message: string }> = {
+  started: { title: 'Sentry started', message: 'Sentry is running with these settings.' },
+  reload: {
+    title: 'Settings saved: reload to apply',
+    message: 'Sentry is already running. Reload the page to use the new settings.',
+  },
+  off: { title: 'Settings saved: Sentry is off', message: 'No DSN is set, so nothing is sent.' },
+};
 
 export function SentrySettings({ onConfigChanged }: { onConfigChanged?: () => void }) {
-  const [config, setConfig] = useState<SentryConfig>(getActiveSentryConfig);
-  const [saved, setSaved] = useState(false);
+  const [config, setConfig] = useState<SentryConfig>(getSentryConfig);
+  const [result, setResult] = useState<ApplyResult | null>(null);
 
   const handleSave = () => {
-    saveSentryConfig(config);
-    reconfigureSentry(config);
-    setSaved(true);
-    notify.success({
-      title: 'Settings Saved',
-      message: 'Sentry client reconfigured with updated parameters.',
-    });
+    const outcome = applySentryConfig(config);
+    setResult(outcome);
+    notify.success(RESULT_MESSAGES[outcome]);
     onConfigChanged?.();
   };
 
   const handleReset = () => {
-    const defaults = resetSentryConfig();
+    const { config: defaults, result: outcome } = resetSentry();
     setConfig(defaults);
-    reconfigureSentry(defaults);
-    notify.info({
-      title: 'Settings Reset',
-      message: 'Restored default settings from environment variables.',
-    });
+    setResult(outcome);
+    notify.info(RESULT_MESSAGES[outcome]);
     onConfigChanged?.();
   };
 
@@ -65,17 +68,16 @@ export function SentrySettings({ onConfigChanged }: { onConfigChanged?: () => vo
           </Text>
         </div>
 
-        {saved && (
+        {result && (
           <Alert
-            color="teal"
+            color={result === 'started' ? 'teal' : 'gray'}
             variant="light"
             icon={<IconCheck size={16} />}
-            title="Configuration Active"
+            title={RESULT_MESSAGES[result].title}
             withCloseButton
-            onClose={() => setSaved(false)}
+            onClose={() => setResult(null)}
           >
-            Sentry is running with your updated settings. You can run verification tests in the Verification
-            tab.
+            {RESULT_MESSAGES[result].message}
           </Alert>
         )}
 
@@ -233,7 +235,7 @@ export function SentrySettings({ onConfigChanged }: { onConfigChanged?: () => vo
             </Button>
 
             <Button size="sm" color="teal" leftSection={<IconDeviceFloppy size={16} />} onClick={handleSave}>
-              Save Settings & Apply
+              Save settings
             </Button>
           </Group>
         </Stack>

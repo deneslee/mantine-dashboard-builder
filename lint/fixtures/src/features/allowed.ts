@@ -6,3 +6,4 @@ import { useNav } from '@/shell/useShell';
 import { Page } from '@/ui/components/Page';
 import { AppError } from '@/core/errors/AppError';
 import { wait } from '@/utils/wait';
+import { reportError } from '@/lib/sentry/runtime';

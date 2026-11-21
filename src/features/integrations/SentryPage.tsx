@@ -24,7 +24,7 @@ import { Link } from '@tanstack/react-router';
 import { useState } from 'react';
 import { RouteBreadcrumbs } from '@/shell/breadcrumbs/RouteBreadcrumbs';
 import { Page } from '@/ui/components/Page';
-import { getSentryStatus } from '@/lib/sentry/client';
+import { getSentryStatus } from '@/lib/sentry/runtime';
 import { SentryIcon } from './sentry/SentryIcon';
 import { SentrySettings } from './sentry/SentrySettings';
 import { SentryStatusCard } from './sentry/SentryStatusCard';
@@ -48,8 +48,8 @@ export function SentryPage() {
               <SentryIcon size={22} />
             </ThemeIcon>
             <span>Sentry Integration</span>
-            <Badge color={status.isConfigured ? 'teal' : 'yellow'} variant="light" size="sm">
-              {status.isConfigured ? 'Connected' : 'Action Required: Set DSN'}
+            <Badge color={status.isRunning ? 'teal' : 'gray'} variant="light" size="sm">
+              {status.isRunning ? 'Running' : 'Off (no DSN)'}
             </Badge>
           </Group>
         </Page.Title>
@@ -69,22 +69,29 @@ export function SentryPage() {
       </Page.Header>
       <Page.Body>
         <Stack gap="md">
+          {status.needsReload && (
+            <Alert color="blue" variant="light" title="Reload to apply" icon={<IconInfoCircle size={16} />}>
+              <Text size="xs">
+                Sentry starts once per page load. Reload the page to use the saved settings.
+              </Text>
+            </Alert>
+          )}
           {!status.isConfigured && (
             <Alert
-              color="yellow"
+              color="gray"
               variant="light"
-              title="Sentry DSN Not Yet Set"
+              title="Sentry is off (no DSN)"
               icon={<IconInfoCircle size={16} />}
             >
               <Group justify="space-between" align="center" wrap="wrap">
                 <Text size="xs">
-                  Your project DSN is not configured. Go to the{' '}
+                  Sentry is optional. The app works without it. To turn it on, go to the{' '}
                   <Text span fw={600}>
                     Settings
                   </Text>{' '}
                   tab to enter your DSN, or save it to <Code>.env.local</Code>.
                 </Text>
-                <Button size="xs" variant="outline" color="yellow" onClick={() => setActiveTab('settings')}>
+                <Button size="xs" variant="outline" color="gray" onClick={() => setActiveTab('settings')}>
                   Configure DSN in Settings
                 </Button>
               </Group>

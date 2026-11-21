@@ -5,3 +5,5 @@ import { SettingsPage } from '@/features/settings/SettingsPage';
 import { nav } from '@/app/nav';
 import { googlePlugin } from '@/plugins/optional/google/googlePlugin';
 import { optionalPlugins } from 'virtual:optional-plugins';
+import * as Sentry from '@sentry/react';
+import { initSentry } from '@/lib/sentry/client';

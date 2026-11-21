@@ -8,7 +8,7 @@ import {
   IconPlayerPlay,
 } from '@tabler/icons-react';
 import { useState } from 'react';
-import { getSentryStatus } from '@/lib/sentry/client';
+import { getSentryStatus } from '@/lib/sentry/runtime';
 
 export function SentryStatusCard() {
   const [status] = useState(getSentryStatus);
@@ -72,8 +72,8 @@ export function SentryStatusCard() {
                       {f.label}
                     </Text>
                   </Group>
-                  <Badge size="xs" color="teal" variant="dot">
-                    Active
+                  <Badge size="xs" color={f.active ? 'teal' : 'gray'} variant="dot">
+                    {f.active ? 'Active' : 'Off'}
                   </Badge>
                 </Group>
                 <Text size="xs" c="dimmed">
@@ -105,12 +105,12 @@ export function SentryStatusCard() {
           </div>
           <div>
             <Text size="xs" c="dimmed">
-              SDK Version
+              SDK
             </Text>
             <Group gap={4}>
-              <IconCheck size={14} color="var(--mantine-color-teal-6)" />
+              {status.isRunning && <IconCheck size={14} color="var(--mantine-color-teal-6)" />}
               <Text size="xs" fw={500}>
-                @sentry/react 10.75.2
+                {status.isRunning ? 'Loaded' : 'Not loaded (Sentry is off)'}
               </Text>
             </Group>
           </div>
