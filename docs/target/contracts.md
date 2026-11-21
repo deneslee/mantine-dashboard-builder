@@ -13,7 +13,7 @@ The promises the parts of the builder make to each other. Each contract says who
 | -------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
 | 1. Widget data       | The only way a widget gets its frames                                 | Mostly; the rules are new                                                               |
 | 2. Datasource        | Runs one query and returns frames                                     | Yes, unchanged                                                                          |
-| 3. Record provider   | Reads and writes editable rows                                        | The contract, browser storage and Convex, both registered; nothing saves through it yet |
+| 3. Record provider   | Reads and writes editable rows                                        | The contract, browser storage and Convex, both registered; dashboards save through it                  |
 | 4. Plugin definition | How widgets, datasources and the new kinds are declared and collected | Partly                                                                                  |
 | 5. State ownership   | Which place owns which state                                          | Mostly; one change                                                                      |
 
