@@ -2,6 +2,12 @@ import { v } from 'convex/values';
 import type { Doc } from './_generated/dataModel';
 import { mutation, query, type MutationCtx, type QueryCtx } from './_generated/server';
 
+/**
+ * WARNING: these functions are public and check no auth. Anyone with the deployment URL (it is in the
+ * client bundle as VITE_CONVEX_URL) can read, change or delete every record. Use a deployment with
+ * test data only, until the functions check the caller.
+ */
+
 /** The most records one collection may hold for a read to return them all. */
 export const MAX_RECORDS = 2000;
 

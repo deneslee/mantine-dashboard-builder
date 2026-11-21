@@ -2,23 +2,23 @@
 
 > This page describes the app as it was built up to November 2026. It is not the target. The target is in [target/architecture.md](target/architecture.md) and [target/contracts.md](target/contracts.md). Parts of this page go out of date as the restructure proceeds.
 
-How the app is put together today: the stack, the layers, how a dashboard's data flows, and where each kind of state lives. The coding rules are in [AGENTS.md](../AGENTS.md); what comes next is in .agents/planning/.
+How the app is put together today: the stack, the layers, how a dashboard's data flows, and where each kind of state lives. The coding rules are in [AGENTS.md](../AGENTS.md); what comes next is in [target/architecture.md](target/architecture.md).
 
 ## Stack
 
-Mantine 9 needs React 19.2+, so all React 19 APIs (`ref` as prop, `use()`, `Activity`, `useEffectEvent`) are fair game. The React Compiler is on (grid-and-charts.md › React Compiler).
+Mantine 9 needs React 19.2+, so all React 19 APIs (`ref` as prop, `use()`, `Activity`, `useEffectEvent`) are fair game. The React Compiler is on; `lint/compiler.test.ts` lists what it skips ([background](https://github.com/deneslee/mantine-dashboard-builder/blob/0e400dd/docs/dashboard/grid-and-charts.md#react-compiler)).
 
 | Area             | Package                                                                                                                           | Notes                                                                                                                                                                                                                |
 | ---------------- | --------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Build            | Vite+, TypeScript strict, pnpm                                                                                                    | Exact toolchain versions in `package.json`; setup and enforcement in [README](../README.md#run)                                                                                                                      |
-| UI               | `@mantine/core` 9.7.3, `hooks`, `notifications`, `modals`, `dates`, `charts`, `spotlight`                                         | Spotlight drives the navbar search; `postcss-preset-mantine`; charts: ECharts draws the `chart` widget, `@mantine/charts` (Recharts) the `chart-recharts` widget                                                     |
+| UI               | `@mantine/core` 9, `hooks`, `notifications`, `modals`, `dates`, `charts`, `spotlight`                                             | Spotlight drives the navbar search; `postcss-preset-mantine`; charts: ECharts draws the `chart` widget, `@mantine/charts` (Recharts) the `chart-recharts` widget                                                     |
 | Fonts            | Fontsource variable fonts: DM Sans, Source Sans 3, Source Code Pro, JetBrains Mono                                                | Self-hosted, no runtime requests to Google                                                                                                                                                                           |
 | Routing          | `@tanstack/react-router`                                                                                                          | File-based routes, `staticData` declares context-bar tabs and breadcrumbs                                                                                                                                            |
 | Data             | `@tanstack/react-query`                                                                                                           | One `QueryClient`                                                                                                                                                                                                    |
 | State            | `zustand` + `immer` + `zundo`                                                                                                     | Shell store (persisted) and one dashboard store per open dashboard (undo history)                                                                                                                                    |
 | Grid             | `react-grid-layout` 2.x                                                                                                           | v2 API only, never `/legacy`                                                                                                                                                                                         |
 | Schemas          | `zod`                                                                                                                             | Dashboard document, widget options, datasource query specs, search params                                                                                                                                            |
-| Optional plugins | `@aws-sdk/client-athena`, `client-rds-data`, `client-redshift-data`, `client-dynamodb`, `util-dynamodb`; nothing extra for Google | In a build only when `plugins.json` lists them; each datasource type's code is a lazy chunk (datasources.md)                                                                                                         |
+| Optional plugins | `@aws-sdk/client-athena`, `client-rds-data`, `client-redshift-data`, `client-dynamodb`, `util-dynamodb`; nothing extra for Google | In a build only when `plugins.json` lists them; each datasource type's code is a lazy chunk ([datasources.md](https://github.com/deneslee/mantine-dashboard-builder/blob/0e400dd/docs/dashboard/datasources.md))     |
 | Relay            | Hono, `@hono/node-server`, `mssql`, `mongodb`                                                                                     | `relay/`, a workspace package: the Node server that runs SQL Server and MongoDB queries, bundled with `vp pack`                                                                                                      |
 | Tables           | `@tanstack/react-table` v9 + `@tanstack/react-virtual`                                                                            | Rendered with Mantine `Table`                                                                                                                                                                                        |
 | Later            | `@xyflow/react`, `react-markdown`                                                                                                 | Each a lazy chunk                                                                                                                                                                                                    |
@@ -73,7 +73,7 @@ Draft   every document change: isDirty ? write draft : clear draft
 Export  orderWidgets(dashboard) → <id>.json;  Import  JSON → storedDashboardSchema → plugin checks → importDocument
 ```
 
-Widget data is cached per datasource query (`['ds', datasource, spec, range]`, with a connection's `revision` after `datasource`), so two widgets asking the same query share one request; auto-refresh and the Refresh button invalidate `['ds']`. While new keys load, a widget keeps its last complete frames. How the canvas stays fast is in grid-and-charts.md; the document model is in dashboard.md.
+Widget data is cached per datasource query (`['ds', datasource, spec, range]`, with a connection's `revision` after `datasource`), so two widgets asking the same query share one request; auto-refresh and the Refresh button invalidate `['ds']`. While new keys load, a widget keeps its last complete frames. How the canvas stays fast is in [grid-and-charts.md](https://github.com/deneslee/mantine-dashboard-builder/blob/0e400dd/docs/dashboard/grid-and-charts.md); the document model is in [dashboard.md](https://github.com/deneslee/mantine-dashboard-builder/blob/0e400dd/docs/dashboard/dashboard.md).
 
 ## Datasource plugins and connections
 
@@ -90,7 +90,7 @@ Add to build   dev: POST /__plugins → plugins.json → reload
                live: commit through GitHub's API → the deploy → build-info.json → Reload
 ```
 
-The page is `/datasources` (`features/datasources`); what each type needs is in datasources.md.
+The page is `/datasources` (`features/datasources`); what each type needs is in [datasources.md](https://github.com/deneslee/mantine-dashboard-builder/blob/0e400dd/docs/dashboard/datasources.md).
 
 ## Where state lives
 

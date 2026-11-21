@@ -29,7 +29,7 @@
       matchPackageNames: ['vite-plus', '@voidzero-dev/vite-plus-core', 'vitest', '@vitest/**'],
     },
     {
-      // plugin-react peers one oxc-transform-react minor; docs/dashboard/grid-and-charts.md › React Compiler.
+      // plugin-react peers one oxc-transform-react minor; https://github.com/deneslee/mantine-dashboard-builder/blob/0e400dd/docs/dashboard/grid-and-charts.md#react-compiler.
       groupName: 'React Compiler',
       matchPackageNames: ['@vitejs/plugin-react', 'oxc-transform-react'],
     },
@@ -48,7 +48,7 @@
       matchUpdateTypes: ['minor', 'patch', 'digest'],
     },
     {
-      // 2.3.0 broke dragging in edit mode (docs/upgrades/RGL.md). No pull requests: newer versions wait for
+      // 2.3.0 broke dragging in edit mode (https://github.com/deneslee/mantine-dashboard-builder/blob/0e400dd/docs/upgrades/RGL.md). No pull requests: newer versions wait for
       // approval on the Dependency Dashboard, to take only once RGL.md's "When to upgrade" holds.
       matchPackageNames: ['react-grid-layout'],
       allowedVersions: '!/^2\\.3\\.0$/',

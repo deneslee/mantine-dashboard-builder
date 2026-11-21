@@ -2,10 +2,11 @@
 
 ## Commands
 
+    pnpm dev              # http://localhost:5173/mantine-dashboard-builder/
     pnpm dev:devtools     # same, plus TanStack Devtools, Vite DevTools and click-to-source (hold Alt+Shift, click)
     pnpm build            # production build
     pnpm lint             # oxlint + type check (tsgolint) + Stylelint; `pnpm typecheck` is the same lint run
-    `vp test run <path>` runs one file, NEVER use pnpm test
+    vp test run <path>    # one test file. NEVER use `pnpm test`: it also runs every story in Chromium
     pnpm test:unit        # node + jsdom only (fast)
     pnpm test:changed     # only tests affected by uncommitted changes: the check while working
     pnpm relay            # the relay for Azure SQL and MongoDB, on http://127.0.0.1:8787
@@ -25,7 +26,7 @@
 
 Older docs, plans and reviews are outside this repo, in the `builder-docs` folder. They are history, not guidance: do not read them unless asked.
 
-For code exploring use qartez-mcp, `qartez` cli is also avaible
+For code exploring use qartez-mcp, the `qartez` CLI is also available
 
 ## Mantine first
 
@@ -139,7 +140,7 @@ Both are local skills: `.agents/skills` is gitignored, so these paths are not li
 
 <!-- /Workflow instructions -->
 
-<!--VITE PLUS START-->
+<!-- convex-ai-start -->
 
 This project uses [Convex](https://convex.dev) as its backend.
 

@@ -10,7 +10,7 @@ export function AddWidgetForm() {
   const plugins = usePlugins();
   const actions = useDashboardActions();
   const navigate = useNavigate({ from: '/dashboards/$id' });
-  const [type, setType] = useState(Object.keys(plugins.widgets)[0] ?? '');
+  const [type, setType] = useState(() => Object.keys(plugins.widgets)[0] ?? '');
   const definition = plugins.widgets[type];
   const [title, setTitle] = useState('');
   const [error, setError] = useState<string>();

@@ -6,7 +6,8 @@ import type { DatasourceRuntime } from '@/plugins/OptionalPlugin';
 import type { ResolvedRange } from '@/core/time/timeRange';
 import { googleFetch } from './googleApi';
 import { SCOPES, getAccessToken } from './googleAuth';
-import type { BigQuerySettings, GoogleSecrets, bigquerySpecSchema } from './googlePlugin';
+import type { BigQuerySettings, bigquerySpecSchema } from './googlePlugin';
+import type { GoogleSecrets } from './googleSecretsSchema';
 import type { z } from 'zod';
 
 /**

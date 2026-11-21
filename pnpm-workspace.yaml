@@ -34,7 +34,7 @@ runtimeOnFail: error
 saveExact: true
 strictPeerDependencies: true
 preferFrozenLockfile: true
-# `pnpm up` / `pnpm up -L` skip these. react-grid-layout stays on 2.2.4 (docs/upgrades/RGL.md);
+# `pnpm up` / `pnpm up -L` skip these. react-grid-layout stays on 2.2.4 (https://github.com/deneslee/mantine-dashboard-builder/blob/0e400dd/docs/upgrades/RGL.md);
 # move it by hand with `pnpm add react-grid-layout@<version>` once RGL.md's "When to upgrade" holds.
 updateConfig:
   ignoreDependencies:

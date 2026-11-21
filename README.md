@@ -27,7 +27,7 @@ Install [Vite+](https://viteplus.dev/guide/) first. The exact Node and pnpm vers
 
 Run commands from the workspace root. Direct `pnpm` commands also work when the pinned versions are active. Use `vp run build` and `vp run lint` for the repository scripts: they are cached by Vite Task, and the built-in `vp lint` omits Stylelint. Type errors come from `vp lint` (tsgolint with `typeCheck`); there is no separate `tsc` step. Formatting uses Oxfmt and the `fmt` block in `vite.config.ts`; lint rules are composed there from `oxlint.config.ts`. CI uses the same pins and commands.
 
-Dependencies update through [Renovate](.github/renovate.json5): grouped pull requests (Mantine, TanStack, React, the Vite+ toolchain and others) early on Mondays, once a release is 3 days old, each checked by CI before you merge. react-grid-layout stays on 2.2.4 (why).
+Dependencies update through [Renovate](.github/renovate.json5): grouped pull requests (Mantine, TanStack, React, the Vite+ toolchain and others) early on Mondays, once a release is 3 days old, each checked by CI before you merge. react-grid-layout stays on 2.2.4 ([why](https://github.com/deneslee/mantine-dashboard-builder/blob/0e400dd/docs/upgrades/RGL.md)).
 
 ## Try it
 
@@ -60,14 +60,11 @@ Dashboards are saved in the place Storage names: this browser's `localStorage` b
 | `relay/`       | The relay: a small Node server (Hono) that runs SQL Server and MongoDB queries for the Azure SQL and MongoDB plugins                                                                                       |
 | `plugins.json` | The optional plugins in the build, `[]` by default; `plugins.config.ts` reads it                                                                                                                           |
 | `public/data/` | Seed dashboards (`dashboards/*.json`) and data frames read by the `local-json` datasource                                                                                                                  |
-| `docs/`        | Two things only: `target/` (where the app is going: architecture and contracts) and [current-state.md](docs/current-state.md) (how it is built today; not the goal)                                        |
-
-                                          |
-
-| `apps/docs/` | The capability catalog: what's fixed, the core capabilities and their providers, and the plugins ([core](apps/docs/core.md), [potential](apps/docs/potential.md)); a docs site later |
-| `AGENTS.md` | Rules for anyone writing code here, people or agents |
-| `lint/` | The local oxlint plugin for the token and style rules, and the tests proving each rule fires |
-| `.storybook/` | Storybook config; every chrome and dashboard state has a story |
+| `docs/`        | `target/` (where the app is going: architecture and contracts), [current-state.md](docs/current-state.md) (how it is built today; not the goal) and `node-studio/` (the plan for the Node Studio branch)   |
+| `apps/docs/`   | The capability catalog: what's fixed, the core capabilities and their providers, and the plugins ([core](apps/docs/core.md), [potential](apps/docs/potential.md)); a docs site later                       |
+| `AGENTS.md`    | Rules for anyone writing code here, people or agents                                                                                                                                                       |
+| `lint/`        | The local oxlint plugin for the token and style rules, and the tests proving each rule fires                                                                                                               |
+| `.storybook/`  | Storybook config; every chrome and dashboard state has a story                                                                                                                                             |
 
 ## Frame behaviour
 
@@ -80,7 +77,7 @@ Dashboards are saved in the place Storage names: this browser's `localStorage` b
 | Pane edges                 | Drag, arrow keys (Shift = 40 px), double-click resets    | –                         |
 | Search (`Ctrl+K` or `/`)   | Spotlight over navigation targets                        | same                      |
 
-Layout preferences persist in `localStorage`; open drawers never do, so nothing pops open on load. The keys are listed in [architecture.md › Browser storage](docs/current-state.md#browser-storage).
+Layout preferences persist in `localStorage`; open drawers never do, so nothing pops open on load. The keys are listed in [current-state.md › Browser storage](docs/current-state.md#browser-storage).
 
 ## Agent skills
 

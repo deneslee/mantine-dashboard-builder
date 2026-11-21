@@ -26,7 +26,7 @@ const barrels = {
   message: 'No barrel files: import the file that defines the name, e.g. @/ui/components/ErrorState.',
 };
 
-/** Raw values stay in the design system; everything else reads the semantic tier (docs/design-system.md). */
+/** Raw values stay in the design system; everything else reads the semantic tier (AGENTS.md › Styling and tokens). */
 const primitives = {
   group: ['@/ui/tokens/primitives'],
   message: 'Only ui/ may import the primitives: use @/ui/tokens/semantic.',
@@ -159,9 +159,9 @@ export const lint = {
       { allowConstantExport: true, allowExportNames: ['Panel', 'ErrorState', 'Page'] },
     ],
 
-    // Design system rule: no inline styles outside design-system/. Use CSS modules or Mantine style props.
+    // Design system rule: no inline styles outside ui/tokens and ui/theme. Use CSS modules or Mantine style props.
     'app/no-inline-style': 'error',
-    // Token keys, not raw values, in Mantine props (docs/design-system.md).
+    // Token keys, not raw values, in Mantine props (AGENTS.md › Styling and tokens).
     'app/no-raw-style-props': 'error',
     // Only the widget data module calls a datasource's `query` (docs/target/contracts.md § 1).
     'app/no-datasource-query': 'error',
@@ -216,7 +216,7 @@ export const lint = {
       env: { node: true, browser: false },
     },
 
-    // Layers (AGENTS.md › Structure, docs/architecture.md › Layers). Each folder imports only the
+    // Layers (AGENTS.md › Structure, docs/current-state.md › Layers). Each folder imports only the
     // folders below it; tests, stories and testing/ are exempt (last override). Every rule also covers
     // its mirror under lint/fixtures/src/, where lint/rules.test.ts proves it fires.
     layer(
