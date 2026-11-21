@@ -128,10 +128,10 @@ export function useCollectionTransfer({ noticeMs = WRITE_NOTICE_MS }: { noticeMs
       await work();
     } catch (error) {
       notify.error({ title: failureTitle, message: describeFailure(toAppError(error).message) });
-    } finally {
-      clearTimeout(timer);
-      setActive(null);
     }
+    // The catch above handles every failure, so this runs on both paths (no `finally`: the compiler skips it).
+    clearTimeout(timer);
+    setActive(null);
   }
 
   const replaced = (placeId: string, collection: StorageCollection) => {

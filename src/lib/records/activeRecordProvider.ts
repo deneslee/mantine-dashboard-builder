@@ -111,5 +111,10 @@ export function loadRecordProvider(id: string): Promise<RecordProvider> {
   return provider;
 }
 
+/** Forgets a loaded provider, so the next use loads it again (its setting changed). */
+export function resetRecordProvider(id: string) {
+  loading.delete(id);
+}
+
 /** The provider of the place in use. Takes no argument, so plain functions can call it. */
 export const loadActiveRecordProvider = () => loadRecordProvider(getActivePlace().id);

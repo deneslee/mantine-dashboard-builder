@@ -1,0 +1,304 @@
+From 15290c6dd1471a984f0159106651f8a19a58cf5f Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Fri, 6 Nov 2026 18:08:57 +0100
+Subject: [PATCH 4/4] perf(charts): spike an ECharts renderer for the chart
+ widget
+
+TimeSeriesEChart draws the time-series widget with ECharts 6.1 on a canvas
+(line, bar, grid, tooltip and the canvas renderer only), with colours and
+fonts read from the Mantine variables and a redraw when the colour scheme
+changes. A resize redraws the canvas without React, so a panel change no
+longer costs a 9-chart Recharts layout. The widget's lazy import points at
+it in place of TimeSeriesChart.
+
+Spike for review (docs/REVIEW/perf/README.md), not for main as it is.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01SvxHHPGWNijwKVz2Xk4M3m
+---
+ package.json                                  |   1 +
+ pnpm-lock.yaml                                |  23 +++
+ .../widgets/chart/TimeSeriesEChart.module.css |   6 +
+ .../widgets/chart/TimeSeriesEChart.tsx        | 156 ++++++++++++++++++
+ src/plugins/widgets/chart/chartWidget.tsx     |   2 +-
+ 5 files changed, 187 insertions(+), 1 deletion(-)
+ create mode 100644 src/plugins/widgets/chart/TimeSeriesEChart.module.css
+ create mode 100644 src/plugins/widgets/chart/TimeSeriesEChart.tsx
+
+diff --git a/package.json b/package.json
+index 9a08bc1..35246bb 100644
+--- a/package.json
++++ b/package.json
+@@ -81,6 +81,7 @@
+     "@tanstack/react-virtual": "3.14.23",
+     "clsx": "^2.1.1",
+     "dayjs": "^1.11.13",
++    "echarts": "6.1.0",
+     "immer": "^11.2.9",
+     "react": "^19.3.0",
+     "react-dom": "^19.3.0",
+diff --git a/pnpm-lock.yaml b/pnpm-lock.yaml
+index a3999e0..51e5120 100644
+--- a/pnpm-lock.yaml
++++ b/pnpm-lock.yaml
+@@ -262,6 +262,9 @@ importers:
+       dayjs:
+         specifier: ^1.11.13
+         version: 1.11.23
++      echarts:
++        specifier: 6.1.0
++        version: 6.1.0
+       immer:
+         specifier: ^11.2.9
+         version: 11.2.9
+@@ -3717,6 +3720,9 @@ packages:
+   ecdsa-sig-formatter@1.0.11:
+     resolution: {integrity: sha512-nagl3RYrbNv6kQkeJIpt6NJZy8twLB/2vtz6yN9Z4vRKHN4/QZJIEbqohALSgwKdnksuY3k5Addp5lg8sVoVcQ==}
+ 
++  echarts@6.1.0:
++    resolution: {integrity: sha512-q0yaFPggC9FUdsWH4blavRWFmxdrIodbkoKNAjJudAI6CA9gNPxHtV2RcZNEepZVlk4yvBYkOkbk6HIVpIyHZA==}
++
+   electron-to-chromium@1.5.433:
+     resolution: {integrity: sha512-5lCAbyZBjtmUt/RAGHRqrL2q0oEFRThDAsZHHDn9XHa89Qw7gMYOeSicBTy+AHfvo0r6vwsZvqNJTQIQy1BLzA==}
+ 
+@@ -5163,6 +5169,9 @@ packages:
+     resolution: {integrity: sha512-NoZ4roiN7LnbKn9QqE1amc9DJfzvZXxF4xDavcOWt1BPkdx+m+0gJuPM+S0vCe7zTJMYUP0R8pO2XMr+Y8oLIg==}
+     engines: {node: '>=6'}
+ 
++  tslib@2.3.0:
++    resolution: {integrity: sha512-N82ooyxVNm6h1riLCoyS9e3fuJ3AMG2zIZs2Gd1ATcSFjSA23Q0fzjjZeh0jbJvWVDZ0cJT8yaNNaaXHzueNjg==}
++
+   tslib@2.8.1:
+     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
+ 
+@@ -5457,6 +5466,9 @@ packages:
+   zod@4.6.7:
+     resolution: {integrity: sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==}
+ 
++  zrender@6.1.0:
++    resolution: {integrity: sha512-oEGMDB6pOP2S6OwRR4PdVv610zrjnA3Bh+JnSG12fYJlBKjtNAoEb5fSUoCOOINlH96I2fU38/A2UpRKs67xYQ==}
++
+   zundo@2.3.0:
+     resolution: {integrity: sha512-4GXYxXA17SIKYhVbWHdSEU04P697IMyVGXrC2TnzoyohEAWytFNOKqOp5gTGvaW93F/PM5Y0evbGtOPF0PWQwQ==}
+     peerDependencies:
+@@ -8482,6 +8494,11 @@ snapshots:
+     dependencies:
+       safe-buffer: 5.2.1
+ 
++  echarts@6.1.0:
++    dependencies:
++      tslib: 2.3.0
++      zrender: 6.1.0
++
+   electron-to-chromium@1.5.433: {}
+ 
+   emoji-regex@8.0.0: {}
+@@ -9967,6 +9984,8 @@ snapshots:
+       minimist: 1.2.8
+       strip-bom: 3.0.0
+ 
++  tslib@2.3.0: {}
++
+   tslib@2.8.1: {}
+ 
+   type-fest@5.10.0:
+@@ -10275,6 +10294,10 @@ snapshots:
+ 
+   zod@4.6.7: {}
+ 
++  zrender@6.1.0:
++    dependencies:
++      tslib: 2.3.0
++
+   zundo@2.3.0(zustand@5.0.16(@types/react@19.3.0)(immer@11.2.9)(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1))):
+     dependencies:
+       zustand: 5.0.16(@types/react@19.3.0)(immer@11.2.9)(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1))
+diff --git a/src/plugins/widgets/chart/TimeSeriesEChart.module.css b/src/plugins/widgets/chart/TimeSeriesEChart.module.css
+new file mode 100644
+index 0000000..e940259
+--- /dev/null
++++ b/src/plugins/widgets/chart/TimeSeriesEChart.module.css
+@@ -0,0 +1,6 @@
++/* ECharts sizes its canvas from this box, which fills the tile body. */
++.host {
++  width: 100%;
++  height: 100%;
++  min-height: 0;
++}
+diff --git a/src/plugins/widgets/chart/TimeSeriesEChart.tsx b/src/plugins/widgets/chart/TimeSeriesEChart.tsx
+new file mode 100644
+index 0000000..b2e4e64
+--- /dev/null
++++ b/src/plugins/widgets/chart/TimeSeriesEChart.tsx
+@@ -0,0 +1,156 @@
++// Spike only: the same chart widget drawn by ECharts (canvas), styled from the app's Mantine variables,
++// to compare resize cost and look with Recharts. Not production code: no tests, no stories, no a11y.
++import { useEffect, useEffectEvent, useRef } from 'react';
++import * as echarts from 'echarts/core';
++import { BarChart, LineChart } from 'echarts/charts';
++import { GridComponent, TooltipComponent } from 'echarts/components';
++import { CanvasRenderer } from 'echarts/renderers';
++import { getFieldLabel, getUnitAffix, type DataFrame } from '@/core/data/DataFrame';
++import { formatTime } from '@/core/time/timeRange';
++import type { WidgetProps } from '@/plugins/WidgetPlugin';
++import type { ChartOptions } from './chartOptions';
++import classes from './TimeSeriesEChart.module.css';
++
++echarts.use([LineChart, BarChart, GridComponent, TooltipComponent, CanvasRenderer]);
++
++const DAY = 86_400_000;
++const EMPTY: DataFrame = { length: 0, fields: [] };
++const SERIES_COLORS = ['brand', 'info', 'success', 'warning'];
++const FALLBACK_COLOR = '#4c6ef5';
++
++/** Colours and font from the page's Mantine variables, the way @mantine/charts picks them. */
++function readTheme(el: HTMLElement) {
++  const root = getComputedStyle(document.documentElement);
++  const v = (name: string) => root.getPropertyValue(name).trim();
++  const isDark = document.documentElement.getAttribute('data-mantine-color-scheme') === 'dark';
++  return {
++    colors: SERIES_COLORS.map((c) => v(`--mantine-color-${c}-5`) || FALLBACK_COLOR),
++    text: isDark ? v('--mantine-color-dark-1') : v('--mantine-color-gray-7'),
++    grid: isDark ? 'rgba(105, 105, 105, 0.6)' : 'rgba(173, 181, 189, 0.6)',
++    font: getComputedStyle(el).fontFamily,
++    tooltipBg: v('--mantine-color-body'),
++    tooltipBorder: v('--mantine-color-default-border'),
++    tooltipText: v('--mantine-color-text'),
++  };
++}
++
++type Theme = ReturnType<typeof readTheme>;
++
++/** `#rrggbb` or `rgb(r, g, b)` with an alpha, for canvas fills. */
++function withAlpha(color: string, alpha: number) {
++  const hex = /^#([0-9a-f]{6})$/i.exec(color)?.[1];
++  if (hex) {
++    const n = parseInt(hex, 16);
++    return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
++  }
++  const rgb = /rgba?\(([^)]+)\)/.exec(color)?.[1]?.split(',').slice(0, 3).join(',');
++  return rgb ? `rgba(${rgb}, ${alpha})` : color;
++}
++
++function toOption(frame: DataFrame, form: ChartOptions['form'], timeZone: string, theme: Theme) {
++  const time = frame.fields.find((field) => field.type === 'time');
++  const numbers = frame.fields.filter((field) => field.type === 'number');
++  const times = (time?.values ?? []) as number[];
++  const span = (times.at(-1) ?? 0) - (times[0] ?? 0);
++  const format = span > 2 * DAY ? 'day' : span > DAY ? 'dayTime' : 'time';
++  const labels = times.map((t) => formatTime(t, timeZone, format));
++  const { prefix = '', suffix = '' } = getUnitAffix(numbers[0]?.config?.unit);
++  const formatValue = (value: number) => `${prefix}${value.toLocaleString()}${suffix}`;
++  const axisText = { color: theme.text, fontSize: 12, fontFamily: theme.font };
++  return {
++    animation: false,
++    color: theme.colors,
++    textStyle: { fontFamily: theme.font },
++    grid: { left: 8, right: 16, top: 12, bottom: 8, containLabel: true },
++    tooltip: {
++      trigger: 'axis',
++      backgroundColor: theme.tooltipBg,
++      borderColor: theme.tooltipBorder,
++      textStyle: { color: theme.tooltipText, fontSize: 12, fontFamily: theme.font },
++      extraCssText: 'box-shadow: var(--mantine-shadow-md); border-radius: var(--mantine-radius-default);',
++      valueFormatter: (value: number) => formatValue(value),
++    },
++    xAxis: {
++      type: 'category',
++      data: labels,
++      boundaryGap: form === 'bar',
++      axisLine: { show: false },
++      axisTick: { show: false },
++      axisLabel: { ...axisText, hideOverlap: true },
++      // @mantine/charts' gridAxis="y" draws the dashed lines at the x ticks.
++      splitLine: { show: true, lineStyle: { color: theme.grid, type: [5, 5] } },
++    },
++    yAxis: {
++      type: 'value',
++      axisLabel: { ...axisText, formatter: (value: number) => formatValue(value) },
++      axisLine: { show: false },
++      axisTick: { show: true, lineStyle: { color: theme.text } },
++      splitLine: { show: false },
++    },
++    series: numbers.map((field, i) => {
++      const color = theme.colors[i % theme.colors.length] ?? FALLBACK_COLOR;
++      return {
++        name: getFieldLabel(field),
++        type: form === 'bar' ? 'bar' : 'line',
++        showSymbol: false,
++        smooth: form !== 'bar' ? 0.35 : undefined,
++        smoothMonotone: 'x',
++        lineStyle: { width: 2 },
++        areaStyle:
++          form === 'area'
++            ? {
++                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
++                  { offset: 0, color: withAlpha(color, 0.2) },
++                  { offset: 1, color: withAlpha(color, 0) },
++                ]),
++              }
++            : undefined,
++        data: field.values as number[],
++      };
++    }),
++  };
++}
++
++export function TimeSeriesEChart({ frames, options, timeZone }: WidgetProps<ChartOptions>) {
++  const ref = useRef<HTMLDivElement>(null);
++  const chart = useRef<echarts.ECharts | null>(null);
++  // Draws with the latest props: when the chart is created and when the colour scheme changes.
++  const draw = useEffectEvent((instance: echarts.ECharts, el: HTMLElement) => {
++    instance.setOption(toOption(frames[0] ?? EMPTY, options.form, timeZone, readTheme(el)), {
++      notMerge: true,
++    });
++  });
++
++  useEffect(() => {
++    const el = ref.current;
++    if (!el) return;
++    const instance = echarts.init(el, undefined, { renderer: 'canvas' });
++    chart.current = instance;
++    draw(instance, el);
++    const resize = new ResizeObserver(() => instance.resize());
++    resize.observe(el);
++    // Follow the colour scheme, as @mantine/charts does through its CSS variables.
++    const scheme = new MutationObserver(() => draw(instance, el));
++    scheme.observe(document.documentElement, {
++      attributes: true,
++      attributeFilter: ['data-mantine-color-scheme'],
++    });
++    return () => {
++      resize.disconnect();
++      scheme.disconnect();
++      instance.dispose();
++      chart.current = null;
++    };
++  }, []);
++
++  useEffect(() => {
++    const el = ref.current;
++    if (!el || !chart.current) return;
++    chart.current.setOption(toOption(frames[0] ?? EMPTY, options.form, timeZone, readTheme(el)), {
++      notMerge: true,
++    });
++  }, [frames, options.form, timeZone]);
++
++  // data-chart marks a chart's root for the perf checks (docs/REVIEW/perf/shell-perf.mjs).
++  return <div ref={ref} className={classes.host} data-chart="echarts" />;
++}
+diff --git a/src/plugins/widgets/chart/chartWidget.tsx b/src/plugins/widgets/chart/chartWidget.tsx
+index 1840de0..2d20fa1 100644
+--- a/src/plugins/widgets/chart/chartWidget.tsx
++++ b/src/plugins/widgets/chart/chartWidget.tsx
+@@ -10,6 +10,6 @@ export const chartWidget = defineWidget({
+   minSize: { w: 2, h: 3 },
+   isTimeAware: true,
+   optionsSchema: chartOptions,
+-  component: lazy(() => import('./TimeSeriesChart').then((m) => ({ default: m.TimeSeriesChart }))),
++  component: lazy(() => import('./TimeSeriesEChart').then((m) => ({ default: m.TimeSeriesEChart }))),
+   skeleton: <ChartSkeleton />,
+ });
+-- 
+2.43.0
+

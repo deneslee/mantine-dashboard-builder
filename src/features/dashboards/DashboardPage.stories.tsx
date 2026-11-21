@@ -451,10 +451,10 @@ async function chooseWithKeyboard(widget: string, item: string) {
  */
 async function undoOnceWithKeyboard() {
   await waitFor(() => expect(document.activeElement).toHaveAttribute('data-widget-menu'));
-  await expect(await page.findByText('Unsaved changes')).toBeVisible();
+  await expect(await page.findByText('Unsaved changes', {}, WAIT)).toBeVisible();
   controls().getByRole('button', { name: 'Undo' }).focus();
   await userEvent.keyboard('{Enter}');
-  await expect(await page.findByText('Saved in This browser')).toBeVisible();
+  await expect(await page.findByText('Saved in This browser', {}, WAIT)).toBeVisible();
   await expect(controls().getByRole('button', { name: 'Undo' })).toBeDisabled();
 }
 
@@ -462,14 +462,15 @@ async function undoOnceWithKeyboard() {
 export const MenuKeyboard: Story = {
   args: { url: EDIT },
   play: async () => {
+    // Revenue fills the grid's width, so the move is by row (to the bottom); a column or a top row is no change.
     await chooseWithKeyboard('Revenue', 'Move to…');
     await page.findByRole('textbox', { name: 'Column' }, WAIT);
-    await userEvent.keyboard('{Control>}a{/Control}2{Tab}{Tab}{Enter}');
+    await userEvent.keyboard('{Tab}{Control>}a{/Control}20{Tab}{Enter}');
     await undoOnceWithKeyboard();
 
     await chooseWithKeyboard('Revenue', 'Resize…');
     await page.findByRole('textbox', { name: 'Width (columns)' }, WAIT);
-    await userEvent.keyboard('{Control>}a{/Control}7{Tab}{Tab}{Enter}');
+    await userEvent.keyboard('{Control>}a{/Control}3{Tab}{Tab}{Enter}');
     await undoOnceWithKeyboard();
 
     await chooseWithKeyboard('Revenue', 'Duplicate');
