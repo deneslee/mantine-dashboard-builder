@@ -24,7 +24,6 @@ minimumReleaseAgeExclude:
 allowBuilds:
   '@sentry/cli': true
   esbuild: true
-  msw: true
   # Optional native terminal for code-inspector's AI-agent feature; click-to-source works without it.
   node-pty: false
 
@@ -85,8 +84,6 @@ peerDependencyRules:
 permissions:
   '@tanstack/devtools-vite':
     skills: false
-  '@tanstack/react-db':
-    skills: true
   '@tanstack/react-router':
     skills: true
   '@tanstack/react-table':
