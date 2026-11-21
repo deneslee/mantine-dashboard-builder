@@ -5,6 +5,7 @@ A dashboard builder on Mantine 9 and React 19. An app frame (top navbar, docking
 **Status:**
 
 - **Paused for a restructure** (Nov 2026). Dashboards, the shell and the datasource plugins work. The target and the order of work are in [docs/target/architecture.md](docs/target/architecture.md); the contracts are in [docs/target/contracts.md](docs/target/contracts.md).
+- What changed recently and what is open: [docs/STATUS.md](docs/STATUS.md).
 - Older docs, plans and reviews were moved out of the repo on Nov 13, 2026, to the `builder-docs` folder. They are history, not guidance.
 
 ## Run
