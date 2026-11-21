@@ -19,3 +19,6 @@ floorplan/.cache
 .kiro/specs/shell-performance-remaining-tasks/.config.kiro
 .playwright-cli
 .vitest/
+.cache
+.atlas
+.repopilot

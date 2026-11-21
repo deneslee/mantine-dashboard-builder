@@ -102,10 +102,16 @@ export function ExploreSchema({ schema }: { schema: Schema }) {
             onNodeHover={(node) => setHoveredId(node?.id ?? null)}
             onNodeClick={({ id }) => setSelectedId(id)}
             onBackgroundClick={() => setSelectedId(null)}
-            enableNodeDrag={false}
+            enableNodeDrag={true}
             maxZoom={5}
             warmupTicks={prefersReducedMotion ? 120 : 0}
-            cooldownTicks={prefersReducedMotion ? 0 : 120}
+            // Do NOT set cooldownTicks when reduced motion is on — let it cool naturally
+            cooldownTicks={prefersReducedMotion ? undefined : 120}
+            d3AlphaDecay={0.0228} // default, fine for most graphs
+            d3VelocityDecay={0.4} // default damping
+            d3AlphaMin={0.001} // stop when almost motionless
+            cooldownTime={15000}
+
             onEngineStop={handleEngineStop}
           />
         )}
