@@ -51,8 +51,8 @@ function fakeProvider(place: StoryPlace): RecordProvider {
  */
 export function StorageStory({
   places,
-  active = places[0]?.id ?? 'browser',
-  stored = active,
+  active: activeId,
+  stored: storedId,
   children,
 }: {
   places: StoryPlace[];
@@ -61,6 +61,8 @@ export function StorageStory({
   stored?: string;
   children: ReactNode;
 }) {
+  const active = activeId ?? places[0]?.id ?? 'browser';
+  const stored = storedId ?? active;
   const queryClient = useQueryClient();
   const [plugins] = useState<Plugins>(() => {
     queryClient.clear();
