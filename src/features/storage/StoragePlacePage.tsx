@@ -14,6 +14,7 @@ import { modals } from '@mantine/modals';
 import {
   IconAlertTriangle,
   IconCheck,
+  IconPlugOff,
   IconDatabaseOff,
   IconLoader2,
   IconPlugConnectedX,
@@ -30,6 +31,7 @@ import { Page } from '@/ui/components/Page';
 import { Section, SectionBody } from '@/ui/components/Section';
 import { fontWeight, iconSize, iconStroke } from '@/ui/tokens/semantic';
 import { countLabel, type StorageCollection } from './collections';
+import { PlaceSetupForm } from './PlaceSetupForm';
 import { PlaceStatusBadge } from './StoragePage';
 import { collectionCountQuery, useCollectionCount } from './useCollectionCount';
 import { useCollectionTransfer } from './useCollectionTransfer';
@@ -41,6 +43,7 @@ const STATUS_ICON: Record<
 > = {
   checking: { icon: IconLoader2, color: 'neutral' },
   ready: { icon: IconCheck, color: 'success' },
+  notConfigured: { icon: IconPlugOff, color: 'warning' },
   unreachable: { icon: IconPlugConnectedX, color: 'danger' },
   notDeployed: { icon: IconDatabaseOff, color: 'danger' },
   failed: { icon: IconAlertTriangle, color: 'danger' },
@@ -163,6 +166,7 @@ function PlaceDetails({
               {status.message && <Text size="sm">{status.message}</Text>}
             </Stack>
           </Alert>
+          {place.setup && <PlaceSetupForm id={id} setup={place.setup} />}
           <Section title="Collections">
             <Table.ScrollContainer minWidth={640}>
               <Table verticalSpacing="sm" horizontalSpacing="lg">

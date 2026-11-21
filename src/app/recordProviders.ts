@@ -1,10 +1,8 @@
 import type { RecordProviderPlugin } from '@/plugins/RecordProviderPlugin';
+import { getPlaceSetting } from '@/lib/records/placeSetting';
 import { storageKey } from '@/lib/storage';
 import { BROWSER_STORAGE_CAPABILITIES } from '@/plugins/recordProviders/browserStorage/browserStorageCapabilities';
 import { createConvexRecordProviderPlugin } from '@/plugins/recordProviders/convex/convexRecordProviderPlugin';
-
-/** Whether this build names a Convex deployment (`VITE_CONVEX_URL`); without one Convex is not a place. */
-export const CONVEX_CONFIGURED = Boolean(import.meta.env.VITE_CONVEX_URL);
 
 const browserProvider: RecordProviderPlugin = {
   id: 'browser',
@@ -19,10 +17,11 @@ const browserProvider: RecordProviderPlugin = {
   },
 };
 
-/**
- * The places records can be saved. Convex is built in, but listed only when `VITE_CONVEX_URL` names a
- * deployment.
- */
-export function createRecordProviders(convexUrl: string | undefined = import.meta.env.VITE_CONVEX_URL) {
-  return convexUrl ? [browserProvider, createConvexRecordProviderPlugin(convexUrl)] : [browserProvider];
+/** The deployment the user saved on the Convex page, else the build's `VITE_CONVEX_URL`, else none. */
+export const getConvexUrl = (): string =>
+  getPlaceSetting('convex') || (import.meta.env.VITE_CONVEX_URL ?? '');
+
+/** The places records can be saved. Convex is always listed; its page asks for the deployment URL. */
+export function createRecordProviders(getUrl: () => string = getConvexUrl) {
+  return [browserProvider, createConvexRecordProviderPlugin(getUrl)];
 }
