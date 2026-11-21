@@ -121,3 +121,25 @@ export const Waiting: Story = {
     await expect(page.queryByRole('button', { name: 'Export' })).toBeNull();
   },
 };
+
+const setup = {
+  label: 'Deployment URL',
+  description: 'From the Convex dashboard.',
+  placeholder: 'https://happy-animal-123.convex.cloud',
+  validate: (value: string) => (value.startsWith('https://') ? null : 'Start the URL with https://.'),
+  test: async () => 'Connected to https://example.convex.cloud.',
+};
+
+/** Convex has no URL yet: the status says so, and the form is where to fix it. */
+export const NotSetUp: Story = {
+  ...withStatus(
+    { state: 'notConfigured', message: 'Enter the deployment URL below, test it, then save.' },
+    { setup },
+  ),
+  play: async () => {
+    await expect((await page.findAllByText('Not set up', {}, WAIT))[0]).toBeVisible();
+    await userEvent.type(page.getByRole('textbox'), 'https://example.convex.cloud');
+    await userEvent.click(page.getByRole('button', { name: 'Test connection' }));
+    await expect(await page.findByText('Connected to https://example.convex.cloud.', {}, WAIT)).toBeVisible();
+  },
+};

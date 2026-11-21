@@ -1,6 +1,6 @@
 import { AppError } from '@/core/errors/AppError';
 import { googleError } from './googleApi';
-import { serviceAccountKeySchema, type GoogleSecrets } from './googlePlugin';
+import { serviceAccountKeySchema, type GoogleSecrets } from './googleSecretsSchema';
 
 /**
  * Tokens for Google APIs, in the browser. A service-account key signs a JWT with WebCrypto (RS256),

@@ -104,7 +104,7 @@ Areas to review and rethink, in this order. Concrete steps are written next to t
 6. Plugin registries: add the three new kinds; reject duplicates.
 7. The record provider contract, then the browser-storage provider, then the Convex provider.
 8. The storage setting, with export and import.
-9. Dashboards saved through the record provider.
+9. Dashboards saved through the record provider. Done: `dashboardApi.ts` lists, loads and saves through the active provider; old `saved:<id>` copies move into the browser place at startup.
 10. The chart widget: ECharts as the default renderer, Recharts kept as a second one. Done: `chart` is ECharts, `chart-recharts` is Recharts.
 11. The grid's double layout at a breakpoint.
 12. Option editors generated from the schema.

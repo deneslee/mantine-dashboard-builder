@@ -96,6 +96,7 @@ export default defineConfig(({ command, mode }) => {
         '.qartez',
         'floorplan',
         'public/assets',
+        'convex/_generated',
       ],
     },
     base: '/mantine-dashboard-builder/',
@@ -111,18 +112,20 @@ export default defineConfig(({ command, mode }) => {
       // Hold Alt+Shift and click an element to open its source in the editor. Must precede react().
       withDevtools && codeInspectorPlugin({ bundler: 'vite' }),
       // React Compiler (Rust port, oxc-transform-react): automatic memoization. lint/compiler.test.ts
-      // fails when it skips a component it shouldn't. See docs/dashboard/grid-and-charts.md.
+      // fails when it skips a component it shouldn't. Background:
+      // https://github.com/deneslee/mantine-dashboard-builder/blob/0e400dd/docs/dashboard/grid-and-charts.md#react-compiler
       react({ compiler: true }),
       // Only the optional plugins plugins.json lists are built in; the rest aren't in dist at all.
       optionalPlugins(),
-      sentryVitePlugin({
-        org: process.env.SENTRY_ORG,
-        project: process.env.SENTRY_PROJECT,
-        authToken: process.env.SENTRY_AUTH_TOKEN,
-        disable: !uploadSourcemaps,
-        // Uploaded to Sentry, then removed so the deployed site never serves them.
-        sourcemaps: { filesToDeleteAfterUpload: ['./dist/**/*.map'] },
-      }),
+      // Optional: only a build with SENTRY_AUTH_TOKEN uploads source maps. No SENTRY_* var is needed.
+      uploadSourcemaps &&
+        sentryVitePlugin({
+          org: process.env.SENTRY_ORG,
+          project: process.env.SENTRY_PROJECT,
+          authToken: process.env.SENTRY_AUTH_TOKEN,
+          // Uploaded to Sentry, then removed so the deployed site never serves them.
+          sourcemaps: { filesToDeleteAfterUpload: ['./dist/**/*.map'] },
+        }),
     ]),
     // Also turns on Rolldown's build data (node_modules/.rolldown/) for analyze builds only.
     devtools: withDevtools || analyze,

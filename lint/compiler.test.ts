@@ -13,7 +13,7 @@ it('the React Compiler compiles a component with a destructured default', () => 
 });
 
 // Every function the compiler skips, and why. A new entry means a component or hook lost memoization:
-// make it compile, or add it here with its reason in docs/upgrades/react-compiler.md.
+// make it compile, or add it here with its reason.
 const SKIPPED = [
   // `VirtualBody`: TanStack Virtual, kept in that leaf so the table around it compiles.
   'src/plugins/widgets/table/FrameTable.tsx: Use of incompatible library',

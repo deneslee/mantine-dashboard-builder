@@ -39,7 +39,7 @@ export function QueryEditor({
 }) {
   const plugins = usePlugins();
   const actions = useDashboardActions();
-  const [value, setValue] = useState(JSON.stringify(widget.queries, null, 2));
+  const [value, setValue] = useState(() => JSON.stringify(widget.queries, null, 2));
   const [preview, setPreview] = useState(widget.queries);
   const [error, setError] = useState<string>();
   // Apply, Undo, Redo or an import replaces the queries: show the dashboard's, not stale text.

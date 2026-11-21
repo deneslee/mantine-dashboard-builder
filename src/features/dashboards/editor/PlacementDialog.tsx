@@ -10,9 +10,8 @@ export function PlacementDialog({ id, kind }: { id: string; kind: 'move' | 'resi
   const actions = useDashboardActions();
   const widget = useWidget(id);
   const breakpoint = useDashboard((s) => s.breakpoint);
-  const item = useDashboard((s) =>
-    resolveLayouts(s.doc.layouts)[s.breakpoint].find((entry) => entry.i === id),
-  );
+  const layouts = useDashboard((s) => s.doc.layouts);
+  const item = resolveLayouts(layouts)[breakpoint].find((entry) => entry.i === id);
   const definition = usePlugins().widgets[widget?.type ?? ''];
   const cols = GRID_COLUMNS[breakpoint];
   const [first, setFirst] = useState(kind === 'move' ? (item?.x ?? 0) + 1 : (item?.w ?? 2));

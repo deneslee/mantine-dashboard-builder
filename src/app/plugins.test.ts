@@ -33,7 +33,7 @@ describe('plugins', () => {
     vi.stubEnv('VITE_CONVEX_URL', '');
     const { plugins } = await import('./plugins');
     expect(Object.keys(plugins.widgets)).toEqual(['kpi', 'chart', 'chart-recharts', 'table']);
-    expect(Object.keys(plugins.recordProviders)).toEqual(['browser']);
+    expect(Object.keys(plugins.recordProviders)).toEqual(['browser', 'convex']);
     expect(plugins.panels).toEqual({});
     expect(plugins.actions).toEqual({});
   });

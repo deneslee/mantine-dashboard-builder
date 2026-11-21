@@ -1,4 +1,4 @@
-/* react-grid-layout overrides. The numbered rules are in docs/grid-and-charts.md. */
+/* react-grid-layout overrides. Background: https://github.com/deneslee/mantine-dashboard-builder/blob/0e400dd/docs/dashboard/grid-and-charts.md#grid */
 .root {
   & :global(.react-grid-placeholder) {
     background: var(--app-color-border-focused);

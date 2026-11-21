@@ -36,7 +36,7 @@ function oxlint(path: string): Diagnostic[] {
   return (JSON.parse(json) as { diagnostics: Diagnostic[] }).diagnostics;
 }
 
-/** The token rules must fire, or `pnpm lint` passing proves nothing (docs/design-system.md). */
+/** The token rules must fire, or `pnpm lint` passing proves nothing (AGENTS.md › Styling and tokens). */
 describe('token lint rules', () => {
   // Stylelint's start-up can pass 5 s when the whole suite runs in parallel.
   it(
@@ -89,7 +89,7 @@ describe('layer lint rules', () => {
       'lib/imports.ts': 2,
       'plugins/imports.ts': 3,
       'shell/imports.ts': 2,
-      'features/imports.ts': 6,
+      'features/imports.ts': 8,
       'app/imports.ts': 2,
     });
   });

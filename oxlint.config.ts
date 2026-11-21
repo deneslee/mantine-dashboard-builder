@@ -26,7 +26,7 @@ const barrels = {
   message: 'No barrel files: import the file that defines the name, e.g. @/ui/components/ErrorState.',
 };
 
-/** Raw values stay in the design system; everything else reads the semantic tier (docs/design-system.md). */
+/** Raw values stay in the design system; everything else reads the semantic tier (AGENTS.md › Styling and tokens). */
 const primitives = {
   group: ['@/ui/tokens/primitives'],
   message: 'Only ui/ may import the primitives: use @/ui/tokens/semantic.',
@@ -46,6 +46,18 @@ const serverPackages = {
     '@hono/**',
   ],
   message: 'Server packages run in relay/, never in the browser: talk to them through the relay client.',
+};
+
+/** The Sentry SDK loads lazily and only with a DSN: everything outside lib/sentry/ goes through its runtime. */
+const sentrySdk = {
+  group: [
+    '@sentry/react',
+    '@sentry/browser',
+    '@/lib/sentry/client',
+    '@/lib/sentry/router',
+    '@/lib/sentry/telemetry',
+  ],
+  message: 'Use @/lib/sentry/runtime: it loads the Sentry SDK only when a DSN is set, and starts it once.',
 };
 
 /** Generated from plugins.json by plugins.config.ts: what's in the build is decided in one place. */
@@ -83,7 +95,7 @@ const layer = (
   dir: string,
   group: string[],
   message: string,
-  shared = [barrels, primitives, serverPackages, virtualPlugins],
+  shared = [barrels, primitives, serverPackages, virtualPlugins, sentrySdk],
 ) => ({
   files: [`src/${dir}/**`, `lint/fixtures/src/${dir}/**`],
   rules: {
@@ -147,15 +159,18 @@ export const lint = {
       { allowConstantExport: true, allowExportNames: ['Panel', 'ErrorState', 'Page'] },
     ],
 
-    // Design system rule: no inline styles outside design-system/. Use CSS modules or Mantine style props.
+    // Design system rule: no inline styles outside ui/tokens and ui/theme. Use CSS modules or Mantine style props.
     'app/no-inline-style': 'error',
-    // Token keys, not raw values, in Mantine props (docs/design-system.md).
+    // Token keys, not raw values, in Mantine props (AGENTS.md › Styling and tokens).
     'app/no-raw-style-props': 'error',
     // Only the widget data module calls a datasource's `query` (docs/target/contracts.md § 1).
     'app/no-datasource-query': 'error',
 
     // No barrel files (bulletproof-react: they defeat tree-shaking); import the file that defines a name.
-    'no-restricted-imports': ['error', { patterns: [barrels, primitives, serverPackages, virtualPlugins] }],
+    'no-restricted-imports': [
+      'error',
+      { patterns: [barrels, primitives, serverPackages, virtualPlugins, sentrySdk] },
+    ],
   },
   overrides: [
     {
@@ -201,7 +216,7 @@ export const lint = {
       env: { node: true, browser: false },
     },
 
-    // Layers (AGENTS.md › Structure, docs/architecture.md › Layers). Each folder imports only the
+    // Layers (AGENTS.md › Structure, docs/current-state.md › Layers). Each folder imports only the
     // folders below it; tests, stories and testing/ are exempt (last override). Every rule also covers
     // its mirror under lint/fixtures/src/, where lint/rules.test.ts proves it fires.
     layer(
@@ -218,7 +233,7 @@ export const lint = {
       'ui',
       [...above('lib', 'shell', 'plugins', 'features', 'app', 'testing'), '@tanstack/react-router'],
       'ui/ is the design system: it imports only core/ and utils/, and knows no routes.',
-      [barrels, serverPackages, virtualPlugins],
+      [barrels, serverPackages, virtualPlugins, sentrySdk],
     ),
     layer(
       'lib',
@@ -251,7 +266,15 @@ export const lint = {
       barrels,
       primitives,
       serverPackages,
+      sentrySdk,
     ]),
+    // lib/sentry/ is the one place that loads the SDK.
+    layer(
+      'lib/sentry',
+      above('shell', 'plugins', 'features', 'app', 'testing'),
+      'lib/ imports only core/, ui/ and utils/.',
+      [barrels, primitives, serverPackages, virtualPlugins],
+    ),
     // relay/ is a Node server: from the app it takes only core/, which it bundles.
     {
       files: ['relay/**', 'lint/fixtures/relay/**'],

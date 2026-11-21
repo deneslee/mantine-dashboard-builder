@@ -1,6 +1,6 @@
 // Project lint rules oxlint has no native equivalent for. Loaded through `jsPlugins` in oxlint.config.ts.
 
-/** Design system rule: no inline style objects outside design-system/. */
+/** Design system rule: no inline style objects outside ui/tokens and ui/theme. */
 const noInlineStyle = {
   meta: {
     type: 'suggestion',
@@ -51,7 +51,7 @@ function stringOf(value) {
 }
 
 /**
- * Design system rule: Mantine props take token keys, not raw values (docs/design-system.md). Numbers in
+ * Design system rule: Mantine props take token keys, not raw values (AGENTS.md › Styling and tokens). Numbers in
  * spacing, `fw`, `fz` and `radius`; palette or raw colors in `c`, `color` and `bg`; numeric
  * `size` / `stroke` on Tabler icons.
  */
@@ -63,7 +63,7 @@ const noRawStyleProps = {
       key: 'Use a token for `{{prop}}` (`fontWeight.*` for fw, a size key for fz, the theme default for radius), not {{value}}.',
       color:
         'Use a semantic color (brand, neutral, danger, warning, success, info, dimmed, bright) for `{{prop}}`, not "{{value}}".',
-      icon: 'Use `iconSize` / `iconStroke` from @/design-system/tokens/semantic for `{{prop}}`, not {{value}}.',
+      icon: 'Use `iconSize` / `iconStroke` from @/ui/tokens/semantic for `{{prop}}`, not {{value}}.',
     },
   },
   create(context) {
