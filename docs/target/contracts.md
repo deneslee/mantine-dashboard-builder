@@ -112,7 +112,7 @@ The promises the parts of the builder make to each other. Each contract says who
 | The active-provider setting and service  | `src/lib/records/activeRecordProvider.ts`, `watchRecords.ts`                      |
 | Dashboards through a place               | `src/features/dashboards/data/dashboardApi.ts`, `dashboardSource.ts`, `drafts.ts` |
 | The Storage pages, export, import, copy  | `src/features/storage/`; routes in `src/app/routes/storage/`                      |
-| Registration                             | `src/app/recordProviders.ts`; Convex only when `VITE_CONVEX_URL` is set           |
+| Registration                             | `src/app/recordProviders.ts`; Convex always; its URL is set on its Storage page   |
 | The suite every provider passes          | `src/testing/recordProviderSuite.ts`                                              |
 
 **Open**
@@ -128,14 +128,14 @@ The promises the parts of the builder make to each other. Each contract says who
 
 **Kinds**
 
-| Kind                                      | Today                                                               | Target                               |
-| ----------------------------------------- | ------------------------------------------------------------------- | ------------------------------------ |
-| Widgets                                   | Yes                                                                 | Extended, see below                  |
-| Datasources and optional datasource types | Yes                                                                 | Unchanged                            |
-| Record providers                          | Registry: browser storage, and Convex when `VITE_CONVEX_URL` is set | Plugins add providers                |
-| Context-bar panels                        | Declared per route; plugin registry, empty                          | Also contributed by plugins          |
-| Actions                                   | Registry, empty                                                     | Plugins add actions                  |
-| Pages, shared services                    | No                                                                  | Later, when the rehab app needs them |
+| Kind                                      | Today                                                                   | Target                               |
+| ----------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------ |
+| Widgets                                   | Yes                                                                     | Extended, see below                  |
+| Datasources and optional datasource types | Yes                                                                     | Unchanged                            |
+| Record providers                          | Registry: browser storage, and Convex (its URL set on its Storage page) | Plugins add providers                |
+| Context-bar panels                        | Declared per route; plugin registry, empty                              | Also contributed by plugins          |
+| Actions                                   | Registry, empty                                                         | Plugins add actions                  |
+| Pages, shared services                    | No                                                                      | Later, when the rehab app needs them |
 
 A mounted page can add a context-bar tab with live content (`ContextBarPanel`); it lasts while the page is mounted.
 

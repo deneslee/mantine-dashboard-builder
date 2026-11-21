@@ -3,6 +3,7 @@ import { useState, type ReactNode } from 'react';
 import type { CollectionExport, RecordProvider, RecordProviderStatus } from '@/core/records/RecordProvider';
 import { configureRecordProviders } from '@/lib/records/activeRecordProvider';
 import { storageKey } from '@/lib/storage';
+import type { RecordProviderSetup } from '@/plugins/RecordProviderPlugin';
 import { PluginsContext, type Plugins } from '@/plugins/usePlugins';
 import type { StorageCollection } from '@/features/storage/collections';
 import { TestRouter } from './TestRouter';
@@ -13,6 +14,8 @@ export interface StoryPlace {
   name: string;
   description: string;
   note?: string;
+  /** Gives the place a setting form, as Convex has. */
+  setup?: RecordProviderSetup;
   /** `'checking'` never answers, so the page stays on "Checking…". */
   status: RecordProviderStatus | 'checking';
   count?: number;
@@ -82,6 +85,7 @@ export function StorageStory({
             name: place.name,
             description: place.description,
             note: place.note,
+            setup: place.setup,
             capabilities: { canWrite: true, canSubscribe: false, canSearchText: false, canCount: true },
             load: async () => fakeProvider(place),
           },

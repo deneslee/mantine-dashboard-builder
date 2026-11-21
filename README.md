@@ -49,18 +49,18 @@ Dependencies update through [Renovate](.github/renovate.json5): grouped pull req
 | `/datasources`                                       | Connections, the vault, the built-in datasources, and Plugins with Add to build (in `vp run dev` it edits `plugins.json`)                   |
 | `/debug`                                             | Every toast level, dedupe, progress, mutation error, a throwing widget, all skeletons                                                       |
 
-Dashboards are saved in the place Storage names: this browser's `localStorage` by default, or your Convex deployment (run `npx convex dev` once, set `VITE_CONVEX_URL` in `.env.local`, then Use for saving on the Storage page). Drafts stay in this browser; the files in `public/data/` are never changed.
+Dashboards are saved in the place Storage names: this browser's `localStorage` by default, or your Convex deployment (run `npx convex dev` once, enter the deployment URL on the Convex page of Storage, test it, save it, then Use for saving; `VITE_CONVEX_URL` in `.env.local` is the URL to start with). Drafts stay in this browser; the files in `public/data/` are never changed.
 
 ## Repo map
 
-| Where          | What                                                                                                                                                                                                    |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/`         | The app: `app/` (routes, providers), `features/`, `shell/`, `plugins/`, `lib/`, `ui/`, `core/`, `utils/`, `testing/`. Layers, data flow and state are in [docs/current-state.md](docs/current-state.md) |
-| `convex/`      | The Convex functions and table behind the Convex record provider; the provider is registered only when `VITE_CONVEX_URL` is set in `.env.local`. Tests run in the `convex` Vitest project               |
-| `relay/`       | The relay: a small Node server (Hono) that runs SQL Server and MongoDB queries for the Azure SQL and MongoDB plugins                                                                                    |
-| `plugins.json` | The optional plugins in the build, `[]` by default; `plugins.config.ts` reads it                                                                                                                        |
-| `public/data/` | Seed dashboards (`dashboards/*.json`) and data frames read by the `local-json` datasource                                                                                                               |
-| `docs/`        | Two things only: `target/` (where the app is going: architecture and contracts) and [current-state.md](docs/current-state.md) (how it is built today; not the goal)                                     |
+| Where          | What                                                                                                                                                                                                       |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/`         | The app: `app/` (routes, providers), `features/`, `shell/`, `plugins/`, `lib/`, `ui/`, `core/`, `utils/`, `testing/`. Layers, data flow and state are in [docs/current-state.md](docs/current-state.md)    |
+| `convex/`      | The Convex functions and table behind the Convex record provider; the deployment URL is set on the Convex page of Storage (or `VITE_CONVEX_URL` in `.env.local`). Tests run in the `convex` Vitest project |
+| `relay/`       | The relay: a small Node server (Hono) that runs SQL Server and MongoDB queries for the Azure SQL and MongoDB plugins                                                                                       |
+| `plugins.json` | The optional plugins in the build, `[]` by default; `plugins.config.ts` reads it                                                                                                                           |
+| `public/data/` | Seed dashboards (`dashboards/*.json`) and data frames read by the `local-json` datasource                                                                                                                  |
+| `docs/`        | Two things only: `target/` (where the app is going: architecture and contracts) and [current-state.md](docs/current-state.md) (how it is built today; not the goal)                                        |
 
                                           |
 

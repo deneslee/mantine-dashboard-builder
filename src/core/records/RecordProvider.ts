@@ -165,8 +165,8 @@ export interface RecordProvider {
 }
 
 export interface RecordProviderStatus {
-  /** `unreachable`: no answer in time. `notDeployed`: the place answers but lacks the record functions. */
-  state: 'ready' | 'unreachable' | 'notDeployed' | 'failed';
+  /** `notConfigured`: the place still needs its setting. `unreachable`: no answer in time. `notDeployed`: the place answers but lacks the record functions. */
+  state: 'ready' | 'notConfigured' | 'unreachable' | 'notDeployed' | 'failed';
   message: string;
 }
 
