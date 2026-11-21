@@ -111,7 +111,8 @@ export default defineConfig(({ command, mode }) => {
       // Hold Alt+Shift and click an element to open its source in the editor. Must precede react().
       withDevtools && codeInspectorPlugin({ bundler: 'vite' }),
       // React Compiler (Rust port, oxc-transform-react): automatic memoization. lint/compiler.test.ts
-      // fails when it skips a component it shouldn't. See docs/dashboard/grid-and-charts.md.
+      // fails when it skips a component it shouldn't. Background:
+      // https://github.com/deneslee/mantine-dashboard-builder/blob/0e400dd/docs/dashboard/grid-and-charts.md#react-compiler
       react({ compiler: true }),
       // Only the optional plugins plugins.json lists are built in; the rest aren't in dist at all.
       optionalPlugins(),

@@ -36,7 +36,7 @@ function oxlint(path: string): Diagnostic[] {
   return (JSON.parse(json) as { diagnostics: Diagnostic[] }).diagnostics;
 }
 
-/** The token rules must fire, or `pnpm lint` passing proves nothing (docs/design-system.md). */
+/** The token rules must fire, or `pnpm lint` passing proves nothing (AGENTS.md › Styling and tokens). */
 describe('token lint rules', () => {
   // Stylelint's start-up can pass 5 s when the whole suite runs in parallel.
   it(

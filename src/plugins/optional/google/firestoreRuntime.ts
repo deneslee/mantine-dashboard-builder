@@ -5,7 +5,8 @@ import type { DatasourceRuntime } from '@/plugins/OptionalPlugin';
 import type { z } from 'zod';
 import { googleFetch } from './googleApi';
 import { SCOPES, getAccessToken } from './googleAuth';
-import type { FirestoreSettings, GoogleSecrets, firestoreSpecSchema } from './googlePlugin';
+import type { FirestoreSettings, firestoreSpecSchema } from './googlePlugin';
+import type { GoogleSecrets } from './googleSecretsSchema';
 
 /**
  * Firestore over its REST API: `runQuery` with the spec's structured query. Values that are exactly

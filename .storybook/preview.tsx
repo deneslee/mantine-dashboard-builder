@@ -26,7 +26,7 @@ const preview: Preview = {
     layout: 'fullscreen',
     backgrounds: { disable: true },
     // Every a11y rule fails a story, except color-contrast: the light-scheme tokens are below AA
-    // today (.agents/planning/tasks.md › Light-scheme contrast). Re-enable it when that is fixed.
+    // today (https://github.com/deneslee/mantine-dashboard-builder/blob/0e400dd/.agents/planning/tasks.md, "Light-scheme contrast"). Re-enable it when that is fixed.
     a11y: { test: 'error', config: { rules: [{ id: 'color-contrast', enabled: false }] } },
     // Titles come from the file paths, so the sidebar mirrors src/.
     options: { storySort: { order: ['ui', 'shell', 'features'] } },

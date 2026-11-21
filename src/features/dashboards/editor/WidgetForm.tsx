@@ -13,7 +13,7 @@ export function WidgetForm({ id, widget }: { id: string; widget: Widget }) {
   const definition = usePlugins().widgets[widget.type];
   const [title, setTitle] = useState(widget.title);
   const [description, setDescription] = useState(widget.description ?? '');
-  const [options, setOptions] = useState(JSON.stringify(widget.options, null, 2));
+  const [options, setOptions] = useState(() => JSON.stringify(widget.options, null, 2));
   const [error, setError] = useState<string>();
   // Undo, redo or an import replaces the widget: show its new values.
   const [previous, setPrevious] = useState(widget);
