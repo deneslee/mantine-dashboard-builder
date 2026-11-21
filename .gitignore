@@ -19,3 +19,5 @@ floorplan/
 .kiro/specs/shell-performance-remaining-tasks/.config.kiro
 .playwright-cli
 .vitest/
+.claude\settings.local.json.bak-doctor-20261121
+.claude\settings.local.json.bak-doctor-convexfix

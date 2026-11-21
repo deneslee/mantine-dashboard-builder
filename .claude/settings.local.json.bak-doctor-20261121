@@ -1,0 +1,32 @@
+{
+  "syncClaudeAiSkills": false,
+  "enabledMcpjsonServers": [
+    "mantine"
+  ],
+  "disableClaudeAiConnectors": true,
+  "skillOverrides": {
+    "frontend-design": "off",
+    "convex-add": "off",
+    "convex-agent": "off",
+    "convex-auth": "off",
+    "convex-authz": "off",
+    "convex-billing": "off",
+    "convex-crons": "off",
+    "convex-design": "off",
+    "convex-domains": "off",
+    "convex-env": "off",
+    "convex-improve-convex-plugin": "off",
+    "convex-migrate": "off",
+    "convex-quickstart": "off",
+    "convex-seed": "off",
+    "convex-suggest": "off",
+    "convex-test": "off",
+    "convex-expert": "off",
+    "convex-reviewer": "off"
+  },
+  "enabledPlugins": {
+    "context7@claude-plugins-official": false,
+    "exa@claude-plugins-official": true,
+    "github@claude-plugins-official": true
+  }
+}
