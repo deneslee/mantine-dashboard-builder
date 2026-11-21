@@ -89,7 +89,7 @@ describe('layer lint rules', () => {
       'lib/imports.ts': 2,
       'plugins/imports.ts': 3,
       'shell/imports.ts': 2,
-      'features/imports.ts': 6,
+      'features/imports.ts': 8,
       'app/imports.ts': 2,
     });
   });

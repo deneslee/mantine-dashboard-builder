@@ -1,4 +1,4 @@
-import { getSentryStatus } from '@/lib/sentry/client';
+import { getSentryStatus } from '@/lib/sentry/runtime';
 import { SentryIcon } from './sentry/SentryIcon';
 import type { IntegrationDefinition } from './types';
 
