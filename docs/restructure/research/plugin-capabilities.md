@@ -1,4 +1,6 @@
-# Plugins, capabilities and record providers
+# Plugins, capabilities and record providers (research for ADR-0007, ADR-0012, ADR-0016)
+
+**Research for:** [ADR-0007](../../adr/0007-plugin-model.md), [ADR-0012](../../adr/0012-add-to-build.md), [ADR-0016](../../adr/0016-connections-vault-storage.md).
 
 Last verified: commit `4550705`, 2026-11-22. Repo facts were re-checked against the code. External claims carry the source the original research cited; they were not re-fetched.
 
@@ -40,17 +42,17 @@ Shipping every optional datasource type in every build costs **+6.1 kB gzip**. T
 
 ## Proposals (not decided)
 
-- **Plugin units.** Option A gives one `definePlugin` per plugin folder, plus typed registries. → D-07
-- **Record provider.** A `RecordsHost` scoped to the app through `createApp(config)`, with no import side effects. You still pick the provider in the UI (A-3). → D-07
-- **Auth.** Auth becomes part of the record provider: Convex Auth (A-4), server-side owner scoping, and "signed out" cases in the conformance suite. → D-07, D-16
-- **Delete candidates.** `ActionPlugin`, `ContextPanelPlugin`, `panels`, `actions`, `subscribe`, `watchRecords`, `optionsEditor`. → D-07
-- **"Add to build".** Ship every datasource type and delete the build-list machinery. → D-12
+- **Plugin units.** Option A gives one `definePlugin` per plugin folder, plus typed registries. → ADR-0007
+- **Record provider.** A `RecordsHost` scoped to the app through `createApp(config)`, with no import side effects. You still pick the provider in the UI (A-3). → ADR-0007
+- **Auth.** Auth becomes part of the record provider: Convex Auth (A-4), server-side owner scoping, and "signed out" cases in the conformance suite. → ADR-0007, ADR-0016
+- **Delete candidates.** `ActionPlugin`, `ContextPanelPlugin`, `panels`, `actions`, `subscribe`, `watchRecords`, `optionsEditor`. → ADR-0007
+- **"Add to build".** Ship every datasource type and delete the build-list machinery. → ADR-0012
 - **Search-first result.** Build it ourselves; no library fits (recorded 2026-11-22).
 
 ## Open questions
 
-- Is Convex Auth acceptable if it requires `ConvexReactClient`? → D-07
-- Can a signed-in user still choose browser storage? → D-16
+- Is Convex Auth acceptable if it requires `ConvexReactClient`? → ADR-0007
+- Can a signed-in user still choose browser storage? → ADR-0016
 
 ## Corrections to the earlier version
 

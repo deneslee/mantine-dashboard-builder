@@ -1,4 +1,6 @@
-# Workspace layout and package boundaries
+# Workspace layout and package boundaries (research for ADR-0003, ADR-0004, ADR-0006)
+
+**Research for:** [ADR-0003](../../adr/0003-target-workspace-layout.md), [ADR-0004](../../adr/0004-package-set-and-names.md), [ADR-0006](../../adr/0006-boundary-and-layer-rules.md).
 
 Last verified: commit `4550705`, 2026-11-22. Repo facts were re-checked against the code. External claims carry the source the original research cited; they were not re-fetched.
 
@@ -42,17 +44,17 @@ How should the repo be laid out as an `apps/` + `packages/` workspace, and where
 - Per-plugin packages only pay off for distributed plugins.
 - Wildcard `exports` work across mixed `.ts` and `.tsx` files.
 
-## Proposals (not decided; see [decisions.md](../decisions.md))
+## Proposals (not decided; see the [ADRs](../../adr/README.md))
 
-- **Target layout.** `apps/web` and `apps/relay`, plus `packages/{domain,ui,plugins,convex}`. `shell`, `features` and `app` stay in `apps/web`. Get there by moving the apps first, then extracting packages. → D-03, D-04
+- **Target layout.** `apps/web` and `apps/relay`, plus `packages/{domain,ui,plugins,convex}`. `shell`, `features` and `app` stay in `apps/web`. Get there by moving the apps first, then extracting packages. → ADR-0003, ADR-0004
 - **Package style.** Just-in-time TS-source packages, `workspace:*`. The relay takes the shared package as a bundled devDependency.
-- **Boundaries.** Use `package.json` deps first, then re-keyed `no-restricted-imports`. Add `eslint-plugin-boundaries` only if needed. → D-06
+- **Boundaries.** Use `package.json` deps first, then re-keyed `no-restricted-imports`. Add `eslint-plugin-boundaries` only if needed. → ADR-0006
 
 ## Open questions
 
-- Is `packages/plugins` one package or split by kind? → D-04
-- Do `src/utils` and `core/build` go with the domain package or with the app? → D-04
-- Does the capability catalog (`apps/docs`) stay a workspace app or become a plain folder? → [cleanup.md](../cleanup.md)
+- Is `packages/plugins` one package or split by kind? → ADR-0004
+- Do `src/utils` and `core/build` go with the domain package or with the app? → ADR-0004
+- Does the capability catalog (`apps/docs`) stay a workspace app or become a plain folder? → P4 (G-033)
 
 ## Corrections to the earlier version
 

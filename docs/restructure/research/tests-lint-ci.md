@@ -1,4 +1,6 @@
-# Tests, lint scope and CI shape
+# Tests, lint scope and CI shape (research for ADR-0001, ADR-0006, ADR-0009, ADR-0010)
+
+**Research for:** [ADR-0001](../../adr/0001-green-baseline-before-moves.md), [ADR-0006](../../adr/0006-boundary-and-layer-rules.md), [ADR-0009](../../adr/0009-test-and-lint-scope.md), [ADR-0010](../../adr/0010-ci-shape.md).
 
 Last verified: commit `4550705`, 2026-11-22. Repo facts were re-checked against the code. Nothing was re-run. External claims carry the source the original research cited.
 
@@ -40,17 +42,17 @@ The unit run was red in 2 of 94 files: `lint/docs.test.ts` (dead links) and `plu
 
 ## Proposals (not decided)
 
-- **Green baseline.** Fix the POSIX-path test, then fix or cut `docs.test.ts` and `toolchain.test.ts`, and fix the Renovate cap. → D-01, phase 2
-- **Test environment.** Choose it by file extension (`.test.ts` runs in node, `.test.tsx` in jsdom), with a docblock for exceptions. → D-09
-- **Cut low-value tests.** Remove the change-detector tests (primitives, most semantic and theme tests, `getIntegrations`). Remove `rules.test.ts` and its fixtures. → D-09
-- **Lint.** Keep correctness, hooks, Compiler rules and type checking. Drop the style and restriction rules. Replace `layer()` with package boundaries after the move. → D-06, D-09
-- **CI.** One workflow with parallel jobs, a `ci-ok` aggregator and the deploy gated on CI. Add the convex project and the relay build. Stories are an optional job (user answer). → D-10
+- **Green baseline.** Fix the POSIX-path test, then fix or cut `docs.test.ts` and `toolchain.test.ts`, and fix the Renovate cap. → ADR-0001, phase 2
+- **Test environment.** Choose it by file extension (`.test.ts` runs in node, `.test.tsx` in jsdom), with a docblock for exceptions. → ADR-0009
+- **Cut low-value tests.** Remove the change-detector tests (primitives, most semantic and theme tests, `getIntegrations`). Remove `rules.test.ts` and its fixtures. → ADR-0009
+- **Lint.** Keep correctness, hooks, Compiler rules and type checking. Drop the style and restriction rules. Replace `layer()` with package boundaries after the move. → ADR-0006, ADR-0009
+- **CI.** One workflow with parallel jobs, a `ci-ok` aggregator and the deploy gated on CI. Add the convex project and the relay build. Stories are an optional job (user answer). → ADR-0010
 
 ## Open questions
 
-- Do any design-token lint rules stay, as warnings? → D-09
-- Do `no-explicit-any` and `ban-ts-comment` stay? → D-09
-- Coverage target: ECC's default is 80 %, while U8 says to shrink the tests. → D-11
+- Do any design-token lint rules stay, as warnings? → ADR-0009
+- Do `no-explicit-any` and `ban-ts-comment` stay? → ADR-0009
+- Coverage target: ECC's default is 80 %, while U8 says to shrink the tests. → ADR-0011
 
 ## Corrections to the earlier version
 

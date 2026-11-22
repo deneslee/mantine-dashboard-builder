@@ -1,4 +1,6 @@
-# Task running and caching
+# Task running and caching (research for ADR-0008, ADR-0001)
+
+**Research for:** [ADR-0008](../../adr/0008-task-runner.md), [ADR-0001](../../adr/0001-green-baseline-before-moves.md).
 
 Last verified: commit `4550705`, 2026-11-22. Repo facts were re-checked against the code. Timings come from the 2026-11-21 runs and were not re-run. External claims carry the source the original research cited; they were not re-fetched.
 
@@ -42,9 +44,9 @@ Should anything (Turborepo, Nx, moon) run tasks alongside `vp run`, and why does
 
 ## Proposals (not decided)
 
-- **Runner.** Use `vp run` only, and add no other runner until there is a second app or a need for a shared cache. → D-08
+- **Runner.** Use `vp run` only, and add no other runner until there is a second app or a need for a shared cache. → ADR-0008
 - **Cache inputs.** Exclude `docs/**` from them. Add `GITHUB_*` to `check:build` `cache.env`. → part of the green-baseline phase
-- **CI.** Optionally restore the Actions task cache, but keep it only if it is measured faster. → D-10
+- **CI.** Optionally restore the Actions task cache, but keep it only if it is measured faster. → ADR-0010
 - **Lint speed.** Try Vite+ 1.7 (tsrs backend) and re-measure lint.
 
 ## Open questions

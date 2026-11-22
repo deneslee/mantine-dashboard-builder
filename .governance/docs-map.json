@@ -1,0 +1,9 @@
+{
+  "constitution": "AGENTS.md",
+  "agents": "AGENTS.md",
+  "map": "README.md",
+  "status": "docs/restructure/README.md",
+  "history": "docs/adr/README.md",
+  "adr_dir": "docs/adr",
+  "adr_index": "docs/adr/README.md"
+}

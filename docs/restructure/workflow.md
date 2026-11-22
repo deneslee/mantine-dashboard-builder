@@ -1,6 +1,6 @@
 # Workflow
 
-How a step is run, which ECC skills and tools to use, and where their output goes. **Status: proposal.** How much of this applies to each step is decision D-02.
+How a step is run, which ECC skills and tools to use, and where their output goes. **Status: proposal.** How much of this applies to each step is decision ADR-0002.
 
 ## Roles
 
@@ -32,7 +32,7 @@ How a step is run, which ECC skills and tools to use, and where their output goe
 6. **Verify.** Run `ecc:verification-loop` using `vp run check:lint`, `check:css`, `check:fmt`, `check:unit` and `check:build`.
 7. **Review.** Run `/ecc:orch-review`. CRITICAL and HIGH findings block the step. Add `ecc:security-review` and agent `convex:convex-reviewer` for auth or secrets.
 8. **Gate 2.** You confirm the commit. `ecc:conventional-commit-review` drafts the message.
-9. **Close.** Tick the step in [phases.md](phases.md), mark the G-rows it closes, and update the start page. Record a decision in the queue and an ADR only if one was made.
+9. **Close.** Tick the step in its phase file under [phases/](phases/README.md), mark the G-rows it closes in the [gap register](research/gap-register.md), and update the start page. If a decision was made, update its ADR and the [ADR index](../adr/README.md).
 
 ## Spec template (`specs/<phase>-<step>.md`)
 
@@ -57,19 +57,19 @@ Decisions used: D-xx (accepted only)
 
 ECC skills each have their own default paths. Tell every skill which of these to use:
 
-| Output                                      | Goes to                                                                                                                           | ECC default it replaces                               |
-| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Plans                                       | [phases.md](phases.md) and `specs/`                                                                                               | `plans/` (`blueprint`), `.claude/plans/` (`/plan`)    |
-| Decisions                                   | the [decisions.md](decisions.md) queue; an ADR in [../adr/](../adr/README.md) only once you accept                                | —                                                     |
-| Impact reports                              | the step's spec, under Evidence or Rollback                                                                                       | the response only (`change-impact`)                   |
-| Research                                    | `research/<topic>.md`, tagged by how each claim was checked                                                                       | —                                                     |
-| Glossary                                    | per D-18                                                                                                                          | `CONTEXT.md`                                          |
-| Task status                                 | [phases.md](phases.md)                                                                                                            | an issue tracker                                      |
-| Doc roles (map, status, history, ADR index) | `.governance/docs-map.json`, added at the end of P0, so ECC's read-only `audit-docs.py` can check links, ADR statuses and orphans | defaults such as `CLAUDE_MAP.md`, `PROJECT_STATUS.md` |
+| Output                                      | Goes to                                                                                                                                  | ECC default it replaces                               |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Plans                                       | [phases/](phases/README.md) and `specs/`                                                                                                 | `plans/` (`blueprint`), `.claude/plans/` (`/plan`)    |
+| Decisions                                   | one ADR per decision in [../adr/](../adr/README.md), `proposed` until you accept                                                         | —                                                     |
+| Impact reports                              | the step's spec, under Evidence or Rollback                                                                                              | the response only (`change-impact`)                   |
+| Research                                    | `research/<topic>.md`, tagged by how each claim was checked                                                                              | —                                                     |
+| Glossary                                    | per ADR-0018                                                                                                                             | `CONTEXT.md`                                          |
+| Task status                                 | [phases/](phases/README.md)                                                                                                              | an issue tracker                                      |
+| Doc roles (map, status, history, ADR index) | `.governance/docs-map.json`, added at the end of P0 (done), so ECC's read-only `audit-docs.py` can check links, ADR statuses and orphans | defaults such as `CLAUDE_MAP.md`, `PROJECT_STATUS.md` |
 
 ## Other defaults
 
-- **Coverage.** Don't enforce ECC's 80 % default until D-11 is decided.
+- **Coverage.** Don't enforce ECC's 80 % default until ADR-0011 is decided.
 - **Parallel work.** Use one session per step, and never let two writers touch the same files.
 - **Size of reviews.** Run `ecc:council` once per contested question, with short context. It writes no files.
 

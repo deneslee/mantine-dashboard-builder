@@ -1,4 +1,6 @@
-# Agent harnesses: how instructions, skills and agents load
+# Agent harnesses: how instructions, skills and agents load (research for the planning system, P0)
+
+**Research for:** how `AGENTS.md`, `CLAUDE.md`, skills and agents are laid out ([P0](../phases/P0-planning-system.md)).
 
 Last verified: 2026-11-22, from official docs only. Each row cites its source page. The harnesses in use are Claude Code, Codex and Antigravity (user answer, 2026-11-22).
 

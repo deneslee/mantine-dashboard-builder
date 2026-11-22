@@ -1,4 +1,6 @@
-# ECC: artifacts, gates and the compliance suggestions
+# ECC: artifacts, gates and the compliance suggestions (research for ADR-0002, ADR-0011)
+
+**Research for:** [ADR-0002](../../adr/0002-per-step-workflow-weight.md), [ADR-0011](../../adr/0011-coverage-target.md).
 
 Last verified: 2026-11-22, against the installed ECC 2.2.3 (`~/.claude/plugins/cache/ecc/ecc/2.2.3/{skills,commands}`). This is a primary source: each skill's own `SKILL.md` or command file.
 
@@ -25,9 +27,9 @@ Where does each ECC skill write its output, what approval does it ask for, and w
 
 **ECC disagrees with itself on plan location:** `plans/` (blueprint), `.claude/plans/` (`/plan`, `plan-canvas`), `.claude/prds/` (`/plan-prd`). This repo uses `docs/restructure/` instead (user answer, 2026-11-22).
 
-The artifact-role contract says the issue tracker owns task status. This repo uses [phases.md](../phases.md) instead (user answer).
+The artifact-role contract says the issue tracker owns task status. This repo uses [phases/](../phases/README.md) instead (user answer).
 
-## The ten compliance suggestions (proposals; see D-02)
+## The ten compliance suggestions (proposals; see ADR-0002)
 
 These came from comparing the old S0–S8 plan with the skills above.
 
@@ -39,13 +41,13 @@ These came from comparing the old S0–S8 plan with the skills above.
 6. Triage every gap row to a phase or to `wont-fix`, and re-audit at the end (brownfield-retrospective).
 7. Mark the steps that `plan-orchestrate` will report as BLOCKED (manual).
 8. One deletion per `refactor-clean` run.
-9. Decide on the 80 % coverage target (D-11).
+9. Decide on the 80 % coverage target (ADR-0011).
 10. Add `git-workflow`, `conventional-commit-review`, `safety-guard` and `module-regression`.
 
 **Already reflected:**
 
 - #2, #3, #8: in [workflow.md](../workflow.md).
-- #5: in [decisions.md](../decisions.md) and the [ADR index](../../adr/README.md).
-- #6: in [phases.md](../phases.md) (every G-row has a phase, or is deferred with a reason).
+- #5: in the [ADR index](../../adr/README.md).
+- #6: in the [gap register](gap-register.md) (every G-row has a phase, or is deferred with a reason).
 
-The rest wait on D-02.
+The rest wait on ADR-0002.

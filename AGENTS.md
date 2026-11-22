@@ -14,7 +14,7 @@ This repository is in **restructure review mode**. Its architecture, layout, nam
   - the user's requirements;
   - proposals;
   - open questions.
-- **Only the user accepts a decision.** Nothing moves to `accepted` in [docs/restructure/decisions.md](docs/restructure/decisions.md) or becomes an ADR without the user's explicit approval.
+- **Only the user accepts a decision.** Each decision is one ADR in [docs/adr/](docs/adr/README.md). `proposed` means not decided; nothing moves to `accepted` without the user's explicit approval.
 - **Ask first.**
   - Do not change application code, move files or delete anything without the user's explicit approval for that change.
   - Editing the planning docs under `docs/restructure/` and `docs/adr/` is allowed.

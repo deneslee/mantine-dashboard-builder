@@ -6,10 +6,6 @@ storybook-static
 coverage
 *.tsbuildinfo
 
-.claude/skills
-.agents/skills
-.kiro/skills
-.junie/skills
 floorplan/
 
 .env

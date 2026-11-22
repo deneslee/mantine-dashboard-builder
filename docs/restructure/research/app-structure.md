@@ -1,4 +1,6 @@
-# App source structure
+# App source structure (research for ADR-0004, ADR-0005, ADR-0013, ADR-0018)
+
+**Research for:** [ADR-0004](../../adr/0004-package-set-and-names.md), [ADR-0005](../../adr/0005-app-folder-organisation.md), [ADR-0013](../../adr/0013-urls-and-package-scope.md), [ADR-0018](../../adr/0018-shared-vocabulary.md).
 
 Last verified: commit `4550705`, 2026-11-22. Repo facts were re-checked against the code. External claims carry the source the original research cited; they were not re-fetched.
 
@@ -33,19 +35,19 @@ Inside a future `apps/web/src`, where does code live, and what moves to `package
 
 ## Proposals (not decided)
 
-- **Feature folders.** Group each feature by file kind first (`api/`, `components/`, `hooks/`, `stores/`, `utils/`), adding areas only inside `components/` once it grows past ~12 files. → D-05
-- **Routes.** Move them to `src/routes`, the TanStack default, and keep them thin. → D-05
+- **Feature folders.** Group each feature by file kind first (`api/`, `components/`, `hooks/`, `stores/`, `utils/`), adding areas only inside `components/` once it grows past ~12 files. → ADR-0005
+- **Routes.** Move them to `src/routes`, the TanStack default, and keep them thin. → ADR-0005
 - **Glue modules.** Move `recordSync` into `features/dashboards`; keep `storageCollections` as app composition.
-- **Naming.** Kebab-case folders, PascalCase component files kept. → D-05
-- **Collision renames.** "place" becomes record provider, `features/datasources` becomes `features/connections`, and `features/storage` becomes `record-storage`. → D-05, D-18
-- **Packages.** The research proposes `packages/{core,ui,shell,platform,plugin-api,relay-contract}`. This conflicts with [workspace-layout](workspace-layout.md). → D-04
-- **Capability catalog.** Move `apps/docs` to `docs/catalog/`. → [cleanup.md](../cleanup.md)
+- **Naming.** Kebab-case folders, PascalCase component files kept. → ADR-0005
+- **Collision renames.** "place" becomes record provider, `features/datasources` becomes `features/connections`, and `features/storage` becomes `record-storage`. → ADR-0005, ADR-0018
+- **Packages.** The research proposes `packages/{core,ui,shell,platform,plugin-api,relay-contract}`. This conflicts with [workspace-layout](workspace-layout.md). → ADR-0004
+- **Capability catalog.** Move `apps/docs` to `docs/catalog/`. → P4 (G-033)
 
 ## Open questions
 
-- Package scope name, and whether user-visible URLs are renamed. → D-13
+- Package scope name, and whether user-visible URLs are renamed. → ADR-0013
 - Is file-name case enforced by lint, or left to review?
-- Is your D6 direction (`components/` and `hooks/` folders) open to revision, given the FSD criticism? → D-05
+- Is your D6 direction (`components/` and `hooks/` folders) open to revision, given the FSD criticism? → ADR-0005
 
 ## Corrections to the earlier version
 
