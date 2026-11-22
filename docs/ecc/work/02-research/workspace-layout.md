@@ -186,7 +186,8 @@ Out of scope:
   - not implemented: `import/no-extraneous-dependencies` (PR #15703 closed 2026-05 over performance), `import/no-relative-packages` and `import/no-restricted-paths`;
   - won't implement: `import/no-internal-modules`, deferred to `no-restricted-imports`.
   - Sources: https://github.com/oxc-project/oxc/issues/1117, https://github.com/oxc-project/oxc/pull/15703. **High.**
-- **S4.5** "package.json deps as the boundary": pnpm links only declared workspace deps (S2.4).
+- **S4.5** "package.json deps as the boundary": pnpm links only declared workspace deps (S2.4). Turborepo also says to declare every dependency in the package that uses it (S1.2).
+  - Sources: https://nx.dev/docs/kb/switch-to-workspaces-project-references ("pnpm requires explicit workspace dependencies"), https://turborepo.com/docs/crafting-your-repository/managing-dependencies. **High** for the pnpm linking behaviour. **Med** for the inference below, which I did not test in this repo.
   - Under the repo's isolated, global virtual store (F12), an undeclared bare import of a sibling package fails to resolve.
   - This is the strongest boundary and costs nothing.
   - **Caveat [R]:** it only governs what a _package_ may import outward. Code inside one app (features vs implementations) still needs lint rules. Relative-path escapes (`../../src/core`) and `@/*` aliases that cross a package bypass it.
@@ -194,7 +195,24 @@ Out of scope:
 
 ### Q5. Plugins: one package, folders in the app, or several packages
 
-There is no direct external source for this question. The analysis below combines S1.3/S1.4 (Nx library types), S2.1 (JIT packages), S4.5 and D2/Q5.
+No primary doc answers this in general. Two large plugin hosts give opposite precedents, and the analysis below combines them with S1.3/S1.4, S2.1, S4.5 and D2/Q5.
+
+- **S5.1 Grafana: built-in plugins are folders in the app.**
+  - Core panel and datasource plugins live under `public/app/plugins/panel/*` and `public/app/plugins/datasource/*`.
+  - They are registered in one map, `builtInPlugins` (`public/app/features/plugins/built_in_plugins.ts`), of `core:plugin/<id>` paths to lazy `import()` loaders. External plugins load through SystemJS instead.
+  - Only some datasources (for example Azure Monitor, Loki and Test Data) are "decoupled" into workspace packages with their own build, because they are deployed separately.
+  - So the model is build-time inclusion, a lazy loader per plugin and runtime use, which is close to this repo's.
+  - Sources: https://github.com/grafana/grafana/blob/main/public/app/features/plugins/built_in_plugins.ts; DeepWiki https://deepwiki.com/search/3cb229c3-22cd-4743-ac55-320aba59e831. **Med**: DeepWiki summary; the file path is from the summary and was not opened.
+- **S5.2 Backstage: one package per plugin _role_.**
+  - Each plugin is a family of packages under `plugins/`: `<id>` (frontend), `<id>-backend`, `<id>-react`, `<id>-node` and `<id>-common`, each with a `backstage.role`.
+  - The stated reasons are separating concerns by runtime and not forcing one package's dependencies on every consumer. The library packages are the public API for _other plugins_.
+  - Backstage's plugins are installed by third-party apps. That is the distribution case Q1 excludes.
+  - Sources: https://backstage.io/docs/tooling/cli/build-system#package-roles; DeepWiki https://deepwiki.com/search/67a50541-a8d7-49c8-bbe3-d654c67aec05. **Med**.
+- **Inference [R]:**
+  - Per-plugin packages pay off when plugins are distributed or deployed separately (Backstage, and Grafana's decoupled datasources).
+  - Built-in, build-time plugins in one deployable stay folders behind a lazy loader map (Grafana core).
+  - That supports P1 or P2 below, not P4.
+  - The Backstage idea worth keeping is the role split: contracts used by others (`-common`/`-react`) are separated from implementations. Inside one package, that is a `contracts/` subpath.
 
 **Observation.** Plugin implementations have the shape of a "feature or data-access" library that is _not_ app-specific:
 
